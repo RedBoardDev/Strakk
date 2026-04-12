@@ -1,0 +1,1 @@
+This is the Android app. Jetpack Compose + Material 3. Follow the `compose-conventions` skill. Route/Screen/Content pattern. Use `collectAsStateWithLifecycle()`, `koinViewModel()`, `@Serializable` routes. Edge-to-edge with `Scaffold` innerPadding or `WindowInsets.safeDrawing`.

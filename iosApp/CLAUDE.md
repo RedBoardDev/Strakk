@@ -1,0 +1,1 @@
+This is the iOS app. SwiftUI only. Follow the `swiftui-conventions` skill. ViewModel wrappers use `@Observable` + `@MainActor`. Bridge KMP StateFlow via SKIE AsyncSequence. Use `NavigationStack`, `.task { }` for async, SF Symbols for icons.

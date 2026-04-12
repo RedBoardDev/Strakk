@@ -1,0 +1,1 @@
+This is the KMP shared module. Package: `com.strakk.shared`. Follow the `kotlin-kmp-conventions` skill. Clean Architecture: `domain/` has zero dependencies, `data/` depends on domain only, `presentation/` depends on domain only. All source under `src/commonMain/kotlin/com/strakk/shared/{domain,data,presentation}/`. Tests in `src/commonTest/`.

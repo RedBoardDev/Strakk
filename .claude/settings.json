@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && grep -rn 'import.*\\.data\\.' shared/src/commonMain/kotlin/com/strakk/shared/domain/ 2>/dev/null && echo 'ARCHITECTURE VIOLATION: domain/ imports from data/' && exit 1; grep -rn 'import.*\\.presentation\\.' shared/src/commonMain/kotlin/com/strakk/shared/domain/ 2>/dev/null && echo 'ARCHITECTURE VIOLATION: domain/ imports from presentation/' && exit 1; grep -rn 'import.*\\.data\\.' shared/src/commonMain/kotlin/com/strakk/shared/presentation/ 2>/dev/null && echo 'ARCHITECTURE VIOLATION: presentation/ imports from data/' && exit 1; exit 0"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew*)",
+      "Bash(cd iosApp*)",
+      "Bash(xcodegen*)",
+      "Bash(swiftlint*)",
+      "Read(*)",
+      "Grep(*)",
+      "Glob(*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)"
+    ]
+  }
+}
