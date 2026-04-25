@@ -3,12 +3,18 @@
 build/
 local.properties
 gradle/wrapper/gradle-wrapper.jar
+.kotlin/
 
 # Android
 *.apk
 *.aab
 
 # iOS
+
+# Local agent/tooling state
+.claude/
+iosApp/.claude/
+.serena/
 iosApp/*.xcodeproj
 iosApp/DerivedData/
 *.xcuserdata
