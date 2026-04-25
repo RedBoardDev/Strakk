@@ -21,14 +21,22 @@ targets:
       properties:
         UILaunchScreen: {}
         CFBundleDisplayName: Strakk
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - strakk
+        NSCameraUsageDescription: "Strakk uses your camera to scan and analyse meal photos with AI."
+        NSPhotoLibraryUsageDescription: "Strakk can read photos from your library to analyse meal contents."
     settings:
       base:
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1"
-        FRAMEWORK_SEARCH_PATHS:
-          - "$(SRCROOT)/../shared/build/bin/iosArm64/debugFramework"
+        FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]:
           - "$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework"
+        FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]:
+          - "$(SRCROOT)/../shared/build/bin/iosArm64/debugFramework"
         OTHER_LINKER_FLAGS: "-ObjC"
+    dependencies:
+      - sdk: VisionKit.framework
     preBuildScripts:
       - name: "Build KMP Shared Framework"
         shell: /bin/bash

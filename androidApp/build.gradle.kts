@@ -20,11 +20,20 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.foundation)
             implementation(compose.ui)
+            implementation(compose.uiTooling)
             implementation(compose.runtime)
 
             implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
+            // CameraX
+            implementation("androidx.camera:camera-camera2:1.3.4")
+            implementation("androidx.camera:camera-lifecycle:1.3.4")
+            implementation("androidx.camera:camera-view:1.3.4")
+            // ML Kit Barcode Scanning
+            implementation("com.google.mlkit:barcode-scanning:17.3.0")
         }
     }
 }
