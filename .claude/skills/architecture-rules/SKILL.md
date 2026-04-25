@@ -1,4 +1,5 @@
 ---
+name: architecture-rules
 description: "Clean Architecture dependency rules and layer boundaries"
 paths:
   - "shared/**/*.kt"

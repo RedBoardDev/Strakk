@@ -1,12 +1,15 @@
 ---
 description: "iOS views must not contain business logic or data layer imports"
-globs:
+paths:
   - "iosApp/**/*.swift"
 ---
-Swift files must NOT:
-- Import `com.strakk.shared.data` (only `shared` framework import allowed)
-- Contain business logic (calculations, validation, data transformation)
-- Call Supabase, Ktor, or any network API directly
+# iOS UI Boundaries
 
-All logic flows through the KMP ViewModel obtained via KoinHelper.
-SwiftUI views only handle: layout, navigation, user interaction, platform APIs (camera, notifications).
+SwiftUI renders state and emits user intent.
+
+- Views use native SwiftUI patterns: `NavigationStack`, data-driven `.sheet(item:)`, `.task {}` for async.
+- KMP state enters SwiftUI through `@MainActor @Observable` wrappers.
+- Wrappers observe SKIE AsyncSequence flows and cancel tasks in `deinit`.
+- Swift files import the shared framework, not KMP `data` concepts.
+- No Supabase, Ktor, persistence, validation, or business calculations in views.
+- Platform APIs are allowed only for UI/platform concerns such as camera, photos, haptics, and notifications.

@@ -10,6 +10,8 @@ effort: max
 maxTurns: 30
 skills:
   - architecture-rules
+  - kotlin-kmp-conventions
+  - koin-di-patterns
 permissionMode: auto
 color: purple
 memory: project
@@ -24,6 +26,7 @@ You are the **Software Architect** for Strakk, a KMP fitness app following Clean
 3. **Verify Clean Architecture compliance** in existing code
 4. **Plan module structure** for new features
 5. **Propose Kotlin interfaces** with full signatures (parameters, return types, generics)
+6. **Decide platform boundaries** — expect/actual vs interface + Koin, native UI vs shared logic
 
 ## Conventions
 
@@ -47,3 +50,5 @@ When reviewing existing code:
 - [ ] Use cases have single responsibility
 - [ ] ViewModels only depend on use cases (never repositories directly)
 - [ ] No business logic in presentation/ (only state mapping)
+- [ ] Supabase and serialization stay in data/
+- [ ] Koin modules do not leak into domain/

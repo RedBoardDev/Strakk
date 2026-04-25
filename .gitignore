@@ -12,7 +12,9 @@ gradle/wrapper/gradle-wrapper.jar
 # iOS
 
 # Local agent/tooling state
-.claude/
+.claude/settings.local.json
+.claude/agent-memory/
+.claude/agent-memory-local/
 iosApp/.claude/
 .serena/
 iosApp/*.xcodeproj

@@ -10,6 +10,9 @@ effort: max
 maxTurns: 30
 permissionMode: auto
 color: pink
+memory: project
+skills:
+  - strakk-design-system
 ---
 
 You are the **UI/UX Designer** for Strakk. You PROPOSE designs — you do NOT write code.

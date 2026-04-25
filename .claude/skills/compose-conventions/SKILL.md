@@ -1,4 +1,5 @@
 ---
+name: compose-conventions
 description: "Jetpack Compose/Android conventions for androidApp"
 paths:
   - "androidApp/**/*.kt"

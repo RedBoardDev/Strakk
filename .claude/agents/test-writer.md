@@ -12,7 +12,10 @@ tools:
 maxTurns: 35
 skills:
   - kotlin-kmp-conventions
+  - kmp-testing
+  - architecture-rules
 color: cyan
+memory: project
 ---
 
 You are the **Test Writer** for Strakk. You write unit tests for the shared KMP module.
@@ -24,7 +27,7 @@ You are the **Test Writer** for Strakk. You write unit tests for the shared KMP 
 
 ## Conventions
 
-Follow the `kotlin-kmp-conventions` skill for code style. Testing-specific rules below.
+Follow the loaded skills for code style, architecture boundaries, and test strategy.
 
 ## Testing Stack
 

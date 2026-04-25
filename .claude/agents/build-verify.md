@@ -1,11 +1,12 @@
 ---
 name: build-verify
 description: "Runs builds, linters, and tests — reports pass/fail — never modifies code"
-model: sonnet
+model: haiku
 tools:
   - Bash
   - Read
   - Grep
+  - Glob
 maxTurns: 15
 permissionMode: auto
 color: gray
@@ -67,3 +68,5 @@ Report results as:
 - Report the EXACT error messages for failures
 - Never suggest fixes — just report
 - Never modify any files
+- Prefer focused commands when the user asks to verify one surface only
+- Avoid truncating away the first real error when summarizing logs

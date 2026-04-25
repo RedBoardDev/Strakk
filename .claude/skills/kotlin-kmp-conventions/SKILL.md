@@ -1,4 +1,5 @@
 ---
+name: kotlin-kmp-conventions
 description: "Kotlin/KMP coding conventions for the shared module"
 paths:
   - "shared/**/*.kt"

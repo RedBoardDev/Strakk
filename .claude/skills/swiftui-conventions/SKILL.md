@@ -1,4 +1,5 @@
 ---
+name: swiftui-conventions
 description: "SwiftUI/iOS conventions for iosApp"
 paths:
   - "iosApp/**/*.swift"
