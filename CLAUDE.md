@@ -1,6 +1,6 @@
 # Strakk
 
-Personal fitness & nutrition tracking app. Solo user, no coach/client model.
+Personal nutrition & weekly check-in tracking app. Solo user, no coach/client model.
 KMP (Kotlin Multiplatform) — shared business logic, native UI on each platform.
 Backend: Supabase (Postgres, Auth, Storage, Edge Functions).
 
@@ -55,7 +55,7 @@ Detailed conventions in skills: `kotlin-kmp-conventions`, `swiftui-conventions`,
 - Business logic in UI — delegate to UseCases
 - ViewModel calls Repository directly — go through UseCase
 - `collectAsState()` — use `collectAsStateWithLifecycle()`
-- `sealed class` — use `sealed interface`
+- `sealed class` — use `sealed interface` (exception: when class inheritance is required, e.g. extending `Exception`)
 - `java.time`, `Gson`, `MockK`, `Dispatchers.IO` in shared/
 - Generic LLM-looking UI — read DESIGN.md, every screen must feel intentional
 
