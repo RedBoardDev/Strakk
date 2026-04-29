@@ -3,6 +3,7 @@ package com.strakk.shared.presentation.meal
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.usecase.SearchFoodUseCase
 import com.strakk.shared.presentation.common.MviViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -20,7 +21,7 @@ private const val DEBOUNCE_MS = 250L
  * The query text is fed through a [MutableStateFlow] with 250 ms debounce to
  * avoid spamming the DB on every keystroke.
  */
-@OptIn(FlowPreview::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class SearchFoodViewModel(
     private val searchFood: SearchFoodUseCase,
 ) : MviViewModel<SearchFoodUiState, SearchFoodEvent, SearchFoodEffect>(SearchFoodUiState.Loading) {
