@@ -4,6 +4,7 @@ import com.russhwolf.settings.Settings
 import com.strakk.shared.data.remote.CurrentUserIdProvider
 import com.strakk.shared.data.remote.SupabaseProvider
 import com.strakk.shared.data.repository.AuthRepositoryImpl
+import com.strakk.shared.data.datasource.OffLiveSearchDataSource
 import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
 import com.strakk.shared.data.repository.MealDraftRepositoryImpl
@@ -119,6 +120,7 @@ internal val dataModule = module {
     singleOf(::MealPhotoRepositoryImpl) { bind<MealPhotoRepository>() }
     singleOf(::MealRepositoryImpl) { bind<MealRepository>() }
     singleOf(::MealDraftRepositoryImpl) { bind<MealDraftRepository>() }
+    singleOf(::OffLiveSearchDataSource)
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
     singleOf(::BarcodeLookupRepositoryImpl) { bind<BarcodeLookupRepository>() }
 }
