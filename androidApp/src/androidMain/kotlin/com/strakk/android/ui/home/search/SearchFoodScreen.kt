@@ -488,33 +488,57 @@ private fun CatalogItemRow(
         modifier = modifier.animateContentSize(animationSpec = tween(200)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.Top) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.name,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("${item.protein.toInt()}g prot")
-                            }
-                            withStyle(SpanStyle(color = LocalStrakkColors.current.textSecondary)) {
-                                append(" · ${item.calories.toInt()} kcal")
-                            }
-                            withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) {
-                                append(" / 100g")
-                            }
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    item.brand?.let { brand ->
+                        Text(
+                            text = brand,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LocalStrakkColors.current.textSecondary,
+                        )
+                    }
                 }
-                Text(
-                    text = "📖",
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                item.nutriscore?.firstOrNull()?.let { grade ->
+                    NutriscoreBadge(grade = grade)
+                }
             }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = LocalStrakkColors.current.calories)) {
+                        append("${item.calories.toInt()} kcal")
+                    }
+                    withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append("${item.protein.toInt()} g prot")
+                    }
+                    item.fat?.let {
+                        withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
+                        withStyle(SpanStyle(color = LocalStrakkColors.current.accentYellow)) {
+                            append("${it.toInt()} g lip")
+                        }
+                    }
+                    item.carbs?.let {
+                        withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
+                        withStyle(SpanStyle(color = LocalStrakkColors.current.accentIndigo)) {
+                            append("${it.toInt()} g gluc")
+                        }
+                    }
+                },
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "⚖︎ valeurs pour 100 g",
+                style = MaterialTheme.typography.labelSmall,
+                color = LocalStrakkColors.current.textTertiary,
+            )
 
             AnimatedVisibility(
                 visible = isExpanded,
@@ -544,6 +568,35 @@ private fun CatalogItemRow(
                     },
                 )
             }
+        }
+    }
+}
+
+// =============================================================================
+// Nutri-Score badge (small a..e color chip)
+// =============================================================================
+
+@Composable
+private fun NutriscoreBadge(grade: Char, modifier: Modifier = Modifier) {
+    val color = when (grade) {
+        'a' -> androidx.compose.ui.graphics.Color(0xFF1F8E3D)
+        'b' -> androidx.compose.ui.graphics.Color(0xFF85BB2F)
+        'c' -> androidx.compose.ui.graphics.Color(0xFFF1C232)
+        'd' -> androidx.compose.ui.graphics.Color(0xFFE67E22)
+        'e' -> androidx.compose.ui.graphics.Color(0xFFC0392B)
+        else -> LocalStrakkColors.current.textTertiary
+    }
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = color,
+        modifier = modifier.size(width = 22.dp, height = 22.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = grade.uppercaseChar().toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = androidx.compose.ui.graphics.Color.White,
+            )
         }
     }
 }
