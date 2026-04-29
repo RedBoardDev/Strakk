@@ -13,6 +13,7 @@ import com.strakk.shared.domain.model.BreakdownItem
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.FoodCatalogItem
+import com.strakk.shared.domain.model.FoodCatalogSource
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.MealStatus
@@ -98,13 +99,28 @@ internal fun BreakdownItem.toDto(): BreakdownItemDto = BreakdownItemDto(
 
 internal fun FoodCatalogItemDto.toDomain(): FoodCatalogItem = FoodCatalogItem(
     id = id,
+    source = parseFoodCatalogSource(source),
     name = name,
+    brand = brand?.takeIf { it.isNotBlank() },
     protein = protein,
     calories = calories,
     fat = fat,
     carbs = carbs,
     defaultPortionGrams = defaultPortionGrams,
+    servingLabel = servingLabel?.takeIf { it.isNotBlank() },
+    nutriscore = nutriscore?.trim()?.lowercase()?.takeIf { it.length == 1 && it[0] in 'a'..'e' },
+    novaGroup = novaGroup?.takeIf { it in 1..4 },
+    barcode = barcode?.takeIf { it.isNotBlank() },
+    imageUrl = imageUrl?.takeIf { it.isNotBlank() },
 )
+
+private fun parseFoodCatalogSource(raw: String): FoodCatalogSource = when (raw) {
+    "ciqual" -> FoodCatalogSource.Ciqual
+    "off_fr" -> FoodCatalogSource.OffFr
+    "off_live" -> FoodCatalogSource.OffLive
+    "manual_admin" -> FoodCatalogSource.ManualAdmin
+    else -> FoodCatalogSource.Ciqual
+}
 
 // =============================================================================
 // Analyzed entries (edge function responses)
