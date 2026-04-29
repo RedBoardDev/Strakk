@@ -14,6 +14,8 @@ struct ExportResultData: Equatable {
     let routineTitle: String
     let exercisesMatched: Int
     let exercisesCreated: Int
+    let exercisesMatchedByAlgo: Int
+    let exercisesMatchedByAi: Int
 }
 
 // MARK: - State enum
@@ -38,8 +40,8 @@ final class HevyExportViewModelWrapper {
     var errorMessage: String?
     var requiresApiKey: Bool = false
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getHevyExportViewModel()
@@ -47,18 +49,14 @@ final class HevyExportViewModelWrapper {
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<HevyExportUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run {
-                    self?.state = Self.mapState(newState)
-                }
+                self?.state = Self.mapState(newState)
             }
         }
 
         effectTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<HevyExportEffect> = observeFlow(sharedVm.effects)
             for await effect in stream {
-                await MainActor.run {
-                    self?.handleEffect(effect)
-                }
+                self?.handleEffect(effect)
             }
         }
     }
@@ -109,7 +107,9 @@ final class HevyExportViewModelWrapper {
             let result = ExportResultData(
                 routineTitle: done.result.routineTitle,
                 exercisesMatched: Int(done.result.exercisesMatched),
-                exercisesCreated: Int(done.result.exercisesCreated)
+                exercisesCreated: Int(done.result.exercisesCreated),
+                exercisesMatchedByAlgo: Int(done.result.exercisesMatchedByAlgo),
+                exercisesMatchedByAi: Int(done.result.exercisesMatchedByAi)
             )
             return .done(result: result)
         }

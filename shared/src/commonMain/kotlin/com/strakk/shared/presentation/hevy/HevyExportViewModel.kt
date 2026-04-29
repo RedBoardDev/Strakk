@@ -24,7 +24,6 @@ class HevyExportViewModel(
 ) : MviViewModel<HevyExportUiState, HevyExportEvent, HevyExportEffect>(HevyExportUiState.Idle) {
 
     private var program: WorkoutProgram? = null
-    private var hevyApiKey: String? = null
 
     override fun onEvent(event: HevyExportEvent) {
         when (event) {
@@ -46,8 +45,6 @@ class HevyExportViewModel(
                 emit(HevyExportEffect.RequireApiKey)
                 return@launch
             }
-            hevyApiKey = key
-
             parseWorkoutPdf(pdfBase64)
                 .onSuccess { parsed ->
                     program = parsed
@@ -63,14 +60,10 @@ class HevyExportViewModel(
     private fun handleSessionSelected(sessionIndex: Int) {
         val currentProgram = program ?: return
         val session = currentProgram.sessions.getOrNull(sessionIndex) ?: return
-        val apiKey = hevyApiKey ?: run {
-            emit(HevyExportEffect.RequireApiKey)
-            return
-        }
 
         setState { HevyExportUiState.Exporting(session.name) }
         viewModelScope.launch {
-            exportToHevy(session, apiKey)
+            exportToHevy(session)
                 .onSuccess { result ->
                     setState { HevyExportUiState.Done(result) }
                     emit(HevyExportEffect.ExportSuccess(result.routineTitle))

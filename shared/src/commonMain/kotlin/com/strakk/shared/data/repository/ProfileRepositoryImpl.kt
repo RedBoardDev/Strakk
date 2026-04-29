@@ -8,6 +8,7 @@ import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.repository.ProfileRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart
@@ -143,18 +144,18 @@ internal class ProfileRepositoryImpl(
         return profile
     }
 
-    override suspend fun updateHevyApiKey(apiKey: String) {
-        val userId = userIdProvider.currentOrThrow()
+    override suspend fun getHevyApiKey(): String? {
+        val result = supabaseClient.postgrest.rpc("get_hevy_api_key")
+        val text = result.data
+        if (text.isBlank() || text == "null") return null
+        return text.trim('"')
+    }
 
-        val json = buildJsonObject {
-            put("hevy_api_key", apiKey)
-            put("updated_at", Clock.System.now().toString())
+    override suspend fun updateHevyApiKey(apiKey: String) {
+        val body = buildJsonObject {
+            put("plain_key", apiKey)
         }
 
-        supabaseClient
-            .from("profiles")
-            .update(json) {
-                filter { eq("id", userId) }
-            }
+        supabaseClient.postgrest.rpc("save_hevy_api_key", body)
     }
 }

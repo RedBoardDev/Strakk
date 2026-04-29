@@ -14,6 +14,7 @@ interface ProgramExercise {
   sets: number;
   reps: string;
   weight_kg: number | null;
+  weight_per_set: (number | null)[];
   rest_seconds: number;
   notes: string | null;
   superset_group: number | null;
@@ -67,12 +68,22 @@ RULES:
 8. For rep ranges like "10 à 12" or "10-12", output as string "10-12".
 9. For duration-based exercises, put the duration as reps string (e.g. "30s", "5min", "10kcal").
 10. For distance-based exercises (e.g. "20m"), put as reps string "20m".
-11. weight_kg: the total weight in kg. For "10kg/côté" on machines or barbells, double it to 20.
-    For "2,5kg/main" with dumbbells, keep per-hand value as-is (2.5) since Hevy tracks per-dumbbell.
-    null if bodyweight or unspecified.
+11. weight_kg: set to the most common value in weight_per_set (see rule 16), or null if empty.
 12. Keep exercise names in their ORIGINAL language from the PDF. Do NOT translate.
 13. Include ALL exercises from ALL sections (warmup, reinforcement, finisher, etc.).
 14. For exercises done "à l'échec" (to failure), set reps to "failure".
+15. notes: Combine key coaching cues (max 2 sentences), tempo instructions, and grip/stance
+    variations into a single notes string separated by " | ". Do NOT include full paragraphs.
+    Examples:
+    - "Tempo: slow and controlled | Pull bar to upper chest, squeeze shoulder blades"
+    - "S1+S2: pronation grip, S3+S4: supination grip | Hold eccentric as long as possible"
+    If no coaching info is present, set notes to null.
+16. weight_per_set: array of weights in kg, one per set. Length MUST equal sets count.
+    - If the PDF says "S1+S2: 10kg, S3: 15kg" with 3 sets → [10, 10, 15]
+    - If the PDF says "10kg/cote" on a machine with 3 sets → [20, 20, 20] (doubled for bilateral machines)
+    - If the PDF says "2,5kg/main" with dumbbells → [2.5, 2.5, 2.5] (per-hand, NOT doubled)
+    - If no weight specified → []
+    Also set weight_kg to the most common value in the array (or null if empty).
 
 OUTPUT: Valid JSON matching this exact schema, nothing else:
 {
@@ -88,9 +99,10 @@ OUTPUT: Valid JSON matching this exact schema, nothing else:
               "name": "string",
               "sets": 3,
               "reps": "10-12",
-              "weight_kg": 20.0,
+              "weight_kg": 15.0,
+              "weight_per_set": [10.0, 10.0, 15.0],
               "rest_seconds": 90,
-              "notes": "string or null",
+              "notes": "Tempo: slow and controlled | Pull bar to upper chest",
               "superset_group": 1,
               "exercise_type": "weight_reps",
               "equipment_category": "machine",
@@ -216,13 +228,27 @@ function coerceNullableInt(v: unknown): number | null {
   return n !== null ? Math.round(n) : null;
 }
 
+function coerceWeightPerSet(raw: unknown, sets: number): (number | null)[] {
+  if (!Array.isArray(raw)) return [];
+  const coerced = raw.map((v) => coerceNullableNumber(v));
+  if (coerced.length === sets) return coerced;
+  if (coerced.length === 0) return [];
+  // Pad with last value or truncate to match sets count
+  const last = coerced[coerced.length - 1];
+  while (coerced.length < sets) coerced.push(last);
+  return coerced.slice(0, sets);
+}
+
 function coerceExercise(raw: unknown): ProgramExercise {
   const r = (raw ?? {}) as Record<string, unknown>;
+  const sets = Math.max(1, coerceNumber(r.sets, 1));
+  const weight_per_set = coerceWeightPerSet(r.weight_per_set, sets);
   return {
     name: coerceString(r.name, "Unknown exercise"),
-    sets: Math.max(1, coerceNumber(r.sets, 1)),
+    sets,
     reps: coerceString(r.reps, "1"),
     weight_kg: coerceNullableNumber(r.weight_kg),
+    weight_per_set,
     rest_seconds: coerceNumber(r.rest_seconds, 0),
     notes: r.notes != null ? coerceString(r.notes) : null,
     superset_group: coerceNullableInt(r.superset_group),

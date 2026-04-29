@@ -39,7 +39,10 @@ data class ExerciseSection(
  * @property name Exercise name (e.g. "Bench Press").
  * @property sets Number of sets.
  * @property reps Rep scheme as text — may be "12", "10-12", "30s", etc.
- * @property weightKg Optional prescribed weight in kg.
+ * @property weightKg Optional prescribed weight in kg. Used as uniform fallback when
+ *   [weightPerSet] is empty or shorter than the set count.
+ * @property weightPerSet Per-set weights in kg. Length should equal [sets]. May be empty
+ *   when the PDF specifies no weight. Takes precedence over [weightKg] for individual sets.
  * @property restSeconds Rest period between sets in seconds.
  * @property notes Optional coaching notes or cues.
  * @property supersetGroup Optional superset group identifier. Exercises sharing
@@ -54,6 +57,7 @@ data class ProgramExercise(
     val sets: Int,
     val reps: String,
     val weightKg: Double?,
+    val weightPerSet: List<Double?> = emptyList(),
     val restSeconds: Int,
     val notes: String?,
     val supersetGroup: Int?,

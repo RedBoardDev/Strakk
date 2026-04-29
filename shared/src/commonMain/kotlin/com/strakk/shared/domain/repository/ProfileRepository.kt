@@ -66,7 +66,15 @@ interface ProfileRepository {
     ): UserProfile
 
     /**
-     * Stores the Hevy API key for the current authenticated user.
+     * Retrieves the decrypted Hevy API key for the current authenticated user.
+     *
+     * @return The API key string, or `null` if not configured.
+     * @throws Exception on network or database errors.
+     */
+    suspend fun getHevyApiKey(): String?
+
+    /**
+     * Stores the Hevy API key (encrypted) for the current authenticated user.
      *
      * @param apiKey The Hevy API key to save.
      * @throws Exception on network or database errors.

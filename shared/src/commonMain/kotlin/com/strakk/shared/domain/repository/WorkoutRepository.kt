@@ -25,10 +25,12 @@ interface WorkoutRepository {
     /**
      * Exports a single [WorkoutSession] to Hevy via the `export-to-hevy` Edge Function.
      *
+     * The Hevy API key is read server-side from the user's profile — it is never sent
+     * from the client.
+     *
      * @param session The session to export.
-     * @param hevyApiKey The user's Hevy API key.
      * @return A [HevyExportResult] describing what was created/matched in Hevy.
      * @throws Exception on network or Hevy API errors.
      */
-    suspend fun exportSessionToHevy(session: WorkoutSession, hevyApiKey: String): HevyExportResult
+    suspend fun exportSessionToHevy(session: WorkoutSession): HevyExportResult
 }

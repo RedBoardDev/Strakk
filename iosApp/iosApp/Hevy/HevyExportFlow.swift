@@ -227,9 +227,17 @@ struct HevyExportFlow: View {
                     .foregroundStyle(Color.strakkTextSecondary)
                     .multilineTextAlignment(.center)
 
-                HStack(spacing: 12) {
-                    statPill(value: result.exercisesMatched, label: "matched")
-                    statPill(value: result.exercisesCreated, label: "created")
+                VStack(spacing: 8) {
+                    HStack(spacing: 12) {
+                        statPill(value: result.exercisesMatched, label: "matched")
+                        statPill(value: result.exercisesCreated, label: "created")
+                    }
+
+                    if result.exercisesMatchedByAi > 0 {
+                        Text("\(result.exercisesMatchedByAlgo) from catalog · \(result.exercisesMatchedByAi) via AI")
+                            .font(.strakkCaption)
+                            .foregroundStyle(Color.strakkTextTertiary)
+                    }
                 }
             }
 

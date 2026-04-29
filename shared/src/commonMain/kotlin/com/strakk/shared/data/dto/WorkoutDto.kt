@@ -37,6 +37,7 @@ internal data class ProgramExerciseDto(
     val sets: Int,
     val reps: String,
     @SerialName("weight_kg") val weightKg: Double? = null,
+    @SerialName("weight_per_set") val weightPerSet: List<Double?> = emptyList(),
     @SerialName("rest_seconds") val restSeconds: Int,
     val notes: String? = null,
     @SerialName("superset_group") val supersetGroup: Int? = null,
@@ -49,7 +50,7 @@ internal data class ProgramExerciseDto(
 @Serializable
 internal data class ExportToHevyRequestDto(
     val session: WorkoutSessionDto,
-    @SerialName("hevy_api_key") val hevyApiKey: String,
+    // hevy_api_key removed — the server reads it from the profiles table via decrypt_hevy_api_key RPC
 )
 
 /** Response from the `export-to-hevy` Supabase Edge Function. */
@@ -59,4 +60,6 @@ internal data class ExportToHevyResponseDto(
     @SerialName("routine_title") val routineTitle: String,
     @SerialName("exercises_matched") val exercisesMatched: Int,
     @SerialName("exercises_created") val exercisesCreated: Int,
+    @SerialName("exercises_matched_by_algo") val exercisesMatchedByAlgo: Int = 0,
+    @SerialName("exercises_matched_by_ai") val exercisesMatchedByAi: Int = 0,
 )

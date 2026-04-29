@@ -36,6 +36,7 @@ internal fun ProgramExerciseDto.toDomain(): ProgramExercise = ProgramExercise(
     sets = sets,
     reps = reps,
     weightKg = weightKg,
+    weightPerSet = weightPerSet,
     restSeconds = restSeconds,
     notes = notes,
     supersetGroup = supersetGroup,
@@ -50,6 +51,8 @@ internal fun ExportToHevyResponseDto.toDomain(): HevyExportResult = HevyExportRe
     routineTitle = routineTitle,
     exercisesMatched = exercisesMatched,
     exercisesCreated = exercisesCreated,
+    exercisesMatchedByAlgo = exercisesMatchedByAlgo,
+    exercisesMatchedByAi = exercisesMatchedByAi,
 )
 
 // =============================================================================
@@ -71,6 +74,7 @@ internal fun ProgramExercise.toDto(): ProgramExerciseDto = ProgramExerciseDto(
     sets = sets,
     reps = reps,
     weightKg = weightKg,
+    weightPerSet = weightPerSet,
     restSeconds = restSeconds,
     notes = notes,
     supersetGroup = supersetGroup,

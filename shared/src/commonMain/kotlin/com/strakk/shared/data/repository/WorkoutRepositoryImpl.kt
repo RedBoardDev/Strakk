@@ -59,16 +59,13 @@ internal class WorkoutRepositoryImpl(
         }
     }
 
-    override suspend fun exportSessionToHevy(session: WorkoutSession, hevyApiKey: String): HevyExportResult {
+    override suspend fun exportSessionToHevy(session: WorkoutSession): HevyExportResult {
         requireActiveSession()
 
         val response = try {
             supabaseClient.functions.invoke(
                 function = "export-to-hevy",
-                body = ExportToHevyRequestDto(
-                    session = session.toDto(),
-                    hevyApiKey = hevyApiKey,
-                ),
+                body = ExportToHevyRequestDto(session = session.toDto()),
             )
         } catch (e: CancellationException) {
             throw e

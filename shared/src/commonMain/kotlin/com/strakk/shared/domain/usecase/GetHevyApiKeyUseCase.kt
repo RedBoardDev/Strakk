@@ -14,6 +14,6 @@ class GetHevyApiKeyUseCase(
 ) {
     suspend operator fun invoke(): Result<String?> =
         runSuspendCatching {
-            profileRepository.getProfile()?.hevyApiKey
+            profileRepository.getHevyApiKey()
         }
 }

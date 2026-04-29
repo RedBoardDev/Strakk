@@ -13,8 +13,8 @@ import com.strakk.shared.domain.repository.WorkoutRepository
 class ExportToHevyUseCase(
     private val workoutRepository: WorkoutRepository,
 ) {
-    suspend operator fun invoke(session: WorkoutSession, hevyApiKey: String): Result<HevyExportResult> =
+    suspend operator fun invoke(session: WorkoutSession): Result<HevyExportResult> =
         runSuspendCatching {
-            workoutRepository.exportSessionToHevy(session, hevyApiKey)
+            workoutRepository.exportSessionToHevy(session)
         }
 }
