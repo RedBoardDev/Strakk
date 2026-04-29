@@ -1,6 +1,12 @@
 package com.strakk.shared.di
 
 import com.strakk.shared.presentation.auth.AuthFlowViewModel
+import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
+import com.strakk.shared.presentation.checkin.CheckInDetailViewModel
+import com.strakk.shared.presentation.checkin.CheckInListViewModel
+import com.strakk.shared.presentation.checkin.CheckInStatsViewModel
+import com.strakk.shared.presentation.checkin.CheckInWizardViewModel
+import org.koin.core.parameter.parametersOf
 import com.strakk.shared.presentation.auth.RootViewModel
 import com.strakk.shared.presentation.calendar.CalendarViewModel
 import com.strakk.shared.presentation.hevy.HevyExportViewModel
@@ -43,4 +49,9 @@ class KoinHelper : KoinComponent {
     fun getSearchFoodViewModel(): SearchFoodViewModel = get()
     fun getManualEntryViewModel(): ManualEntryViewModel = get()
     fun getQuickAddViewModel(): QuickAddViewModel = get()
+    fun getCheckInListViewModel(): CheckInListViewModel = get()
+    fun getCheckInDetailViewModel(checkInId: String): CheckInDetailViewModel = get { parametersOf(checkInId) }
+    fun getCheckInWizardViewModel(checkInId: String?): CheckInWizardViewModel = get { parametersOf(checkInId) }
+    fun getCheckInStatsViewModel(): CheckInStatsViewModel = get()
+    fun getGenerateCheckInPdfUseCase(): GenerateCheckInPdfUseCase = get()
 }

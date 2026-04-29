@@ -409,3 +409,6 @@ verify_jwt = false
 
 [functions.export-to-hevy]
 verify_jwt = false
+
+[functions.generate-checkin-summary]
+verify_jwt = false

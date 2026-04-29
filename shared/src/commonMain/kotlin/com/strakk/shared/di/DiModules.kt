@@ -5,6 +5,7 @@ import com.strakk.shared.data.remote.CurrentUserIdProvider
 import com.strakk.shared.data.remote.SupabaseProvider
 import com.strakk.shared.data.repository.AuthRepositoryImpl
 import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
+import com.strakk.shared.data.repository.CheckInRepositoryImpl
 import com.strakk.shared.data.datasource.OffLiveSearchDataSource
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
 import com.strakk.shared.data.repository.MealDraftRepositoryImpl
@@ -19,6 +20,7 @@ import com.strakk.shared.domain.common.SystemClockProvider
 import com.strakk.shared.domain.common.createLogger
 import com.strakk.shared.domain.repository.AuthRepository
 import com.strakk.shared.domain.repository.BarcodeLookupRepository
+import com.strakk.shared.domain.repository.CheckInRepository
 import com.strakk.shared.domain.repository.FoodCatalogRepository
 import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealPhotoRepository
@@ -72,6 +74,19 @@ import com.strakk.shared.domain.usecase.SignUpUseCase
 import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
 import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
 import com.strakk.shared.domain.usecase.UpdateProfileUseCase
+import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
+import com.strakk.shared.domain.usecase.ObserveCheckInUseCase
+import com.strakk.shared.domain.usecase.ObserveCheckInQuickStatsUseCase
+import com.strakk.shared.domain.usecase.CreateCheckInUseCase
+import com.strakk.shared.domain.usecase.UpdateCheckInUseCase
+import com.strakk.shared.domain.usecase.DeleteCheckInUseCase
+import com.strakk.shared.domain.usecase.ComputeNutritionSummaryUseCase
+import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
+import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
+import com.strakk.shared.domain.usecase.GetCheckInStatsUseCase
+import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
+import com.strakk.shared.domain.service.CheckInPdfGenerator
+import com.strakk.shared.data.pdf.CheckInPdfBuilderImpl
 import com.strakk.shared.presentation.auth.AuthFlowViewModel
 import com.strakk.shared.presentation.auth.RootViewModel
 import com.strakk.shared.presentation.calendar.CalendarViewModel
@@ -83,6 +98,10 @@ import com.strakk.shared.presentation.meal.SearchFoodViewModel
 import com.strakk.shared.presentation.onboarding.OnboardingViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
 import com.strakk.shared.presentation.today.TodayViewModel
+import com.strakk.shared.presentation.checkin.CheckInListViewModel
+import com.strakk.shared.presentation.checkin.CheckInDetailViewModel
+import com.strakk.shared.presentation.checkin.CheckInWizardViewModel
+import com.strakk.shared.presentation.checkin.CheckInStatsViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -91,6 +110,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -119,6 +139,8 @@ internal val dataModule = module {
     singleOf(::ProfileRepositoryImpl) { bind<ProfileRepository>() }
     singleOf(::NutritionRepositoryImpl) { bind<NutritionRepository>() }
     singleOf(::WorkoutRepositoryImpl) { bind<WorkoutRepository>() }
+    singleOf(::CheckInRepositoryImpl) { bind<CheckInRepository>() }
+
     // Meal refonte v2
     singleOf(::MealPhotoRepositoryImpl) { bind<MealPhotoRepository>() }
     singleOf(::MealRepositoryImpl) { bind<MealRepository>() }
@@ -126,6 +148,9 @@ internal val dataModule = module {
     singleOf(::OffLiveSearchDataSource)
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
     singleOf(::BarcodeLookupRepositoryImpl) { bind<BarcodeLookupRepository>() }
+
+    // PDF generation
+    factoryOf(::CheckInPdfBuilderImpl) { bind<CheckInPdfGenerator>() }
 }
 
 /** Domain layer bindings: pure use cases. */
@@ -193,6 +218,21 @@ internal val domainModule = module {
     factoryOf(::ExportToHevyUseCase)
     factoryOf(::GetHevyApiKeyUseCase)
     factoryOf(::SaveHevyApiKeyUseCase)
+
+    // Check-in
+    factoryOf(::ObserveCheckInsUseCase)
+    factoryOf(::ObserveCheckInUseCase)
+    factoryOf(::CreateCheckInUseCase)
+    factoryOf(::UpdateCheckInUseCase)
+    factoryOf(::DeleteCheckInUseCase)
+    factoryOf(::ComputeNutritionSummaryUseCase)
+    factoryOf(::GetCheckInDeltaUseCase)
+    factoryOf(::GetCheckInPhotoUrlUseCase)
+    factoryOf(::GetCheckInStatsUseCase)
+    factoryOf(::ObserveCheckInQuickStatsUseCase)
+
+    // Check-in PDF
+    factoryOf(::GenerateCheckInPdfUseCase)
 }
 
 /** Presentation layer bindings: ViewModels. */
@@ -210,6 +250,32 @@ internal val presentationModule = module {
     viewModelOf(::SearchFoodViewModel)
     viewModelOf(::ManualEntryViewModel)
     viewModelOf(::QuickAddViewModel)
+
+    // Check-in
+    viewModelOf(::CheckInListViewModel)
+    viewModel { params ->
+        CheckInDetailViewModel(
+            checkInId = params.get(),
+            observeCheckIn = get(),
+            getCheckInDelta = get(),
+            getCheckInPhotoUrl = get(),
+            deleteCheckIn = get(),
+        )
+    }
+    viewModel { params ->
+        CheckInWizardViewModel(
+            checkInId = params.getOrNull(),
+            observeCheckIn = get(),
+            observeCheckIns = get(),
+            createCheckIn = get(),
+            updateCheckIn = get(),
+            computeNutritionSummary = get(),
+            getCheckInDelta = get(),
+            getCheckInPhotoUrl = get(),
+            clock = get(),
+        )
+    }
+    viewModelOf(::CheckInStatsViewModel)
 }
 
 /** Aggregated module registered by each platform on startup. */

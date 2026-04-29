@@ -17,9 +17,13 @@ struct MainTabView: View {
                 .tabItem { Label("Calendar", systemImage: "calendar") }
                 .tag(1)
 
+            CheckInListView()
+                .tabItem { Label("Bilans", systemImage: "chart.bar.doc.horizontal") }
+                .tag(2)
+
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-                .tag(2)
+                .tag(3)
         }
         .tint(Color.strakkPrimary)
     }
