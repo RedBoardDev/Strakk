@@ -31,7 +31,7 @@ sealed interface ManualEntryEvent {
     data class FatChanged(val value: String) : ManualEntryEvent
     data class CarbsChanged(val value: String) : ManualEntryEvent
     data class QuantityChanged(val value: String) : ManualEntryEvent
-    data object Submit : ManualEntryEvent
+    data class Submit(val logDate: String? = null) : ManualEntryEvent
     data object Cancel : ManualEntryEvent
 }
 

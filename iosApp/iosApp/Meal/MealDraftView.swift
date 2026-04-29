@@ -12,6 +12,7 @@ struct MealDraftView: View {
     @State private var showDiscardConfirm = false
     @State private var showReview = false
     @State private var showProcessConfirm = false
+    @State private var editingItem: DraftItemData?
 
     var body: some View {
         ZStack {
@@ -87,14 +88,7 @@ struct MealDraftView: View {
         } message: {
             Text("Des items en attente seront analysés par IA. L'opération prend quelques secondes.")
         }
-        .alert("Erreur", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )) {
-            Button("OK") { viewModel.errorMessage = nil }
-        } message: {
-            Text(viewModel.errorMessage ?? "")
-        }
+        .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: viewModel.navigateToReview) { _, navigate in
             if navigate {
                 showReview = true
@@ -103,6 +97,28 @@ struct MealDraftView: View {
         }
         .navigationDestination(isPresented: $showReview) {
             MealReviewView(viewModel: viewModel)
+        }
+        .sheet(item: $editingItem) { item in
+            if case .resolved(let entry) = item.kind {
+                EditEntrySheet(
+                    entry: entry,
+                    onSave: { name, protein, calories, fat, carbs, quantity in
+                        viewModel.onEvent(MealDraftEventUpdateResolvedItem(
+                            itemId: item.id,
+                            name: name,
+                            protein: protein,
+                            calories: calories,
+                            fat: asKotlinDouble(fat),
+                            carbs: asKotlinDouble(carbs),
+                            quantity: quantity,
+                            source: entry.source,
+                            createdAt: entry.createdAt
+                        ))
+                        editingItem = nil
+                    },
+                    onCancel: { editingItem = nil }
+                )
+            }
         }
     }
 
@@ -118,40 +134,30 @@ struct MealDraftView: View {
     @ViewBuilder
     private func editingBody(draft: EditingDraftData) -> some View {
         VStack(spacing: 0) {
-            // Totals card
-            totalsCard(draft: draft)
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    mealHeader(draft: draft)
+                    totalsCard(draft: draft)
 
-            // Items list
-            if draft.items.isEmpty {
-                Spacer()
-                Text("Votre repas est vide. Tapez + Ajouter pour commencer.")
-                    .font(.strakkBody)
-                    .foregroundStyle(Color.strakkTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                Spacer()
-            } else {
-                List {
-                    ForEach(draft.items) { item in
-                        draftItemRow(item: item)
-                            .listRowBackground(Color.strakkSurface1)
-                            .listRowSeparatorTint(Color.strakkDivider)
-                    }
-                    .onDelete { offsets in
-                        let items = draft.items
-                        for idx in offsets {
-                            viewModel.onEvent(MealDraftEventRemoveItem(itemId: items[idx].id))
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionHeader(title: "ITEMS")
+
+                        if draft.items.isEmpty {
+                            emptyItemsCard
+                        } else {
+                            VStack(spacing: 10) {
+                                ForEach(draft.items) { item in
+                                    draftItemCard(item: item)
+                                }
+                            }
                         }
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .background(Color.strakkBackground)
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 20)
             }
 
-            // Bottom buttons
             bottomBar(draft: draft)
         }
 
@@ -174,62 +180,96 @@ struct MealDraftView: View {
 
     // MARK: - Totals card
 
-    private func totalsCard(draft: EditingDraftData) -> some View {
-        HStack(spacing: 0) {
-            macroCell(label: "PROT", value: draft.totals.protein, unit: "g", color: .strakkPrimary)
-            Divider().frame(height: 32).background(Color.strakkDivider)
-            macroCell(label: "KCAL", value: draft.totals.calories, unit: "", color: .strakkPrimaryLight)
-            Divider().frame(height: 32).background(Color.strakkDivider)
-            macroCell(label: "FAT", value: draft.totals.fat, unit: "g", color: .strakkTextSecondary)
-            Divider().frame(height: 32).background(Color.strakkDivider)
-            macroCell(label: "CARBS", value: draft.totals.carbs, unit: "g", color: .strakkTextSecondary)
-        }
-        .padding(.vertical, 12)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            Group {
+    private func mealHeader(draft: EditingDraftData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("\(draft.items.count) item\(draft.items.count > 1 ? "s" : "")")
+                    .font(.strakkOverline)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .kerning(1.0)
+                Spacer()
                 if draft.pendingCount > 0 {
-                    HStack {
-                        Spacer()
-                        Text("\(draft.pendingCount) en attente")
-                            .font(.strakkCaption)
-                            .foregroundStyle(Color.strakkTextTertiary)
-                            .padding(.trailing, 12)
-                    }
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-                    .padding(.bottom, 4)
+                    Text("\(draft.pendingCount) en attente")
+                        .font(.strakkCaptionBold)
+                        .foregroundStyle(Color.strakkWarning)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.strakkSurface2)
+                        .clipShape(Capsule())
                 }
             }
-        )
+
+            Text("Compose ton repas, ajuste les portions, puis lance l'analyse si besoin.")
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
-    private func macroCell(label: String, value: Double, unit: String, color: Color) -> some View {
-        VStack(spacing: 2) {
+    private func totalsCard(draft: EditingDraftData) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .lastTextBaseline) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("TOTAL REPAS")
+                        .font(.strakkOverline)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                        .kerning(1.0)
+                    Text(String(format: "%.0f kcal", draft.totals.calories))
+                        .font(.strakkDisplay)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .monospacedDigit()
+                }
+                Spacer()
+                Text(String(format: "%.0fg prot", draft.totals.protein))
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkPrimary)
+                    .monospacedDigit()
+            }
+
+            HStack(spacing: 8) {
+                macroPill(label: "Lipides", value: draft.totals.fat, unit: "g")
+                macroPill(label: "Glucides", value: draft.totals.carbs, unit: "g")
+                macroPill(label: "Items", value: Double(draft.resolvedCount), unit: "")
+            }
+        }
+        .padding(16)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func macroPill(label: String, value: Double, unit: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.strakkOverline)
+                .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
             Text(String(format: "%.0f\(unit)", value))
                 .font(.strakkBodyBold)
-                .foregroundStyle(color)
+                .foregroundStyle(Color.strakkTextPrimary)
                 .monospacedDigit()
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.strakkSurface2)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    // MARK: - Draft item row
+    // MARK: - Draft item cards
 
-    private func draftItemRow(item: DraftItemData) -> some View {
+    private func draftItemCard(item: DraftItemData) -> some View {
         HStack(spacing: 12) {
+            itemIcon(item: item)
+
             switch item.kind {
             case .resolved(let entry):
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(entry.name ?? "Item")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextPrimary)
+                        .lineLimit(1)
                     HStack(spacing: 4) {
                         Text(String(format: "%.0f kcal", entry.calories))
-                            .foregroundStyle(Color.strakkTextSecondary)
+                            .foregroundStyle(Color.strakkCalories)
                         if entry.protein > 0 {
                             Text("·")
                                 .foregroundStyle(Color.strakkTextTertiary)
@@ -246,10 +286,20 @@ struct MealDraftView: View {
                     .font(.strakkCaption)
                 }
                 Spacer()
-                sourceIconSmall(for: entry.source)
+                Button {
+                    editingItem = item
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.strakkTextSecondary)
+                        .frame(width: 34, height: 34)
+                        .background(Color.strakkSurface2)
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Modifier \(entry.name ?? "l'item")")
 
             case .pendingPhoto(let hint):
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Analyse en attente")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextSecondary)
@@ -265,7 +315,7 @@ struct MealDraftView: View {
                     .foregroundStyle(Color.strakkTextTertiary)
 
             case .pendingText(let description):
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Texte en attente")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextSecondary)
@@ -278,9 +328,41 @@ struct MealDraftView: View {
                 Image(systemName: "hourglass")
                     .foregroundStyle(Color.strakkTextTertiary)
             }
+
+            Button(role: .destructive) {
+                viewModel.onEvent(MealDraftEventRemoveItem(itemId: item.id))
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.strakkError)
+                    .frame(width: 34, height: 34)
+                    .background(Color.strakkSurface2)
+                    .clipShape(Circle())
+            }
+            .accessibilityLabel("Supprimer")
         }
-        .padding(.vertical, 4)
+        .padding(16)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
         .accessibilityLabel(draftItemLabel(item: item))
+    }
+
+    private var emptyItemsCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: "fork.knife.circle")
+                .font(.system(size: 28, weight: .medium))
+                .foregroundStyle(Color.strakkPrimary)
+            Text("Ton repas est vide")
+                .font(.strakkHeading3)
+                .foregroundStyle(Color.strakkTextPrimary)
+            Text("Ajoute un aliment manuel, une recherche CIQUAL, un barcode, une photo ou un texte.")
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
     // MARK: - Bottom bar
@@ -362,29 +444,39 @@ struct MealDraftView: View {
         }
     }
 
-    @ViewBuilder
-    private func sourceIconSmall(for source: EntrySource) -> some View {
-        switch source {
-        case .photoai:
-            Image(systemName: "camera.fill")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .barcode:
-            Image(systemName: "barcode.viewfinder")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .manual:
-            Image(systemName: "pencil")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .textai:
-            Image(systemName: "text.quote")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.strakkTextTertiary)
-        default:
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.strakkTextTertiary)
+    private func itemIcon(item: DraftItemData) -> some View {
+        let systemName: String
+        let tint: Color
+
+        switch item.kind {
+        case .resolved(let entry):
+            switch entry.source {
+            case .manual:
+                systemName = "pencil"
+            case .barcode:
+                systemName = "barcode.viewfinder"
+            case .photoai:
+                systemName = "camera.fill"
+            case .textai:
+                systemName = "text.quote"
+            default:
+                systemName = "magnifyingglass"
+            }
+            tint = Color.strakkPrimary
+        case .pendingPhoto:
+            systemName = "camera.fill"
+            tint = Color.strakkWarning
+        case .pendingText:
+            systemName = "text.quote"
+            tint = Color.strakkWarning
         }
+
+        return Image(systemName: systemName)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(tint)
+            .frame(width: 38, height: 38)
+            .background(Color.strakkSurface2)
+            .clipShape(Circle())
     }
+
 }

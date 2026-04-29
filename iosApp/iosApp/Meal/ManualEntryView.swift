@@ -4,7 +4,20 @@ import shared
 struct ManualEntryView: View {
     let draftViewModel: MealDraftViewModelWrapper
     let isDraftMode: Bool
+    let logDate: String?
     let onDismiss: () -> Void
+
+    init(
+        draftViewModel: MealDraftViewModelWrapper,
+        isDraftMode: Bool,
+        logDate: String? = nil,
+        onDismiss: @escaping () -> Void
+    ) {
+        self.draftViewModel = draftViewModel
+        self.isDraftMode = isDraftMode
+        self.logDate = logDate
+        self.onDismiss = onDismiss
+    }
 
     @State private var formViewModel = ManualEntryViewModelWrapper()
 
@@ -113,7 +126,11 @@ struct ManualEntryView: View {
 
                         // Submit button
                         Button {
-                            formViewModel.onEvent(ManualEntryEventSubmit.shared)
+                            if isDraftMode {
+                                submitToDraft()
+                            } else {
+                                formViewModel.onEvent(ManualEntryEventSubmit(logDate: logDate))
+                            }
                         } label: {
                             HStack {
                                 if formViewModel.formData.isSubmitting {
@@ -160,18 +177,30 @@ struct ManualEntryView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onChange(of: formViewModel.shouldDismiss) { _, should in
-            if should {
-                if let entry = formViewModel.submittedEntry {
-                    // Add to draft if in draft mode
-                    if isDraftMode {
-                        // The ManualEntryViewModel already dispatches via AddItemToDraftUseCase
-                        // so nothing extra needed here
-                    }
-                    _ = entry
-                }
-                onDismiss()
-            }
+            if should { onDismiss() }
         }
+    }
+
+    // MARK: - Draft mode submit (bypasses QuickAddManualUseCase)
+
+    private func submitToDraft() {
+        let d = formViewModel.formData
+        let protein = Double(d.protein.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let calories = Double(d.calories.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let fat = Double(d.fat.replacingOccurrences(of: ",", with: "."))
+        let carbs = Double(d.carbs.replacingOccurrences(of: ",", with: "."))
+        let qty: String? = d.quantity.isEmpty ? nil : d.quantity
+
+        draftViewModel.onEvent(MealDraftEventAddManualItem(
+            name: d.name,
+            protein: protein,
+            calories: calories,
+            fat: asKotlinDouble(fat),
+            carbs: asKotlinDouble(carbs),
+            quantity: qty,
+            source: EntrySource.manual
+        ))
+        onDismiss()
     }
 
     // MARK: - Field builders
@@ -230,13 +259,5 @@ struct ManualEntryView: View {
     ) -> some View {
         inputField(placeholder: placeholder, text: text, field: field, isValid: isValid)
             .keyboardType(.decimalPad)
-    }
-}
-
-// MARK: - String → Double helper
-
-private extension String {
-    func toDoubleOrNil() -> Double? {
-        Double(self.replacingOccurrences(of: ",", with: "."))
     }
 }

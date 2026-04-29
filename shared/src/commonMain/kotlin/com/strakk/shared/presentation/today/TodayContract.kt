@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.today
 
 import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.DailySummary
+import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.WaterEntry
@@ -53,6 +54,20 @@ sealed interface TodayEvent {
     data class OnDeleteOrphanEntry(val id: String) : TodayEvent
     /** Delete a whole meal container with all its entries. */
     data class OnDeleteMeal(val mealId: String) : TodayEvent
+
+    data class OnUpdateEntry(
+        val id: String,
+        val mealId: String?,
+        val logDate: String,
+        val source: EntrySource,
+        val createdAt: String,
+        val name: String,
+        val protein: Double,
+        val calories: Double,
+        val fat: Double?,
+        val carbs: Double?,
+        val quantity: String?,
+    ) : TodayEvent
 }
 
 sealed interface TodayEffect {

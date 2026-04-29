@@ -2,33 +2,39 @@ import SwiftUI
 import UIKit
 
 private let kDefaultAmountML: Int = 250
+private let kStepAmountML: Int = 50
 private let kMinAmountML: Int = 50
 private let kMaxAmountML: Int = 2000
 
 // MARK: - WaterRow — ligne unique compacte
 //
-// 💧  1.5 L / 5 L                              [−]  [+]
+// 💧  1.5 L / 5 L                              [−]  [+]  [⚙]
 //
 // Tap court : ajoute / retire la quantité par défaut (250 mL).
-// Long press : ouvre une modal pour saisir une quantité custom dans le mode du bouton pressé.
+// Bouton ⚙ : ouvre une sheet compacte pour choisir une quantité custom.
 
 struct WaterRow: View {
     let summary: DailySummaryData
     let onAdd: (Int) -> Void
     let onRemove: (Int) -> Void
 
-    @State private var dialogOpen: Bool = false
-    @State private var dialogText: String = String(kDefaultAmountML)
+    @State private var showCustomSheet: Bool = false
+    @State private var dialogAmount: Int = kDefaultAmountML
 
     private var totalL: Double { Double(summary.totalWater) / 1000.0 }
     private var goalL: Double? { summary.waterGoal.map { Double($0) / 1000.0 } }
     private var canRemove: Bool { summary.totalWater > 0 }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "drop.fill")
-                .font(.system(size: 18))
-                .foregroundStyle(Color.strakkWater)
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.strakkSurface3)
+                    .frame(width: 36, height: 36)
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.strakkWater)
+            }
 
             Text(headerText)
                 .font(.system(size: 18, weight: .bold))
@@ -66,15 +72,15 @@ struct WaterRow: View {
             )
             .accessibilityLabel("Ajouter 250 mL d'eau")
 
-            // 3ème bouton — quantité personnalisée
+            // Quantité custom
             WaterIconButton(
                 systemName: "slider.horizontal.3",
                 background: Color.strakkSurface3,
                 foreground: Color.strakkTextPrimary,
                 enabled: true,
                 onTap: {
-                    dialogText = String(kDefaultAmountML)
-                    dialogOpen = true
+                    dialogAmount = kDefaultAmountML
+                    showCustomSheet = true
                 }
             )
             .accessibilityLabel("Quantité personnalisée")
@@ -83,36 +89,100 @@ struct WaterRow: View {
         .padding(.vertical, 12)
         .background(Color.strakkSurface1)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .alert("Quantité personnalisée", isPresented: $dialogOpen) {
-            TextField("mL", text: $dialogText)
-                .keyboardType(.numberPad)
-            Button("+ Ajouter") {
-                guard let amount = Int(dialogText),
-                      (kMinAmountML...kMaxAmountML).contains(amount) else {
-                    dialogOpen = false
-                    return
-                }
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                onAdd(amount)
-                dialogOpen = false
-            }
-            Button("− Retirer") {
-                guard let amount = Int(dialogText),
-                      (kMinAmountML...kMaxAmountML).contains(amount) else {
-                    dialogOpen = false
-                    return
-                }
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                onRemove(amount)
-                dialogOpen = false
-            }
-            .disabled(!canRemove)
-            Button("Annuler", role: .cancel) {
-                dialogOpen = false
-            }
-        } message: {
-            Text("Quantité en mL (entre \(kMinAmountML) et \(kMaxAmountML))")
+        .sheet(isPresented: $showCustomSheet) {
+            customAmountSheet
         }
+    }
+
+    // MARK: - Custom amount sheet
+
+    private var customAmountSheet: some View {
+        VStack(spacing: 28) {
+            Text("Quantité personnalisée")
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+                .padding(.top, 24)
+
+            // Stepper row
+            HStack(spacing: 28) {
+                Button {
+                    let next = dialogAmount - kStepAmountML
+                    dialogAmount = max(kMinAmountML, next)
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.system(size: 38))
+                        .foregroundStyle(dialogAmount <= kMinAmountML ? Color.strakkSurface3 : Color.strakkSurface2)
+                }
+                .disabled(dialogAmount <= kMinAmountML)
+                .accessibilityLabel("Diminuer la quantité")
+
+                Text("\(dialogAmount) mL")
+                    .font(.system(size: 28, weight: .bold))
+                    .monospacedDigit()
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .frame(minWidth: 110)
+                    .multilineTextAlignment(.center)
+                    .contentTransition(.numericText())
+
+                Button {
+                    let next = dialogAmount + kStepAmountML
+                    dialogAmount = min(kMaxAmountML, next)
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 38))
+                        .foregroundStyle(dialogAmount >= kMaxAmountML ? Color.strakkSurface3 : Color.strakkWater)
+                }
+                .disabled(dialogAmount >= kMaxAmountML)
+                .accessibilityLabel("Augmenter la quantité")
+            }
+
+            // Actions row
+            HStack(spacing: 12) {
+                Button("Annuler") {
+                    showCustomSheet = false
+                }
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+
+                Spacer()
+
+                if canRemove {
+                    Button("Retirer") {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        onRemove(dialogAmount)
+                        showCustomSheet = false
+                    }
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextSecondary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.strakkSurface2)
+                    .clipShape(Capsule())
+                    .accessibilityLabel("Retirer \(dialogAmount) mL d'eau")
+                }
+
+                Button("Ajouter") {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    onAdd(dialogAmount)
+                    showCustomSheet = false
+                }
+                .font(.strakkBodyBold)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.strakkWater)
+                .clipShape(Capsule())
+                .accessibilityLabel("Ajouter \(dialogAmount) mL d'eau")
+            }
+            .padding(.horizontal, 24)
+
+            Spacer()
+        }
+        .presentationDetents([.height(200)])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(Color.strakkSurface1)
     }
 
     private var headerText: String {
@@ -123,7 +193,8 @@ struct WaterRow: View {
         return total
     }
 }
-// MARK: - WaterIconButton (tap + long-press)
+
+// MARK: - WaterIconButton
 
 private struct WaterIconButton: View {
     let systemName: String

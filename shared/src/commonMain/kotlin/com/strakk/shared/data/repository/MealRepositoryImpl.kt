@@ -230,6 +230,21 @@ internal class MealRepositoryImpl(
         }
     }
 
+    override fun updateEntryInCache(entry: MealEntry) {
+        val mealId = entry.mealId ?: return
+        mealsCache.update { byDate ->
+            byDate.mapValues { (_, meals) ->
+                meals.map { meal ->
+                    if (meal.id == mealId) {
+                        meal.copy(entries = meal.entries.map { e ->
+                            if (e.id == entry.id) entry else e
+                        })
+                    } else meal
+                }
+            }
+        }
+    }
+
     override fun clearCache() {
         mealsCache.value = emptyMap()
         fetchedDates.clear()

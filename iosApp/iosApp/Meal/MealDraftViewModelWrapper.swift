@@ -50,12 +50,13 @@ final class MealDraftViewModelWrapper {
     private let sharedVm: MealDraftViewModel
 
     var state: MealDraftState = .loading
+    var didStartDraft: Bool = false
     var navigateToReview: Bool = false
     var committedMeal: MealData?
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getMealDraftViewModel()
@@ -88,7 +89,9 @@ final class MealDraftViewModelWrapper {
     // MARK: - Private
 
     private func handleEffect(_ effect: MealDraftEffect) {
-        if effect is MealDraftEffectNavigateToReview {
+        if effect is MealDraftEffectStarted {
+            didStartDraft = true
+        } else if effect is MealDraftEffectNavigateToReview {
             navigateToReview = true
         } else if let committed = effect as? MealDraftEffectCommitted {
             committedMeal = MealData(
@@ -96,8 +99,7 @@ final class MealDraftViewModelWrapper {
                 name: committed.meal.name,
                 date: committed.meal.date,
                 createdAt: committed.meal.createdAt.description,
-                entries: committed.meal.entries.compactMap { $0 as? MealEntry }
-                    .map(TodayViewModelWrapper.mapEntry)
+                entries: committed.meal.entries.map(mapToMealEntryData)
             )
         } else if let showError = effect as? MealDraftEffectShowError {
             errorMessage = showError.message
@@ -116,7 +118,7 @@ final class MealDraftViewModelWrapper {
                 if let resolved = item as? DraftItemResolved {
                     return DraftItemData(
                         id: resolved.id,
-                        kind: .resolved(entry: TodayViewModelWrapper.mapEntry(resolved.entry))
+                        kind: .resolved(entry: mapToMealEntryData(resolved.entry))
                     )
                 } else if let photo = item as? DraftItemPendingPhoto {
                     return DraftItemData(id: photo.id, kind: .pendingPhoto(hint: photo.hint))

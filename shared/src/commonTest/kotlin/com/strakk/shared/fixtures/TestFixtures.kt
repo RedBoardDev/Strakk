@@ -28,9 +28,6 @@ object TestFixtures {
         proteinGoal = 150,
         calorieGoal = 2000,
         waterGoal = 2500,
-        reminderTrackingTime = "17:00",
-        reminderCheckinDay = 6,
-        reminderCheckinTime = "10:00",
     )
 
     val defaultUserProfile = UserProfile(
@@ -38,9 +35,6 @@ object TestFixtures {
         proteinGoal = 150,
         calorieGoal = 2000,
         waterGoal = 2500,
-        reminderTrackingTime = "17:00",
-        reminderCheckinDay = 6,
-        reminderCheckinTime = "10:00",
     )
 }
 
@@ -107,15 +101,17 @@ class FakeProfileRepository : ProfileRepository {
         proteinGoal: Int?,
         calorieGoal: Int?,
         waterGoal: Int?,
-        reminderTrackingTime: String?,
-        reminderCheckinDay: Int?,
-        reminderCheckinTime: String?,
     ): UserProfile {
         shouldThrow?.let { throw it }
         updateProfileCalls.add(
-            listOf(proteinGoal, calorieGoal, waterGoal, reminderTrackingTime, reminderCheckinDay, reminderCheckinTime)
+            listOf(proteinGoal, calorieGoal, waterGoal)
         )
         return updateProfileResult
+    }
+
+    override suspend fun getHevyApiKey(): String? {
+        shouldThrow?.let { throw it }
+        return getProfileResult?.hevyApiKey
     }
 
     override suspend fun updateHevyApiKey(apiKey: String) {

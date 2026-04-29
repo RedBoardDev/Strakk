@@ -58,6 +58,9 @@ interface NutritionRepository {
     /** Deletes the meal entry with [id]. */
     suspend fun deleteMeal(id: String)
 
+    /** Updates the editable fields of a meal entry in-place. */
+    suspend fun updateMealEntry(entry: MealEntry): MealEntry
+
     /** Inserts a water entry. */
     suspend fun addWater(logDate: String, amount: Int): WaterEntry
 

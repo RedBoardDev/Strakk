@@ -25,18 +25,18 @@ class ManualEntryViewModel(
         is ManualEntryEvent.FatChanged -> setState { copy(fat = event.value, errorMessage = null) }
         is ManualEntryEvent.CarbsChanged -> setState { copy(carbs = event.value, errorMessage = null) }
         is ManualEntryEvent.QuantityChanged -> setState { copy(quantity = event.value, errorMessage = null) }
-        ManualEntryEvent.Submit -> handleSubmit()
+        is ManualEntryEvent.Submit -> handleSubmit(event.logDate)
         ManualEntryEvent.Cancel -> emit(ManualEntryEffect.Cancelled)
     }
 
-    private fun handleSubmit() {
+    private fun handleSubmit(logDate: String? = null) {
         val state = uiState.value
         if (!state.isSubmittable || state.isSubmitting) return
 
         setState { copy(isSubmitting = true, errorMessage = null) }
 
         viewModelScope.launch {
-            quickAddManual(buildDraft(state))
+            quickAddManual(buildDraft(state, logDate))
                 .onSuccess { emit(ManualEntryEffect.Submitted(it)) }
                 .onFailure { error ->
                     val message = (error as? DomainError.ValidationError)?.message
@@ -49,12 +49,13 @@ class ManualEntryViewModel(
         }
     }
 
-    private fun buildDraft(state: ManualEntryUiState): ManualEntryDraft = ManualEntryDraft(
+    private fun buildDraft(state: ManualEntryUiState, logDate: String?): ManualEntryDraft = ManualEntryDraft(
         name = state.name,
         protein = state.protein.toDoubleOrNull() ?: 0.0,
         calories = state.calories.toDoubleOrNull() ?: 0.0,
         fat = state.fat.toDoubleOrNull(),
         carbs = state.carbs.toDoubleOrNull(),
         quantity = state.quantity.takeIf { it.isNotBlank() },
+        logDate = logDate,
     )
 }

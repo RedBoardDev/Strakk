@@ -30,8 +30,8 @@ final class ManualEntryViewModelWrapper {
     var shouldDismiss: Bool = false
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getManualEntryViewModel()
@@ -65,7 +65,7 @@ final class ManualEntryViewModelWrapper {
 
     private func handleEffect(_ effect: ManualEntryEffect) {
         if let submitted = effect as? ManualEntryEffectSubmitted {
-            submittedEntry = TodayViewModelWrapper.mapEntry(submitted.entry)
+            submittedEntry = mapToMealEntryData(submitted.entry)
             shouldDismiss = true
         } else if effect is ManualEntryEffectCancelled {
             shouldDismiss = true

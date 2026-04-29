@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.today
 
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.ClockProvider
+import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
@@ -16,10 +17,13 @@ import com.strakk.shared.domain.usecase.ObserveMealContainersForDateUseCase
 import com.strakk.shared.domain.usecase.ObserveMealsForDateUseCase
 import com.strakk.shared.domain.usecase.ObserveWaterEntriesForDateUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
+import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import com.strakk.shared.presentation.common.formatDateLabel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+
+private const val TAG = "TodayVM"
 
 /**
  * Manages the Today screen: daily summary, chronological timeline
@@ -39,7 +43,9 @@ class TodayViewModel(
     private val removeLastWaterEntry: RemoveLastWaterEntryUseCase,
     private val deleteOrphanEntry: DeleteMealUseCase,
     private val deleteMealContainer: DeleteMealContainerUseCase,
+    private val updateEntry: UpdateMealEntryUseCase,
     private val clock: ClockProvider,
+    private val logger: Logger,
 ) : MviViewModel<TodayUiState, TodayEvent, TodayEffect>(TodayUiState.Loading) {
 
     init {
@@ -53,6 +59,7 @@ class TodayViewModel(
             is TodayEvent.OnDeleteWater -> launchDeleteWater(event.id)
             is TodayEvent.OnDeleteOrphanEntry -> launchDeleteOrphan(event.id)
             is TodayEvent.OnDeleteMeal -> launchDeleteMeal(event.mealId)
+            is TodayEvent.OnUpdateEntry -> launchUpdateEntry(event)
         }
     }
 
@@ -87,6 +94,8 @@ class TodayViewModel(
             orphans.forEach { add(TimelineItem.OrphanEntry(it)) }
         }.sortedBy { it.createdAt }
 
+        logger.d(TAG, "buildReadyState: orphans=${orphans.size}, meals=${meals.size}, timeline=${timeline.size}")
+
         return TodayUiState.Ready(
             dateLabel = dateLabel,
             summary = summary,
@@ -114,6 +123,23 @@ class TodayViewModel(
 
     private fun launchDeleteMeal(mealId: String) = viewModelScope.launch {
         deleteMealContainer(mealId).onFailure { emitError(it) }
+    }
+
+    private fun launchUpdateEntry(event: TodayEvent.OnUpdateEntry) = viewModelScope.launch {
+        val entry = MealEntry(
+            id = event.id,
+            logDate = event.logDate,
+            name = event.name.takeIf { it.isNotBlank() },
+            protein = event.protein,
+            calories = event.calories,
+            fat = event.fat,
+            carbs = event.carbs,
+            source = event.source,
+            createdAt = event.createdAt,
+            mealId = event.mealId,
+            quantity = event.quantity?.takeIf { it.isNotBlank() },
+        )
+        updateEntry(entry).onFailure { emitError(it) }
     }
 
     private fun emitError(throwable: Throwable) {

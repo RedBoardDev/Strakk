@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.meal
 
 import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.Meal
 
 // =============================================================================
@@ -63,6 +64,30 @@ sealed interface MealDraftEvent {
     data class AddResolvedItem(val item: DraftItem.Resolved) : MealDraftEvent
     data class AddPendingPhoto(val imageBase64: String, val hint: String?) : MealDraftEvent
     data class AddPendingText(val description: String) : MealDraftEvent
+    /**
+     * Adds a fully-known item (manual entry or scaled search result) without
+     * going through QuickAddManualUseCase — the entry stays local until commit.
+     */
+    data class AddManualItem(
+        val name: String,
+        val protein: Double,
+        val calories: Double,
+        val fat: Double? = null,
+        val carbs: Double? = null,
+        val quantity: String? = null,
+        val source: EntrySource = EntrySource.Manual,
+    ) : MealDraftEvent
+    data class UpdateResolvedItem(
+        val itemId: String,
+        val name: String,
+        val protein: Double,
+        val calories: Double,
+        val fat: Double? = null,
+        val carbs: Double? = null,
+        val quantity: String? = null,
+        val source: EntrySource = EntrySource.Manual,
+        val createdAt: String,
+    ) : MealDraftEvent
     data object Discard : MealDraftEvent
     /** Runs AI extraction on pending items and opens the Review screen on success. */
     data object Process : MealDraftEvent
@@ -75,6 +100,7 @@ sealed interface MealDraftEvent {
 // =============================================================================
 
 sealed interface MealDraftEffect {
+    data object Started : MealDraftEffect
     data object NavigateToReview : MealDraftEffect
     data class Committed(val meal: Meal) : MealDraftEffect
     data object Discarded : MealDraftEffect

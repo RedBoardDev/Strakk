@@ -94,6 +94,7 @@ fun MealDraftRoute(
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
+                is MealDraftEffect.Started -> Unit
                 is MealDraftEffect.NavigateToReview -> onNavigateToReview()
                 is MealDraftEffect.Committed -> {
                     snackbarHostState.showSnackbar("Repas enregistré")

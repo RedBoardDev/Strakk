@@ -7,6 +7,7 @@ struct CalendarDayDetailData: Equatable {
     let date: String
     let summary: DailySummaryData
     let meals: [MealEntryData]
+    let mealContainers: [MealData]
     let waterEntries: [WaterEntryData]
 }
 
@@ -32,8 +33,8 @@ final class CalendarViewModelWrapper {
     var errorMessage: String?
     var openMealEntryForDate: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getCalendarViewModel()
@@ -41,18 +42,14 @@ final class CalendarViewModelWrapper {
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CalendarUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run {
-                    self?.state = Self.mapState(newState)
-                }
+                self?.state = Self.mapState(newState)
             }
         }
 
         effectTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CalendarEffect> = observeFlow(sharedVm.effects)
             for await effect in stream {
-                await MainActor.run {
-                    self?.handleEffect(effect)
-                }
+                self?.handleEffect(effect)
             }
         }
     }
@@ -83,9 +80,10 @@ final class CalendarViewModelWrapper {
             let detail: CalendarDayDetailData? = ready.dayDetail.map { d in
                 CalendarDayDetailData(
                     date: d.date,
-                    summary: mapSummary(d.summary),
-                    meals: d.meals.map(mapMeal),
-                    waterEntries: d.waterEntries.map(mapWater)
+                    summary: mapToDailySummaryData(d.summary),
+                    meals: d.meals.map(mapToMealEntryData),
+                    mealContainers: d.mealContainers.map(mapToMealData),
+                    waterEntries: d.waterEntries.map(mapToWaterEntryData)
                 )
             }
             let activeDaysSet: Set<String> = ready.activeDays
@@ -100,36 +98,4 @@ final class CalendarViewModelWrapper {
         return .loading
     }
 
-    private static func mapSummary(_ s: DailySummary) -> DailySummaryData {
-        DailySummaryData(
-            totalProtein: s.totalProtein,
-            totalCalories: s.totalCalories,
-            totalFat: s.totalFat,
-            totalCarbs: s.totalCarbs,
-            totalWater: Int(s.totalWater),
-            proteinGoal: s.proteinGoal?.intValue,
-            calorieGoal: s.calorieGoal?.intValue,
-            waterGoal: s.waterGoal?.intValue
-        )
-    }
-
-    private static func mapMeal(_ m: MealEntry) -> MealEntryData {
-        MealEntryData(
-            id: m.id,
-            name: m.name,
-            protein: m.protein,
-            calories: m.calories,
-            fat: m.fat?.doubleValue,
-            carbs: m.carbs?.doubleValue,
-            source: m.source,
-            logDate: m.logDate,
-            createdAt: m.createdAt,
-            mealId: m.mealId,
-            quantity: m.quantity
-        )
-    }
-
-    private static func mapWater(_ w: WaterEntry) -> WaterEntryData {
-        WaterEntryData(id: w.id, amount: Int(w.amount))
-    }
 }

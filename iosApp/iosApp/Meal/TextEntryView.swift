@@ -14,34 +14,46 @@ struct TextEntryView: View {
             ZStack {
                 Color.strakkBackground.ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 12) {
                     Text("Décrivez ce que vous avez mangé")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextSecondary)
-                        .padding(.top, 8)
+                        .padding(.top, 16)
 
-                    TextEditor(text: $text)
-                        .font(.strakkBody)
-                        .foregroundStyle(Color.strakkTextPrimary)
-                        .scrollContentBackground(.hidden)
-                        .padding(12)
-                        .background(Color.strakkSurface1)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(
-                                    text.count > 300 ? Color.strakkError : Color.strakkDivider,
-                                    lineWidth: 1
-                                )
-                        )
-                        .frame(minHeight: 120)
-                        .focused($isFocused)
-                        .onChange(of: text) { _, v in
-                            if v.count > 300 {
-                                text = String(v.prefix(300))
-                            }
+                    ZStack(alignment: .topLeading) {
+                        if text.isEmpty {
+                            Text("Ex : 200g poulet grillé, riz basmati, une pomme…")
+                                .font(.strakkBody)
+                                .foregroundStyle(Color.strakkTextTertiary)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 14)
+                                .allowsHitTesting(false)
                         }
-                        .accessibilityLabel("Description du repas")
+                        TextEditor(text: $text)
+                            .font(.strakkBody)
+                            .foregroundStyle(Color.strakkTextPrimary)
+                            .scrollContentBackground(.hidden)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 10)
+                            .frame(minHeight: 140)
+                            .focused($isFocused)
+                            .onChange(of: text) { _, v in
+                                if v.count > 300 {
+                                    text = String(v.prefix(300))
+                                }
+                            }
+                            .accessibilityLabel("Description du repas")
+                    }
+                    .background(Color.strakkSurface1)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(
+                                isFocused ? Color.strakkPrimary : (text.count > 300 ? Color.strakkError : Color.strakkDivider),
+                                lineWidth: 1.5
+                            )
+                            .animation(.easeInOut(duration: 0.15), value: isFocused)
+                    )
 
                     HStack {
                         if text.count > 300 {

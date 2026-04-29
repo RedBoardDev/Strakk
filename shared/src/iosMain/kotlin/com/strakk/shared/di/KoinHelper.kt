@@ -1,14 +1,12 @@
 package com.strakk.shared.di
 
-import com.strakk.shared.domain.usecase.QuickAddFromBarcodeUseCase
-import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
-import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.presentation.auth.AuthFlowViewModel
 import com.strakk.shared.presentation.auth.RootViewModel
 import com.strakk.shared.presentation.calendar.CalendarViewModel
 import com.strakk.shared.presentation.hevy.HevyExportViewModel
 import com.strakk.shared.presentation.meal.ManualEntryViewModel
 import com.strakk.shared.presentation.meal.MealDraftViewModel
+import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
 import com.strakk.shared.presentation.onboarding.OnboardingViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
@@ -44,7 +42,5 @@ class KoinHelper : KoinComponent {
     fun getMealDraftViewModel(): MealDraftViewModel = get()
     fun getSearchFoodViewModel(): SearchFoodViewModel = get()
     fun getManualEntryViewModel(): ManualEntryViewModel = get()
-    fun getQuickAddFromPhotoUseCase(): QuickAddFromPhotoUseCase = get()
-    fun getQuickAddFromTextUseCase(): QuickAddFromTextUseCase = get()
-    fun getQuickAddFromBarcodeUseCase(): QuickAddFromBarcodeUseCase = get()
+    fun getQuickAddViewModel(): QuickAddViewModel = get()
 }

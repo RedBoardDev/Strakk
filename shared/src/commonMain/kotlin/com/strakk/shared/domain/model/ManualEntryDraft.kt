@@ -18,4 +18,5 @@ data class ManualEntryDraft(
     val fat: Double?,
     val carbs: Double?,
     val quantity: String?,
+    val logDate: String? = null,
 )

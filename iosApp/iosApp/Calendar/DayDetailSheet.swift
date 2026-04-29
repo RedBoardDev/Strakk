@@ -1,9 +1,19 @@
 import SwiftUI
+import shared
 
 struct DayDetailSheet: View {
     let detail: CalendarDayDetailData
     let onDismiss: () -> Void
     let onAddMeal: () -> Void
+    let onAddWater: (Int) -> Void
+    let onRemoveWater: (Int) -> Void
+    let onEditEntry: (MealEntryData, String, Double, Double, Double?, Double?, String?) -> Void
+    let onDeleteEntry: (MealEntryData) -> Void
+    let onDeleteMeal: (MealData) -> Void
+
+    @State private var selectedMeal: MealData?
+    @State private var selectedEntry: MealEntryData?
+    @State private var editingEntry: MealEntryData?
 
     var body: some View {
         NavigationStack {
@@ -13,7 +23,8 @@ struct DayDetailSheet: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         // MARK: Macros section
-                        sectionHeader("NUTRITION")
+                        SectionHeader(title: "NUTRITION")
+                            .padding(.horizontal, 20)
                             .padding(.top, 20)
 
                         VStack(spacing: 8) {
@@ -44,38 +55,33 @@ struct DayDetailSheet: View {
                         .padding(.top, 8)
 
                         // MARK: Water section
-                        sectionHeader("EAU")
+                        SectionHeader(title: "EAU")
+                            .padding(.horizontal, 20)
                             .padding(.top, 24)
 
-                        macroRow(
-                            label: "Consommation",
-                            value: String(format: "%d mL", detail.summary.totalWater),
-                            color: Color.strakkWater,
-                            current: Double(detail.summary.totalWater),
-                            goal: detail.summary.waterGoal.map { Double($0) }
+                        WaterRow(
+                            summary: detail.summary,
+                            onAdd: { amount in onAddWater(amount) },
+                            onRemove: { amount in onRemoveWater(amount) }
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 8)
 
-                        // MARK: Meals section
-                        if !detail.meals.isEmpty {
-                            sectionHeader("REPAS")
+                        // MARK: Meals/entries section
+                        if !detail.mealContainers.isEmpty || !detail.meals.isEmpty {
+                            SectionHeader(title: "REPAS")
+                                .padding(.horizontal, 20)
                                 .padding(.top, 24)
 
-                            VStack(spacing: 0) {
-                                ForEach(Array(detail.meals.enumerated()), id: \.element.id) { idx, meal in
-                                    VStack(spacing: 0) {
-                                        if idx > 0 {
-                                            Divider()
-                                                .background(Color.strakkDivider)
-                                                .padding(.leading, 16)
-                                        }
-                                        readOnlyMealRow(meal: meal)
-                                    }
+                            VStack(spacing: 6) {
+                                ForEach(detail.mealContainers) { meal in
+                                    mealContainerRow(meal: meal)
+                                }
+
+                                ForEach(detail.meals) { entry in
+                                    orphanEntryRow(entry: entry)
                                 }
                             }
-                            .background(Color.strakkSurface1)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                             .padding(.horizontal, 20)
                             .padding(.top, 8)
                         }
@@ -101,6 +107,47 @@ struct DayDetailSheet: View {
                     }
                 }
             }
+            .sheet(item: $selectedMeal) { meal in
+                MealDetailSheet(
+                    meal: meal,
+                    onEditEntry: { entry in
+                        selectedMeal = nil
+                        editingEntry = entry
+                    },
+                    onDeleteEntry: { entry in
+                        onDeleteEntry(entry)
+                    },
+                    onDeleteMeal: {
+                        onDeleteMeal(meal)
+                        selectedMeal = nil
+                    },
+                    onDismiss: { selectedMeal = nil }
+                )
+            }
+            .sheet(item: $selectedEntry) { entry in
+                EntryDetailSheet(
+                    entry: entry,
+                    onEdit: {
+                        selectedEntry = nil
+                        editingEntry = entry
+                    },
+                    onDelete: {
+                        onDeleteEntry(entry)
+                        selectedEntry = nil
+                    },
+                    onDismiss: { selectedEntry = nil }
+                )
+            }
+            .sheet(item: $editingEntry) { entry in
+                EditEntrySheet(
+                    entry: entry,
+                    onSave: { name, protein, calories, fat, carbs, quantity in
+                        onEditEntry(entry, name, protein, calories, fat, carbs, quantity)
+                        editingEntry = nil
+                    },
+                    onCancel: { editingEntry = nil }
+                )
+            }
             .navigationTitle(formatDate(detail.date))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -118,15 +165,115 @@ struct DayDetailSheet: View {
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Timeline rows (same pattern as TodayView)
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.strakkOverline)
-            .foregroundStyle(Color.strakkTextTertiary)
-            .kerning(1.0)
-            .padding(.horizontal, 20)
+    private func mealContainerRow(meal: MealData) -> some View {
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            selectedMeal = meal
+        } label: {
+            HStack(spacing: 10) {
+                Text(timeLabel(from: meal.createdAt))
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .frame(width: 44, alignment: .leading)
+
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.strakkTextSecondary)
+                    .frame(width: 16)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.name)
+                        .font(.strakkHeading3)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .lineLimit(1)
+                    Text("\(meal.entries.count) item\(meal.entries.count > 1 ? "s" : "")")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .contextMenu {
+            Button(role: .destructive) {
+                onDeleteMeal(meal)
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                onDeleteMeal(meal)
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
     }
+
+    private func orphanEntryRow(entry: MealEntryData) -> some View {
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            selectedEntry = entry
+        } label: {
+            HStack(spacing: 10) {
+                Text(timeLabel(from: entry.createdAt))
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .frame(width: 44, alignment: .leading)
+
+                sourceIcon(for: entry.source)
+                    .frame(width: 16)
+
+                Text(entry.name ?? "Item")
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .lineLimit(1)
+
+                if let qty = entry.quantity {
+                    Text(qty)
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                onDeleteEntry(entry)
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .contextMenu {
+            Button { editingEntry = entry } label: {
+                Label("Modifier", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                onDeleteEntry(entry)
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+    }
+
+    // MARK: - Subviews
 
     private func macroRow(
         label: String,
@@ -189,31 +336,16 @@ struct DayDetailSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func readOnlyMealRow(meal: MealEntryData) -> some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(meal.name ?? "Repas")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                    .lineLimit(1)
+    // MARK: - Helpers
 
-                HStack(spacing: 4) {
-                    Text(String(format: "%.0fg prot", meal.protein))
-                        .foregroundStyle(Color.strakkPrimary)
-                    Text("·")
-                        .foregroundStyle(Color.strakkTextTertiary)
-                    Text(String(format: "%.0f kcal", meal.calories))
-                        .foregroundStyle(Color.strakkTextSecondary)
-                }
-                .font(.strakkCaption)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+    @ViewBuilder
+    private func sourceIcon(for source: EntrySource) -> some View {
+        entrySourceIcon(for: source)
     }
 
-    // MARK: - Date formatting
+    private func timeLabel(from isoString: String) -> String {
+        formatTimeLabel(from: isoString)
+    }
 
     private func formatDate(_ dateString: String) -> String {
         let formatter = DateFormatter()

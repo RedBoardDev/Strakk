@@ -1,12 +1,13 @@
 import SwiftUI
 
-// MARK: - ProgressSection — Direction A : Hero compact + ledger horizontal
+// MARK: - ProgressSection — Hero protéines + ledger horizontal
 //
 // Card unique surface-1 :
-//   - Gauche : ring protéines (96pt) avec valeur centrale display
-//   - Droite : ledger 3 lignes (Calories / Glucides / Lipides) séparées par dividers
+//   - Gauche : ring protéines 96pt avec valeur centrale
+//   - Séparateur vertical 1pt
+//   - Droite : ledger 3 lignes (Calories / Glucides / Lipides) avec icône-case
 //
-// Aucun fond teinté primaire — l'accent vient uniquement du ring et du label.
+// Aucun fond teinté primaire — l'accent vient du ring et du label.
 
 struct ProgressSection: View {
     let summary: DailySummaryData
@@ -47,25 +48,37 @@ struct ProgressSection: View {
                     ringColor: ringColor
                 )
 
+                // Séparateur vertical
+                Rectangle()
+                    .fill(Color.strakkDivider)
+                    .frame(width: 1)
+                    .frame(maxHeight: .infinity)
+
                 // Ledger 3 macros (droite)
                 VStack(spacing: 0) {
                     LedgerRow(
+                        icon: "flame.fill",
+                        iconTint: Color.strakkPrimary,
                         label: "CALORIES",
                         value: "\(Int(summary.totalCalories))",
                         suffix: summary.calorieGoal.map { "/ \($0) kcal" } ?? "kcal"
                     )
                     Divider()
-                        .background(Color.strakkDivider)
+                        .overlay(Color.strakkDivider)
                         .padding(.vertical, 10)
                     LedgerRow(
+                        icon: "leaf.fill",
+                        iconTint: Color.strakkWater,
                         label: "GLUCIDES",
                         value: "\(Int(summary.totalCarbs))",
                         suffix: "g"
                     )
                     Divider()
-                        .background(Color.strakkDivider)
+                        .overlay(Color.strakkDivider)
                         .padding(.vertical, 10)
                     LedgerRow(
+                        icon: "drop.fill",
+                        iconTint: Color.strakkWarning,
                         label: "LIPIDES",
                         value: "\(Int(summary.totalFat))",
                         suffix: "g"
@@ -129,15 +142,27 @@ private struct ProteinRing: View {
     }
 }
 
-// MARK: - LedgerRow
+// MARK: - LedgerRow (icon-case + label + value)
 
 private struct LedgerRow: View {
+    let icon: String
+    let iconTint: Color
     let label: String
     let value: String
     let suffix: String
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 12) {
+            // Icon case
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.strakkSurface3)
+                    .frame(width: 32, height: 32)
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(iconTint)
+            }
+
             Text(label)
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextSecondary)
@@ -169,6 +194,21 @@ private struct LedgerRow: View {
         totalCarbs: 210,
         totalWater: 1500,
         proteinGoal: 160,
+        calorieGoal: 2200,
+        waterGoal: 2500
+    ))
+    .padding()
+    .background(Color.strakkBackground)
+}
+
+#Preview("Empty") {
+    ProgressSection(summary: DailySummaryData(
+        totalProtein: 0,
+        totalCalories: 0,
+        totalFat: 0,
+        totalCarbs: 0,
+        totalWater: 0,
+        proteinGoal: 105,
         calorieGoal: 2200,
         waterGoal: 2500
     ))

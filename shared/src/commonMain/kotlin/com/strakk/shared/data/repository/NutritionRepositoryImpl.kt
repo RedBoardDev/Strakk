@@ -14,6 +14,7 @@ import com.strakk.shared.domain.repository.NutritionRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,12 @@ internal class NutritionRepositoryImpl(
         val shouldFetch = fetchMutex.withLock { mealsFetchedDates.add(date) }
         if (shouldFetch) {
             val entries = fetchOrphanMeals(date)
-            mealsCache.update { it + (date to entries) }
+            mealsCache.update { cache ->
+                cache + (date to mergeFetchedMealEntries(
+                    cachedEntries = cache[date].orEmpty(),
+                    fetchedEntries = entries,
+                ))
+            }
         }
     }
 
@@ -114,6 +120,7 @@ internal class NutritionRepositoryImpl(
 
     override suspend fun addMeal(entry: MealEntry): MealEntry {
         val userId = userIdProvider.currentOrThrow()
+        logger.d(LOG_TAG, "addMeal: name=${entry.name}, logDate=${entry.logDate}, mealId=${entry.mealId}")
 
         val payload = buildJsonObject {
             put("user_id", userId)
@@ -136,8 +143,12 @@ internal class NutritionRepositoryImpl(
             .decodeSingle<MealEntryDto>()
             .toDomain()
 
-        mealsCache.update {
-            it + (entry.logDate to ((it[entry.logDate] ?: emptyList()) + created))
+        logger.d(LOG_TAG, "addMeal created: id=${created.id}, logDate=${created.logDate}")
+
+        mealsCache.update { cache ->
+            val existing = cache[entry.logDate] ?: emptyList()
+            logger.d(LOG_TAG, "addMeal cache update: key=${entry.logDate}, existingCount=${existing.size}")
+            cache + (entry.logDate to (existing + created))
         }
         emitMutation()
         return created
@@ -151,6 +162,27 @@ internal class NutritionRepositoryImpl(
             byDate.mapValues { (_, entries) -> entries.filterNot { it.id == id } }
         }
         emitMutation()
+    }
+
+    override suspend fun updateMealEntry(entry: MealEntry): MealEntry {
+        supabaseClient
+            .from("meal_entries")
+            .update({
+                set("name", entry.name)
+                set("protein", entry.protein)
+                set("calories", entry.calories)
+                set("fat", entry.fat)
+                set("carbs", entry.carbs)
+                set("quantity", entry.quantity)
+            }) { filter { eq("id", entry.id) } }
+
+        mealsCache.update { byDate ->
+            byDate.mapValues { (_, entries) ->
+                entries.map { if (it.id == entry.id) entry else it }
+            }
+        }
+        emitMutation()
+        return entry
     }
 
     // -------------------------------------------------------------------------
@@ -243,6 +275,8 @@ internal class NutritionRepositoryImpl(
 
         val userId = try {
             userIdProvider.currentOrThrow()
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             emit(emptyList())
             return@flow
@@ -257,6 +291,8 @@ internal class NutritionRepositoryImpl(
                     range(0L, 199L)
                 }
                 .decodeList<MealEntryDto>()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(LOG_TAG, "Frequent items fetch failed", e)
             emit(frequentItemsCache.value ?: emptyList())
@@ -314,4 +350,13 @@ internal class NutritionRepositoryImpl(
                 else -> 0.0
             }
         }.getOrDefault(0.0)
+}
+
+internal fun mergeFetchedMealEntries(
+    cachedEntries: List<MealEntry>,
+    fetchedEntries: List<MealEntry>,
+): List<MealEntry> {
+    val fetchedIds = fetchedEntries.map { it.id }.toSet()
+    return (fetchedEntries + cachedEntries.filterNot { it.id in fetchedIds })
+        .sortedBy { it.createdAt }
 }

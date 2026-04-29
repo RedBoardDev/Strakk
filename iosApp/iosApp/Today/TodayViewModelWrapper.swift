@@ -93,8 +93,8 @@ final class TodayViewModelWrapper {
     var state: TodayState = .loading
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getTodayViewModel()
@@ -142,9 +142,9 @@ final class TodayViewModelWrapper {
         } else if let ready = kmpState as? TodayUiStateReady {
             let timeline = ready.timeline.compactMap { item -> TimelineItemData? in
                 if let container = item as? TimelineItemMealContainer {
-                    return .mealContainer(mapMeal(container.meal))
+                    return .mealContainer(mapToMealData(container.meal))
                 } else if let orphan = item as? TimelineItemOrphanEntry {
-                    return .orphanEntry(mapEntry(orphan.entry))
+                    return .orphanEntry(mapToMealEntryData(orphan.entry))
                 }
                 return nil
             }
@@ -168,55 +168,12 @@ final class TodayViewModelWrapper {
 
             return .ready(
                 dateLabel: ready.dateLabel,
-                summary: mapSummary(ready.summary),
+                summary: mapToDailySummaryData(ready.summary),
                 timeline: timeline,
-                waterEntries: ready.waterEntries.compactMap { $0 as? WaterEntry }.map(mapWater),
+                waterEntries: ready.waterEntries.map(mapToWaterEntryData),
                 activeDraft: activeDraft
             )
         }
         return .loading
-    }
-
-    private static func mapSummary(_ s: DailySummary) -> DailySummaryData {
-        DailySummaryData(
-            totalProtein: s.totalProtein,
-            totalCalories: s.totalCalories,
-            totalFat: s.totalFat,
-            totalCarbs: s.totalCarbs,
-            totalWater: Int(s.totalWater),
-            proteinGoal: s.proteinGoal?.intValue,
-            calorieGoal: s.calorieGoal?.intValue,
-            waterGoal: s.waterGoal?.intValue
-        )
-    }
-
-    private static func mapMeal(_ m: Meal) -> MealData {
-        MealData(
-            id: m.id,
-            name: m.name,
-            date: m.date,
-            createdAt: m.createdAt.description,
-            entries: m.entries.compactMap { $0 as? MealEntry }.map(mapEntry)
-        )
-    }
-
-    static func mapEntry(_ m: MealEntry) -> MealEntryData {
-        MealEntryData(
-            id: m.id,
-            name: m.name,
-            protein: m.protein,
-            calories: m.calories,
-            fat: m.fat?.doubleValue,
-            carbs: m.carbs?.doubleValue,
-            source: m.source,
-            logDate: m.logDate,
-            createdAt: m.createdAt,
-            mealId: m.mealId,
-            quantity: m.quantity
-        )
-    }
-
-    private static func mapWater(_ w: WaterEntry) -> WaterEntryData {
-        WaterEntryData(id: w.id, amount: Int(w.amount))
     }
 }

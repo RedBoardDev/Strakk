@@ -20,18 +20,18 @@ class QuickAddFromTextUseCase(
     private val mealRepository: MealRepository,
     private val nutritionRepository: NutritionRepository,
 ) {
-    suspend operator fun invoke(description: String): Result<MealEntry> = runSuspendCatching {
+    suspend operator fun invoke(description: String, logDate: String? = null): Result<MealEntry> = runSuspendCatching {
         val trimmed = description.trim()
         if (trimmed.length !in MIN_LENGTH..MAX_LENGTH) {
             throw DomainError.ValidationError(
                 "La description doit contenir entre $MIN_LENGTH et $MAX_LENGTH caractères.",
             )
         }
-        val today = Clock.System.now()
+        val dateToUse = logDate ?: Clock.System.now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
             .toString()
-        val analyzed = mealRepository.analyzeTextForQuickAdd(trimmed, today)
+        val analyzed = mealRepository.analyzeTextForQuickAdd(trimmed, dateToUse)
         nutritionRepository.addMeal(analyzed)
     }
 }

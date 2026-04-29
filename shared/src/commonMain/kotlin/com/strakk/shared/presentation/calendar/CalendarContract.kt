@@ -1,6 +1,8 @@
 package com.strakk.shared.presentation.calendar
 
 import com.strakk.shared.domain.model.DailySummary
+import com.strakk.shared.domain.model.EntrySource
+import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.WaterEntry
 
@@ -20,6 +22,7 @@ data class CalendarDayDetail(
     val date: String,
     val summary: DailySummary,
     val meals: List<MealEntry>,
+    val mealContainers: List<Meal>,
     val waterEntries: List<WaterEntry>,
 )
 
@@ -66,6 +69,28 @@ sealed interface CalendarEvent {
 
     /** User dismissed the day detail panel/sheet. */
     data object DismissDay : CalendarEvent
+
+    data class OnDeleteOrphanEntry(val id: String) : CalendarEvent
+
+    data class OnDeleteMeal(val mealId: String) : CalendarEvent
+
+    data class OnUpdateEntry(
+        val id: String,
+        val mealId: String?,
+        val logDate: String,
+        val source: EntrySource,
+        val createdAt: String,
+        val name: String,
+        val protein: Double,
+        val calories: Double,
+        val fat: Double?,
+        val carbs: Double?,
+        val quantity: String?,
+    ) : CalendarEvent
+
+    data class OnAddWater(val date: String, val amount: Int) : CalendarEvent
+
+    data class OnRemoveWater(val date: String, val amount: Int) : CalendarEvent
 }
 
 // =============================================================================

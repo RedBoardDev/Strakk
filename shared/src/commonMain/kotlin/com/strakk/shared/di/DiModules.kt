@@ -4,8 +4,8 @@ import com.russhwolf.settings.Settings
 import com.strakk.shared.data.remote.CurrentUserIdProvider
 import com.strakk.shared.data.remote.SupabaseProvider
 import com.strakk.shared.data.repository.AuthRepositoryImpl
-import com.strakk.shared.data.datasource.OffLiveSearchDataSource
 import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
+import com.strakk.shared.data.datasource.OffLiveSearchDataSource
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
 import com.strakk.shared.data.repository.MealDraftRepositoryImpl
 import com.strakk.shared.data.repository.MealPhotoRepositoryImpl
@@ -29,6 +29,7 @@ import com.strakk.shared.domain.repository.WorkoutRepository
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
 import com.strakk.shared.domain.usecase.AddItemToProcessedMealUseCase
 import com.strakk.shared.domain.usecase.AddWaterUseCase
+import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
 import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
 import com.strakk.shared.domain.usecase.CommitMealDraftUseCase
 import com.strakk.shared.domain.usecase.CreateMealDraftUseCase
@@ -57,6 +58,7 @@ import com.strakk.shared.domain.usecase.QuickAddEntryUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromBarcodeUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
+import com.strakk.shared.domain.usecase.QuickAddKnownEntryUseCase
 import com.strakk.shared.domain.usecase.QuickAddManualUseCase
 import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
@@ -68,6 +70,7 @@ import com.strakk.shared.domain.usecase.SignInUseCase
 import com.strakk.shared.domain.usecase.SignOutUseCase
 import com.strakk.shared.domain.usecase.SignUpUseCase
 import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
+import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
 import com.strakk.shared.domain.usecase.UpdateProfileUseCase
 import com.strakk.shared.presentation.auth.AuthFlowViewModel
 import com.strakk.shared.presentation.auth.RootViewModel
@@ -75,6 +78,7 @@ import com.strakk.shared.presentation.calendar.CalendarViewModel
 import com.strakk.shared.presentation.hevy.HevyExportViewModel
 import com.strakk.shared.presentation.meal.ManualEntryViewModel
 import com.strakk.shared.presentation.meal.MealDraftViewModel
+import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
 import com.strakk.shared.presentation.onboarding.OnboardingViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
@@ -115,7 +119,6 @@ internal val dataModule = module {
     singleOf(::ProfileRepositoryImpl) { bind<ProfileRepository>() }
     singleOf(::NutritionRepositoryImpl) { bind<NutritionRepository>() }
     singleOf(::WorkoutRepositoryImpl) { bind<WorkoutRepository>() }
-
     // Meal refonte v2
     singleOf(::MealPhotoRepositoryImpl) { bind<MealPhotoRepository>() }
     singleOf(::MealRepositoryImpl) { bind<MealRepository>() }
@@ -141,6 +144,7 @@ internal val domainModule = module {
     factoryOf(::ObserveProfileUseCase)
 
     // Nutrition — streams
+    factoryOf(::BuildMealEntryUseCase)
     factoryOf(::ObserveMealsForDateUseCase)
     factoryOf(::ObserveWaterEntriesForDateUseCase)
     factoryOf(::ObserveNutritionMutationsUseCase)
@@ -150,6 +154,7 @@ internal val domainModule = module {
 
     // Nutrition — mutations (orphan entries)
     factoryOf(::DeleteMealUseCase)
+    factoryOf(::UpdateMealEntryUseCase)
     factoryOf(::AddWaterUseCase)
     factoryOf(::DeleteWaterUseCase)
     factoryOf(::RemoveLastWaterEntryUseCase)
@@ -178,6 +183,7 @@ internal val domainModule = module {
     factoryOf(::QuickAddFromPhotoUseCase)
     factoryOf(::QuickAddFromTextUseCase)
     factoryOf(::QuickAddFromBarcodeUseCase)
+    factoryOf(::QuickAddKnownEntryUseCase)
 
     // Catalogue
     factoryOf(::SearchFoodUseCase)
@@ -203,6 +209,7 @@ internal val presentationModule = module {
     viewModelOf(::MealDraftViewModel)
     viewModelOf(::SearchFoodViewModel)
     viewModelOf(::ManualEntryViewModel)
+    viewModelOf(::QuickAddViewModel)
 }
 
 /** Aggregated module registered by each platform on startup. */

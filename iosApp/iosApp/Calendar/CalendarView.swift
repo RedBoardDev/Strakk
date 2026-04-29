@@ -1,8 +1,17 @@
 import SwiftUI
 import shared
 
+// MARK: - Identifiable wrapper for sheet(item:)
+
+private struct CalendarAddDate: Identifiable {
+    let id: String  // ISO date string "yyyy-MM-dd"
+}
+
+// MARK: - CalendarView
+
 struct CalendarView: View {
     @State private var viewModel = CalendarViewModelWrapper()
+    @State private var calendarAddDate: CalendarAddDate?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
     private let weekdaySymbols = ["L", "M", "M", "J", "V", "S", "D"]
@@ -16,13 +25,14 @@ struct CalendarView: View {
             .navigationTitle("Calendrier")
             .navigationBarTitleDisplayMode(.large)
         }
-        .alert("Erreur", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )) {
-            Button("OK") { viewModel.errorMessage = nil }
-        } message: {
-            Text(viewModel.errorMessage ?? "")
+        .errorAlert(message: $viewModel.errorMessage)
+        .sheet(item: $calendarAddDate) { addDate in
+            AddPickerSheet(
+                isDraftMode: false,
+                draftViewModel: MealDraftViewModelWrapper(),
+                onDismiss: { calendarAddDate = nil },
+                logDate: addDate.id
+            )
         }
     }
 
@@ -69,8 +79,37 @@ struct CalendarView: View {
                             viewModel.onEvent(CalendarEventDismissDay.shared)
                         },
                         onAddMeal: {
-                            viewModel.onEvent(CalendarEventDismissDay.shared)
-                            // Meal entry from calendar is not implemented in v2 — user goes to Today to add.
+                            if let date = dayDetail?.date {
+                                viewModel.onEvent(CalendarEventDismissDay.shared)
+                                calendarAddDate = CalendarAddDate(id: date)
+                            }
+                        },
+                        onAddWater: { amount in
+                            viewModel.onEvent(CalendarEventOnAddWater(date: detail.date, amount: Int32(amount)))
+                        },
+                        onRemoveWater: { amount in
+                            viewModel.onEvent(CalendarEventOnRemoveWater(date: detail.date, amount: Int32(amount)))
+                        },
+                        onEditEntry: { entry, name, protein, calories, fat, carbs, quantity in
+                            viewModel.onEvent(CalendarEventOnUpdateEntry(
+                                id: entry.id,
+                                mealId: entry.mealId,
+                                logDate: entry.logDate,
+                                source: entry.source,
+                                createdAt: entry.createdAt,
+                                name: name,
+                                protein: protein,
+                                calories: calories,
+                                fat: asKotlinDouble(fat),
+                                carbs: asKotlinDouble(carbs),
+                                quantity: quantity
+                            ))
+                        },
+                        onDeleteEntry: { entry in
+                            viewModel.onEvent(CalendarEventOnDeleteOrphanEntry(id: entry.id))
+                        },
+                        onDeleteMeal: { meal in
+                            viewModel.onEvent(CalendarEventOnDeleteMeal(mealId: meal.id))
                         }
                     )
                     .presentationDetents([.large])
@@ -118,7 +157,7 @@ struct CalendarView: View {
 
     private var weekdayHeader: some View {
         LazyVGrid(columns: columns, spacing: 4) {
-            ForEach(weekdaySymbols, id: \.self) { symbol in
+            ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                 Text(symbol)
                     .font(.strakkOverline)
                     .foregroundStyle(Color.strakkTextTertiary)
@@ -137,7 +176,7 @@ struct CalendarView: View {
     ) -> some View {
         let days = generateDays(year: year, month: month)
         return LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(days, id: \.self) { day in
+            ForEach(Array(days.enumerated()), id: \.offset) { _, day in
                 if let day {
                     dayCell(
                         day: day,

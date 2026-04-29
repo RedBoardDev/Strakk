@@ -8,6 +8,14 @@ enum TodayDestination: Hashable {
     case addPicker(isDraft: Bool)
 }
 
+enum AddPickerMode: String, Identifiable {
+    case draft
+    case quickAdd
+
+    var id: String { rawValue }
+    var isDraft: Bool { self == .draft }
+}
+
 // MARK: - TodayView
 
 struct TodayView: View {
@@ -18,12 +26,16 @@ struct TodayView: View {
     @State private var navigationPath = NavigationPath()
 
     // Sheets
-    @State private var showAddPickerSheet: Bool = false
-    @State private var addPickerIsDraft: Bool = true
+    @State private var addPickerMode: AddPickerMode?
     @State private var showHevyExport: Bool = false
+    @State private var shouldOpenDraftAfterStart: Bool = false
 
-    // Expanded meal IDs
-    @State private var expandedMealIds: Set<String> = []
+    // Detail sheets
+    @State private var selectedMeal: MealData?
+    @State private var selectedEntry: MealEntryData?
+
+    // Edit entry sheet
+    @State private var editingEntry: MealEntryData?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -56,8 +68,7 @@ struct TodayView: View {
                 switch destination {
                 case .mealDraft:
                     MealDraftView(viewModel: draftViewModel, onAdd: {
-                        addPickerIsDraft = true
-                        showAddPickerSheet = true
+                        addPickerMode = .draft
                     })
                 case .addPicker(let isDraft):
                     AddPickerSheet(
@@ -68,29 +79,84 @@ struct TodayView: View {
                 }
             }
         }
-        .sheet(isPresented: $showAddPickerSheet) {
+        .sheet(item: $addPickerMode) { mode in
             AddPickerSheet(
-                isDraftMode: addPickerIsDraft,
+                isDraftMode: mode.isDraft,
                 draftViewModel: draftViewModel,
-                onDismiss: { showAddPickerSheet = false }
+                onDismiss: { addPickerMode = nil }
+            )
+        }
+        .sheet(item: $selectedMeal) { meal in
+            MealDetailSheet(
+                meal: meal,
+                onEditEntry: { entry in
+                    selectedMeal = nil
+                    editingEntry = entry
+                },
+                onDeleteEntry: { entry in
+                    if let mealId = entry.mealId {
+                        viewModel.onEvent(TodayEventOnDeleteMeal(mealId: mealId))
+                    } else {
+                        viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
+                    }
+                },
+                onDeleteMeal: {
+                    viewModel.onEvent(TodayEventOnDeleteMeal(mealId: meal.id))
+                    selectedMeal = nil
+                },
+                onDismiss: { selectedMeal = nil }
+            )
+        }
+        .sheet(item: $selectedEntry) { entry in
+            EntryDetailSheet(
+                entry: entry,
+                onEdit: {
+                    selectedEntry = nil
+                    editingEntry = entry
+                },
+                onDelete: {
+                    viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
+                    selectedEntry = nil
+                },
+                onDismiss: { selectedEntry = nil }
+            )
+        }
+        .sheet(item: $editingEntry) { entry in
+            EditEntrySheet(
+                entry: entry,
+                onSave: { name, protein, calories, fat, carbs, quantity in
+                    viewModel.onEvent(TodayEventOnUpdateEntry(
+                        id: entry.id,
+                        mealId: entry.mealId,
+                        logDate: entry.logDate,
+                        source: entry.source,
+                        createdAt: entry.createdAt,
+                        name: name,
+                        protein: protein,
+                        calories: calories,
+                        fat: asKotlinDouble(fat),
+                        carbs: asKotlinDouble(carbs),
+                        quantity: quantity
+                    ))
+                    editingEntry = nil
+                },
+                onCancel: { editingEntry = nil }
             )
         }
         .fullScreenCover(isPresented: $showHevyExport) {
             HevyExportFlow(onDismiss: { showHevyExport = false })
         }
-        .alert("Erreur", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )) {
-            Button("OK") { viewModel.errorMessage = nil }
-        } message: {
-            Text(viewModel.errorMessage ?? "")
-        }
+        .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: draftViewModel.committedMeal) { _, meal in
             if meal != nil {
                 navigationPath = NavigationPath()
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
+        }
+        .onChange(of: draftViewModel.didStartDraft) { _, didStart in
+            guard didStart, shouldOpenDraftAfterStart else { return }
+            shouldOpenDraftAfterStart = false
+            navigationPath.append(TodayDestination.mealDraft)
         }
     }
 
@@ -102,8 +168,9 @@ struct TodayView: View {
             // Repas button
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                shouldOpenDraftAfterStart = true
+                draftViewModel.didStartDraft = false
                 draftViewModel.onEvent(MealDraftEventStartDraft(initialName: nil, date: nil))
-                navigationPath.append(TodayDestination.mealDraft)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "fork.knife")
@@ -122,8 +189,7 @@ struct TodayView: View {
             // Rapide button
             Button {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                addPickerIsDraft = false
-                showAddPickerSheet = true
+                addPickerMode = .quickAdd
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "bolt.fill")
@@ -248,93 +314,44 @@ struct TodayView: View {
     }
 
     private func mealContainerRow(meal: MealData) -> some View {
-        let isExpanded = expandedMealIds.contains(meal.id)
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            selectedMeal = meal
+        } label: {
+            HStack(spacing: 10) {
+                Text(timeLabel(from: meal.createdAt))
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .frame(width: 44, alignment: .leading)
 
-        return VStack(spacing: 0) {
-            // Header row (always visible)
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    if isExpanded {
-                        expandedMealIds.remove(meal.id)
-                    } else {
-                        expandedMealIds.insert(meal.id)
-                    }
-                }
-            } label: {
-                HStack(spacing: 10) {
-                    // Time
-                    Text(timeLabel(from: meal.createdAt))
-                        .font(.strakkCaptionBold)
-                        .foregroundStyle(Color.strakkTextTertiary)
-                        .frame(width: 44, alignment: .leading)
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.strakkTextSecondary)
+                    .frame(width: 16)
 
-                    // Name + sub-info
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(meal.name)
-                            .font(.strakkBodyBold)
-                            .foregroundStyle(Color.strakkTextPrimary)
-                        Text("\(meal.entries.count) items")
-                            .font(.strakkCaption)
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-
-                    Spacer()
-
-                    Text(String(format: "%.0f kcal", meal.totalCalories))
-                        .font(.strakkCaptionBold)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.name)
+                        .font(.strakkHeading3)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .lineLimit(1)
+                    Text("\(meal.entries.count) item\(meal.entries.count > 1 ? "s" : "")")
+                        .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextSecondary)
-                        .monospacedDigit()
-
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Color.strakkTextTertiary)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-            }
-            .buttonStyle(.plain)
 
-            // Expanded entries
-            if isExpanded {
-                VStack(spacing: 0) {
-                    Divider()
-                        .background(Color.strakkDivider)
-                        .padding(.horizontal, 14)
+                Spacer()
 
-                    ForEach(meal.entries) { entry in
-                        HStack(spacing: 8) {
-                            Spacer().frame(width: 44)
-                            sourceIcon(for: entry.source)
-                                .frame(width: 16)
-                            Text(entry.name ?? "Item")
-                                .font(.strakkBody)
-                                .foregroundStyle(Color.strakkTextPrimary)
-                                .lineLimit(1)
-                            if let qty = entry.quantity {
-                                Text(qty)
-                                    .font(.strakkCaption)
-                                    .foregroundStyle(Color.strakkTextTertiary)
-                            }
-                            Spacer()
-                            Text(String(format: "%.0f kcal", entry.calories))
-                                .font(.strakkCaption)
-                                .foregroundStyle(Color.strakkTextSecondary)
-                                .monospacedDigit()
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                    }
-                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.strakkTextTertiary)
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
         }
+        .buttonStyle(.plain)
         .background(Color.strakkSurface1)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .contextMenu {
-            Button {
-                // Rename: open MealDraft screen in processed mode
-            } label: {
-                Label("Renommer", systemImage: "pencil")
-            }
             Button(role: .destructive) {
                 viewModel.onEvent(TodayEventOnDeleteMeal(mealId: meal.id))
             } label: {
@@ -348,39 +365,40 @@ struct TodayView: View {
                 Label("Supprimer", systemImage: "trash")
             }
         }
-        .accessibilityLabel("\(meal.name), \(meal.entries.count) items, \(Int(meal.totalCalories)) kcal")
+        .accessibilityLabel("\(meal.name), \(meal.entries.count) items")
     }
 
     private func orphanEntryRow(entry: MealEntryData) -> some View {
-        HStack(spacing: 10) {
-            Text(timeLabel(from: entry.createdAt))
-                .font(.strakkCaptionBold)
-                .foregroundStyle(Color.strakkTextTertiary)
-                .frame(width: 44, alignment: .leading)
-
-            sourceIcon(for: entry.source)
-                .frame(width: 16)
-
-            Text(entry.name ?? "Item")
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextPrimary)
-                .lineLimit(1)
-
-            if let qty = entry.quantity {
-                Text(qty)
-                    .font(.strakkCaption)
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            selectedEntry = entry
+        } label: {
+            HStack(spacing: 10) {
+                Text(timeLabel(from: entry.createdAt))
+                    .font(.strakkCaptionBold)
                     .foregroundStyle(Color.strakkTextTertiary)
+                    .frame(width: 44, alignment: .leading)
+
+                sourceIcon(for: entry.source)
+                    .frame(width: 16)
+
+                Text(entry.name ?? "Item")
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .lineLimit(1)
+
+                if let qty = entry.quantity {
+                    Text(qty)
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
+
+                Spacer()
             }
-
-            Spacer()
-
-            Text(String(format: "%.0f kcal", entry.calories))
-                .font(.strakkCaptionBold)
-                .foregroundStyle(Color.strakkTextSecondary)
-                .monospacedDigit()
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .buttonStyle(.plain)
         .background(Color.strakkSurface1)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -390,7 +408,17 @@ struct TodayView: View {
                 Label("Supprimer", systemImage: "trash")
             }
         }
-        .accessibilityLabel("\(entry.name ?? "Item"), \(Int(entry.calories)) kcal")
+        .contextMenu {
+            Button { editingEntry = entry } label: {
+                Label("Modifier", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
+            } label: {
+                Label("Supprimer", systemImage: "trash")
+            }
+        }
+        .accessibilityLabel(entry.name ?? "Item")
     }
 
     // MARK: - Floating draft bar
@@ -407,9 +435,11 @@ struct TodayView: View {
                         .font(.strakkBodyBold)
                         .foregroundStyle(.white)
                         .lineLimit(1)
-                    Text(isEmpty ? "Aucun item · ajoute pour commencer" : draftSubtitle(draft: draft))
-                        .font(.strakkCaption)
-                        .foregroundStyle(.white.opacity(0.75))
+                    if !isEmpty {
+                        Text(draftSubtitle(draft: draft))
+                            .font(.strakkCaption)
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
                 }
             }
             .buttonStyle(.plain)
@@ -417,8 +447,7 @@ struct TodayView: View {
             Spacer()
 
             Button {
-                addPickerIsDraft = true
-                showAddPickerSheet = true
+                addPickerMode = .draft
             } label: {
                 Text("+ Ajouter")
                     .font(.strakkCaptionBold)
@@ -459,20 +488,52 @@ struct TodayView: View {
     // MARK: - Empty state
 
     private var emptyTimelineView: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "fork.knife")
-                .font(.system(size: 32))
-                .foregroundStyle(Color.strakkTextTertiary)
-            Text("Aucun item aujourd'hui")
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextSecondary)
-            Text("Utilisez les boutons ci-dessous pour commencer")
-                .font(.strakkCaption)
-                .foregroundStyle(Color.strakkTextTertiary)
-                .multilineTextAlignment(.center)
+        VStack(spacing: 20) {
+            // Hairline + centered icon
+            HStack(spacing: 14) {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.clear, Color.strakkDivider],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(height: 1)
+
+                ZStack {
+                    Circle()
+                        .fill(Color.strakkSurface2)
+                        .overlay(Circle().strokeBorder(Color.strakkDivider, lineWidth: 1))
+                        .frame(width: 64, height: 64)
+                    Image(systemName: "fork.knife")
+                        .font(.system(size: 26, weight: .medium))
+                        .foregroundStyle(Color.strakkTextSecondary)
+                }
+
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.strakkDivider, .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(height: 1)
+            }
+
+            VStack(spacing: 5) {
+                Text("Aucun item aujourd'hui")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                Text("Utilisez les boutons ci-dessous pour commencer")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
+        .padding(.vertical, 32)
     }
 
     // MARK: - Helpers
@@ -490,45 +551,12 @@ struct TodayView: View {
     }
 
     private func timeLabel(from isoString: String) -> String {
-        let formats = ["yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss"]
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "fr_FR")
-        for fmt in formats {
-            df.dateFormat = fmt
-            if let date = df.date(from: isoString) {
-                df.dateFormat = "HH:mm"
-                return df.string(from: date)
-            }
-        }
-        return ""
+        formatTimeLabel(from: isoString)
     }
 
     @ViewBuilder
     private func sourceIcon(for source: EntrySource) -> some View {
-        switch source {
-        case .photoai:
-            Image(systemName: "camera.fill")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .barcode:
-            Image(systemName: "barcode.viewfinder")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .manual:
-            Image(systemName: "pencil")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .textai:
-            Image(systemName: "text.quote")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.strakkTextTertiary)
-        case .search, .frequent:
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.strakkTextTertiary)
-        default:
-            EmptyView()
-        }
+        entrySourceIcon(for: source)
     }
 }
 

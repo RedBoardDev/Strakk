@@ -4,7 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.ClockProvider
 import com.strakk.shared.domain.common.DomainError
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.MealEntryInput
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
+import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
 import com.strakk.shared.domain.usecase.CommitMealDraftUseCase
 import com.strakk.shared.domain.usecase.CreateMealDraftUseCase
 import com.strakk.shared.domain.usecase.DiscardMealDraftUseCase
@@ -12,6 +14,7 @@ import com.strakk.shared.domain.usecase.ObserveActiveMealDraftUseCase
 import com.strakk.shared.domain.usecase.ProcessMealDraftUseCase
 import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RenameMealDraftUseCase
+import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -35,6 +38,8 @@ class MealDraftViewModel(
     private val discardDraft: DiscardMealDraftUseCase,
     private val processDraft: ProcessMealDraftUseCase,
     private val commitDraft: CommitMealDraftUseCase,
+    private val updateDraftItem: UpdateDraftItemUseCase,
+    private val buildMealEntry: BuildMealEntryUseCase,
     private val clock: ClockProvider,
 ) : MviViewModel<MealDraftUiState, MealDraftEvent, MealDraftEffect>(MealDraftUiState.Loading) {
 
@@ -63,6 +68,8 @@ class MealDraftViewModel(
         is MealDraftEvent.AddPendingText -> handleAddItem(
             DraftItem.PendingText(id = generateId(), description = event.description),
         )
+        is MealDraftEvent.AddManualItem -> handleAddKnownItem(event)
+        is MealDraftEvent.UpdateResolvedItem -> handleUpdateResolvedItem(event)
         MealDraftEvent.Discard -> handleDiscard()
         MealDraftEvent.Process -> handleProcess()
         MealDraftEvent.Commit -> handleCommit()
@@ -72,7 +79,9 @@ class MealDraftViewModel(
         viewModelScope.launch {
             val name = event.initialName ?: defaultDraftName()
             val date = event.date ?: clock.today().toString()
-            createDraft(name, date).onFailure { emitError(it) }
+            createDraft(name, date)
+                .onSuccess { emit(MealDraftEffect.Started) }
+                .onFailure { emitError(it) }
         }
     }
 
@@ -86,6 +95,49 @@ class MealDraftViewModel(
 
     private fun handleAddItem(item: DraftItem) {
         viewModelScope.launch { addItem(item).onFailure { emitError(it) } }
+    }
+
+    private fun handleAddKnownItem(event: MealDraftEvent.AddManualItem) {
+        val itemId = generateId()
+        val date = (uiState.value as? MealDraftUiState.Editing)?.draft?.date
+        handleAddItem(
+            DraftItem.Resolved(
+                id = itemId,
+                entry = buildMealEntry(
+                    MealEntryInput.Known(
+                        name = event.name,
+                        protein = event.protein,
+                        calories = event.calories,
+                        fat = event.fat,
+                        carbs = event.carbs,
+                        quantity = event.quantity,
+                        source = event.source,
+                        logDate = date,
+                    ),
+                    localId = itemId,
+                ),
+            ),
+        )
+    }
+
+    private fun handleUpdateResolvedItem(event: MealDraftEvent.UpdateResolvedItem) {
+        val state = uiState.value as? MealDraftUiState.Editing ?: return
+        viewModelScope.launch {
+            val entry = buildMealEntry(
+                MealEntryInput.Known(
+                    name = event.name,
+                    protein = event.protein,
+                    calories = event.calories,
+                    fat = event.fat,
+                    carbs = event.carbs,
+                    quantity = event.quantity,
+                    source = event.source,
+                    logDate = state.draft.date,
+                ),
+                localId = event.itemId,
+            ).copy(createdAt = event.createdAt)
+            updateDraftItem(event.itemId, entry).onFailure { emitError(it) }
+        }
     }
 
     private fun handleDiscard() {

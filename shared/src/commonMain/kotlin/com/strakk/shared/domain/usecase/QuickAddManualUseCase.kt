@@ -5,11 +5,8 @@ import com.strakk.shared.domain.common.runSuspendCatching
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.ManualEntryDraft
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.MealEntryInput
 import com.strakk.shared.domain.repository.NutritionRepository
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * Persists a user-filled manual entry as an orphan quick-add.
@@ -20,25 +17,22 @@ import kotlinx.datetime.toLocalDateTime
  */
 class QuickAddManualUseCase(
     private val nutritionRepository: NutritionRepository,
+    private val buildMealEntry: BuildMealEntryUseCase,
 ) {
     suspend operator fun invoke(draft: ManualEntryDraft): Result<MealEntry> =
         runSuspendCatching {
             validate(draft)
-            val today = todayIso()
-            val entry = MealEntry(
-                id = "",
-                logDate = today,
-                name = draft.name.trim(),
-                protein = draft.protein,
-                calories = draft.calories,
-                fat = draft.fat,
-                carbs = draft.carbs,
-                source = EntrySource.Manual,
-                createdAt = "",
-                mealId = null,
-                quantity = draft.quantity?.trim()?.ifBlank { null },
-                breakdown = null,
-                photoPath = null,
+            val entry = buildMealEntry(
+                MealEntryInput.Known(
+                    name = draft.name,
+                    protein = draft.protein,
+                    calories = draft.calories,
+                    fat = draft.fat,
+                    carbs = draft.carbs,
+                    quantity = draft.quantity,
+                    source = EntrySource.Manual,
+                    logDate = draft.logDate,
+                ),
             )
             nutritionRepository.addMeal(entry)
         }
@@ -67,10 +61,4 @@ class QuickAddManualUseCase(
             }
         }
     }
-
-    private fun todayIso(): String =
-        Clock.System.now()
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .date
-            .toString()
 }

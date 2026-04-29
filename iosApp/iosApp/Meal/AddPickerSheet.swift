@@ -15,16 +15,26 @@ struct AddPickerSheet: View {
     let isDraftMode: Bool
     let draftViewModel: MealDraftViewModelWrapper
     let onDismiss: () -> Void
+    let logDate: String?
 
+    @State private var quickAddViewModel: QuickAddViewModelWrapper
     @State private var showSearch = false
     @State private var showManual = false
     @State private var showText = false
     @State private var showPhoto = false
 
-    // Quick-add async processing state
-    @State private var isProcessing = false
-    @State private var processingTask: Task<Void, Never>? = nil
-    @State private var errorMessage: String?
+    init(
+        isDraftMode: Bool,
+        draftViewModel: MealDraftViewModelWrapper,
+        onDismiss: @escaping () -> Void,
+        logDate: String? = nil
+    ) {
+        self.isDraftMode = isDraftMode
+        self.draftViewModel = draftViewModel
+        self.onDismiss = onDismiss
+        self.logDate = logDate
+        self._quickAddViewModel = State(initialValue: QuickAddViewModelWrapper(logDate: logDate))
+    }
 
     private var title: String {
         isDraftMode ? "Ajouter au repas" : "Ajout rapide"
@@ -58,7 +68,7 @@ struct AddPickerSheet: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
 
-                    if isProcessing {
+                    if quickAddViewModel.isProcessing {
                         HStack(spacing: 10) {
                             ProgressView()
                                 .tint(Color.strakkPrimary)
@@ -81,20 +91,21 @@ struct AddPickerSheet: View {
                 }
             }
         }
-        .alert("Erreur", isPresented: Binding(
-            get: { errorMessage != nil },
-            set: { if !$0 { errorMessage = nil } }
-        )) {
-            Button("OK") { errorMessage = nil }
-        } message: {
-            Text(errorMessage ?? "")
-        }
+        .errorAlert(message: $quickAddViewModel.errorMessage)
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
+        .onChange(of: quickAddViewModel.didComplete) { _, didComplete in
+            if didComplete {
+                quickAddViewModel.consumeCompletion()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                onDismiss()
+            }
+        }
         .sheet(isPresented: $showSearch) {
             SearchFoodView(
                 draftViewModel: draftViewModel,
                 isDraftMode: isDraftMode,
+                logDate: logDate,
                 onDismiss: {
                     showSearch = false
                     onDismiss()
@@ -105,6 +116,7 @@ struct AddPickerSheet: View {
             ManualEntryView(
                 draftViewModel: draftViewModel,
                 isDraftMode: isDraftMode,
+                logDate: logDate,
                 onDismiss: {
                     showManual = false
                     onDismiss()
@@ -176,37 +188,10 @@ struct AddPickerSheet: View {
     // MARK: - Quick-add dispatchers
 
     private func quickAddFromPhoto(imageBase64: String, hint: String?) {
-        isProcessing = true
-        processingTask = Task { @MainActor in
-            do {
-                _ = try await KoinHelper().getQuickAddFromPhotoUseCase().invoke(
-                    imageBase64: imageBase64,
-                    hint: hint
-                )
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                isProcessing = false
-                onDismiss()
-            } catch {
-                isProcessing = false
-                errorMessage = error.localizedDescription
-            }
-        }
+        quickAddViewModel.addFromPhoto(imageBase64: imageBase64, hint: hint)
     }
 
     private func quickAddFromText(description: String) {
-        isProcessing = true
-        processingTask = Task { @MainActor in
-            do {
-                _ = try await KoinHelper().getQuickAddFromTextUseCase().invoke(
-                    description: description
-                )
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                isProcessing = false
-                onDismiss()
-            } catch {
-                isProcessing = false
-                errorMessage = error.localizedDescription
-            }
-        }
+        quickAddViewModel.addFromText(description: description)
     }
 }

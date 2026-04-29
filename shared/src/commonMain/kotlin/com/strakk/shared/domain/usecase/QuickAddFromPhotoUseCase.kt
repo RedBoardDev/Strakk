@@ -16,13 +16,13 @@ class QuickAddFromPhotoUseCase(
     private val mealRepository: MealRepository,
     private val nutritionRepository: NutritionRepository,
 ) {
-    suspend operator fun invoke(imageBase64: String, hint: String?): Result<MealEntry> =
+    suspend operator fun invoke(imageBase64: String, hint: String?, logDate: String? = null): Result<MealEntry> =
         runSuspendCatching {
-            val today = Clock.System.now()
+            val dateToUse = logDate ?: Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault())
                 .date
                 .toString()
-            val analyzed = mealRepository.analyzePhotoForQuickAdd(imageBase64, hint, today)
+            val analyzed = mealRepository.analyzePhotoForQuickAdd(imageBase64, hint, dateToUse)
             nutritionRepository.addMeal(analyzed)
         }
 }

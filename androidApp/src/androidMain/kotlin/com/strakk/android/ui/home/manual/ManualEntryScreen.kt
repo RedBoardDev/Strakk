@@ -132,7 +132,7 @@ private fun ManualEntryScreen(
                     .padding(horizontal = 20.dp, vertical = 12.dp),
             ) {
                 Button(
-                    onClick = { onEvent(ManualEntryEvent.Submit) },
+                    onClick = { onEvent(ManualEntryEvent.Submit()) },
                     enabled = uiState.isSubmittable && !uiState.isSubmitting,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(

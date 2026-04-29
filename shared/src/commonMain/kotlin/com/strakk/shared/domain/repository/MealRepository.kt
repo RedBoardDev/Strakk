@@ -69,6 +69,9 @@ interface MealRepository {
     /** Adds a single entry to an already-committed (Processed) meal. */
     suspend fun addEntryToMeal(mealId: String, entry: DraftItem.Resolved)
 
+    /** Updates the cached entry within a meal container without touching Supabase. */
+    fun updateEntryInCache(entry: MealEntry)
+
     /** Clears all in-memory caches. Should be called on sign-out. */
     fun clearCache()
 
