@@ -43,10 +43,12 @@ internal class ProfileRepositoryImpl(
     }
 
     private suspend fun ensureProfileFetched() {
-        val shouldFetch = fetchMutex.withLock {
-            if (profileFetched) false else { profileFetched = true; true }
+        fetchMutex.withLock {
+            if (!profileFetched) {
+                profileFetched = true
+                profileCache.value = getProfile()
+            }
         }
-        if (shouldFetch) { profileCache.value = getProfile() }
     }
 
     override suspend fun profileExists(): Boolean {
@@ -94,9 +96,6 @@ internal class ProfileRepositoryImpl(
             data.proteinGoal?.let { put("protein_goal", it) }
             data.calorieGoal?.let { put("calorie_goal", it) }
             data.waterGoal?.let { put("water_goal", it) }
-            data.reminderTrackingTime?.let { put("reminder_tracking_time", it) }
-            data.reminderCheckinDay?.let { put("reminder_checkin_day", it) }
-            data.reminderCheckinTime?.let { put("reminder_checkin_time", it) }
         }
 
         val dto = supabaseClient
@@ -115,9 +114,6 @@ internal class ProfileRepositoryImpl(
         proteinGoal: Int?,
         calorieGoal: Int?,
         waterGoal: Int?,
-        reminderTrackingTime: String?,
-        reminderCheckinDay: Int?,
-        reminderCheckinTime: String?,
     ): UserProfile {
         val userId = userIdProvider.currentOrThrow()
 
@@ -125,9 +121,6 @@ internal class ProfileRepositoryImpl(
             if (proteinGoal != null) put("protein_goal", proteinGoal) else put("protein_goal", JsonNull)
             if (calorieGoal != null) put("calorie_goal", calorieGoal) else put("calorie_goal", JsonNull)
             if (waterGoal != null) put("water_goal", waterGoal) else put("water_goal", JsonNull)
-            if (reminderTrackingTime != null) put("reminder_tracking_time", reminderTrackingTime) else put("reminder_tracking_time", JsonNull)
-            if (reminderCheckinDay != null) put("reminder_checkin_day", reminderCheckinDay) else put("reminder_checkin_day", JsonNull)
-            if (reminderCheckinTime != null) put("reminder_checkin_time", reminderCheckinTime) else put("reminder_checkin_time", JsonNull)
             put("updated_at", Clock.System.now().toString())
         }
 

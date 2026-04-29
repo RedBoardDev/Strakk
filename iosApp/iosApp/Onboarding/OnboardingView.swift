@@ -11,7 +11,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 // Step indicator
-                StepIndicatorView(currentStep: Int(viewModel.state.currentStep), totalSteps: 3)
+                StepIndicatorView(currentStep: Int(viewModel.state.currentStep), totalSteps: 2)
                     .padding(.top, 24)
                     .padding(.horizontal, 20)
 
@@ -32,23 +32,6 @@ struct OnboardingView: View {
                         WaterStepView(
                             waterGoal: viewModel.state.waterGoal,
                             onWaterChanged: { viewModel.onEvent(OnboardingEventOnWaterGoalChanged(value: $0)) }
-                        )
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        ))
-                    } else {
-                        RemindersStepView(
-                            trackingEnabled: viewModel.state.trackingReminderEnabled,
-                            trackingTime: viewModel.state.trackingReminderTime,
-                            checkinEnabled: viewModel.state.checkinReminderEnabled,
-                            checkinDay: Int(viewModel.state.checkinReminderDay),
-                            checkinTime: viewModel.state.checkinReminderTime,
-                            onTrackingToggled: { viewModel.onEvent(OnboardingEventOnTrackingReminderToggled(enabled: $0)) },
-                            onTrackingTimeChanged: { viewModel.onEvent(OnboardingEventOnTrackingReminderTimeChanged(time: $0)) },
-                            onCheckinToggled: { viewModel.onEvent(OnboardingEventOnCheckinReminderToggled(enabled: $0)) },
-                            onCheckinDayChanged: { viewModel.onEvent(OnboardingEventOnCheckinReminderDayChanged(day: Int32($0))) },
-                            onCheckinTimeChanged: { viewModel.onEvent(OnboardingEventOnCheckinReminderTimeChanged(time: $0)) }
                         )
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),

@@ -26,7 +26,7 @@ interface ProfileRepository {
      * Called after onboarding completes. The profile ID is set to `auth.uid()`
      * by the data layer implementation.
      *
-     * @param data Goals and reminder preferences collected during onboarding.
+     * @param data Goals collected during onboarding.
      * @return The created [UserProfile].
      * @throws Exception on network, database, or conflict errors.
      */
@@ -43,16 +43,12 @@ interface ProfileRepository {
     /**
      * Updates the current user's profile with the given values.
      *
-     * Null values are explicitly stored as NULL in the database (e.g. disabling
-     * a reminder or clearing a goal). Called from the Settings screen with
-     * per-field debounce.
+     * Null values are explicitly stored as NULL in the database (clearing a goal).
+     * Called from the Settings screen with per-field debounce.
      *
      * @param proteinGoal Daily protein goal in grams, or null to clear.
      * @param calorieGoal Daily calorie goal in kcal, or null to clear.
      * @param waterGoal Daily water goal in mL, or null to clear.
-     * @param reminderTrackingTime Daily tracking reminder in "HH:mm" format, or null to disable.
-     * @param reminderCheckinDay Weekly check-in day (0=Mon..6=Sun), or null to disable.
-     * @param reminderCheckinTime Weekly check-in time in "HH:mm" format, or null to disable.
      * @return The updated [UserProfile].
      * @throws Exception on network or database errors.
      */
@@ -60,9 +56,6 @@ interface ProfileRepository {
         proteinGoal: Int?,
         calorieGoal: Int?,
         waterGoal: Int?,
-        reminderTrackingTime: String?,
-        reminderCheckinDay: Int?,
-        reminderCheckinTime: String?,
     ): UserProfile
 
     /**

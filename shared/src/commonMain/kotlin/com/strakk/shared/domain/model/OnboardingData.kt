@@ -14,10 +14,4 @@ data class OnboardingData(
     val calorieGoal: Int?,
     /** Daily water goal in mL. */
     val waterGoal: Int?,
-    /** Daily tracking reminder time in "HH:mm" format. null = disabled. */
-    val reminderTrackingTime: String?,
-    /** Weekly check-in reminder day (0 = Monday, 6 = Sunday). null = disabled. */
-    val reminderCheckinDay: Int?,
-    /** Weekly check-in reminder time in "HH:mm" format. null = disabled. */
-    val reminderCheckinTime: String?,
 )

@@ -10,8 +10,8 @@ final class OnboardingViewModelWrapper {
     var errorMessage: String?
     var shouldNavigateToHome: Bool = false
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getOnboardingViewModel()
@@ -20,11 +20,6 @@ final class OnboardingViewModelWrapper {
             proteinGoal: "",
             calorieGoal: "",
             waterGoal: "",
-            trackingReminderEnabled: false,
-            trackingReminderTime: "17:00",
-            checkinReminderEnabled: false,
-            checkinReminderDay: 6,
-            checkinReminderTime: "10:00",
             isSaving: false
         )
 

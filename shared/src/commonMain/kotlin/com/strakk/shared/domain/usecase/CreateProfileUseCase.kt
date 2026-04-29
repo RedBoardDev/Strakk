@@ -9,8 +9,7 @@ import com.strakk.shared.domain.repository.ProfileRepository
 /**
  * Creates a new user profile with onboarding data.
  *
- * Called at the end of the onboarding flow to persist goals
- * and reminder preferences.
+ * Called at the end of the onboarding flow to persist goals.
  *
  * Returns [Result.success] with the created [UserProfile],
  * or [Result.failure] on network or database errors.

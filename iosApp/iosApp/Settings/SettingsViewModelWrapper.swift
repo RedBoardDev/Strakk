@@ -8,11 +8,6 @@ struct SettingsData: Equatable {
     let proteinGoal: String
     let calorieGoal: String
     let waterGoal: String
-    let trackingReminderEnabled: Bool
-    let trackingReminderTime: String
-    let checkinReminderEnabled: Bool
-    let checkinReminderDay: Int
-    let checkinReminderTime: String
     let hevyApiKey: String
 }
 
@@ -31,8 +26,8 @@ final class SettingsViewModelWrapper {
     var state: SettingsState = .loading
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getSettingsViewModel()
@@ -81,11 +76,6 @@ final class SettingsViewModelWrapper {
                 proteinGoal: ready.proteinGoal,
                 calorieGoal: ready.calorieGoal,
                 waterGoal: ready.waterGoal,
-                trackingReminderEnabled: ready.trackingReminderEnabled,
-                trackingReminderTime: ready.trackingReminderTime,
-                checkinReminderEnabled: ready.checkinReminderEnabled,
-                checkinReminderDay: Int(ready.checkinReminderDay),
-                checkinReminderTime: ready.checkinReminderTime,
                 hevyApiKey: ready.hevyApiKey
             ))
         }

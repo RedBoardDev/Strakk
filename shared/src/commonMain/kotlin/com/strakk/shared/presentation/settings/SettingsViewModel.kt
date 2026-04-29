@@ -13,16 +13,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 private const val DEBOUNCE_DELAY_MS = 500L
-private const val DEFAULT_TRACKING_REMINDER_TIME = "17:00"
-private const val DEFAULT_CHECKIN_REMINDER_TIME = "09:00"
-private const val DEFAULT_CHECKIN_REMINDER_DAY = 0
 
 /**
  * Manages the Settings screen.
  *
  * Loads the user profile and email on init. Each editable field change updates
  * state immediately and triggers a debounced auto-save via [UpdateProfileUseCase].
- * Toggle changes (reminders on/off) bypass the debounce and save immediately.
  */
 class SettingsViewModel(
     private val getCurrentUserEmail: GetCurrentUserEmailUseCase,
@@ -53,26 +49,6 @@ class SettingsViewModel(
                 updateReady { copy(waterGoal = event.value) }
                 scheduleSave()
             }
-            is SettingsEvent.OnTrackingReminderEnabledChanged -> {
-                updateReady { copy(trackingReminderEnabled = event.enabled) }
-                saveImmediately()
-            }
-            is SettingsEvent.OnTrackingReminderTimeChanged -> {
-                updateReady { copy(trackingReminderTime = event.time) }
-                scheduleSave()
-            }
-            is SettingsEvent.OnCheckinReminderEnabledChanged -> {
-                updateReady { copy(checkinReminderEnabled = event.enabled) }
-                saveImmediately()
-            }
-            is SettingsEvent.OnCheckinReminderDayChanged -> {
-                updateReady { copy(checkinReminderDay = event.day) }
-                saveImmediately()
-            }
-            is SettingsEvent.OnCheckinReminderTimeChanged -> {
-                updateReady { copy(checkinReminderTime = event.time) }
-                scheduleSave()
-            }
             is SettingsEvent.OnHevyApiKeyChanged -> {
                 updateReady { copy(hevyApiKey = event.value) }
                 scheduleHevyKeySave()
@@ -94,11 +70,6 @@ class SettingsViewModel(
                     proteinGoal = profile?.proteinGoal?.toString() ?: "",
                     calorieGoal = profile?.calorieGoal?.toString() ?: "",
                     waterGoal = profile?.waterGoal?.toString() ?: "",
-                    trackingReminderEnabled = profile?.reminderTrackingTime != null,
-                    trackingReminderTime = profile?.reminderTrackingTime ?: DEFAULT_TRACKING_REMINDER_TIME,
-                    checkinReminderEnabled = profile?.reminderCheckinDay != null,
-                    checkinReminderDay = profile?.reminderCheckinDay ?: DEFAULT_CHECKIN_REMINDER_DAY,
-                    checkinReminderTime = profile?.reminderCheckinTime ?: DEFAULT_CHECKIN_REMINDER_TIME,
                     hevyApiKey = profile?.hevyApiKey ?: "",
                 )
             }
@@ -117,11 +88,6 @@ class SettingsViewModel(
         }
     }
 
-    private fun saveImmediately() {
-        saveDebounceJob?.cancel()
-        saveDebounceJob = viewModelScope.launch { performSave() }
-    }
-
     private suspend fun performSave() {
         val state = uiState.value as? SettingsUiState.Ready ?: return
 
@@ -129,9 +95,6 @@ class SettingsViewModel(
             proteinGoal = state.proteinGoal.toIntOrNull(),
             calorieGoal = state.calorieGoal.toIntOrNull(),
             waterGoal = state.waterGoal.toIntOrNull(),
-            reminderTrackingTime = state.trackingReminderTime.takeIf { state.trackingReminderEnabled },
-            reminderCheckinDay = state.checkinReminderDay.takeIf { state.checkinReminderEnabled },
-            reminderCheckinTime = state.checkinReminderTime.takeIf { state.checkinReminderEnabled },
         ).onFailure { emitError(it) }
     }
 

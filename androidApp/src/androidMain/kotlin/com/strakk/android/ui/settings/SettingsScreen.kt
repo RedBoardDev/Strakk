@@ -1,6 +1,10 @@
 package com.strakk.android.ui.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,12 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -23,10 +36,19 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,8 +58,6 @@ import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.presentation.settings.SettingsEvent
 import com.strakk.shared.presentation.settings.SettingsUiState
-
-private val DAY_LABELS = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 @Composable
 fun SettingsScreen(
@@ -100,22 +120,6 @@ private fun ReadyView(
             onProteinChanged = { onEvent(SettingsEvent.OnProteinGoalChanged(it)) },
             onCalorieChanged = { onEvent(SettingsEvent.OnCalorieGoalChanged(it)) },
             onWaterChanged = { onEvent(SettingsEvent.OnWaterGoalChanged(it)) },
-        )
-
-        TrackingReminderSection(
-            enabled = state.trackingReminderEnabled,
-            time = state.trackingReminderTime,
-            onEnabledChanged = { onEvent(SettingsEvent.OnTrackingReminderEnabledChanged(it)) },
-            onTimeChanged = { onEvent(SettingsEvent.OnTrackingReminderTimeChanged(it)) },
-        )
-
-        CheckinReminderSection(
-            enabled = state.checkinReminderEnabled,
-            day = state.checkinReminderDay,
-            time = state.checkinReminderTime,
-            onEnabledChanged = { onEvent(SettingsEvent.OnCheckinReminderEnabledChanged(it)) },
-            onDayChanged = { onEvent(SettingsEvent.OnCheckinReminderDayChanged(it)) },
-            onTimeChanged = { onEvent(SettingsEvent.OnCheckinReminderTimeChanged(it)) },
         )
 
         Button(
@@ -201,111 +205,6 @@ private fun GoalField(
 }
 
 @Composable
-private fun TrackingReminderSection(
-    enabled: Boolean,
-    time: String,
-    onEnabledChanged: (Boolean) -> Unit,
-    onTimeChanged: (String) -> Unit,
-) {
-    SectionCard(title = "DAILY TRACKING REMINDER") {
-        ToggleRow(
-            label = "Remind me to log",
-            enabled = enabled,
-            onEnabledChanged = onEnabledChanged,
-        )
-        if (enabled) {
-            OutlinedTextField(
-                value = time,
-                onValueChange = onTimeChanged,
-                label = { Text("Time (HH:mm)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
-}
-
-@Composable
-private fun CheckinReminderSection(
-    enabled: Boolean,
-    day: Int,
-    time: String,
-    onEnabledChanged: (Boolean) -> Unit,
-    onDayChanged: (Int) -> Unit,
-    onTimeChanged: (String) -> Unit,
-) {
-    SectionCard(title = "WEEKLY CHECK-IN REMINDER") {
-        ToggleRow(
-            label = "Remind me for check-in",
-            enabled = enabled,
-            onEnabledChanged = onEnabledChanged,
-        )
-        if (enabled) {
-            DayPicker(selected = day, onSelected = onDayChanged)
-            OutlinedTextField(
-                value = time,
-                onValueChange = onTimeChanged,
-                label = { Text("Time (HH:mm)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
-}
-
-@Composable
-private fun DayPicker(selected: Int, onSelected: (Int) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        DAY_LABELS.forEachIndexed { index, label ->
-            val isSelected = index == selected
-            Button(
-                onClick = { onSelected(index) },
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        LocalStrakkColors.current.surface2
-                    },
-                    contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                ),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                modifier = Modifier.height(40.dp),
-            ) {
-                Text(label, style = MaterialTheme.typography.labelMedium)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ToggleRow(
-    label: String,
-    enabled: Boolean,
-    onEnabledChanged: (Boolean) -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Switch(checked = enabled, onCheckedChange = onEnabledChanged)
-    }
-}
-
-@Composable
 private fun SectionCard(
     title: String,
     content: @Composable () -> Unit,
@@ -333,15 +232,10 @@ private fun SettingsScreenPreview() {
     StrakkTheme {
         SettingsScreen(
             state = SettingsUiState.Ready(
-                email = "thomas@strakk.app",
+                email = "preview@strakk.app",
                 proteinGoal = "150",
                 calorieGoal = "2400",
                 waterGoal = "2500",
-                trackingReminderEnabled = true,
-                trackingReminderTime = "17:00",
-                checkinReminderEnabled = true,
-                checkinReminderDay = 6,
-                checkinReminderTime = "10:00",
                 hevyApiKey = "",
             ),
             snackbar = SnackbarHostState(),

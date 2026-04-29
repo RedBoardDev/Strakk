@@ -34,7 +34,7 @@ import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.presentation.onboarding.OnboardingEvent
 import com.strakk.shared.presentation.onboarding.OnboardingUiState
 
-private const val TOTAL_STEPS = 3
+private const val TOTAL_STEPS = 2
 
 @Composable
 fun OnboardingScreen(
@@ -81,18 +81,6 @@ fun OnboardingScreen(
                     1 -> WaterStepContent(
                         waterGoal = uiState.waterGoal,
                         onWaterGoalChanged = { onEvent(OnboardingEvent.OnWaterGoalChanged(it)) },
-                    )
-                    2 -> RemindersStepContent(
-                        trackingReminderEnabled = uiState.trackingReminderEnabled,
-                        trackingReminderTime = uiState.trackingReminderTime,
-                        checkinReminderEnabled = uiState.checkinReminderEnabled,
-                        checkinReminderDay = uiState.checkinReminderDay,
-                        checkinReminderTime = uiState.checkinReminderTime,
-                        onTrackingReminderToggled = { onEvent(OnboardingEvent.OnTrackingReminderToggled(it)) },
-                        onTrackingReminderTimeChanged = { onEvent(OnboardingEvent.OnTrackingReminderTimeChanged(it)) },
-                        onCheckinReminderToggled = { onEvent(OnboardingEvent.OnCheckinReminderToggled(it)) },
-                        onCheckinReminderDayChanged = { onEvent(OnboardingEvent.OnCheckinReminderDayChanged(it)) },
-                        onCheckinReminderTimeChanged = { onEvent(OnboardingEvent.OnCheckinReminderTimeChanged(it)) },
                     )
                     else -> Unit
                 }
@@ -169,17 +157,6 @@ private fun OnboardingScreenStep0Preview() {
     StrakkTheme {
         OnboardingScreen(
             uiState = OnboardingUiState(currentStep = 0),
-            onEvent = {},
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF151720)
-@Composable
-private fun OnboardingScreenStep2Preview() {
-    StrakkTheme {
-        OnboardingScreen(
-            uiState = OnboardingUiState(currentStep = 2),
             onEvent = {},
         )
     }

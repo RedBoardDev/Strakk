@@ -7,11 +7,10 @@ import com.strakk.shared.presentation.common.MviViewModel
 import kotlinx.coroutines.launch
 
 /**
- * Manages the 3-step onboarding flow (Goals Setup).
+ * Manages the 2-step onboarding flow (Goals Setup).
  *
  * Step 0: Protein + Calories goals.
  * Step 1: Water goal.
- * Step 2: Reminder preferences.
  *
  * On the last step's "Continue", builds [OnboardingData] from the form state,
  * calls [CreateProfileUseCase], and emits [OnboardingEffect.NavigateToHome] on success.
@@ -28,16 +27,6 @@ class OnboardingViewModel(
                 setState { copy(calorieGoal = event.value) }
             is OnboardingEvent.OnWaterGoalChanged ->
                 setState { copy(waterGoal = event.value) }
-            is OnboardingEvent.OnTrackingReminderToggled ->
-                setState { copy(trackingReminderEnabled = event.enabled) }
-            is OnboardingEvent.OnTrackingReminderTimeChanged ->
-                setState { copy(trackingReminderTime = event.time) }
-            is OnboardingEvent.OnCheckinReminderToggled ->
-                setState { copy(checkinReminderEnabled = event.enabled) }
-            is OnboardingEvent.OnCheckinReminderDayChanged ->
-                setState { copy(checkinReminderDay = event.day) }
-            is OnboardingEvent.OnCheckinReminderTimeChanged ->
-                setState { copy(checkinReminderTime = event.time) }
             is OnboardingEvent.OnContinue -> handleContinue()
             is OnboardingEvent.OnBack -> handleBack()
         }
@@ -75,8 +64,5 @@ class OnboardingViewModel(
         proteinGoal = proteinGoal.toIntOrNull(),
         calorieGoal = calorieGoal.toIntOrNull(),
         waterGoal = waterGoal.toIntOrNull(),
-        reminderTrackingTime = trackingReminderTime.takeIf { trackingReminderEnabled },
-        reminderCheckinDay = checkinReminderDay.takeIf { checkinReminderEnabled },
-        reminderCheckinTime = checkinReminderTime.takeIf { checkinReminderEnabled },
     )
 }

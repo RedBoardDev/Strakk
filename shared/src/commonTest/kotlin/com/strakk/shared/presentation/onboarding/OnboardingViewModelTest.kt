@@ -79,20 +79,6 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun onContinueStep1AdvancesToStep2() = runTest {
-        val viewModel = createViewModel()
-        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1
-
-        viewModel.uiState.test {
-            skipItems(1)
-            viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 2
-            val state = awaitItem()
-            assertEquals(2, state.currentStep)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun onBackStep1ReturnsToStep0() = runTest {
         val viewModel = createViewModel()
         viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1
@@ -111,9 +97,8 @@ class OnboardingViewModelTest {
         val viewModel = createViewModel()
         viewModel.onEvent(OnboardingEvent.OnProteinGoalChanged("150"))
         viewModel.onEvent(OnboardingEvent.OnCalorieGoalChanged("2000"))
-        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1
+        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1 (last step)
         viewModel.onEvent(OnboardingEvent.OnWaterGoalChanged("2500"))
-        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 2
 
         viewModel.effects.test {
             viewModel.onEvent(OnboardingEvent.OnContinue) // submit
@@ -134,8 +119,7 @@ class OnboardingViewModelTest {
     fun createProfileFailureEmitsShowError() = runTest {
         profileRepository.shouldThrow = RuntimeException("Server error")
         val viewModel = createViewModel()
-        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1
-        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 2
+        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1 (last step)
 
         viewModel.effects.test {
             viewModel.onEvent(OnboardingEvent.OnContinue) // submit
@@ -151,8 +135,7 @@ class OnboardingViewModelTest {
     fun createProfileFailureResetsSaving() = runTest {
         profileRepository.shouldThrow = RuntimeException("error")
         val viewModel = createViewModel()
-        viewModel.onEvent(OnboardingEvent.OnContinue)
-        viewModel.onEvent(OnboardingEvent.OnContinue)
+        viewModel.onEvent(OnboardingEvent.OnContinue) // -> step 1 (last step)
         viewModel.onEvent(OnboardingEvent.OnContinue) // submit
 
         assertFalse(viewModel.uiState.value.isSaving)

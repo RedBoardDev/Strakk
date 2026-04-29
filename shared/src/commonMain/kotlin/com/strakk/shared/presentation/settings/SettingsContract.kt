@@ -9,9 +9,6 @@ package com.strakk.shared.presentation.settings
  *
  * Goal fields are [String] (not [Int]?) to support direct two-way binding
  * with text fields — an empty string means "no goal set".
- *
- * Reminder toggles are separate booleans so the UI can show/hide the
- * time/day pickers independently of their stored values.
  */
 sealed interface SettingsUiState {
     /** Initial loading while profile is fetched. */
@@ -24,22 +21,12 @@ sealed interface SettingsUiState {
      * @param proteinGoal Daily protein goal as editable text (empty = no goal).
      * @param calorieGoal Daily calorie goal as editable text (empty = no goal).
      * @param waterGoal Daily water goal as editable text (empty = no goal).
-     * @param trackingReminderEnabled Whether the daily tracking reminder is active.
-     * @param trackingReminderTime Time for the tracking reminder in "HH:mm" format.
-     * @param checkinReminderEnabled Whether the weekly check-in reminder is active.
-     * @param checkinReminderDay Day for the check-in reminder (0=Mon..6=Sun).
-     * @param checkinReminderTime Time for the check-in reminder in "HH:mm" format.
      */
     data class Ready(
         val email: String?,
         val proteinGoal: String,
         val calorieGoal: String,
         val waterGoal: String,
-        val trackingReminderEnabled: Boolean,
-        val trackingReminderTime: String,
-        val checkinReminderEnabled: Boolean,
-        val checkinReminderDay: Int,
-        val checkinReminderTime: String,
         /** Hevy API key as editable text (empty = not configured). */
         val hevyApiKey: String,
     ) : SettingsUiState
@@ -59,21 +46,6 @@ sealed interface SettingsEvent {
 
     /** User edits the daily water goal text field. */
     data class OnWaterGoalChanged(val value: String) : SettingsEvent
-
-    /** User toggles the daily tracking reminder on/off. */
-    data class OnTrackingReminderEnabledChanged(val enabled: Boolean) : SettingsEvent
-
-    /** User picks a new time for the daily tracking reminder. */
-    data class OnTrackingReminderTimeChanged(val time: String) : SettingsEvent
-
-    /** User toggles the weekly check-in reminder on/off. */
-    data class OnCheckinReminderEnabledChanged(val enabled: Boolean) : SettingsEvent
-
-    /** User picks a new day for the weekly check-in reminder. */
-    data class OnCheckinReminderDayChanged(val day: Int) : SettingsEvent
-
-    /** User picks a new time for the weekly check-in reminder. */
-    data class OnCheckinReminderTimeChanged(val time: String) : SettingsEvent
 
     /** User edits the Hevy API key field. */
     data class OnHevyApiKeyChanged(val value: String) : SettingsEvent
