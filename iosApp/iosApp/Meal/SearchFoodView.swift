@@ -4,11 +4,26 @@ import shared
 struct SearchFoodView: View {
     let draftViewModel: MealDraftViewModelWrapper
     let isDraftMode: Bool
+    let logDate: String?
     let onDismiss: () -> Void
 
     @State private var searchViewModel = SearchFoodViewModelWrapper()
+    @State private var quickAddViewModel: QuickAddViewModelWrapper
+
+    init(
+        draftViewModel: MealDraftViewModelWrapper,
+        isDraftMode: Bool,
+        logDate: String? = nil,
+        onDismiss: @escaping () -> Void
+    ) {
+        self.draftViewModel = draftViewModel
+        self.isDraftMode = isDraftMode
+        self.logDate = logDate
+        self.onDismiss = onDismiss
+        self._quickAddViewModel = State(initialValue: QuickAddViewModelWrapper(logDate: logDate))
+    }
     @State private var query: String = ""
-    @State private var selectedItemId: String?      // userItem normalizedName
+    @State private var selectedItemId: String?
     @State private var selectedCatalogId: Int64?
     @State private var portionGrams: Double = 100
 
@@ -33,6 +48,13 @@ struct SearchFoodView: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .errorAlert(message: $quickAddViewModel.errorMessage)
+        .onChange(of: quickAddViewModel.didComplete) { _, didComplete in
+            if didComplete {
+                quickAddViewModel.consumeCompletion()
+                onDismiss()
+            }
+        }
     }
 
     // MARK: - Content
@@ -77,7 +99,10 @@ struct SearchFoodView: View {
                     if results.userItems.isEmpty {
                         emptyFrequentsView
                     } else {
-                        sectionHeader("FRÉQUENTS")
+                        SectionHeader(title: "FRÉQUENTS")
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            .padding(.bottom, 4)
                         ForEach(results.userItems) { item in
                             frequentRow(item: item)
                         }
@@ -88,13 +113,19 @@ struct SearchFoodView: View {
                         noResultsView(query: query)
                     } else {
                         if !results.userItems.isEmpty {
-                            sectionHeader("MES ITEMS")
+                            SectionHeader(title: "MES ITEMS")
+                                .padding(.horizontal, 20)
+                                .padding(.top, 16)
+                                .padding(.bottom, 4)
                             ForEach(results.userItems) { item in
                                 frequentRow(item: item)
                             }
                         }
                         if !results.catalogItems.isEmpty {
-                            sectionHeader("CATALOGUE")
+                            SectionHeader(title: "CATALOGUE")
+                                .padding(.horizontal, 20)
+                                .padding(.top, 16)
+                                .padding(.bottom, 4)
                             ForEach(results.catalogItems) { item in
                                 catalogRow(item: item)
                             }
@@ -166,11 +197,27 @@ struct SearchFoodView: View {
                     caloriesPer100: item.calories,
                     fatPer100: item.fat,
                     carbsPer100: item.carbs,
-                    onAdd: {
-                        searchViewModel.onEvent(
-                            SearchFoodEventSelectUserItem(normalizedName: item.normalizedName)
-                        )
-                        onDismiss()
+                    onAdd: { protein, calories, fat, carbs, grams in
+                        let qty = String(format: "%.0fg", grams)
+                        if isDraftMode {
+                            draftViewModel.onEvent(MealDraftEventAddManualItem(
+                                name: item.name ?? item.normalizedName,
+                                protein: protein,
+                                calories: calories,
+                                fat: asKotlinDouble(fat),
+                                carbs: asKotlinDouble(carbs),
+                                quantity: qty,
+                                source: EntrySource.search
+                            ))
+                            onDismiss()
+                        } else {
+                            quickAddSearchItem(
+                                name: item.name ?? item.normalizedName,
+                                protein: protein, calories: calories,
+                                fat: fat, carbs: carbs, quantity: qty,
+                                source: EntrySource.frequent
+                            )
+                        }
                     }
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -185,21 +232,40 @@ struct SearchFoodView: View {
     private func catalogRow(item: FoodCatalogItemData) -> some View {
         let isSelected = selectedCatalogId == item.id
         return VStack(spacing: 0) {
-            HStack(spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "book.closed")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.strakkTextTertiary)
                     .frame(width: 18)
+                    .padding(.top, 2)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.name)
-                        .font(.strakkBody)
-                        .foregroundStyle(Color.strakkTextPrimary)
-                    Text(String(format: "%.0f kcal/100g", item.calories))
-                        .font(.strakkCaption)
-                        .foregroundStyle(Color.strakkTextSecondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .top, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.strakkBody)
+                                .foregroundStyle(Color.strakkTextPrimary)
+                                .lineLimit(2)
+                            if let brand = item.brand, !brand.isEmpty {
+                                Text(brand)
+                                    .font(.strakkCaption)
+                                    .foregroundStyle(Color.strakkTextSecondary)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                        if let grade = item.nutriscore?.first {
+                            NutriscoreBadgeView(grade: grade)
+                        }
+                    }
+                    macroLine(item: item)
+                    HStack(spacing: 4) {
+                        Image(systemName: "scalemass")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("valeurs pour 100 g")
+                            .font(.strakkCaption)
+                    }
+                    .foregroundStyle(Color.strakkTextTertiary)
                 }
-                Spacer()
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -224,9 +290,27 @@ struct SearchFoodView: View {
                     caloriesPer100: item.calories,
                     fatPer100: item.fat,
                     carbsPer100: item.carbs,
-                    onAdd: {
-                        searchViewModel.onEvent(SearchFoodEventSelectCatalogItem(id: item.id))
-                        onDismiss()
+                    onAdd: { protein, calories, fat, carbs, grams in
+                        let qty = String(format: "%.0fg", grams)
+                        if isDraftMode {
+                            draftViewModel.onEvent(MealDraftEventAddManualItem(
+                                name: item.name,
+                                protein: protein,
+                                calories: calories,
+                                fat: asKotlinDouble(fat),
+                                carbs: asKotlinDouble(carbs),
+                                quantity: qty,
+                                source: EntrySource.search
+                            ))
+                            onDismiss()
+                        } else {
+                            quickAddSearchItem(
+                                name: item.name,
+                                protein: protein, calories: calories,
+                                fat: fat, carbs: carbs, quantity: qty,
+                                source: EntrySource.search
+                            )
+                        }
                     }
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -244,7 +328,7 @@ struct SearchFoodView: View {
         caloriesPer100: Double,
         fatPer100: Double?,
         carbsPer100: Double?,
-        onAdd: @escaping () -> Void
+        onAdd: @escaping (_ protein: Double, _ calories: Double, _ fat: Double?, _ carbs: Double?, _ grams: Double) -> Void
     ) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
@@ -281,16 +365,31 @@ struct SearchFoodView: View {
             Spacer()
 
             Button {
-                onAdd()
+                let p = portionGrams
+                onAdd(
+                    proteinPer100 * p / 100,
+                    caloriesPer100 * p / 100,
+                    fatPer100.map { $0 * p / 100 },
+                    carbsPer100.map { $0 * p / 100 },
+                    p
+                )
             } label: {
-                Text("Ajouter")
-                    .font(.strakkCaptionBold)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color.strakkPrimary)
-                    .clipShape(Capsule())
+                HStack(spacing: 6) {
+                    if quickAddViewModel.isProcessing {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.7)
+                    }
+                    Text(quickAddViewModel.isProcessing ? "Ajout..." : "Ajouter")
+                        .font(.strakkCaptionBold)
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(quickAddViewModel.isProcessing ? Color.strakkSurface2 : Color.strakkPrimary)
+                .clipShape(Capsule())
             }
+            .disabled(quickAddViewModel.isProcessing)
             .accessibilityLabel("Ajouter \(name)")
         }
         .padding(.horizontal, 20)
@@ -298,16 +397,26 @@ struct SearchFoodView: View {
         .background(Color.strakkSurface1)
     }
 
-    // MARK: - Section header
+    // MARK: - Quick-add (non-draft mode)
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.strakkOverline)
-            .foregroundStyle(Color.strakkTextTertiary)
-            .kerning(1.0)
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 4)
+    private func quickAddSearchItem(
+        name: String,
+        protein: Double,
+        calories: Double,
+        fat: Double?,
+        carbs: Double?,
+        quantity: String,
+        source: EntrySource
+    ) {
+        quickAddViewModel.addKnown(
+            name: name,
+            protein: protein,
+            calories: calories,
+            fat: fat,
+            carbs: carbs,
+            quantity: quantity,
+            source: source
+        )
     }
 
     // MARK: - Empty states
@@ -346,5 +455,56 @@ struct SearchFoodView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 48)
+    }
+}
+
+private extension SearchFoodView {
+    /// Dense macro line: kcal · prot · lip · gluc, each in its semantic colour.
+    /// Mirrors the palette used in EntryDetailSheet / MealDraftView so the same
+    /// number stays the same colour everywhere in the app.
+    func macroLine(item: FoodCatalogItemData) -> some View {
+        HStack(spacing: 6) {
+            Text(String(format: "%.0f kcal", item.calories))
+                .foregroundStyle(Color.strakkCalories)
+            Text("·").foregroundStyle(Color.strakkTextTertiary)
+            Text(String(format: "%.0f g prot", item.protein))
+                .foregroundStyle(Color.strakkProtein)
+            if let fat = item.fat {
+                Text("·").foregroundStyle(Color.strakkTextTertiary)
+                Text(String(format: "%.0f g lip", fat))
+                    .foregroundStyle(Color.strakkAccentYellow)
+            }
+            if let carbs = item.carbs {
+                Text("·").foregroundStyle(Color.strakkTextTertiary)
+                Text(String(format: "%.0f g gluc", carbs))
+                    .foregroundStyle(Color.strakkAccentIndigo)
+            }
+        }
+        .font(.strakkCaption)
+        .monospacedDigit()
+        .lineLimit(1)
+        .minimumScaleFactor(0.85)
+    }
+}
+
+private struct NutriscoreBadgeView: View {
+    let grade: Character
+
+    var body: some View {
+        let color: Color = {
+            switch String(grade).lowercased() {
+            case "a": return Color(red: 0.12, green: 0.56, blue: 0.24)
+            case "b": return Color(red: 0.52, green: 0.73, blue: 0.18)
+            case "c": return Color(red: 0.95, green: 0.76, blue: 0.20)
+            case "d": return Color(red: 0.90, green: 0.49, blue: 0.13)
+            case "e": return Color(red: 0.75, green: 0.22, blue: 0.17)
+            default:  return Color.strakkTextTertiary
+            }
+        }()
+        return Text(String(grade).uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 22, height: 22)
+            .background(color, in: RoundedRectangle(cornerRadius: 6))
     }
 }

@@ -18,11 +18,14 @@ struct FrequentItemData: Identifiable, Equatable {
 struct FoodCatalogItemData: Identifiable, Equatable {
     let id: Int64
     let name: String
+    let brand: String?
     let protein: Double
     let calories: Double
     let fat: Double?
     let carbs: Double?
     let defaultPortionGrams: Double
+    let servingLabel: String?
+    let nutriscore: String?
 }
 
 struct SearchResultsData: Equatable {
@@ -44,11 +47,10 @@ final class SearchFoodViewModelWrapper {
     private let sharedVm: SearchFoodViewModel
 
     var state: SearchFoodState = .loading
-    var selectedItem: (name: String, sourceId: String)?
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getSearchFoodViewModel()
@@ -81,9 +83,7 @@ final class SearchFoodViewModelWrapper {
     // MARK: - Private
 
     private func handleEffect(_ effect: SearchFoodEffect) {
-        if let selected = effect as? SearchFoodEffectItemSelected {
-            selectedItem = (name: selected.name, sourceId: selected.sourceId)
-        } else if let showError = effect as? SearchFoodEffectShowError {
+        if let showError = effect as? SearchFoodEffectShowError {
             errorMessage = showError.message
         }
     }
@@ -95,7 +95,7 @@ final class SearchFoodViewModelWrapper {
             return .loading
         } else if let ready = kmpState as? SearchFoodUiStateReady {
             let results = SearchResultsData(
-                userItems: ready.results.userItems.compactMap { $0 as? FrequentItem }.map { item in
+                userItems: ready.results.userItems.map { item in
                     FrequentItemData(
                         normalizedName: item.normalizedName,
                         name: item.name,
@@ -107,15 +107,18 @@ final class SearchFoodViewModelWrapper {
                         occurrences: Int(item.occurrences)
                     )
                 },
-                catalogItems: ready.results.catalogItems.compactMap { $0 as? FoodCatalogItem }.map { item in
+                catalogItems: ready.results.catalogItems.map { item in
                     FoodCatalogItemData(
                         id: item.id,
                         name: item.name,
+                        brand: item.brand,
                         protein: item.protein,
                         calories: item.calories,
                         fat: item.fat?.doubleValue,
                         carbs: item.carbs?.doubleValue,
-                        defaultPortionGrams: item.defaultPortionGrams
+                        defaultPortionGrams: item.defaultPortionGrams,
+                        servingLabel: item.servingLabel,
+                        nutriscore: item.nutriscore
                     )
                 }
             )
