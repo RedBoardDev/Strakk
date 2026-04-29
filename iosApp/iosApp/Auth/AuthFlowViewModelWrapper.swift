@@ -24,8 +24,8 @@ final class AuthFlowViewModelWrapper {
     var state: AuthFlowState = .welcome
     var errorMessage: String?
 
-    nonisolated(unsafe) private var stateTask: Task<Void, Never>?
-    nonisolated(unsafe) private var effectTask: Task<Void, Never>?
+    @ObservationIgnored private var stateTask: Task<Void, Never>?
+    @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getAuthFlowViewModel()

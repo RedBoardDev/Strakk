@@ -15,7 +15,7 @@ final class RootViewModelWrapper {
 
     var state: RootState = .loading
 
-    nonisolated(unsafe) private var observationTask: Task<Void, Never>?
+    @ObservationIgnored private var observationTask: Task<Void, Never>?
 
     init() {
         self.sharedVm = KoinHelper().getRootViewModel()
