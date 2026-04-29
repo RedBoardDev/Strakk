@@ -25,8 +25,8 @@ import io.ktor.client.plugins.HttpTimeout
  */
 internal object SupabaseProvider {
 
-    private const val REQUEST_TIMEOUT_MS = 60_000L  // 60s total per request
-    private const val SOCKET_TIMEOUT_MS = 60_000L   // 60s per socket read/write
+    private const val REQUEST_TIMEOUT_MS = 180_000L  // 3 min — parse-workout-pdf calls Claude on multi-page PDFs
+    private const val SOCKET_TIMEOUT_MS = 180_000L   // 3 min per socket read/write
 
     @OptIn(SupabaseInternal::class)
     fun createClient(): SupabaseClient = createSupabaseClient(
