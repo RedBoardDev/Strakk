@@ -27,6 +27,7 @@ export interface ClaudeRequest {
   maxTokens?: number;
   temperature?: number;
   system?: string;
+  model?: string;
 }
 
 /**
@@ -39,7 +40,7 @@ export async function callClaude(req: ClaudeRequest): Promise<string> {
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
   const body = {
-    model: CLAUDE_MODEL,
+    model: req.model ?? CLAUDE_MODEL,
     max_tokens: req.maxTokens ?? 8192,
     temperature: req.temperature ?? 0.1,
     ...(req.system ? { system: req.system } : {}),
