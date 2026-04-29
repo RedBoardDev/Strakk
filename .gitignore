@@ -9,6 +9,11 @@ gradle/wrapper/gradle-wrapper.jar
 *.apk
 *.aab
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+
 # iOS
 
 # Local agent/tooling state
