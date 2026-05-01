@@ -14,9 +14,8 @@ function json(body: unknown, status: number): Response {
  * Lists all file paths under a given Storage prefix and deletes them in batch.
  * Errors are logged but never thrown — user deletion must proceed regardless.
  */
-// deno-lint-ignore no-explicit-any
 async function purgeStoragePrefix(
-  adminClient: any,
+  adminClient: ReturnType<typeof createClient>,
   bucket: string,
   prefix: string,
 ): Promise<void> {
@@ -81,9 +80,11 @@ Deno.serve(async (req: Request) => {
 
   try {
     // 6a. Purge meal photos — log errors, continue on failure
+    // @ts-expect-error supabase-js generic variance mismatch
     await purgeStoragePrefix(adminClient, "meal-photos", userId);
 
     // 6b. Purge check-in photos — log errors, continue on failure
+    // @ts-expect-error supabase-js generic variance mismatch
     await purgeStoragePrefix(adminClient, "checkin-photos", userId);
 
     // 6c. Delete the auth user — cascades to profiles (which triggers
