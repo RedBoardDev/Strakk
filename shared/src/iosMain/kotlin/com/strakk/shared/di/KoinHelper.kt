@@ -1,7 +1,7 @@
 package com.strakk.shared.di
 
-import com.strakk.shared.presentation.auth.AuthFlowViewModel
 import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
+import com.strakk.shared.presentation.auth.LoginViewModel
 import com.strakk.shared.presentation.checkin.CheckInDetailViewModel
 import com.strakk.shared.presentation.checkin.CheckInListViewModel
 import com.strakk.shared.presentation.checkin.CheckInStatsViewModel
@@ -14,33 +14,23 @@ import com.strakk.shared.presentation.meal.ManualEntryViewModel
 import com.strakk.shared.presentation.meal.MealDraftViewModel
 import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
-import com.strakk.shared.presentation.onboarding.OnboardingViewModel
+import com.strakk.shared.presentation.onboarding.OnboardingFlowViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
 import com.strakk.shared.presentation.today.TodayViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
 
-/**
- * Starts Koin with the shared module. Must be called once from iOS app startup
- * (see `iOSApp.swift`) before any ViewModel is obtained.
- */
 fun initKoin() {
     startKoin {
         modules(sharedModule)
     }
 }
 
-/**
- * Bridge used by SwiftUI wrappers to obtain KMP ViewModels.
- *
- * Method names are chosen over `inline fun <reified T>` because Swift interop
- * doesn't see reified generics.
- */
 class KoinHelper : KoinComponent {
     fun getRootViewModel(): RootViewModel = get()
-    fun getAuthFlowViewModel(): AuthFlowViewModel = get()
-    fun getOnboardingViewModel(): OnboardingViewModel = get()
+    fun getLoginViewModel(): LoginViewModel = get()
+    fun getOnboardingFlowViewModel(): OnboardingFlowViewModel = get()
     fun getTodayViewModel(): TodayViewModel = get()
     fun getCalendarViewModel(): CalendarViewModel = get()
     fun getSettingsViewModel(): SettingsViewModel = get()

@@ -1,186 +1,138 @@
 import SwiftUI
 
-// MARK: - ProgressSection — Hero protéines + ledger horizontal
+// MARK: - ProgressSection — 2×2 macro grid
 //
-// Card unique surface-1 :
-//   - Gauche : ring protéines 96pt avec valeur centrale
-//   - Séparateur vertical 1pt
-//   - Droite : ledger 3 lignes (Calories / Glucides / Lipides) avec icône-case
-//
-// Aucun fond teinté primaire — l'accent vient du ring et du label.
+// Four macro cards arranged in a LazyVGrid, each showing:
+//   icon-case + label
+//   consumed / goal value
+//   progress bar (only when a goal is available)
 
 struct ProgressSection: View {
     let summary: DailySummaryData
 
-    private var proteinProgress: Double {
-        guard let goal = summary.proteinGoal, goal > 0 else { return 0 }
-        return min(summary.totalProtein / Double(goal), 2.0)
-    }
-
-    private var isProteinReached: Bool { proteinProgress >= 1.0 }
-
-    private var ringColor: Color {
-        isProteinReached ? Color.strakkSuccess : Color.strakkPrimary
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header label "PROTEIN" + optional check
-            HStack {
-                Text("PROTEIN")
-                    .font(.strakkOverline)
-                    .foregroundStyle(Color.strakkPrimary)
-
-                if isProteinReached {
-                    Spacer()
-                    Text("✓ Goal reached")
-                        .font(.strakkCaptionBold)
-                        .foregroundStyle(Color.strakkSuccess)
-                }
-            }
-
-            HStack(alignment: .center, spacing: 20) {
-                // Ring protéines (gauche)
-                ProteinRing(
-                    progress: min(proteinProgress, 1.0),
-                    totalProtein: summary.totalProtein,
-                    proteinGoal: summary.proteinGoal,
-                    ringColor: ringColor
-                )
-
-                // Séparateur vertical
-                Rectangle()
-                    .fill(Color.strakkDivider)
-                    .frame(width: 1)
-                    .frame(maxHeight: .infinity)
-
-                // Ledger 3 macros (droite)
-                VStack(spacing: 0) {
-                    LedgerRow(
-                        icon: "flame.fill",
-                        iconTint: Color.strakkPrimary,
-                        label: "CALORIES",
-                        value: "\(Int(summary.totalCalories))",
-                        suffix: summary.calorieGoal.map { "/ \($0) kcal" } ?? "kcal"
-                    )
-                    Divider()
-                        .overlay(Color.strakkDivider)
-                        .padding(.vertical, 10)
-                    LedgerRow(
-                        icon: "leaf.fill",
-                        iconTint: Color.strakkWater,
-                        label: "CARBS",
-                        value: "\(Int(summary.totalCarbs))",
-                        suffix: "g"
-                    )
-                    Divider()
-                        .overlay(Color.strakkDivider)
-                        .padding(.vertical, 10)
-                    LedgerRow(
-                        icon: "drop.fill",
-                        iconTint: Color.strakkWarning,
-                        label: "FAT",
-                        value: "\(Int(summary.totalFat))",
-                        suffix: "g"
-                    )
-                }
-                .frame(maxWidth: .infinity)
-            }
+        LazyVGrid(
+            columns: [GridItem(.flexible()), GridItem(.flexible())],
+            spacing: StrakkSpacing.sm
+        ) {
+            MacroCard(
+                icon: "dumbbell.fill",
+                label: "Protéines",
+                consumed: summary.totalProtein,
+                goal: summary.proteinGoal,
+                unit: "g",
+                color: .strakkPrimary
+            )
+            MacroCard(
+                icon: "flame.fill",
+                label: "Calories",
+                consumed: summary.totalCalories,
+                goal: summary.calorieGoal,
+                unit: "kcal",
+                color: .strakkCalories
+            )
+            MacroCard(
+                icon: "drop.fill",
+                label: "Lipides",
+                consumed: summary.totalFat,
+                goal: nil,
+                unit: "g",
+                color: .strakkAccentYellow
+            )
+            MacroCard(
+                icon: "leaf.fill",
+                label: "Glucides",
+                consumed: summary.totalCarbs,
+                goal: nil,
+                unit: "g",
+                color: .strakkAccentIndigo
+            )
         }
-        .padding(16)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilitySummary)
     }
 
     private var accessibilitySummary: String {
         var parts: [String] = []
-        parts.append("Protein: \(Int(summary.totalProtein)) g")
-        if let goal = summary.proteinGoal { parts.append("of \(goal) g") }
-        parts.append("Calories: \(Int(summary.totalCalories)) kcal")
-        parts.append("Carbs: \(Int(summary.totalCarbs)) g")
-        parts.append("Fat: \(Int(summary.totalFat)) g")
+        parts.append("Protéines : \(Int(summary.totalProtein)) g")
+        if let goal = summary.proteinGoal { parts.append("sur \(goal) g") }
+        parts.append("Calories : \(Int(summary.totalCalories)) kcal")
+        if let goal = summary.calorieGoal { parts.append("sur \(goal) kcal") }
+        parts.append("Lipides : \(Int(summary.totalFat)) g")
+        parts.append("Glucides : \(Int(summary.totalCarbs)) g")
         return parts.joined(separator: ". ")
     }
 }
 
-// MARK: - ProteinRing
+// MARK: - MacroCard
 
-private struct ProteinRing: View {
-    let progress: Double
-    let totalProtein: Double
-    let proteinGoal: Int?
-    let ringColor: Color
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.strakkSurface3, lineWidth: 6)
-                .frame(width: 96, height: 96)
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(
-                    ringColor,
-                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                )
-                .frame(width: 96, height: 96)
-                .rotationEffect(.degrees(-90))
-                .animation(.easeOut(duration: 0.4), value: progress)
-
-            VStack(spacing: 0) {
-                Text("\(Int(totalProtein))")
-                    .font(.system(size: 28, weight: .bold))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Text(proteinGoal.map { "/ \($0) g" } ?? "g")
-                    .font(.strakkCaption)
-                    .foregroundStyle(Color.strakkTextTertiary)
-            }
-        }
-    }
-}
-
-// MARK: - LedgerRow (icon-case + label + value)
-
-private struct LedgerRow: View {
+private struct MacroCard: View {
     let icon: String
-    let iconTint: Color
     let label: String
-    let value: String
-    let suffix: String
+    let consumed: Double
+    let goal: Int?
+    let unit: String
+    let color: Color
+
+    private var progress: Double {
+        guard let goal, goal > 0 else { return 0 }
+        return min(consumed / Double(goal), 1.0)
+    }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            // Icon case
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.strakkSurface3)
-                    .frame(width: 32, height: 32)
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(iconTint)
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            // Icon + label row
+            HStack(spacing: 8) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(color.opacity(0.12))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(color)
+                }
+                Text(label)
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextSecondary)
+                    .lineLimit(1)
             }
 
-            Text(label)
-                .font(.strakkOverline)
-                .foregroundStyle(Color.strakkTextSecondary)
-
-            Spacer()
-
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value)
-                    .font(.strakkHeading3)
-                    .fontWeight(.semibold)
+            // Value line
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
+                Text("\(Int(consumed))")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextPrimary)
                     .monospacedDigit()
                     .contentTransition(.numericText())
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Text(suffix)
-                    .font(.strakkCaption)
-                    .foregroundStyle(Color.strakkTextTertiary)
+
+                if let goal {
+                    Text("/ \(goal)\(unit)")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                } else {
+                    Text(unit)
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
             }
+
+            // Progress bar — always shown for uniform card height; fills to 0 when no goal
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.strakkSurface2)
+                        .frame(height: 4)
+                    Capsule()
+                        .fill(color)
+                        .frame(width: progress * geo.size.width, height: 4)
+                        .animation(.easeOut(duration: 0.4), value: progress)
+                }
+            }
+            .frame(height: 4)
         }
+        .padding(StrakkSpacing.md)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
     }
 }
 

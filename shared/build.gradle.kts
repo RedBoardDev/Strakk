@@ -49,9 +49,11 @@ val localProps = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 
+val env = (project.findProperty("env") ?: "prod").toString()
+
 val generateSupabaseConfig by tasks.registering(GenerateSupabaseConfigTask::class) {
-    url.set(localProps.getProperty("supabase.url", ""))
-    key.set(localProps.getProperty("supabase.key", ""))
+    url.set(localProps.getProperty("supabase.$env.url", localProps.getProperty("supabase.url", "")))
+    key.set(localProps.getProperty("supabase.$env.key", localProps.getProperty("supabase.key", "")))
     outputDir.set(layout.buildDirectory.dir("generated/supabaseConfig"))
 }
 
@@ -82,7 +84,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)

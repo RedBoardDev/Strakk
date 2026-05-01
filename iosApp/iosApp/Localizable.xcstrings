@@ -1,1854 +1,3128 @@
 {
   "sourceLanguage" : "en",
-  "version" : "1.0",
   "strings" : {
-    "Back" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Retour" }
-        }
-      }
-    },
-    "Cancel" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Annuler" }
-        }
-      }
-    },
-    "Add" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter" }
-        }
-      }
-    },
-    "Delete" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Supprimer" }
-        }
-      }
-    },
-    "Edit" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Modifier" }
-        }
-      }
-    },
-    "Save" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Enregistrer" }
-        }
-      }
-    },
-    "OK" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "OK" }
-        }
-      }
-    },
-    "Error" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Erreur" }
-        }
-      }
-    },
-    "Close" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Fermer" }
-        }
-      }
-    },
-    "Retry" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Réessayer" }
-        }
-      }
-    },
-    "Next" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Suivant" }
-        }
-      }
-    },
-    "Done" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Terminé" }
-        }
-      }
-    },
-    "Rename" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Renommer" }
-        }
-      }
-    },
-    "Coming soon" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bientôt disponible" }
-        }
-      }
-    },
-    "Today" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aujourd'hui" }
-        }
-      }
-    },
-    "Calendar" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Calendrier" }
-        }
-      }
-    },
-    "Check-ins" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bilans" }
-        }
-      }
-    },
-    "Settings" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Réglages" }
-        }
-      }
-    },
-    "Get started" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Commencer" }
-        }
-      }
-    },
-    "Continue" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Continuer" }
-        }
-      }
-    },
-    "Continue to next step" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Passer à l'étape suivante" }
-        }
-      }
-    },
-    "Go back to previous step" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Revenir à l'étape précédente" }
-        }
-      }
-    },
-    "Set your daily goals" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Définissez vos objectifs quotidiens" }
-        }
-      }
-    },
-    "How much protein and calories do you aim for?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Combien de protéines et calories visez-vous ?" }
-        }
-      }
-    },
-    "Set your daily water intake goal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Définissez votre objectif d'eau quotidien" }
-        }
-      }
-    },
-    "Stay hydrated" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Restez hydraté" }
-        }
-      }
-    },
-    "Track your fitness journey" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Suivez votre parcours fitness" }
-        }
-      }
-    },
-    "Start tracking your fitness journey" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Commencez à suivre votre parcours fitness" }
-        }
-      }
-    },
-    "Continue with email" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Continuer avec un email" }
-        }
-      }
-    },
-    "Sign in" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Se connecter" }
-        }
-      }
-    },
-    "Sign In" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Se connecter" }
-        }
-      }
-    },
-    "Sign Up" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "S'inscrire" }
-        }
-      }
-    },
-    "Create account" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Créer un compte" }
-        }
-      }
-    },
-    "Don't have an account? " : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Pas encore de compte ? " }
-        }
-      }
-    },
-    "Already have an account? " : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Déjà un compte ? " }
-        }
-      }
-    },
-    "Email address" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Adresse email" }
-        }
-      }
-    },
-    "Password" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mot de passe" }
-        }
-      }
-    },
-    "Create an account" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Créer un compte" }
-        }
-      }
-    },
-    "Meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Repas" }
-        }
-      }
-    },
-    "Quick" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Rapide" }
-        }
-      }
-    },
-    "New meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Nouveau repas" }
-        }
-      }
-    },
-    "Quick add" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajout rapide" }
-        }
-      }
-    },
-    "STATS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "STATS" }
-        }
-      }
-    },
-    "WATER" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "EAU" }
-        }
-      }
-    },
-    "TIMELINE" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "TIMELINE" }
-        }
-      }
-    },
-    "No items today" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucun item aujourd'hui" }
-        }
-      }
-    },
-    "Use the buttons below to get started" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Utilisez les boutons ci-dessous pour commencer" }
-        }
-      }
-    },
-    "Export Hevy" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Export Hevy" }
-        }
-      }
-    },
-    "PROTEIN" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "PROTÉINES" }
-        }
-      }
-    },
-    "CALORIES" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "CALORIES" }
-        }
-      }
-    },
-    "FAT" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "LIPIDES" }
-        }
-      }
-    },
-    "CARBS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "GLUCIDES" }
-        }
-      }
-    },
-    "Goal reached" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Objectif atteint" }
-        }
-      }
-    },
-    "Custom amount" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Quantité personnalisée" }
-        }
-      }
-    },
-    "Remove" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Retirer" }
-        }
-      }
-    },
-    "Point the camera at a barcode" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Pointez la caméra sur un code-barres" }
-        }
-      }
-    },
-    "Enter manually" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Saisir manuellement" }
-        }
-      }
-    },
-    "Scanner unavailable" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Scanner non disponible" }
-        }
-      }
-    },
-    "The barcode scanner is not available on this device." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Le scanner de code-barres n'est pas disponible sur cet appareil." }
-        }
-      }
-    },
-    "Add to meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter au repas" }
-        }
-      }
-    },
-    "Search" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Rechercher" }
-        }
-      }
-    },
-    "Manual" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Manuel" }
-        }
-      }
-    },
-    "Free text" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Texte libre" }
-        }
-      }
-    },
-    "Photo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Photo" }
-        }
-      }
-    },
-    "Analyzing…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyse en cours…" }
-        }
-      }
-    },
-    "Delete meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Supprimer le repas" }
-        }
-      }
-    },
-    "Protein" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Protéines" }
-        }
-      }
-    },
-    "Calories" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Calories" }
-        }
-      }
-    },
-    "Fat" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Lipides" }
-        }
-      }
-    },
-    "Carbs" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Glucides" }
-        }
-      }
-    },
-    "Quantity" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Quantité" }
-        }
-      }
-    },
-    "ITEMS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "ITEMS" }
-        }
-      }
-    },
-    "Name *" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Nom *" }
-        }
-      }
+    " · " : {
+
     },
-    "Protein (g) *" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Protéines (g) *" }
-        }
-      }
-    },
-    "Calories *" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Calories *" }
-        }
-      }
-    },
-    "Fat (g)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Lipides (g)" }
-        }
-      }
-    },
-    "Carbs (g)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Glucides (g)" }
-        }
-      }
-    },
-    "e.g. Grilled chicken" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "ex : Poulet grillé" }
-        }
-      }
-    },
-    "e.g. 150g, 1 bowl" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "ex : 150g, 1 bol" }
-        }
-      }
-    },
-    "Add food item" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter l'aliment" }
-        }
-      }
-    },
-    "Manual entry" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajout manuel" }
-        }
-      }
-    },
-    "Edit entry" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Modifier l'entrée" }
-        }
-      }
-    },
-    "Search for a food" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Rechercher un aliment" }
-        }
-      }
-    },
-    "Apple, chicken..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Pomme, poulet..." }
-        }
-      }
-    },
-    "FREQUENT" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "FRÉQUENTS" }
-        }
-      }
+    "—" : {
+
     },
-    "MY ITEMS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "MES ITEMS" }
-        }
-      }
+    "·" : {
+
     },
-    "CATALOG" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "CATALOGUE" }
-        }
-      }
+    "*" : {
+
     },
-    "No recent foods" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucun aliment récent" }
-        }
-      }
+    "/ %@" : {
+
     },
-    "Add one to build your history." : {
+    "/ %@%@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajoutez-en un pour alimenter votre historique." }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "/ %1$@%2$@"
+          }
         }
       }
     },
-    "No results for" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucun résultat pour" }
-        }
-      }
+    "%@" : {
+
     },
-    "values per 100 g" : {
+    "%@ / %@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "valeurs pour 100 g" }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
         }
       }
     },
-    "Adding..." : {
+    "%@ %@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajout..." }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
         }
       }
     },
-    "Describe what you ate" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Décrivez ce que vous avez mangé" }
-        }
-      }
+    "%@ cm" : {
+
     },
-    "E.g. 200g grilled chicken, basmati rice..." : {
+    "%@ day%@ selected" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ex : 200g poulet grillé, riz basmati..." }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ day%2$@ selected"
+          }
         }
       }
     },
-    "Maximum 300 characters" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Maximum 300 caractères" }
-        }
-      }
+    "%@ en attente" : {
+
     },
-    "Minimum 3 characters" : {
+    "%@ from catalog · %@ via AI" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Minimum 3 caractères" }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ from catalog · %2$@ via AI"
+          }
         }
       }
     },
-    "Add text entry" : {
+    "%@ item%@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter un texte" }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ item%2$@"
+          }
         }
       }
     },
-    "Add text to meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter le texte au repas" }
-        }
-      }
+    "%@ items detected. Edit if needed before confirming." : {
+
     },
-    "Cancel meal" : {
+    "%@ jour%@ couverts" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Annuler le repas" }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ jour%2$@ couverts"
+          }
         }
       }
     },
-    "Rename meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Renommer le repas" }
-        }
-      }
+    "%@ kg" : {
+
     },
-    "Meal name" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Nom du repas" }
-        }
-      }
+    "%@ mL" : {
+
     },
-    "1 to 60 characters" : {
+    "%@/%@ photos" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "1 à 60 caractères" }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@ photos"
+          }
         }
       }
     },
-    "Your current meal will be deleted." : {
+    "%@/%@ semaines" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Votre repas en cours sera supprimé." }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@ semaines"
+          }
         }
       }
     },
-    "Analyze meal?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyser le repas ?" }
-        }
-      }
+    "%@/150" : {
+
     },
-    "Start analysis" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Lancer l'analyse" }
-        }
-      }
+    "%@/300" : {
+
     },
-    "Pending items will be analyzed by AI. This takes a few seconds." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Des items en attente seront analysés par IA. L'opération prend quelques secondes." }
-        }
-      }
+    "%@/1000" : {
+
     },
-    "MEAL TOTAL" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "TOTAL REPAS" }
-        }
-      }
+    "%@%%" : {
+
     },
-    "Pending analysis" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyse en attente" }
-        }
-      }
+    "• CIQUAL 2020 — ANSES" : {
+
     },
-    "Pending text" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Texte en attente" }
-        }
-      }
+    "• Open Food Facts (ODbL)" : {
+
     },
-    "Your meal is empty" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ton repas est vide" }
-        }
-      }
+    "↑ +%@" : {
+
     },
-    "Add a manual item, a CIQUAL search, a barcode, a photo or text." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajoute un aliment manuel, une recherche CIQUAL, un barcode, une photo ou un texte." }
-        }
-      }
+    "↓ %@" : {
+
     },
     "+ Add" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "+ Ajouter" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Ajouter"
+          }
         }
       }
     },
-    "Finish meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Terminer le repas" }
-        }
-      }
-    },
-    "No meal in progress" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucun repas en cours" }
-        }
-      }
-    },
-    "Create a meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Créer un repas" }
-        }
-      }
-    },
-    "Analyzing your meal..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyse de votre repas..." }
-        }
-      }
-    },
-    "Compose your meal, adjust portions, then analyze if needed." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Compose ton repas, ajuste les portions, puis lance l'analyse si besoin." }
-        }
-      }
-    },
-    "Meal in progress" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Repas en cours" }
-        }
-      }
-    },
-    "Analyze" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyser" }
-        }
-      }
-    },
-    "Confirm meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Valider le repas" }
-        }
-      }
-    },
-    "Analyzed meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Repas analysé" }
-        }
-      }
-    },
-    "items detected. Edit if needed before confirming." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "items détectés. Modifiez si nécessaire avant de valider." }
-        }
-      }
-    },
-    "Describe your meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Décrire le repas" }
-        }
-      }
-    },
-    "E.g. 200g grilled chicken, basmati rice, olive oil" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ex: 200g poulet grillé, riz basmati, huile d'olive" }
-        }
-      }
-    },
-    "Analyze described meal" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyser le repas décrit" }
-        }
-      }
-    },
-    "Camera" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Appareil photo" }
-        }
-      }
-    },
-    "Select a photo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sélectionnez une photo" }
-        }
-      }
-    },
-    "Hint (optional)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Indice (optionnel)" }
-        }
-      }
-    },
-    "AI not working? No problem." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "L'IA ne fonctionne pas ? Pas de souci." }
-        }
-      }
-    },
-    "Skip & add manually" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Passer et ajouter manuellement" }
-        }
-      }
-    },
-    "Export to Hevy" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Exporter vers Hevy" }
-        }
-      }
-    },
-    "Select a PDF to get started" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sélectionnez un PDF pour commencer" }
-        }
-      }
-    },
-    "Analyzing workout program..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Analyse du programme..." }
-        }
-      }
-    },
-    "Select a session to export" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sélectionnez une séance à exporter" }
-        }
-      }
-    },
-    "exercises" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "exercices" }
-        }
-      }
-    },
-    "Export session %@" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Exporter la séance %@" }
-        }
-      }
-    },
-    "Exporting to Hevy..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Export vers Hevy..." }
-        }
-      }
-    },
-    "Routine Created!" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Routine créée !" }
-        }
-      }
-    },
-    "matched" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "trouvés" }
-        }
-      }
-    },
-    "created" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "créés" }
-        }
-      }
-    },
-    "Export Another" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Exporter une autre séance" }
-        }
-      }
-    },
-    "Export another workout program" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Exporter un autre programme" }
-        }
-      }
-    },
-    "Done, close export" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Terminé, fermer l'export" }
-        }
-      }
-    },
-    "Hevy API Key Required" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Clé API Hevy requise" }
-        }
-      }
-    },
-    "Go to Settings" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aller dans Réglages" }
-        }
-      }
-    },
-    "Add your Hevy API key in Settings to export workouts." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajoutez votre clé API Hevy dans les réglages pour exporter vos séances." }
-        }
-      }
-    },
-    "ACCOUNT" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "COMPTE" }
-        }
-      }
-    },
-    "DAILY GOALS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "OBJECTIFS QUOTIDIENS" }
-        }
-      }
-    },
-    "Sign out" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Se déconnecter" }
-        }
-      }
-    },
-    "Are you sure you want to sign out?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Voulez-vous vraiment vous déconnecter ?" }
-        }
-      }
-    },
-    "HEVY INTEGRATION" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "INTÉGRATION HEVY" }
-        }
-      }
-    },
-    "API Key" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Clé API" }
-        }
-      }
-    },
-    "Paste Hevy API key" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Coller la clé API Hevy" }
-        }
-      }
-    },
-    "Email" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Email" }
-        }
-      }
-    },
-    "Previous month" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mois précédent" }
-        }
-      }
-    },
-    "Next month" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mois suivant" }
-        }
-      }
-    },
-    "NUTRITION" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "NUTRITION" }
-        }
-      }
-    },
-    "MEALS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "REPAS" }
-        }
-      }
-    },
-    "Add for this day" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter pour ce jour" }
-        }
-      }
-    },
-    "New check-in" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Nouveau bilan" }
-        }
-      }
-    },
-    "QUICK STATS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "STATS RAPIDES" }
-        }
-      }
-    },
-    "Weight" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Poids" }
-        }
-      }
-    },
-    "Avg. arms" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bras moy." }
-        }
-      }
-    },
-    "Waist" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Taille" }
-        }
-      }
-    },
-    "View detailed stats" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Voir les stats détaillées" }
-        }
-      }
-    },
-    "RECENT CHECK-INS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "BILANS RÉCENTS" }
-        }
-      }
-    },
-    "No check-ins yet" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Pas encore de bilan" }
-        }
-      }
-    },
-    "Start tracking your progress by creating your first weekly check-in." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Commencez à suivre votre progression en créant votre premier bilan hebdomadaire." }
-        }
-      }
-    },
-    "Create my first check-in" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Créer mon premier bilan" }
-        }
-      }
-    },
-    "PHOTOS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "PHOTOS" }
-        }
-      }
-    },
-    "No photos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucune photo" }
-        }
-      }
-    },
-    "MEASUREMENTS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "MESURES" }
-        }
-      }
-    },
-    "FEELINGS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "RESSENTIS" }
-        }
-      }
-    },
-    "No feelings recorded" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucun ressenti renseigné" }
-        }
-      }
-    },
-    "Positive feelings" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sensations positives" }
-        }
-      }
-    },
-    "Negative feelings" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sensations négatives" }
-        }
-      }
-    },
-    "MENTAL FEELING" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "RESSENTI MENTAL" }
-        }
-      }
-    },
-    "PHYSICAL FEELING" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "RESSENTI PHYSIQUE" }
-        }
-      }
-    },
-    "AI Summary" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Résumé IA" }
-        }
-      }
-    },
-    "Share check-in" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Partager le bilan" }
-        }
-      }
-    },
-    "Delete this check-in?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Supprimer ce bilan ?" }
-        }
-      }
-    },
-    "This action cannot be undone." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Cette action est irréversible." }
-        }
-      }
-    },
-    "Check-in options" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Options du bilan" }
-        }
-      }
-    },
-    "PER DAY" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "PAR JOUR" }
-        }
-      }
-    },
-    "Saving..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Enregistrement..." }
-        }
-      }
-    },
-    "WEEK" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "SEMAINE" }
-        }
-      }
-    },
-    "COVERED DAYS" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "JOURS COUVERTS" }
-        }
-      }
-    },
-    "day(s) selected" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "jour(s) sélectionné(s)" }
-        }
-      }
-    },
-    "A check-in already exists for this week." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Un bilan existe déjà pour cette semaine." }
-        }
-      }
-    },
-    "WEIGHT" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "POIDS" }
-        }
-      }
-    },
-    "UPPER BODY" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "HAUT DU CORPS" }
-        }
-      }
-    },
-    "LOWER BODY" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "BAS DU CORPS" }
-        }
-      }
-    },
-    "Weight (kg)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Poids (kg)" }
-        }
-      }
-    },
-    "Shoulders (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Épaules (cm)" }
-        }
-      }
-    },
-    "Chest (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Poitrine (cm)" }
-        }
-      }
-    },
-    "Left arm (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bras gauche (cm)" }
-        }
-      }
-    },
-    "Right arm (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bras droit (cm)" }
-        }
-      }
-    },
-    "Waist (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Tour de taille (cm)" }
-        }
-      }
-    },
-    "Hips (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Hanches (cm)" }
-        }
-      }
-    },
-    "Left thigh (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Cuisse gauche (cm)" }
-        }
-      }
-    },
-    "Right thigh (cm)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Cuisse droite (cm)" }
-        }
-      }
-    },
-    "How are you feeling?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Comment tu te sens ?" }
-        }
-      }
-    },
-    "Pick the feelings that summarize your week, then describe your mental and physical state separately." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Choisis les sensations qui résument ta semaine, puis détaille séparément le mental et le physique." }
-        }
-      }
-    },
-    "E.g. motivation, stress, mood..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ex: motivation, stress, humeur..." }
-        }
-      }
-    },
-    "E.g. energy, sleep, digestion..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ex: énergie, sommeil, digestion..." }
-        }
-      }
-    },
-    "Add a photo" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ajouter une photo" }
-        }
-      }
-    },
-    "Choose a recent photo or take one now." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Choisis une photo récente ou prends-en une maintenant." }
-        }
-      }
-    },
-    "Gallery" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Galerie" }
-        }
-      }
-    },
-    "Delete this photo?" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Supprimer cette photo ?" }
-        }
-      }
-    },
-    "Photo. Long press to delete." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Photo. Appuyer longuement pour supprimer." }
-        }
-      }
-    },
-    "Take your photos in the same conditions for consistent tracking." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Prends tes photos dans les mêmes conditions pour un suivi cohérent." }
-        }
-      }
-    },
-    "Calculating..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Calcul en cours..." }
-        }
-      }
-    },
-    "No nutrition data for these days." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Aucune donnée nutritionnelle pour ces jours." }
-        }
-      }
-    },
-    "Daily avg." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Moy. journalière" }
-        }
-      }
-    },
-    "Water" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Eau" }
-        }
-      }
-    },
-    "SUMMARY" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "RÉCAP" }
-        }
-      }
-    },
-    "Photos" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Photos" }
-        }
-      }
-    },
-    "Mental" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mental" }
-        }
-      }
-    },
-    "Physical" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Physique" }
-        }
-      }
-    },
-    "Feelings" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ressentis" }
-        }
-      }
-    },
-    "GENERAL" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "GÉNÉRAL" }
-        }
-      }
+    "=" : {
+
     },
-    "Body measurements" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mesures corporelles" }
-        }
-      }
-    },
-    "Averages" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Moyennes" }
-        }
-      }
-    },
-    "Per day" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Par jour" }
-        }
-      }
-    },
-    "Generating..." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Génération..." }
-        }
-      }
-    },
-    "Generate PDF" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Générer le PDF" }
-        }
-      }
+    "0" : {
+
     },
-    "PDF content" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Contenu du PDF" }
-        }
-      }
-    },
-    "Trends" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Évolution" }
-        }
-      }
+    "0 / %@ ml" : {
+
     },
-    "Period" : {
+    "1 to 60 characters" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Période" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 à 60 caractères"
+          }
         }
       }
     },
     "4 wk" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "4 sem" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 sem"
+          }
         }
       }
     },
     "12 wk" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "12 sem" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 sem"
+          }
         }
       }
+    },
+    "A check-in already exists for this week." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un bilan existe déjà pour cette semaine."
+          }
+        }
+      }
+    },
+    "ACCOUNT" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COMPTE"
+          }
+        }
+      }
+    },
+    "Activité hors entraînement" : {
+
+    },
+    "Add" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter"
+          }
+        }
+      }
+    },
+    "Add a manual item, a CIQUAL search, a barcode, a photo or text." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute un aliment manuel, une recherche CIQUAL, un barcode, une photo ou un texte."
+          }
+        }
+      }
+    },
+    "Add a photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une photo"
+          }
+        }
+      }
+    },
+    "Add food item" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter l'aliment"
+          }
+        }
+      }
+    },
+    "Add for this day" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter pour ce jour"
+          }
+        }
+      }
+    },
+    "Add one to build your history." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez-en un pour alimenter votre historique."
+          }
+        }
+      }
+    },
+    "Add text entry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un texte"
+          }
+        }
+      }
+    },
+    "Add text to meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter le texte au repas"
+          }
+        }
+      }
+    },
+    "Add to meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter au repas"
+          }
+        }
+      }
+    },
+    "Add your Hevy API key in Settings to export workouts." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez votre clé API Hevy dans les réglages pour exporter vos séances."
+          }
+        }
+      }
+    },
+    "Adding..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajout..."
+          }
+        }
+      }
+    },
+    "AI not working? No problem." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'IA ne fonctionne pas ? Pas de souci."
+          }
+        }
+      }
+    },
+    "AI Summary" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé IA"
+          }
+        }
+      }
+    },
+    "Ajuste ou laisse l'IA calculer pour toi." : {
+
     },
     "All" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Tout" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout"
+          }
         }
       }
     },
-    "Display period" : {
+    "Already have an account? " : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Période d'affichage" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà un compte ? "
+          }
         }
       }
     },
-    "WAIST" : {
+    "Analyze" : {
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "TAILLE" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyser"
+          }
+        }
+      }
+    },
+    "Analyze described meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyser le repas décrit"
+          }
+        }
+      }
+    },
+    "Analyze meal?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyser le repas ?"
+          }
+        }
+      }
+    },
+    "Analyzed meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas analysé"
+          }
+        }
+      }
+    },
+    "Analyzing workout program..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse du programme..."
+          }
+        }
+      }
+    },
+    "Analyzing your meal..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse de votre repas..."
+          }
+        }
+      }
+    },
+    "Analyzing…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse en cours…"
+          }
+        }
+      }
+    },
+    "API Key" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé API"
+          }
+        }
+      }
+    },
+    "Apple, chicken..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomme, poulet..."
+          }
+        }
+      }
+    },
+    "Are you sure you want to sign out?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voulez-vous vraiment vous déconnecter ?"
+          }
         }
       }
     },
     "ARMS (AVG.)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "BRAS (MOY.)" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BRAS (MOY.)"
+          }
         }
       }
     },
-    "THIGHS (AVG.)" : {
+    "Aucun ressenti renseigné" : {
+
+    },
+    "Aucune donnée nutritionnelle" : {
+
+    },
+    "Averages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "CUISSES (MOY.)" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moyennes"
+          }
         }
       }
     },
-    "HIPS" : {
+    "Avg. arms" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "HANCHES" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bras moy."
+          }
         }
       }
     },
-    "CONSISTENCY" : {
+    "Back" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "RÉGULARITÉ" }
-        }
-      }
-    },
-    "weeks" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "semaines" }
-        }
-      }
-    },
-    "Not enough data to show trends." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Pas assez de données pour afficher les tendances." }
-        }
-      }
-    },
-    "Stable energy" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Énergie stable" }
-        }
-      }
-    },
-    "Good energy" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bonne énergie" }
-        }
-      }
-    },
-    "Motivated" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Motivation" }
-        }
-      }
-    },
-    "Disciplined" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Régularité" }
-        }
-      }
-    },
-    "Slept well" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bien dormi" }
-        }
-      }
-    },
-    "Good recovery" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bonne récup" }
-        }
-      }
-    },
-    "Strong training" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Séances solides" }
-        }
-      }
-    },
-    "Good mood" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bonne humeur" }
-        }
-      }
-    },
-    "Focused" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mental clair" }
-        }
-      }
-    },
-    "Light body" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Corps léger" }
-        }
-      }
-    },
-    "Good digestion" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Bonne digestion" }
-        }
-      }
-    },
-    "Low energy" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Peu d'énergie" }
-        }
-      }
-    },
-    "Tired" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Fatigue" }
-        }
-      }
-    },
-    "Slept poorly" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Mal dormi" }
-        }
-      }
-    },
-    "Stress" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Stress" }
-        }
-      }
-    },
-    "Low motivation" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Motivation basse" }
-        }
-      }
-    },
-    "Heavy body" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Corps lourd" }
-        }
-      }
-    },
-    "Sore" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Courbatures" }
-        }
-      }
-    },
-    "Joint discomfort" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Gêne articulaire" }
-        }
-      }
-    },
-    "Poor digestion" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Digestion difficile" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
         }
       }
     },
     "Bloating" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Ballonnements" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ballonnements"
+          }
+        }
+      }
+    },
+    "Body measurements" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesures corporelles"
+          }
+        }
+      }
+    },
+    "C'est parti" : {
+
+    },
+    "Cal." : {
+
+    },
+    "Calculating..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcul en cours..."
+          }
+        }
+      }
+    },
+    "Calendar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendrier"
+          }
+        }
+      }
+    },
+    "Calories" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories"
+          }
+        }
+      }
+    },
+    "CALORIES" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CALORIES"
+          }
+        }
+      }
+    },
+    "Calories *" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories *"
+          }
+        }
+      }
+    },
+    "Camera" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appareil photo"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Cancel meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le repas"
+          }
+        }
+      }
+    },
+    "Carbs" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucides"
+          }
+        }
+      }
+    },
+    "CARBS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GLUCIDES"
+          }
+        }
+      }
+    },
+    "Carbs (g)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucides (g)"
+          }
+        }
+      }
+    },
+    "CATALOG" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CATALOGUE"
+          }
+        }
+      }
+    },
+    "Check-in options" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Options du bilan"
+          }
+        }
+      }
+    },
+    "Check-ins" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilans"
+          }
+        }
+      }
+    },
+    "Chest (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poitrine (cm)"
+          }
+        }
+      }
+    },
+    "Choose a recent photo or take one now." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis une photo récente ou prends-en une maintenant."
+          }
+        }
+      }
+    },
+    "Close" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Coming soon" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bientôt disponible"
+          }
+        }
+      }
+    },
+    "Commence à tracker pour voir ta progression." : {
+
+    },
+    "Commencer à tracker" : {
+
+    },
+    "Compose your meal, adjust portions, then analyze if needed." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compose ton repas, ajuste les portions, puis lance l'analyse si besoin."
+          }
+        }
+      }
+    },
+    "Confirm meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider le repas"
+          }
+        }
+      }
+    },
+    "Connecte-toi pour accéder à ton espace." : {
+
+    },
+    "CONSISTENCY" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RÉGULARITÉ"
+          }
+        }
+      }
+    },
+    "Content de te revoir" : {
+
+    },
+    "Continue" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        }
+      }
+    },
+    "Continue to next step" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer à l'étape suivante"
+          }
+        }
+      }
+    },
+    "Continue with email" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer avec un email"
+          }
+        }
+      }
+    },
+    "Continuer" : {
+
+    },
+    "COVERED DAYS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JOURS COUVERTS"
+          }
+        }
+      }
+    },
+    "Create a meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un repas"
+          }
+        }
+      }
+    },
+    "Create account" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un compte"
+          }
+        }
+      }
+    },
+    "Create an account" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un compte"
+          }
+        }
+      }
+    },
+    "Create my first check-in" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer mon premier bilan"
+          }
+        }
+      }
+    },
+    "created" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "créés"
+          }
+        }
+      }
+    },
+    "Crée ton compte" : {
+
+    },
+    "Créer mon compte" : {
+
+    },
+    "Créer un compte" : {
+
+    },
+    "Custom amount" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quantité personnalisée"
+          }
+        }
+      }
+    },
+    "Daily avg." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moy. journalière"
+          }
+        }
+      }
+    },
+    "Daily avg. (%@ day%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Daily avg. (%1$@ day%2$@)"
+          }
+        }
+      }
+    },
+    "DAILY GOALS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OBJECTIFS QUOTIDIENS"
+          }
+        }
+      }
+    },
+    "DATA SOURCES" : {
+
+    },
+    "Date" : {
+
+    },
+    "Date de naissance" : {
+
+    },
+    "day(s) selected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jour(s) sélectionné(s)"
+          }
+        }
+      }
+    },
+    "Déjà un compte ?" : {
+
+    },
+    "Delete" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Delete meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le repas"
+          }
+        }
+      }
+    },
+    "Delete this check-in?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer ce bilan ?"
+          }
+        }
+      }
+    },
+    "Delete this photo?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer cette photo ?"
+          }
+        }
+      }
+    },
+    "Describe what you ate" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décrivez ce que vous avez mangé"
+          }
+        }
+      }
+    },
+    "Describe what you ate — be as specific as possible." : {
+
+    },
+    "Describe your meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décrire le repas"
+          }
+        }
+      }
+    },
+    "Disciplined" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Régularité"
+          }
+        }
+      }
+    },
+    "Display period" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période d'affichage"
+          }
+        }
+      }
+    },
+    "Don't have an account? " : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de compte ? "
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé"
+          }
+        }
+      }
+    },
+    "Done, close export" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé, fermer l'export"
+          }
+        }
+      }
+    },
+    "e.g. 150g, 1 bowl" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex : 150g, 1 bol"
+          }
+        }
+      }
+    },
+    "E.g. 200g grilled chicken, basmati rice, olive oil" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex: 200g poulet grillé, riz basmati, huile d'olive"
+          }
+        }
+      }
+    },
+    "E.g. 200g grilled chicken, basmati rice..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex : 200g poulet grillé, riz basmati..."
+          }
+        }
+      }
+    },
+    "E.g. energy, sleep, digestion..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex: énergie, sommeil, digestion..."
+          }
+        }
+      }
+    },
+    "e.g. Grilled chicken" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex : Poulet grillé"
+          }
+        }
+      }
+    },
+    "E.g. motivation, stress, mood..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex: motivation, stress, humeur..."
+          }
+        }
+      }
+    },
+    "Eau" : {
+
+    },
+    "Eau : %@ ml/j en moy." : {
+
+    },
+    "Edit" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier"
+          }
+        }
+      }
+    },
+    "Edit entry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l'entrée"
+          }
+        }
+      }
+    },
+    "Email" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        }
+      }
+    },
+    "Email address" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse email"
+          }
+        }
+      }
+    },
+    "Enter manually" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisir manuellement"
+          }
+        }
+      }
+    },
+    "Error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur"
+          }
+        }
+      }
+    },
+    "Et au quotidien ?" : {
+
+    },
+    "exercises" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "exercices"
+          }
+        }
+      }
+    },
+    "Export Another" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter une autre séance"
+          }
+        }
+      }
+    },
+    "Export another workout program" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter un autre programme"
+          }
+        }
+      }
+    },
+    "Export Hevy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Hevy"
+          }
+        }
+      }
+    },
+    "Export session %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter la séance %@"
+          }
+        }
+      }
+    },
+    "Export to Hevy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter vers Hevy"
+          }
+        }
+      }
+    },
+    "Exporting to Hevy..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export vers Hevy..."
+          }
+        }
+      }
+    },
+    "Facultatif — pour personnaliser tes objectifs." : {
+
+    },
+    "Fat" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides"
+          }
+        }
+      }
+    },
+    "FAT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIPIDES"
+          }
+        }
+      }
+    },
+    "Fat (g)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides (g)"
+          }
+        }
+      }
+    },
+    "Feelings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ressentis"
+          }
+        }
+      }
+    },
+    "FEELINGS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESSENTIS"
+          }
+        }
+      }
+    },
+    "Finish meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer le repas"
+          }
+        }
+      }
+    },
+    "Focused" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mental clair"
+          }
+        }
+      }
+    },
+    "Food data provided by:" : {
+
+    },
+    "Free text" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Texte libre"
+          }
+        }
+      }
+    },
+    "FREQUENT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FRÉQUENTS"
+          }
+        }
+      }
+    },
+    "Gallery" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Galerie"
+          }
+        }
+      }
+    },
+    "GENERAL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GÉNÉRAL"
+          }
+        }
+      }
+    },
+    "Generate PDF" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Générer le PDF"
+          }
+        }
+      }
+    },
+    "Generating..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Génération..."
+          }
+        }
+      }
+    },
+    "Get started" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer"
+          }
+        }
+      }
+    },
+    "Go back to previous step" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à l'étape précédente"
+          }
+        }
+      }
+    },
+    "Go to Settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller dans Réglages"
+          }
+        }
+      }
+    },
+    "Goal reached" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif atteint"
+          }
+        }
+      }
+    },
+    "Good digestion" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonne digestion"
+          }
+        }
+      }
+    },
+    "Good energy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonne énergie"
+          }
+        }
+      }
+    },
+    "Good mood" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonne humeur"
+          }
+        }
+      }
+    },
+    "Good recovery" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonne récup"
+          }
+        }
+      }
+    },
+    "Heavy body" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corps lourd"
+          }
+        }
+      }
+    },
+    "Hevy API Key Required" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clé API Hevy requise"
+          }
+        }
+      }
+    },
+    "HEVY INTEGRATION" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INTÉGRATION HEVY"
+          }
+        }
+      }
+    },
+    "Hint (optional)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indice (optionnel)"
+          }
+        }
+      }
+    },
+    "HIPS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HANCHES"
+          }
+        }
+      }
+    },
+    "Hips (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hanches (cm)"
+          }
+        }
+      }
+    },
+    "How are you feeling?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment tu te sens ?"
+          }
+        }
+      }
+    },
+    "How much protein and calories do you aim for?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combien de protéines et calories visez-vous ?"
+          }
         }
       }
     },
     "Hungry" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Faim marquée" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faim marquée"
+          }
         }
       }
     },
+    "Intensité de tes séances" : {
+
+    },
     "Irritable" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Irritabilité" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irritabilité"
+          }
+        }
+      }
+    },
+    "ITEMS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ITEMS"
+          }
+        }
+      }
+    },
+    "items detected. Edit if needed before confirming." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "items détectés. Modifiez si nécessaire avant de valider."
+          }
+        }
+      }
+    },
+    "Joint discomfort" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gêne articulaire"
+          }
+        }
+      }
+    },
+    "Left arm (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bras gauche (cm)"
+          }
+        }
+      }
+    },
+    "Left thigh (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuisse gauche (cm)"
+          }
+        }
+      }
+    },
+    "Light body" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corps léger"
+          }
+        }
+      }
+    },
+    "Low energy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peu d'énergie"
+          }
         }
       }
     },
     "Low mood" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
-          "stringUnit" : { "state" : "translated", "value" : "Moral bas" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moral bas"
+          }
+        }
+      }
+    },
+    "Low motivation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivation basse"
+          }
+        }
+      }
+    },
+    "LOWER BODY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BAS DU CORPS"
+          }
+        }
+      }
+    },
+    "Manual" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuel"
+          }
+        }
+      }
+    },
+    "Manual entry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajout manuel"
+          }
+        }
+      }
+    },
+    "matched" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "trouvés"
+          }
+        }
+      }
+    },
+    "Maximum 300 characters" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum 300 caractères"
+          }
+        }
+      }
+    },
+    "Meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas"
+          }
+        }
+      }
+    },
+    "Meal in progress" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas en cours"
+          }
+        }
+      }
+    },
+    "Meal name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du repas"
+          }
+        }
+      }
+    },
+    "MEAL TOTAL" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTAL REPAS"
+          }
+        }
+      }
+    },
+    "MEALS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REPAS"
+          }
+        }
+      }
+    },
+    "MEASUREMENTS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MESURES"
+          }
+        }
+      }
+    },
+    "Mental" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mental"
+          }
+        }
+      }
+    },
+    "MENTAL FEELING" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESSENTI MENTAL"
+          }
+        }
+      }
+    },
+    "Minimum 3 characters" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum 3 caractères"
+          }
+        }
+      }
+    },
+    "Minimum 6 caractères" : {
+
+    },
+    "Mot de passe" : {
+
+    },
+    "Mot de passe oublié ?" : {
+
+    },
+    "Motivated" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivation"
+          }
+        }
+      }
+    },
+    "MY ITEMS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MES ITEMS"
+          }
+        }
+      }
+    },
+    "Name *" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom *"
+          }
+        }
+      }
+    },
+    "Negative feelings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensations négatives"
+          }
+        }
+      }
+    },
+    "New check-in" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau bilan"
+          }
+        }
+      }
+    },
+    "New meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau repas"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        }
+      }
+    },
+    "Next month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mois suivant"
+          }
+        }
+      }
+    },
+    "No check-ins yet" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de bilan"
+          }
+        }
+      }
+    },
+    "No feelings recorded" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun ressenti renseigné"
+          }
+        }
+      }
+    },
+    "No items today" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun item aujourd'hui"
+          }
+        }
+      }
+    },
+    "No meal in progress" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun repas en cours"
+          }
+        }
+      }
+    },
+    "No nutrition data for these days." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune donnée nutritionnelle pour ces jours."
+          }
+        }
+      }
+    },
+    "No photos" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune photo"
+          }
+        }
+      }
+    },
+    "No recent foods" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun aliment récent"
+          }
+        }
+      }
+    },
+    "No results for" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat pour"
+          }
+        }
+      }
+    },
+    "No results for \"%@\"" : {
+
+    },
+    "Not enough data to show trends." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas assez de données pour afficher les tendances."
+          }
+        }
+      }
+    },
+    "NUTRITION" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NUTRITION"
+          }
+        }
+      }
+    },
+    "NUTRITION (%@ jour%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "NUTRITION (%1$@ jour%2$@)"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Parle-moi de ton entraînement" : {
+
+    },
+    "Password" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mot de passe"
+          }
+        }
+      }
+    },
+    "Paste Hevy API key" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coller la clé API Hevy"
+          }
+        }
+      }
+    },
+    "PDF content" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contenu du PDF"
+          }
+        }
+      }
+    },
+    "Pending analysis" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse en attente"
+          }
+        }
+      }
+    },
+    "Pending items will be analyzed by AI. This takes a few seconds." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des items en attente seront analysés par IA. L'opération prend quelques secondes."
+          }
+        }
+      }
+    },
+    "Pending text" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Texte en attente"
+          }
+        }
+      }
+    },
+    "Per day" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par jour"
+          }
+        }
+      }
+    },
+    "PER DAY" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PAR JOUR"
+          }
+        }
+      }
+    },
+    "Period" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période"
+          }
+        }
+      }
+    },
+    "Photo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo"
+          }
+        }
+      }
+    },
+    "Photo. Long press to delete." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo. Appuyer longuement pour supprimer."
+          }
+        }
+      }
+    },
+    "Photos" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos"
+          }
+        }
+      }
+    },
+    "PHOTOS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PHOTOS"
+          }
+        }
+      }
+    },
+    "Physical" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Physique"
+          }
+        }
+      }
+    },
+    "PHYSICAL FEELING" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESSENTI PHYSIQUE"
+          }
+        }
+      }
+    },
+    "Pick the feelings that summarize your week, then describe your mental and physical state separately." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis les sensations qui résument ta semaine, puis détaille séparément le mental et le physique."
+          }
+        }
+      }
+    },
+    "Point the camera at a barcode" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pointez la caméra sur un code-barres"
+          }
+        }
+      }
+    },
+    "Poor digestion" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digestion difficile"
+          }
+        }
+      }
+    },
+    "Positive feelings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensations positives"
+          }
+        }
+      }
+    },
+    "Previous month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mois précédent"
+          }
+        }
+      }
+    },
+    "Prot." : {
+
+    },
+    "Protein" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines"
+          }
+        }
+      }
+    },
+    "PROTEIN" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PROTÉINES"
+          }
+        }
+      }
+    },
+    "Protein (g) *" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines (g) *"
+          }
+        }
+      }
+    },
+    "Quantity" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quantité"
+          }
+        }
+      }
+    },
+    "Quel est ton objectif ?" : {
+
+    },
+    "Quel est ton poids actuel ?" : {
+
+    },
+    "Quelques infos sur toi" : {
+
+    },
+    "Quick" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapide"
+          }
+        }
+      }
+    },
+    "Quick add" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajout rapide"
+          }
+        }
+      }
+    },
+    "QUICK STATS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS RAPIDES"
+          }
+        }
+      }
+    },
+    "RECENT CHECK-INS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BILANS RÉCENTS"
+          }
+        }
+      }
+    },
+    "Réessaie ou ajuste manuellement" : {
+
+    },
+    "Remove" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        }
+      }
+    },
+    "Rename" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer"
+          }
+        }
+      }
+    },
+    "Rename meal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer le repas"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Right arm (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bras droit (cm)"
+          }
+        }
+      }
+    },
+    "Right thigh (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuisse droite (cm)"
+          }
+        }
+      }
+    },
+    "Routine Created!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routine créée !"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Saving..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement..."
+          }
+        }
+      }
+    },
+    "Scanner unavailable" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanner non disponible"
+          }
+        }
+      }
+    },
+    "Se connecter" : {
+
+    },
+    "Séances par semaine" : {
+
+    },
+    "Search" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher"
+          }
+        }
+      }
+    },
+    "Search for a food" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher un aliment"
+          }
+        }
+      }
+    },
+    "Select a PDF to get started" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un PDF pour commencer"
+          }
+        }
+      }
+    },
+    "Select a photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une photo"
+          }
+        }
+      }
+    },
+    "Select a session to export" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez une séance à exporter"
+          }
+        }
+      }
+    },
+    "Set your daily goals" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Définissez vos objectifs quotidiens"
+          }
+        }
+      }
+    },
+    "Set your daily water intake goal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Définissez votre objectif d'eau quotidien"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages"
+          }
+        }
+      }
+    },
+    "Sexe biologique" : {
+
+    },
+    "Share check-in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager le bilan"
+          }
+        }
+      }
+    },
+    "Shoulders (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules (cm)"
+          }
+        }
+      }
+    },
+    "Sign in" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter"
+          }
+        }
+      }
+    },
+    "Sign In" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter"
+          }
+        }
+      }
+    },
+    "Sign out" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se déconnecter"
+          }
+        }
+      }
+    },
+    "Sign Up" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S'inscrire"
+          }
+        }
+      }
+    },
+    "Skip & add manually" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer et ajouter manuellement"
+          }
+        }
+      }
+    },
+    "Slept poorly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mal dormi"
+          }
+        }
+      }
+    },
+    "Slept well" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bien dormi"
+          }
+        }
+      }
+    },
+    "Sore" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Courbatures"
+          }
+        }
+      }
+    },
+    "Stable energy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Énergie stable"
+          }
+        }
+      }
+    },
+    "Start analysis" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer l'analyse"
+          }
+        }
+      }
+    },
+    "Start tracking your fitness journey" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencez à suivre votre parcours fitness"
+          }
+        }
+      }
+    },
+    "Start tracking your progress by creating your first weekly check-in." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencez à suivre votre progression en créant votre premier bilan hebdomadaire."
+          }
+        }
+      }
+    },
+    "STATS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS"
+          }
+        }
+      }
+    },
+    "Stay hydrated" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restez hydraté"
+          }
+        }
+      }
+    },
+    "Step %@/5" : {
+
+    },
+    "Strakk" : {
+
+    },
+    "Stress" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stress"
+          }
+        }
+      }
+    },
+    "Strong training" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances solides"
+          }
+        }
+      }
+    },
+    "SUMMARY" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RÉCAP"
+          }
+        }
+      }
+    },
+    "Taille" : {
+
+    },
+    "Take your photos in the same conditions for consistent tracking." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prends tes photos dans les mêmes conditions pour un suivi cohérent."
+          }
+        }
+      }
+    },
+    "Tendance : %@ %@%@ %@ sur %@ sem." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tendance : %1$@ %2$@%3$@ %4$@ sur %5$@ sem."
+          }
+        }
+      }
+    },
+    "Tes objectifs nutritionnels" : {
+
+    },
+    "The barcode scanner is not available on this device." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le scanner de code-barres n'est pas disponible sur cet appareil."
+          }
+        }
+      }
+    },
+    "THIGHS (AVG.)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CUISSES (MOY.)"
+          }
+        }
+      }
+    },
+    "This action cannot be undone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "TIMELINE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TIMELINE"
+          }
+        }
+      }
+    },
+    "Tired" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fatigue"
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd'hui"
+          }
+        }
+      }
+    },
+    "Ton coach nutrition & fitness, simplifié." : {
+
+    },
+    "Track your fitness journey" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivez votre parcours fitness"
+          }
+        }
+      }
+    },
+    "Trends" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Évolution"
+          }
+        }
+      }
+    },
+    "Types d'entraînement" : {
+
+    },
+    "UPPER BODY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAUT DU CORPS"
+          }
+        }
+      }
+    },
+    "Use the buttons below to get started" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez les boutons ci-dessous pour commencer"
+          }
+        }
+      }
+    },
+    "values per 100 g" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "valeurs pour 100 g"
+          }
+        }
+      }
+    },
+    "View detailed stats" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir les stats détaillées"
+          }
+        }
+      }
+    },
+    "Voilà à quoi ressemblera ta journée" : {
+
+    },
+    "Waist" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taille"
+          }
+        }
+      }
+    },
+    "WAIST" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TAILLE"
+          }
+        }
+      }
+    },
+    "Waist (cm)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tour de taille (cm)"
+          }
+        }
+      }
+    },
+    "Water" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eau"
+          }
+        }
+      }
+    },
+    "WATER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EAU"
+          }
+        }
+      }
+    },
+    "WEEK" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SEMAINE"
+          }
+        }
+      }
+    },
+    "weeks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaines"
+          }
+        }
+      }
+    },
+    "Weight" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids"
+          }
+        }
+      }
+    },
+    "WEIGHT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POIDS"
+          }
+        }
+      }
+    },
+    "Weight (kg)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids (kg)"
+          }
+        }
+      }
+    },
+    "Your current meal will be deleted." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre repas en cours sera supprimé."
+          }
+        }
+      }
+    },
+    "Your meal is empty" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton repas est vide"
+          }
         }
       }
     }
-  }
+  },
+  "version" : "1.0"
 }

@@ -8,6 +8,7 @@ import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
 import com.strakk.shared.data.repository.CheckInRepositoryImpl
 import com.strakk.shared.data.datasource.OffLiveSearchDataSource
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
+import com.strakk.shared.data.repository.GoalsRepositoryImpl
 import com.strakk.shared.data.repository.MealDraftRepositoryImpl
 import com.strakk.shared.data.repository.MealPhotoRepositoryImpl
 import com.strakk.shared.data.repository.MealRepositoryImpl
@@ -22,6 +23,7 @@ import com.strakk.shared.domain.repository.AuthRepository
 import com.strakk.shared.domain.repository.BarcodeLookupRepository
 import com.strakk.shared.domain.repository.CheckInRepository
 import com.strakk.shared.domain.repository.FoodCatalogRepository
+import com.strakk.shared.domain.repository.GoalsRepository
 import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealPhotoRepository
 import com.strakk.shared.domain.repository.MealRepository
@@ -31,8 +33,10 @@ import com.strakk.shared.domain.repository.WorkoutRepository
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
 import com.strakk.shared.domain.usecase.AddWaterUseCase
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
+import com.strakk.shared.domain.usecase.CalculateGoalsUseCase
 import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
 import com.strakk.shared.domain.usecase.CommitMealDraftUseCase
+import com.strakk.shared.domain.usecase.CompleteOnboardingUseCase
 import com.strakk.shared.domain.usecase.CreateMealDraftUseCase
 import com.strakk.shared.domain.usecase.CreateProfileUseCase
 import com.strakk.shared.domain.usecase.DeleteMealContainerUseCase
@@ -62,6 +66,7 @@ import com.strakk.shared.domain.usecase.QuickAddManualUseCase
 import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
 import com.strakk.shared.domain.usecase.RenameMealDraftUseCase
+import com.strakk.shared.domain.usecase.ResetPasswordUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.SearchFoodUseCase
 import com.strakk.shared.domain.usecase.SignInUseCase
@@ -83,7 +88,7 @@ import com.strakk.shared.domain.usecase.GetCheckInStatsUseCase
 import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
 import com.strakk.shared.domain.service.CheckInPdfGenerator
 import com.strakk.shared.data.pdf.CheckInPdfBuilderImpl
-import com.strakk.shared.presentation.auth.AuthFlowViewModel
+import com.strakk.shared.presentation.auth.LoginViewModel
 import com.strakk.shared.presentation.auth.RootViewModel
 import com.strakk.shared.presentation.calendar.CalendarViewModel
 import com.strakk.shared.presentation.hevy.HevyExportViewModel
@@ -91,7 +96,7 @@ import com.strakk.shared.presentation.meal.ManualEntryViewModel
 import com.strakk.shared.presentation.meal.MealDraftViewModel
 import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
-import com.strakk.shared.presentation.onboarding.OnboardingViewModel
+import com.strakk.shared.presentation.onboarding.OnboardingFlowViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
 import com.strakk.shared.presentation.today.TodayViewModel
 import com.strakk.shared.presentation.checkin.CheckInListViewModel
@@ -110,34 +115,31 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-/** Data layer bindings: remote clients, repositories, platform services. */
 internal val dataModule = module {
     single<SupabaseClient> { SupabaseProvider.createClient() }
     singleOf(::CurrentUserIdProvider)
     single<Logger> { createLogger() }
     singleOf(::SystemClockProvider) { bind<ClockProvider>() }
 
-    // Local KV storage (multiplatform-settings no-arg factory — picks
-    // NSUserDefaults on iOS and SharedPreferences on Android automatically).
     single<Settings> { Settings() }
 
-    // Standalone Ktor client for third-party APIs (Open Food Facts, etc.) —
-    // kept separate from the Supabase client to avoid coupling.
+    single { Json { ignoreUnknownKeys = true } }
+
     single<HttpClient> {
         HttpClient {
             install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+                json(get())
             }
         }
     }
 
     singleOf(::AuthRepositoryImpl) { bind<AuthRepository>() }
     singleOf(::ProfileRepositoryImpl) { bind<ProfileRepository>() }
+    singleOf(::GoalsRepositoryImpl) { bind<GoalsRepository>() }
     singleOf(::NutritionRepositoryImpl) { bind<NutritionRepository>() }
     singleOf(::WorkoutRepositoryImpl) { bind<WorkoutRepository>() }
     singleOf(::CheckInRepositoryImpl) { bind<CheckInRepository>() }
 
-    // Meal refonte v2
     singleOf(::MealPhotoRepositoryImpl) { bind<MealPhotoRepository>() }
     singleOf(::MealRepositoryImpl) { bind<MealRepository>() }
     singleOf(::MealDraftRepositoryImpl) { bind<MealDraftRepository>() }
@@ -145,11 +147,9 @@ internal val dataModule = module {
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
     singleOf(::BarcodeLookupRepositoryImpl) { bind<BarcodeLookupRepository>() }
 
-    // PDF generation
     factoryOf(::CheckInPdfBuilderImpl) { bind<CheckInPdfGenerator>() }
 }
 
-/** Domain layer bindings: pure use cases. */
 internal val domainModule = module {
     // Auth
     factoryOf(::ObserveAuthStatusUseCase)
@@ -157,12 +157,17 @@ internal val domainModule = module {
     factoryOf(::SignUpUseCase)
     factoryOf(::SignOutUseCase)
     factoryOf(::GetCurrentUserEmailUseCase)
+    factoryOf(::ResetPasswordUseCase)
 
     // Profile
     factoryOf(::CheckProfileExistsUseCase)
     factoryOf(::CreateProfileUseCase)
     factoryOf(::UpdateProfileUseCase)
     factoryOf(::ObserveProfileUseCase)
+    factoryOf(::CompleteOnboardingUseCase)
+
+    // Goals (AI)
+    factoryOf(::CalculateGoalsUseCase)
 
     // Nutrition — streams
     factoryOf(::BuildMealEntryUseCase)
@@ -227,17 +232,16 @@ internal val domainModule = module {
     factoryOf(::GenerateCheckInPdfUseCase)
 }
 
-/** Presentation layer bindings: ViewModels. */
 internal val presentationModule = module {
     viewModelOf(::RootViewModel)
-    viewModelOf(::AuthFlowViewModel)
-    viewModelOf(::OnboardingViewModel)
+    viewModelOf(::LoginViewModel)
+    viewModelOf(::OnboardingFlowViewModel)
     viewModelOf(::TodayViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::HevyExportViewModel)
 
-    // Meal refonte v2
+    // Meal
     viewModelOf(::MealDraftViewModel)
     viewModelOf(::SearchFoodViewModel)
     viewModelOf(::ManualEntryViewModel)
@@ -270,7 +274,6 @@ internal val presentationModule = module {
     viewModelOf(::CheckInStatsViewModel)
 }
 
-/** Aggregated module registered by each platform on startup. */
 val sharedModule = module {
     includes(dataModule, domainModule, presentationModule)
 }

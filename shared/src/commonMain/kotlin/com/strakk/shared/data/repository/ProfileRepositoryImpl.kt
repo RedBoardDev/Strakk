@@ -3,6 +3,7 @@ package com.strakk.shared.data.repository
 import com.strakk.shared.data.dto.ProfileDto
 import com.strakk.shared.data.mapper.toDomain
 import com.strakk.shared.data.remote.CurrentUserIdProvider
+import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.OnboardingData
 import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.repository.ProfileRepository
@@ -18,13 +19,8 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 
-/**
- * Supabase-backed implementation of [ProfileRepository].
- *
- * Queries and mutates the `profiles` table. The current user's ID is obtained
- * from [SupabaseClient.auth] to tie each row to `auth.uid()`.
- */
 internal class ProfileRepositoryImpl(
     private val supabaseClient: SupabaseClient,
     private val userIdProvider: CurrentUserIdProvider,
@@ -93,9 +89,25 @@ internal class ProfileRepositoryImpl(
 
         val json = buildJsonObject {
             put("id", userId)
+            put("weight_kg", data.weightKg)
+            data.heightCm?.let { put("height_cm", it) }
+            data.birthDate?.let { put("birth_date", it.toString()) }
+            data.biologicalSex?.let { put("biological_sex", it.name.lowercase()) }
+            data.fitnessGoal?.let { put("fitness_goal", it.name.lowercase()) }
+            data.trainingFrequency?.let { put("training_frequency", it) }
+            if (data.trainingTypes.isNotEmpty()) {
+                putJsonArray("training_types") {
+                    data.trainingTypes.forEach { add(kotlinx.serialization.json.JsonPrimitive(it.name.lowercase())) }
+                }
+            }
+            data.trainingIntensity?.let { put("training_intensity", it.name.lowercase()) }
+            data.dailyActivityLevel?.let { put("daily_activity_level", it.name.lowercase()) }
             data.proteinGoal?.let { put("protein_goal", it) }
             data.calorieGoal?.let { put("calorie_goal", it) }
+            data.fatGoal?.let { put("fat_goal", it) }
+            data.carbGoal?.let { put("carb_goal", it) }
             data.waterGoal?.let { put("water_goal", it) }
+            put("onboarding_completed", false)
         }
 
         val dto = supabaseClient
@@ -106,6 +118,32 @@ internal class ProfileRepositoryImpl(
             .decodeSingle<ProfileDto>()
 
         val profile = dto.toDomain()
+        profileCache.value = profile
+        return profile
+    }
+
+    override suspend fun completeOnboarding(goals: NutritionGoals): UserProfile {
+        val userId = userIdProvider.currentOrThrow()
+
+        val json = buildJsonObject {
+            if (goals.proteinGoal != null) put("protein_goal", goals.proteinGoal) else put("protein_goal", JsonNull)
+            if (goals.calorieGoal != null) put("calorie_goal", goals.calorieGoal) else put("calorie_goal", JsonNull)
+            if (goals.fatGoal != null) put("fat_goal", goals.fatGoal) else put("fat_goal", JsonNull)
+            if (goals.carbGoal != null) put("carb_goal", goals.carbGoal) else put("carb_goal", JsonNull)
+            if (goals.waterGoal != null) put("water_goal", goals.waterGoal) else put("water_goal", JsonNull)
+            put("onboarding_completed", true)
+            put("updated_at", Clock.System.now().toString())
+        }
+
+        val profile = supabaseClient
+            .from("profiles")
+            .update(json) {
+                select()
+                filter { eq("id", userId) }
+            }
+            .decodeSingle<ProfileDto>()
+            .toDomain()
+
         profileCache.value = profile
         return profile
     }
