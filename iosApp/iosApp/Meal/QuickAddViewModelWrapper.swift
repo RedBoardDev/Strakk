@@ -16,7 +16,7 @@ final class QuickAddViewModelWrapper {
 
     init(logDate: String? = nil) {
         self.logDate = logDate
-        self.sharedVm = KoinHelper().getQuickAddViewModel()
+        self.sharedVm = KoinBridge.shared.getQuickAddViewModel()
         self.applyState(sharedVm.uiState.value as? QuickAddUiState)
 
         stateTask = Task { [weak self, sharedVm] in

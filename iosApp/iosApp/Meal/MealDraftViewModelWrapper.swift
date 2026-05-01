@@ -34,6 +34,9 @@ struct EditingDraftData: Equatable {
     let pendingCount: Int
     let totals: DraftTotalsData
     let isProcessing: Bool
+
+    /// Items that are fully resolved — pre-filtered for review screens.
+    var resolvedItems: [DraftItemData] { items.filter(\.isResolved) }
 }
 
 enum MealDraftState: Equatable {
@@ -59,7 +62,7 @@ final class MealDraftViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getMealDraftViewModel()
+        self.sharedVm = KoinBridge.shared.getMealDraftViewModel()
         self.state = Self.mapState(sharedVm.uiState.value as? MealDraftUiState)
 
         stateTask = Task { [weak self, sharedVm] in
@@ -99,7 +102,7 @@ final class MealDraftViewModelWrapper {
                 name: committed.meal.name,
                 date: committed.meal.date,
                 createdAt: committed.meal.createdAt.description,
-                entries: committed.meal.entries.map(mapToMealEntryData)
+                entries: committed.meal.entries.map(KMPMappers.mealEntry)
             )
         } else if let showError = effect as? MealDraftEffectShowError {
             errorMessage = showError.message
@@ -118,7 +121,7 @@ final class MealDraftViewModelWrapper {
                 if let resolved = item as? DraftItemResolved {
                     return DraftItemData(
                         id: resolved.id,
-                        kind: .resolved(entry: mapToMealEntryData(resolved.entry))
+                        kind: .resolved(entry: KMPMappers.mealEntry(resolved.entry))
                     )
                 } else if let photo = item as? DraftItemPendingPhoto {
                     return DraftItemData(id: photo.id, kind: .pendingPhoto(hint: photo.hint))

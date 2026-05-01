@@ -91,19 +91,19 @@ final class CheckInWizardViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init(checkInId: String?) {
-        self.sharedVm = KoinHelper().getCheckInWizardViewModel(checkInId: checkInId)
+        self.sharedVm = KoinBridge.shared.getCheckInWizardViewModel(checkInId: checkInId)
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInWizardUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run { self?.updateState(newState) }
+                self?.updateState(newState)
             }
         }
 
         effectTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInWizardEffect> = observeFlow(sharedVm.effects)
             for await effect in stream {
-                await MainActor.run { self?.handleEffect(effect) }
+                self?.handleEffect(effect)
             }
         }
     }
@@ -117,15 +117,32 @@ final class CheckInWizardViewModelWrapper {
         sharedVm.onEvent(event: event)
     }
 
-    /// Adds a photo from a Swift Data source. Converts to KotlinByteArray and sends the event.
+    func consumeNavigateBack() { navigateBack = false }
+    func consumeNavigateToDetail() { navigateToDetailId = nil }
+
+    /// Adds a photo from a Swift Data source.
+    /// The Data → KotlinByteArray conversion is done off the main thread to avoid
+    /// blocking the UI for large images (several MB is common for camera output).
     func addPhoto(imageData: Data) {
-        let bytes = imageData.map { Int8(bitPattern: $0) }
-        let kotlinBytes = KotlinByteArray(size: Int32(bytes.count))
-        for (index, byte) in bytes.enumerated() {
-            kotlinBytes.set(index: Int32(index), value: byte)
-        }
         pendingLocalPhotos.append(imageData)
-        sharedVm.onEvent(event: CheckInWizardEventOnAddPhoto(imageData: kotlinBytes))
+        let sharedVm = self.sharedVm
+        Task.detached(priority: .userInitiated) {
+            let kotlinBytes = Self.makeKotlinByteArray(from: imageData)
+            await MainActor.run {
+                sharedVm.onEvent(event: CheckInWizardEventOnAddPhoto(imageData: kotlinBytes))
+            }
+        }
+    }
+
+    /// Converts Swift `Data` to `KotlinByteArray` off the main thread.
+    private static func makeKotlinByteArray(from data: Data) -> KotlinByteArray {
+        let kotlinBytes = KotlinByteArray(size: Int32(data.count))
+        data.withUnsafeBytes { buffer in
+            for (index, byte) in buffer.enumerated() {
+                kotlinBytes.set(index: Int32(index), value: Int8(bitPattern: byte))
+            }
+        }
+        return kotlinBytes
     }
 
     /// Queue of local photo Data, consumed in order as KMP state updates with new local photo IDs.

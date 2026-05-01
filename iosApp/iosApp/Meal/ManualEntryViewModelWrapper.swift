@@ -34,7 +34,7 @@ final class ManualEntryViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getManualEntryViewModel()
+        self.sharedVm = KoinBridge.shared.getManualEntryViewModel()
         self.formData = Self.mapState(sharedVm.uiState.value as? ManualEntryUiState)
 
         stateTask = Task { [weak self, sharedVm] in
@@ -61,11 +61,13 @@ final class ManualEntryViewModelWrapper {
         sharedVm.onEvent(event: event)
     }
 
+    func consumeShouldDismiss() { shouldDismiss = false }
+
     // MARK: - Private
 
     private func handleEffect(_ effect: ManualEntryEffect) {
         if let submitted = effect as? ManualEntryEffectSubmitted {
-            submittedEntry = mapToMealEntryData(submitted.entry)
+            submittedEntry = KMPMappers.mealEntry(submitted.entry)
             shouldDismiss = true
         } else if effect is ManualEntryEffectCancelled {
             shouldDismiss = true

@@ -18,7 +18,7 @@ final class RootViewModelWrapper {
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getRootViewModel()
+        self.sharedVm = KoinBridge.shared.getRootViewModel()
         self.state = Self.map(sharedVm.uiState.value as? RootUiState)
 
         observationTask = Task { [weak self, sharedVm] in

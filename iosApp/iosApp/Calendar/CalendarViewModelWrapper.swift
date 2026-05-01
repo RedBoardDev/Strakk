@@ -37,7 +37,7 @@ final class CalendarViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getCalendarViewModel()
+        self.sharedVm = KoinBridge.shared.getCalendarViewModel()
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CalendarUiState> = observeFlow(sharedVm.uiState)
@@ -80,10 +80,10 @@ final class CalendarViewModelWrapper {
             let detail: CalendarDayDetailData? = ready.dayDetail.map { d in
                 CalendarDayDetailData(
                     date: d.date,
-                    summary: mapToDailySummaryData(d.summary),
-                    meals: d.meals.map(mapToMealEntryData),
-                    mealContainers: d.mealContainers.map(mapToMealData),
-                    waterEntries: d.waterEntries.map(mapToWaterEntryData)
+                    summary: KMPMappers.dailySummary(d.summary),
+                    meals: d.meals.map(KMPMappers.mealEntry),
+                    mealContainers: d.mealContainers.map(KMPMappers.meal),
+                    waterEntries: d.waterEntries.map(KMPMappers.waterEntry)
                 )
             }
             let activeDaysSet: Set<String> = ready.activeDays

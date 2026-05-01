@@ -53,7 +53,7 @@ final class SearchFoodViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getSearchFoodViewModel()
+        self.sharedVm = KoinBridge.shared.getSearchFoodViewModel()
         self.state = Self.mapState(sharedVm.uiState.value as? SearchFoodUiState)
 
         stateTask = Task { [weak self, sharedVm] in

@@ -14,7 +14,7 @@ final class OnboardingViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getOnboardingViewModel()
+        self.sharedVm = KoinBridge.shared.getOnboardingViewModel()
         self.state = (sharedVm.uiState.value as? OnboardingUiState) ?? OnboardingUiState(
             currentStep: 0,
             proteinGoal: "",

@@ -58,12 +58,12 @@ final class CheckInStatsViewModelWrapper {
     @ObservationIgnored private var stateTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getCheckInStatsViewModel()
+        self.sharedVm = KoinBridge.shared.getCheckInStatsViewModel()
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInStatsUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run { self?.state = Self.mapState(newState) }
+                self?.state = Self.mapState(newState)
             }
         }
     }

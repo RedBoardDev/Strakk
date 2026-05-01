@@ -44,7 +44,7 @@ final class HevyExportViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getHevyExportViewModel()
+        self.sharedVm = KoinBridge.shared.getHevyExportViewModel()
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<HevyExportUiState> = observeFlow(sharedVm.uiState)
@@ -69,6 +69,8 @@ final class HevyExportViewModelWrapper {
     func onEvent(_ event: HevyExportEvent) {
         sharedVm.onEvent(event: event)
     }
+
+    func consumeShouldDismiss() { shouldDismiss = false }
 
     // MARK: - Private
 

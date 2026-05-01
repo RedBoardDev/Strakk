@@ -28,7 +28,7 @@ final class AuthFlowViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getAuthFlowViewModel()
+        self.sharedVm = KoinBridge.shared.getAuthFlowViewModel()
         self.state = Self.mapState(sharedVm.uiState.value as? AuthFlowUiState)
 
         stateTask = Task { [weak self, sharedVm] in

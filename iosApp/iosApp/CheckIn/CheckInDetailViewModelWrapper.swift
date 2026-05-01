@@ -65,23 +65,20 @@ final class CheckInDetailViewModelWrapper {
 
     init(checkInId: String) {
         self.checkInId = checkInId
-        let koin = KoinHelper()
-        self.sharedVm = koin.getCheckInDetailViewModel(checkInId: checkInId)
-        self.pdfUseCase = koin.getGenerateCheckInPdfUseCase()
+        self.sharedVm = KoinBridge.shared.getCheckInDetailViewModel(checkInId: checkInId)
+        self.pdfUseCase = KoinBridge.shared.getGenerateCheckInPdfUseCase()
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInDetailUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run {
-                    self?.state = Self.mapState(newState)
-                }
+                self?.state = Self.mapState(newState)
             }
         }
 
         effectTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInDetailEffect> = observeFlow(sharedVm.effects)
             for await effect in stream {
-                await MainActor.run { self?.handleEffect(effect) }
+                self?.handleEffect(effect)
             }
         }
     }
@@ -94,6 +91,9 @@ final class CheckInDetailViewModelWrapper {
     func onEvent(_ event: CheckInDetailEvent) {
         sharedVm.onEvent(event: event)
     }
+
+    func consumeNavigateBack() { navigateBack = false }
+    func consumeNavigateToWizard() { navigateToWizardCheckInId = nil }
 
     func generatePdf(options: PdfExportConfig) async -> Data? {
         do {

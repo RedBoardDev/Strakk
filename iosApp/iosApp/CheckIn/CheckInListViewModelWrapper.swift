@@ -42,19 +42,19 @@ final class CheckInListViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getCheckInListViewModel()
+        self.sharedVm = KoinBridge.shared.getCheckInListViewModel()
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInListUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
-                await MainActor.run { self?.state = Self.mapState(newState) }
+                self?.state = Self.mapState(newState)
             }
         }
 
         effectTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<CheckInListEffect> = observeFlow(sharedVm.effects)
             for await effect in stream {
-                await MainActor.run { self?.handleEffect(effect) }
+                self?.handleEffect(effect)
             }
         }
     }

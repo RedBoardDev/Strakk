@@ -30,7 +30,7 @@ final class SettingsViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getSettingsViewModel()
+        self.sharedVm = KoinBridge.shared.getSettingsViewModel()
         self.state = Self.mapState(sharedVm.uiState.value as? SettingsUiState)
 
         stateTask = Task { [weak self, sharedVm] in

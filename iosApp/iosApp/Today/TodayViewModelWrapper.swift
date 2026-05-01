@@ -97,7 +97,7 @@ final class TodayViewModelWrapper {
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
     init() {
-        self.sharedVm = KoinHelper().getTodayViewModel()
+        self.sharedVm = KoinBridge.shared.getTodayViewModel()
         self.state = Self.mapState(sharedVm.uiState.value as? TodayUiState)
 
         stateTask = Task { [weak self, sharedVm] in
@@ -142,9 +142,9 @@ final class TodayViewModelWrapper {
         } else if let ready = kmpState as? TodayUiStateReady {
             let timeline = ready.timeline.compactMap { item -> TimelineItemData? in
                 if let container = item as? TimelineItemMealContainer {
-                    return .mealContainer(mapToMealData(container.meal))
+                    return .mealContainer(KMPMappers.meal(container.meal))
                 } else if let orphan = item as? TimelineItemOrphanEntry {
-                    return .orphanEntry(mapToMealEntryData(orphan.entry))
+                    return .orphanEntry(KMPMappers.mealEntry(orphan.entry))
                 }
                 return nil
             }
@@ -168,9 +168,9 @@ final class TodayViewModelWrapper {
 
             return .ready(
                 dateLabel: ready.dateLabel,
-                summary: mapToDailySummaryData(ready.summary),
+                summary: KMPMappers.dailySummary(ready.summary),
                 timeline: timeline,
-                waterEntries: ready.waterEntries.map(mapToWaterEntryData),
+                waterEntries: ready.waterEntries.map(KMPMappers.waterEntry),
                 activeDraft: activeDraft
             )
         }
