@@ -7,6 +7,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 
 const OFF_SEARCH_URL = "https://search.openfoodfacts.org/search";
 const OFF_LEGACY_URL = "https://world.openfoodfacts.org/cgi/search.pl";
@@ -96,7 +97,13 @@ function pickNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-async function searchOff(query: string, limit: number): Promise<OffProduct[]> {
+interface OffSearchResult {
+  hits: OffProduct[];
+  /** true only when at least one API responded with a successful HTTP status */
+  apiOk: boolean;
+}
+
+async function searchOff(query: string, limit: number): Promise<OffSearchResult> {
   const url = new URL(OFF_SEARCH_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("countries_tags", "en:france");
@@ -113,7 +120,7 @@ async function searchOff(query: string, limit: number): Promise<OffProduct[]> {
       const json = await res.json();
       const hits = (json?.hits ?? []) as OffProduct[];
       console.log(`[search-off-live] search-a-licious returned ${hits.length} hits`);
-      return hits;
+      return { hits, apiOk: true };
     }
     console.warn(`[search-off-live] search-a-licious HTTP ${res.status}`);
   } catch (e) {
@@ -132,15 +139,17 @@ async function searchOff(query: string, limit: number): Promise<OffProduct[]> {
     const res = await fetch(legacy, { headers: { "User-Agent": USER_AGENT } });
     if (!res.ok) {
       console.warn(`[search-off-live] legacy HTTP ${res.status}`);
-      return [];
+      // Both arms failed with non-2xx — do not cache.
+      return { hits: [], apiOk: false };
     }
     const json = await res.json();
     const hits = (json?.products ?? []) as OffProduct[];
     console.log(`[search-off-live] legacy v1 returned ${hits.length} hits`);
-    return hits;
+    return { hits, apiOk: true };
   } catch (e) {
     console.error("[search-off-live] legacy fallback failed:", (e as Error).message);
-    return [];
+    // Network error — do not cache.
+    return { hits: [], apiOk: false };
   }
 }
 
@@ -229,10 +238,23 @@ async function handle(req: Request): Promise<Response> {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  if (checkPayloadSize(req, 64 * 1024) === -1) {
+    return jsonResponse({ error: "Payload too large" }, 413);
+  }
+
+  let user: { userId: string };
   try {
-    await requireUser(req);
+    user = await requireUser(req);
   } catch (e) {
     return jsonResponse({ error: (e as Error).message }, 401);
+  }
+
+  if (!(await checkRateLimit(user.userId, "search-off-live", 30, 60))) {
+    return jsonResponse({ error: "Rate limit exceeded" }, 429);
   }
 
   let body: { q?: string; limit?: number };
@@ -245,6 +267,7 @@ async function handle(req: Request): Promise<Response> {
   const q = (body.q ?? "").trim();
   const limit = Math.max(1, Math.min(MAX_LIMIT, body.limit ?? 20));
   if (q.length < 2) return jsonResponse({ items: [] });
+  if (q.length > 200) return jsonResponse({ error: "Query too long" }, 400);
 
   console.log(`[search-off-live] q="${q}" limit=${limit}`);
 
@@ -263,17 +286,22 @@ async function handle(req: Request): Promise<Response> {
     }
   }
 
-  const offHits = await searchOff(q, limit);
-  if (offHits.length === 0) {
-    // Cache empty results too — avoids hammering OFF for misspelled words
-    // that genuinely have no match. Same TTL.
-    if (kv) await kv.set(cacheKey, { items: [] }, { expireIn: OFF_CACHE_TTL_MS });
+  const offResult = await searchOff(q, limit);
+  if (offResult.hits.length === 0) {
+    if (offResult.apiOk) {
+      // OFF responded successfully but found no matches — safe to cache so we
+      // don't hammer OFF for misspelled words. Same TTL as positive results.
+      if (kv) await kv.set(cacheKey, { items: [] }, { expireIn: OFF_CACHE_TTL_MS });
+    } else {
+      // Transient API error — do not cache; the next request should retry OFF.
+      console.warn("[search-off-live] skipping cache write: OFF API error");
+    }
     return jsonResponse({ items: [] });
   }
 
   const mapped: MappedRow[] = [];
   const seen = new Set<string>();
-  for (const p of offHits) {
+  for (const p of offResult.hits) {
     const m = mapToCatalog(p);
     if (!m) continue;
     if (seen.has(m.ext_id)) continue;

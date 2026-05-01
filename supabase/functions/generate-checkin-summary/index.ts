@@ -1,5 +1,6 @@
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 import { generateCheckinSummary, CheckinSummaryInput } from "../_shared/checkin-summary.ts";
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -14,7 +15,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
   try {
-    await requireUser(req);
+    if (checkPayloadSize(req, 256 * 1024) === -1) {
+      return jsonResponse({ error: "Payload too large" }, 413);
+    }
+
+    const { userId } = await requireUser(req);
+
+    if (!(await checkRateLimit(userId, "generate-checkin-summary", 5, 60))) {
+      return jsonResponse({ error: "Rate limit exceeded" }, 429);
+    }
 
     let body: Record<string, unknown>;
     try {

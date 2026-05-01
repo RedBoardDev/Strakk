@@ -15,6 +15,4 @@ data class UserProfile(
     val calorieGoal: Int?,
     /** Daily water goal in mL. */
     val waterGoal: Int?,
-    /** Hevy API key for exporting workout sessions. null = not configured. */
-    val hevyApiKey: String? = null,
 )

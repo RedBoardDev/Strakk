@@ -31,6 +31,7 @@
 
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 import {
   analyzeBatch,
   analyzeSingle,
@@ -42,6 +43,16 @@ import { assertOwnedPath, downloadPhotoAsBase64 } from "../_shared/storage.ts";
 
 const MAX_PHOTOS_PER_BATCH = 2;
 const MAX_ITEMS_PER_REQUEST = 16;
+const PHOTO_DOWNLOAD_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout: ${label} after ${ms}ms`)), ms),
+    ),
+  ]);
+}
 
 interface InputPhoto {
   id: string;
@@ -68,7 +79,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
   try {
+    if (checkPayloadSize(req, 1 * 1024 * 1024) === -1) {
+      return jsonResponse({ error: "Payload too large" }, 413);
+    }
+
     const { userId } = await requireUser(req);
+
+    if (!(await checkRateLimit(userId, "extract-meal-draft", 10, 60))) {
+      return jsonResponse({ error: "Rate limit exceeded" }, 429);
+    }
 
     let body: Record<string, unknown>;
     try {
@@ -202,13 +221,20 @@ interface HydratedText {
 type HydratedItem = HydratedPhoto | HydratedText;
 
 async function hydratePhotos(items: InputItem[]): Promise<HydratedItem[]> {
-  return Promise.all(
-    items.map(async (item): Promise<HydratedItem> => {
-      if (item.type === "text") return item;
-      const imageBase64 = await downloadPhotoAsBase64(item.photoPath);
-      return { id: item.id, type: "photo", imageBase64, hint: item.hint };
-    }),
-  );
+  const result: HydratedItem[] = [];
+  for (const item of items) {
+    if (item.type === "text") {
+      result.push(item);
+    } else {
+      const imageBase64 = await withTimeout(
+        downloadPhotoAsBase64(item.photoPath),
+        PHOTO_DOWNLOAD_TIMEOUT_MS,
+        `photo ${item.id}`,
+      );
+      result.push({ id: item.id, type: "photo", imageBase64, hint: item.hint });
+    }
+  }
+  return result;
 }
 
 // =============================================================================

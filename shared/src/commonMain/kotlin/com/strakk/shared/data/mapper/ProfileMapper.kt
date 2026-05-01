@@ -11,5 +11,4 @@ internal fun ProfileDto.toDomain(): UserProfile = UserProfile(
     proteinGoal = proteinGoal,
     calorieGoal = calorieGoal,
     waterGoal = waterGoal,
-    hevyApiKey = hevyApiKey,
 )

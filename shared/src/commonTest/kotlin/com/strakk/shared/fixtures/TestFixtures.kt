@@ -111,7 +111,7 @@ class FakeProfileRepository : ProfileRepository {
 
     override suspend fun getHevyApiKey(): String? {
         shouldThrow?.let { throw it }
-        return getProfileResult?.hevyApiKey
+        return null
     }
 
     override suspend fun updateHevyApiKey(apiKey: String) {

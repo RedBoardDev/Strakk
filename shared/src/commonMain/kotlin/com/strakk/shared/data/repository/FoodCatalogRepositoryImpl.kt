@@ -26,13 +26,9 @@ internal class FoodCatalogRepositoryImpl(
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return@coroutineScope emptyList()
 
-        logger.d(LOG_TAG, "search(\"$trimmed\", limit=$limit) — fan-out")
-
         val localDeferred = async {
             try {
-                runRpc(trimmed, limit).also {
-                    logger.d(LOG_TAG, "  local RPC → ${it.size} hit(s)")
-                }
+                runRpc(trimmed, limit)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
@@ -42,16 +38,12 @@ internal class FoodCatalogRepositoryImpl(
         }
         val liveDeferred = async {
             if (trimmed.length < 2) return@async emptyList()
-            val live = offLive.search(trimmed, limit)
-            logger.d(LOG_TAG, "  live OFF → ${live.size} hit(s)")
-            live
+            offLive.search(trimmed, limit)
         }
 
         val local = localDeferred.await()
         val live = liveDeferred.await()
-        val merged = merge(local, live, limit)
-        logger.d(LOG_TAG, "search(\"$trimmed\") → ${merged.size} merged result(s)")
-        merged.map { it.toDomain() }
+        merge(local, live, limit).map { it.toDomain() }
     }
 
     private suspend fun runRpc(query: String, limit: Int): List<FoodCatalogItemDto> {

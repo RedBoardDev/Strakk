@@ -1,5 +1,7 @@
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
+import { callClaude, stripMarkdownFences, type ClaudeContent } from "../_shared/claude.ts";
 
 // =============================================================================
 // Types
@@ -116,89 +118,39 @@ OUTPUT: Valid JSON matching this exact schema, nothing else:
 }`;
 
 // =============================================================================
-// Claude API
+// Claude invocation (wraps _shared/callClaude with PDF-specific payload)
 // =============================================================================
 
-const CLAUDE_MODEL = "claude-sonnet-4-6";
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 2000;
+// The PDF document content block is not part of the shared ClaudeContent union
+// (which only covers text and image). We cast it so callClaude can forward it
+// to the API unchanged — the shape is still valid at runtime.
+type PdfDocumentBlock = {
+  type: "document";
+  source: { type: "base64"; media_type: "application/pdf"; data: string };
+};
 
-async function callClaude(pdfBase64: string): Promise<string> {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
+async function parsePdfWithClaude(pdfBase64: string): Promise<string> {
+  const pdfBlock: PdfDocumentBlock = {
+    type: "document",
+    source: { type: "base64", media_type: "application/pdf", data: pdfBase64 },
+  };
+  const textBlock: ClaudeContent = { type: "text", text: EXTRACTION_PROMPT };
 
-  const body = {
-    model: CLAUDE_MODEL,
-    max_tokens: 16384,
+  return await callClaude({
+    maxTokens: 16384,
     temperature: 0,
     messages: [
       {
         role: "user",
-        content: [
-          {
-            type: "document",
-            source: {
-              type: "base64",
-              media_type: "application/pdf",
-              data: pdfBase64,
-            },
-          },
-          {
-            type: "text",
-            text: EXTRACTION_PROMPT,
-          },
-        ],
+        content: [pdfBlock as unknown as ClaudeContent, textBlock],
       },
     ],
-  };
-
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      const delay = Math.min(BASE_DELAY_MS * 2 ** (attempt - 1), 15000);
-      await new Promise((r) => setTimeout(r, delay));
-    }
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if ([429, 503, 529].includes(response.status)) {
-      continue;
-    }
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Claude API HTTP ${response.status}: ${text}`);
-    }
-
-    const json = await response.json();
-    const contentArray = json.content as Array<{ type: string; text?: string }>;
-    const textBlock = contentArray.find((c) => c.type === "text");
-    if (!textBlock?.text) {
-      throw new Error("No text in Claude response");
-    }
-
-    return textBlock.text;
-  }
-
-  throw new Error("Claude API unavailable after retries");
+  });
 }
 
 // =============================================================================
 // Response parsing + coercion
 // =============================================================================
-
-function stripMarkdownFences(text: string): string {
-  const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (match && match[1]) return match[1].trim();
-  return text.trim();
-}
 
 function coerceNumber(v: unknown, fallback = 0): number {
   if (typeof v === "number" && !Number.isNaN(v)) return v;
@@ -311,7 +263,21 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    await requireUser(req);
+    if (checkPayloadSize(req, 10 * 1024 * 1024) === -1) {
+      return new Response(JSON.stringify({ error: "Payload too large (max 10 MB)" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { userId } = await requireUser(req);
+
+    if (!(await checkRateLimit(userId, "parse-workout-pdf", 5, 60))) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let body: ParseRequest;
     try {
@@ -333,7 +299,17 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const raw = await callClaude(body.pdf_base64);
+    if (body.pdf_base64.length > 10 * 1024 * 1024) {
+      return new Response(
+        JSON.stringify({ error: "pdf_base64 too large (max ~7.5 MB decoded)" }),
+        {
+          status: 413,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const raw = await parsePdfWithClaude(body.pdf_base64);
     const parsed = parseClaudeResponse(raw);
 
     if (parsed.sessions.length === 0) {

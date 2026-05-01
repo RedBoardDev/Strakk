@@ -97,8 +97,14 @@ class ObserveCheckInQuickStatsUseCaseTest {
         override suspend fun deletePhoto(photoId: String, storagePath: String) = error("Unused")
         override suspend fun getPhotoUrl(storagePath: String): String = error("Unused")
         override suspend fun computeNutritionAverages(dates: List<String>): NutritionAverages = error("Unused")
-        override suspend fun generateAiSummary(averages: NutritionAverages, goals: NutritionGoals): String =
-            error("Unused")
+        override suspend fun generateAiSummary(
+            averages: NutritionAverages,
+            goals: NutritionGoals,
+            weightKg: Double?,
+            feelingTags: List<String>,
+            mentalFeeling: String,
+            physicalFeeling: String,
+        ): String = error("Unused")
 
         override suspend fun getPreviousMeasurements(weekLabel: String): CheckInMeasurements? = error("Unused")
         override suspend fun checkExistingForWeek(weekLabel: String): String? = error("Unused")

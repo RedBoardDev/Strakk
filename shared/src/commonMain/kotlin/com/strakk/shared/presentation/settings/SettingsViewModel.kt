@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.settings
 
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
+import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.SignOutUseCase
@@ -26,6 +27,7 @@ class SettingsViewModel(
     private val updateProfile: UpdateProfileUseCase,
     private val signOut: SignOutUseCase,
     private val saveHevyApiKey: SaveHevyApiKeyUseCase,
+    private val getHevyApiKey: GetHevyApiKeyUseCase,
 ) : MviViewModel<SettingsUiState, SettingsEvent, SettingsEffect>(SettingsUiState.Loading) {
 
     private var saveDebounceJob: Job? = null
@@ -63,6 +65,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             val email = getCurrentUserEmail().getOrNull()
             val profile = observeProfile().first()
+            val hevyKey = getHevyApiKey().getOrNull()
 
             setState {
                 SettingsUiState.Ready(
@@ -70,7 +73,7 @@ class SettingsViewModel(
                     proteinGoal = profile?.proteinGoal?.toString() ?: "",
                     calorieGoal = profile?.calorieGoal?.toString() ?: "",
                     waterGoal = profile?.waterGoal?.toString() ?: "",
-                    hevyApiKey = profile?.hevyApiKey ?: "",
+                    hevyApiKey = hevyKey ?: "",
                 )
             }
         }

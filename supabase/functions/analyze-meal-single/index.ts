@@ -17,7 +17,12 @@
 
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 import { analyzeSingle, SingleInput } from "../_shared/meal-analysis.ts";
+
+const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB (covers base64 photo)
+const RATE_LIMIT = 10; // requests per window
+const RATE_WINDOW_S = 60; // 1 minute
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -31,7 +36,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
   try {
-    await requireUser(req);
+    if (checkPayloadSize(req, MAX_BODY_BYTES) === -1) {
+      return jsonResponse({ error: "Payload too large" }, 413);
+    }
+
+    const { userId } = await requireUser(req);
+
+    if (!(await checkRateLimit(userId, "analyze-meal-single", RATE_LIMIT, RATE_WINDOW_S))) {
+      return jsonResponse({ error: "Rate limit exceeded" }, 429);
+    }
 
     let body: Record<string, unknown>;
     try {

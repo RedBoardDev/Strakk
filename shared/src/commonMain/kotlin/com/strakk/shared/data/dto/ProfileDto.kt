@@ -15,7 +15,6 @@ internal data class ProfileDto(
     @SerialName("protein_goal") val proteinGoal: Int?,
     @SerialName("calorie_goal") val calorieGoal: Int?,
     @SerialName("water_goal") val waterGoal: Int?,
-    @SerialName("hevy_api_key") val hevyApiKey: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
 )

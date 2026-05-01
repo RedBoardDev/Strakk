@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.meal
 
 import app.cash.turbine.test
 import com.strakk.shared.domain.common.ClockProvider
+import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.FrequentItem
@@ -86,7 +87,7 @@ class QuickAddViewModelTest {
             viewModel.onEvent(QuickAddEvent.AddFromText("no"))
 
             val effect = assertIs<QuickAddEffect.ShowError>(awaitItem())
-            assertEquals("La description doit contenir entre 3 et 500 caractères.", effect.message)
+            assertEquals("Description must be between 3 and 500 characters.", effect.message)
             assertEquals(effect.message, viewModel.uiState.value.errorMessage)
             assertFalse(viewModel.uiState.value.isProcessing)
             cancelAndIgnoreRemainingEvents()
@@ -108,6 +109,10 @@ class QuickAddViewModelTest {
                 mealRepository = mealRepository,
                 nutritionRepository = nutritionRepository,
             ),
+            logger = object : Logger {
+                override fun d(tag: String, message: String) {}
+                override fun e(tag: String, message: String, throwable: Throwable?) {}
+            },
         )
     }
 }

@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
+import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 
 // =============================================================================
 // Types — Input
@@ -786,8 +787,16 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    await requireUser(req);
+    if (checkPayloadSize(req, 1 * 1024 * 1024) === -1) {
+      return json({ error: "Payload too large" }, 413);
+    }
+
+    const { userId } = await requireUser(req);
     const userJwt = req.headers.get("Authorization")!.replace(/^Bearer\s+/i, "").trim();
+
+    if (!(await checkRateLimit(userId, "export-to-hevy", 5, 60))) {
+      return json({ error: "Rate limit exceeded" }, 429);
+    }
 
     let hevyApiKey: string;
     try {
@@ -824,15 +833,16 @@ Deno.serve(async (req: Request) => {
     }
 
     if (message.includes("Hevy API")) {
-      return json({ error: message }, 502);
+      console.error("[export-to-hevy] Hevy API error:", message);
+      return json({ error: "External service unavailable" }, 502);
     }
 
     if (message.includes("Claude API")) {
       console.error("[export-to-hevy] Claude API error:", message);
-      return json({ error: message }, 500);
+      return json({ error: "AI service error" }, 500);
     }
 
     console.error("[export-to-hevy] error:", message, error instanceof Error ? error.stack : "");
-    return json({ error: message || "Internal server error" }, 500);
+    return json({ error: "Internal server error" }, 500);
   }
 });

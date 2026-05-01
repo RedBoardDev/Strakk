@@ -2,7 +2,6 @@ package com.strakk.shared.presentation.today
 
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.ClockProvider
-import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
@@ -22,8 +21,6 @@ import com.strakk.shared.presentation.common.MviViewModel
 import com.strakk.shared.presentation.common.formatDateLabel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-
-private const val TAG = "TodayVM"
 
 /**
  * Manages the Today screen: daily summary, chronological timeline
@@ -45,7 +42,6 @@ class TodayViewModel(
     private val deleteMealContainer: DeleteMealContainerUseCase,
     private val updateEntry: UpdateMealEntryUseCase,
     private val clock: ClockProvider,
-    private val logger: Logger,
 ) : MviViewModel<TodayUiState, TodayEvent, TodayEffect>(TodayUiState.Loading) {
 
     init {
@@ -94,8 +90,6 @@ class TodayViewModel(
             orphans.forEach { add(TimelineItem.OrphanEntry(it)) }
         }.sortedBy { it.createdAt }
 
-        logger.d(TAG, "buildReadyState: orphans=${orphans.size}, meals=${meals.size}, timeline=${timeline.size}")
-
         return TodayUiState.Ready(
             dateLabel = dateLabel,
             summary = summary,
@@ -143,6 +137,6 @@ class TodayViewModel(
     }
 
     private fun emitError(throwable: Throwable) {
-        emit(TodayEffect.ShowError(throwable.message ?: "Une erreur est survenue."))
+        emit(TodayEffect.ShowError(throwable.message ?: "An error occurred"))
     }
 }

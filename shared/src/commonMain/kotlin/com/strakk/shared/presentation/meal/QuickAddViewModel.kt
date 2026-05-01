@@ -19,10 +19,7 @@ class QuickAddViewModel(
 ) : MviViewModel<QuickAddUiState, QuickAddEvent, QuickAddEffect>(QuickAddUiState()) {
 
     override fun onEvent(event: QuickAddEvent) = when (event) {
-        is QuickAddEvent.AddKnown -> {
-            logger.d(TAG, "AddKnown: name=${event.name}, logDate=${event.logDate}, source=${event.source}")
-            addKnown(event)
-        }
+        is QuickAddEvent.AddKnown -> addKnown(event)
         is QuickAddEvent.AddFromText -> addFromText(event.description, event.logDate)
         is QuickAddEvent.AddFromPhoto -> addFromPhoto(event.imageBase64, event.hint, event.logDate)
         QuickAddEvent.ClearError -> setState { copy(errorMessage = null) }
@@ -52,20 +49,16 @@ class QuickAddViewModel(
     }
 
     private fun launchQuickAdd(block: suspend () -> Result<MealEntry>) {
-        if (uiState.value.isProcessing) {
-            logger.d(TAG, "launchQuickAdd skipped — already processing")
-            return
-        }
+        if (uiState.value.isProcessing) return
 
         setState { copy(isProcessing = true, errorMessage = null) }
         viewModelScope.launch {
             block()
                 .onSuccess { entry ->
-                    logger.d(TAG, "Quick-add SUCCESS: id=${entry.id}, logDate=${entry.logDate}, name=${entry.name}")
                     emit(QuickAddEffect.Completed(entry))
                 }
                 .onFailure { error ->
-                    val message = error.message ?: "Ajout impossible."
+                    val message = error.message ?: "An error occurred"
                     logger.e(TAG, "Quick-add FAILED: $message", error)
                     setState { copy(errorMessage = message) }
                     emit(QuickAddEffect.ShowError(message))

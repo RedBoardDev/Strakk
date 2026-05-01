@@ -27,11 +27,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 private const val LOG_TAG = "NutritionRepository"
+private const val FREQUENT_ITEMS_FETCH_LIMIT = 200L
 
 /**
  * Supabase-backed implementation of [NutritionRepository].
@@ -80,10 +86,12 @@ internal class NutritionRepositoryImpl(
         if (shouldFetch) {
             val entries = fetchOrphanMeals(date)
             mealsCache.update { cache ->
-                cache + (date to mergeFetchedMealEntries(
-                    cachedEntries = cache[date].orEmpty(),
-                    fetchedEntries = entries,
-                ))
+                trimCache(
+                    cache + (date to mergeFetchedMealEntries(
+                        cachedEntries = cache[date].orEmpty(),
+                        fetchedEntries = entries,
+                    )),
+                )
             }
         }
     }
@@ -92,7 +100,20 @@ internal class NutritionRepositoryImpl(
         val shouldFetch = fetchMutex.withLock { waterFetchedDates.add(date) }
         if (shouldFetch) {
             val entries = fetchWaterEntries(date)
-            waterCache.update { it + (date to entries) }
+            waterCache.update { trimCache(it + (date to entries)) }
+        }
+    }
+
+    /**
+     * Removes cache entries for dates older than 30 days to prevent unbounded growth.
+     */
+    private fun <T> trimCache(cache: Map<String, T>): Map<String, T> {
+        val cutoff = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+            .minus(DatePeriod(days = 30))
+        return cache.filterKeys { dateKey ->
+            runCatching { LocalDate.parse(dateKey) >= cutoff }.getOrDefault(true)
         }
     }
 
@@ -120,8 +141,6 @@ internal class NutritionRepositoryImpl(
 
     override suspend fun addMeal(entry: MealEntry): MealEntry {
         val userId = userIdProvider.currentOrThrow()
-        logger.d(LOG_TAG, "addMeal: name=${entry.name}, logDate=${entry.logDate}, mealId=${entry.mealId}")
-
         val payload = buildJsonObject {
             put("user_id", userId)
             put("log_date", entry.logDate)
@@ -143,11 +162,8 @@ internal class NutritionRepositoryImpl(
             .decodeSingle<MealEntryDto>()
             .toDomain()
 
-        logger.d(LOG_TAG, "addMeal created: id=${created.id}, logDate=${created.logDate}")
-
         mealsCache.update { cache ->
             val existing = cache[entry.logDate] ?: emptyList()
-            logger.d(LOG_TAG, "addMeal cache update: key=${entry.logDate}, existingCount=${existing.size}")
             cache + (entry.logDate to (existing + created))
         }
         emitMutation()
@@ -288,7 +304,7 @@ internal class NutritionRepositoryImpl(
                 .select {
                     filter { eq("user_id", userId) }
                     order("created_at", Order.DESCENDING)
-                    range(0L, 199L)
+                    range(0L, FREQUENT_ITEMS_FETCH_LIMIT - 1)
                 }
                 .decodeList<MealEntryDto>()
         } catch (e: CancellationException) {
