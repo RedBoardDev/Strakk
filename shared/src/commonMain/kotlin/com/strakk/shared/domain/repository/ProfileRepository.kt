@@ -1,5 +1,6 @@
 package com.strakk.shared.domain.repository
 
+import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.OnboardingData
 import com.strakk.shared.domain.model.UserProfile
 import kotlinx.coroutines.flow.Flow
@@ -73,6 +74,17 @@ interface ProfileRepository {
      * @throws Exception on network or database errors.
      */
     suspend fun updateHevyApiKey(apiKey: String)
+
+    /**
+     * Saves the nutrition goals and marks onboarding as completed in a single update.
+     *
+     * Called from the Day Preview (step 7) to finalize the onboarding flow.
+     *
+     * @param goals Nutrition goals chosen by the user (or AI-calculated).
+     * @return The updated [UserProfile].
+     * @throws Exception on network or database errors.
+     */
+    suspend fun completeOnboarding(goals: NutritionGoals): UserProfile
 
     /**
      * Returns a [Flow] that emits the current [UserProfile] (or null if none),

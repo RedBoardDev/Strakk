@@ -10,9 +10,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.strakk.android.ui.auth.AuthFlowRoute
 import com.strakk.android.ui.main.MainScreen
-import com.strakk.android.ui.onboarding.OnboardingRoute
+import com.strakk.android.ui.onboarding.OnboardingFlowRoute
 import com.strakk.shared.presentation.auth.RootUiState
 
 @Composable
@@ -38,13 +37,13 @@ fun RootContent(
                 }
             }
             is RootUiState.Unauthenticated -> {
-                AuthFlowRoute(modifier = contentModifier)
+                OnboardingFlowRoute(modifier = contentModifier)
             }
             is RootUiState.Authenticated -> {
-                if (state.hasProfile) {
+                if (state.onboardingCompleted) {
                     MainScreen(modifier = contentModifier)
                 } else {
-                    OnboardingRoute(modifier = contentModifier)
+                    OnboardingFlowRoute(modifier = contentModifier)
                 }
             }
         }

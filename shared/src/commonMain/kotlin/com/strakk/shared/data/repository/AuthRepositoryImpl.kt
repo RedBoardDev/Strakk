@@ -52,6 +52,10 @@ internal class AuthRepositoryImpl(
         supabaseClient.auth.signOut()
     }
 
+    override suspend fun resetPassword(email: String) {
+        supabaseClient.auth.resetPasswordForEmail(email)
+    }
+
     override suspend fun getCurrentUserEmail(): String? {
         supabaseClient.auth.currentUserOrNull()?.email?.let { return it }
 

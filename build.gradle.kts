@@ -17,6 +17,7 @@ allprojects {
         allRules = true
         parallel = true
         autoCorrect = false
+        baseline = rootProject.file("config/detekt/detekt-baseline.xml")
     }
 
     dependencies {

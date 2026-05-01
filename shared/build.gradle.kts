@@ -82,7 +82,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)

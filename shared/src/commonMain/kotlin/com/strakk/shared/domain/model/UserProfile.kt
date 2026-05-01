@@ -1,18 +1,22 @@
 package com.strakk.shared.domain.model
 
-/**
- * Domain representation of the `profiles` table.
- *
- * Contains user goals. All goal fields are nullable — a user can skip onboarding
- * and set them later in Settings.
- */
+import kotlinx.datetime.LocalDate
+
 data class UserProfile(
-    /** Supabase user ID (matches `auth.uid()`). */
     val id: String,
-    /** Daily protein goal in grams. */
+    val weightKg: Double?,
+    val heightCm: Int?,
+    val birthDate: LocalDate?,
+    val biologicalSex: BiologicalSex?,
+    val fitnessGoal: FitnessGoal?,
+    val trainingFrequency: Int?,
+    val trainingTypes: Set<TrainingType>,
+    val trainingIntensity: TrainingIntensity?,
+    val dailyActivityLevel: DailyActivityLevel?,
     val proteinGoal: Int?,
-    /** Daily calorie goal in kcal. */
     val calorieGoal: Int?,
-    /** Daily water goal in mL. */
+    val fatGoal: Int?,
+    val carbGoal: Int?,
     val waterGoal: Int?,
+    val onboardingCompleted: Boolean,
 )

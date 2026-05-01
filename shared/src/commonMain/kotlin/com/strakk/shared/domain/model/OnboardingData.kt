@@ -1,17 +1,20 @@
 package com.strakk.shared.domain.model
 
-/**
- * Data collected during the onboarding flow (Goals Setup).
- *
- * Passed to [com.strakk.shared.domain.repository.ProfileRepository.createProfile]
- * to create the initial `profiles` row. All fields are nullable because the user
- * can skip every step.
- */
+import kotlinx.datetime.LocalDate
+
 data class OnboardingData(
-    /** Daily protein goal in grams. */
+    val weightKg: Double,
+    val heightCm: Int?,
+    val birthDate: LocalDate?,
+    val biologicalSex: BiologicalSex?,
+    val fitnessGoal: FitnessGoal?,
+    val trainingFrequency: Int?,
+    val trainingTypes: Set<TrainingType>,
+    val trainingIntensity: TrainingIntensity?,
+    val dailyActivityLevel: DailyActivityLevel?,
     val proteinGoal: Int?,
-    /** Daily calorie goal in kcal. */
     val calorieGoal: Int?,
-    /** Daily water goal in mL. */
+    val fatGoal: Int?,
+    val carbGoal: Int?,
     val waterGoal: Int?,
 )
