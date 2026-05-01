@@ -1,5 +1,6 @@
 package com.strakk.shared.data.remote
 
+import com.strakk.shared.domain.common.DomainError
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.serialization.json.Json
@@ -15,7 +16,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  * token payload's `sub` claim — necessary on cold start when the user object
  * is not yet populated in the session state but a valid token exists.
  *
- * Throws [IllegalStateException] if no authenticated session is available.
+ * Throws [DomainError.AuthError] if no authenticated session is available.
  */
 internal class CurrentUserIdProvider(
     private val supabaseClient: SupabaseClient,
@@ -25,20 +26,24 @@ internal class CurrentUserIdProvider(
         supabaseClient.auth.currentUserOrNull()?.id?.let { return it }
 
         val accessToken = supabaseClient.auth.currentSessionOrNull()?.accessToken
-            ?: error("No authenticated session")
+            ?: throw DomainError.AuthError("No authenticated session. Please sign in again.")
 
         val payload = accessToken.split(".").getOrNull(1)
-            ?: error("Invalid JWT format")
+            ?: throw DomainError.AuthError("Invalid session token format.")
 
-        val decoded = Base64.UrlSafe
-            .withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
-            .decode(payload)
-            .decodeToString()
+        val decoded = try {
+            Base64.UrlSafe
+                .withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+                .decode(payload)
+                .decodeToString()
+        } catch (e: Exception) {
+            throw DomainError.AuthError("Failed to decode session token.", e)
+        }
 
         return Json.parseToJsonElement(decoded)
             .jsonObject["sub"]
             ?.jsonPrimitive
             ?.content
-            ?: error("No 'sub' claim in JWT")
+            ?: throw DomainError.AuthError("Session token is missing user identity ('sub' claim).")
     }
 }

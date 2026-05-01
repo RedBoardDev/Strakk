@@ -196,7 +196,7 @@ class CalendarViewModel(
     }
 
     private fun emitError(throwable: Throwable) {
-        emit(CalendarEffect.ShowError(throwable.message ?: "Une erreur est survenue."))
+        emit(CalendarEffect.ShowError(throwable.message ?: "An error occurred"))
     }
 
     // -------------------------------------------------------------------------

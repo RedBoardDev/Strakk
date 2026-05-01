@@ -33,9 +33,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -63,24 +67,49 @@ internal class MealRepositoryImpl(
     private val logger: Logger,
 ) : MealRepository {
 
+    // Date-keyed cache: date → list of meals for that date.
     private val mealsCache = MutableStateFlow<Map<String, List<Meal>>>(emptyMap())
+
+    // Flat index by meal ID for O(1) lookup — kept in sync via [updateCaches].
+    private val mealIndex = MutableStateFlow<Map<String, Meal>>(emptyMap())
+
     private val fetchedDates = mutableSetOf<String>()
     private val fetchMutex = Mutex()
+
+    /** Updates both caches atomically. All mutations must go through this function. */
+    private fun updateCaches(newByDate: Map<String, List<Meal>>) {
+        mealsCache.value = newByDate
+        mealIndex.value = newByDate.values.flatten().associateBy { it.id }
+    }
 
     override fun observeMealsForDate(date: String): Flow<List<Meal>> =
         mealsCache.map { it[date] ?: emptyList() }
             .distinctUntilChanged()
             .onStart { ensureFetched(date) }
 
+    /** O(1) lookup by meal ID via the flat [mealIndex]. */
     override fun observeMeal(id: String): Flow<Meal?> =
-        mealsCache.map { map -> map.values.flatten().firstOrNull { it.id == id } }
+        mealIndex.map { it[id] }
             .distinctUntilChanged()
 
     private suspend fun ensureFetched(date: String) {
         val shouldFetch = fetchMutex.withLock { fetchedDates.add(date) }
         if (shouldFetch) {
             val meals = fetchMealsForDate(date)
-            mealsCache.update { it + (date to meals) }
+            updateCaches(trimCache(mealsCache.value + (date to meals)))
+        }
+    }
+
+    /**
+     * Removes cache entries for dates older than 30 days to prevent unbounded growth.
+     */
+    private fun trimCache(cache: Map<String, List<Meal>>): Map<String, List<Meal>> {
+        val cutoff = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+            .minus(kotlinx.datetime.DatePeriod(days = 30))
+        return cache.filterKeys { dateKey ->
+            runCatching { LocalDate.parse(dateKey) >= cutoff }.getOrDefault(true)
         }
     }
 
@@ -108,7 +137,8 @@ internal class MealRepositoryImpl(
             .decodeSingle<MealDto>()
 
         val meal = dto.toDomain()
-        mealsCache.update { it + (date to ((it[date] ?: emptyList()) + meal)) }
+        val current = mealsCache.value
+        updateCaches(current + (date to ((current[date] ?: emptyList()) + meal)))
         return meal
     }
 
@@ -117,17 +147,16 @@ internal class MealRepositoryImpl(
             .from("meals")
             .update({ set("name", name) }) { filter { eq("id", id) } }
 
-        mealsCache.update { byDate ->
-            byDate.mapValues { (_, meals) ->
+        updateCaches(
+            mealsCache.value.mapValues { (_, meals) ->
                 meals.map { if (it.id == id) it.copy(name = name) else it }
-            }
-        }
+            },
+        )
     }
 
     override suspend fun deleteMeal(id: String) {
         // Gather photo paths before the cascade wipes meal_entries.
-        val photoPaths = mealsCache.value.values.flatten()
-            .firstOrNull { it.id == id }
+        val photoPaths = mealIndex.value[id]
             ?.entries
             ?.mapNotNull { it.photoPath }
             ?: emptyList()
@@ -136,9 +165,9 @@ internal class MealRepositoryImpl(
             .from("meals")
             .delete { filter { eq("id", id) } }
 
-        mealsCache.update { byDate ->
-            byDate.mapValues { (_, meals) -> meals.filterNot { it.id == id } }
-        }
+        updateCaches(
+            mealsCache.value.mapValues { (_, meals) -> meals.filterNot { it.id == id } },
+        )
 
         if (photoPaths.isNotEmpty()) {
             try {
@@ -174,38 +203,51 @@ internal class MealRepositoryImpl(
             .decodeSingle<MealDto>()
 
         // 2) INSERT all entries with meal_id / photo_path set.
-        val entriesPayload = buildJsonArray {
-            entries.forEach { resolved ->
-                add(
-                    buildEntryPayload(
-                        userId = userId,
-                        mealId = mealBase.id,
-                        logDate = date,
-                        entry = resolved.entry,
-                        photoPath = photoPathsByItemId[resolved.id],
-                    ),
-                )
+        // Compensating transaction: if entries insert fails, delete the orphan meal.
+        val insertedEntries = try {
+            val entriesPayload = buildJsonArray {
+                entries.forEach { resolved ->
+                    add(
+                        buildEntryPayload(
+                            userId = userId,
+                            mealId = mealBase.id,
+                            logDate = date,
+                            entry = resolved.entry,
+                            photoPath = photoPathsByItemId[resolved.id],
+                        ),
+                    )
+                }
             }
+            supabaseClient
+                .from("meal_entries")
+                .insert(entriesPayload) { select() }
+                .decodeList<MealEntryDto>()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(LOG_TAG, "Entries insert failed for meal ${mealBase.id}, rolling back meal", e)
+            try {
+                supabaseClient.from("meals").delete { filter { eq("id", mealBase.id) } }
+            } catch (rollbackEx: CancellationException) {
+                throw rollbackEx
+            } catch (rollbackEx: Exception) {
+                logger.e(LOG_TAG, "Rollback of meal ${mealBase.id} also failed", rollbackEx)
+            }
+            throw DomainError.DataError("Failed to save meal entries. The meal was not created.", e)
         }
-
-        val insertedEntries = supabaseClient
-            .from("meal_entries")
-            .insert(entriesPayload) { select() }
-            .decodeList<MealEntryDto>()
 
         val meal = mealBase
             .copy(mealEntries = insertedEntries.sortedBy { it.createdAt })
             .toDomain()
 
-        mealsCache.update { byDate ->
-            byDate + (date to ((byDate[date] ?: emptyList()) + meal))
-        }
+        val current = mealsCache.value
+        updateCaches(current + (date to ((current[date] ?: emptyList()) + meal)))
         return meal
     }
 
     override suspend fun addEntryToMeal(mealId: String, entry: DraftItem.Resolved) {
         val userId = userIdProvider.currentOrThrow()
-        val existing = mealsCache.value.values.flatten().firstOrNull { it.id == mealId }
+        val existing = mealIndex.value[mealId]
             ?: throw DomainError.DataError("Meal $mealId not found in cache")
 
         val payload = buildEntryPayload(
@@ -221,19 +263,19 @@ internal class MealRepositoryImpl(
             .decodeSingle<MealEntryDto>()
             .toDomain()
 
-        mealsCache.update { byDate ->
-            byDate.mapValues { (_, meals) ->
+        updateCaches(
+            mealsCache.value.mapValues { (_, meals) ->
                 meals.map { m ->
                     if (m.id == mealId) m.copy(entries = m.entries + inserted) else m
                 }
-            }
-        }
+            },
+        )
     }
 
     override fun updateEntryInCache(entry: MealEntry) {
         val mealId = entry.mealId ?: return
-        mealsCache.update { byDate ->
-            byDate.mapValues { (_, meals) ->
+        updateCaches(
+            mealsCache.value.mapValues { (_, meals) ->
                 meals.map { meal ->
                     if (meal.id == mealId) {
                         meal.copy(entries = meal.entries.map { e ->
@@ -241,12 +283,12 @@ internal class MealRepositoryImpl(
                         })
                     } else meal
                 }
-            }
-        }
+            },
+        )
     }
 
     override fun clearCache() {
-        mealsCache.value = emptyMap()
+        updateCaches(emptyMap())
         fetchedDates.clear()
     }
 

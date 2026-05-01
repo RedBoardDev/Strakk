@@ -143,7 +143,7 @@ class CheckInWizardViewModel(
     private fun loadForEdit(id: String) {
         viewModelScope.launch {
             val checkIn = observeCheckIn(id).firstOrNull() ?: run {
-                emit(CheckInWizardEffect.ShowError("Bilan introuvable."))
+                emit(CheckInWizardEffect.ShowError("Check-in not found."))
                 emit(CheckInWizardEffect.NavigateBack)
                 return@launch
             }
@@ -353,7 +353,7 @@ class CheckInWizardViewModel(
                 }
                 .onFailure {
                     setState { (this as? CheckInWizardUiState.Ready)?.copy(nutritionLoading = false) ?: this }
-                    emit(CheckInWizardEffect.ShowError(it.message ?: "Erreur lors du calcul nutritionnel."))
+                    emit(CheckInWizardEffect.ShowError(it.message ?: "An error occurred"))
                 }
         }
     }
@@ -386,7 +386,7 @@ class CheckInWizardViewModel(
                 }
                 .onFailure {
                     setState { (this as? CheckInWizardUiState.Ready)?.copy(saving = false) ?: this }
-                    emit(CheckInWizardEffect.ShowError(it.message ?: "Erreur lors de la sauvegarde."))
+                    emit(CheckInWizardEffect.ShowError(it.message ?: "An error occurred"))
                 }
         }
     }

@@ -174,10 +174,7 @@ class MealDraftViewModel(
     }
 
     private fun emitError(throwable: Throwable) {
-        val message = when (throwable) {
-            is DomainError -> throwable.message ?: "Une erreur est survenue."
-            else -> throwable.message ?: "Une erreur est survenue."
-        }
+        val message = throwable.message ?: "An error occurred"
         emit(MealDraftEffect.ShowError(message))
     }
 
@@ -185,12 +182,13 @@ class MealDraftViewModel(
         val local = clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
         val hh = local.hour.toString().padStart(2, '0')
         val mm = local.minute.toString().padStart(2, '0')
-        return "Repas - ${hh}h${mm}"
+        return "Meal - ${hh}h${mm}"
     }
 
     private fun generateId(): String {
-        val now = clock.now().toEpochMilliseconds()
-        val rand = (0..0xFFFF).random()
-        return "item-${now}-${rand.toString(16)}"
+        // 128-bit randomness (16 bytes) encoded as hex — collision-safe for local item IDs.
+        val bytes = kotlin.random.Random.nextBytes(16)
+        val hex = bytes.joinToString("") { it.toInt().and(0xFF).toString(16).padStart(2, '0') }
+        return "item-$hex"
     }
 }

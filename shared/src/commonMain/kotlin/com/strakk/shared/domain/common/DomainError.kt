@@ -5,32 +5,37 @@ package com.strakk.shared.domain.common
  *
  * Used as [Result.failure] payloads across use case boundaries.
  * Each variant carries a human-readable [message] and an optional [cause].
+ *
+ * Implements [sealed interface] per domain conventions. Each subclass extends
+ * [Exception] directly so that structured error handling and stack traces work
+ * correctly across the call stack.
  */
-sealed class DomainError(
-    override val message: String,
-    override val cause: Throwable? = null,
-) : Exception(message, cause) {
+sealed interface DomainError {
+
+    val message: String
+    val cause: Throwable?
 
     /**
-     * Authentication-related failure (expired session, invalid token, network error during auth).
+     * Authentication-related failure (no session, expired session, invalid token).
      */
-    class AuthError(
-        message: String,
-        cause: Throwable? = null,
-    ) : DomainError(message, cause)
+    data class AuthError(
+        override val message: String,
+        override val cause: Throwable? = null,
+    ) : Exception(message, cause), DomainError
 
     /**
      * Data-layer failure (network, database, serialization).
      */
-    class DataError(
-        message: String,
-        cause: Throwable? = null,
-    ) : DomainError(message, cause)
+    data class DataError(
+        override val message: String,
+        override val cause: Throwable? = null,
+    ) : Exception(message, cause), DomainError
 
     /**
      * Client-side validation failure (bad input format, missing required field).
      */
-    class ValidationError(
-        message: String,
-    ) : DomainError(message)
+    data class ValidationError(
+        override val message: String,
+        override val cause: Throwable? = null,
+    ) : Exception(message, cause), DomainError
 }

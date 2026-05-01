@@ -76,7 +76,7 @@ class CheckInDetailViewModel(
         viewModelScope.launch {
             deleteCheckIn(checkInId)
                 .onSuccess { emit(CheckInDetailEffect.NavigateBack) }
-                .onFailure { emit(CheckInDetailEffect.ShowError(it.message ?: "Erreur lors de la suppression.")) }
+                .onFailure { emit(CheckInDetailEffect.ShowError(it.message ?: "An error occurred")) }
         }
     }
 }

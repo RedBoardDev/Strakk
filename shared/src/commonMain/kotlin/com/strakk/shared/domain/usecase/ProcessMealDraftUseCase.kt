@@ -7,6 +7,7 @@ import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealPhotoRepository
 import com.strakk.shared.domain.repository.MealRepository
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -89,25 +90,29 @@ class ProcessMealDraftUseCase(
                     val jobs = photoBatches.mapIndexed { batchIndex, photoBatch ->
                         val textsForBatch = if (batchIndex == 0) pendingTexts else emptyList()
                         async {
-                            runCatching {
+                            try {
                                 extractBatch(
                                     photos = photoBatch,
                                     texts = textsForBatch,
                                     uploadedPaths = uploadedPaths,
                                     draft = draft,
                                 )
-                            }.getOrElse { _ ->
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (_: Exception) {
                                 // Batch failed → per-item fallback via analyze-meal-single
                                 val fallback = mutableMapOf<String, ItemResult>()
                                 for (photo in photoBatch) {
-                                    fallback[photo.id] = runCatching {
+                                    fallback[photo.id] = try {
                                         val resolved = mealRepository.analyzePhotoSingle(
                                             imageBase64 = photo.imageBase64,
                                             hint = photo.hint,
                                             draftItemId = photo.id,
                                         )
                                         ItemResult(photo.id, resolved, null)
-                                    }.getOrElse { e ->
+                                    } catch (ce: CancellationException) {
+                                        throw ce
+                                    } catch (e: Exception) {
                                         ItemResult(
                                             photo.id,
                                             null,
@@ -117,13 +122,15 @@ class ProcessMealDraftUseCase(
                                 }
                                 if (batchIndex == 0) {
                                     for (text in textsForBatch) {
-                                        fallback[text.id] = runCatching {
+                                        fallback[text.id] = try {
                                             val resolved = mealRepository.analyzeTextSingle(
                                                 description = text.description,
                                                 draftItemId = text.id,
                                             )
                                             ItemResult(text.id, resolved, null)
-                                        }.getOrElse { e ->
+                                        } catch (ce: CancellationException) {
+                                            throw ce
+                                        } catch (e: Exception) {
                                             ItemResult(
                                                 text.id,
                                                 null,

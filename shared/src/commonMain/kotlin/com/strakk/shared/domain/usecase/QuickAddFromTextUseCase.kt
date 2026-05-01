@@ -24,7 +24,7 @@ class QuickAddFromTextUseCase(
         val trimmed = description.trim()
         if (trimmed.length !in MIN_LENGTH..MAX_LENGTH) {
             throw DomainError.ValidationError(
-                "La description doit contenir entre $MIN_LENGTH et $MAX_LENGTH caractères.",
+                "Description must be between $MIN_LENGTH and $MAX_LENGTH characters.",
             )
         }
         val dateToUse = logDate ?: Clock.System.now()

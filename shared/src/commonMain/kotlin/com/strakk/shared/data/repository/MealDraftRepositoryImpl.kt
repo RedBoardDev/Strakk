@@ -124,10 +124,10 @@ internal class MealDraftRepositoryImpl(
     }
 
     private fun generateId(): String {
-        // Short, URL-safe, good enough for local uniqueness.
+        // 128-bit randomness (16 bytes) encoded as hex — collision-safe for local draft IDs.
         // Draft IDs are never sent to Supabase as-is; server generates its own UUIDs on commit.
-        val now = Clock.System.now().toEpochMilliseconds()
-        val rand = (0..0xFFFF).random()
-        return "draft-${now}-${rand.toString(16)}"
+        val bytes = kotlin.random.Random.nextBytes(16)
+        val hex = bytes.joinToString("") { it.toInt().and(0xFF).toString(16).padStart(2, '0') }
+        return "draft-$hex"
     }
 }

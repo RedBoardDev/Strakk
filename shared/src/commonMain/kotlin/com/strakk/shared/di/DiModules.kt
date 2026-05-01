@@ -29,7 +29,6 @@ import com.strakk.shared.domain.repository.NutritionRepository
 import com.strakk.shared.domain.repository.ProfileRepository
 import com.strakk.shared.domain.repository.WorkoutRepository
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
-import com.strakk.shared.domain.usecase.AddItemToProcessedMealUseCase
 import com.strakk.shared.domain.usecase.AddWaterUseCase
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
 import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
@@ -49,7 +48,6 @@ import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
 import com.strakk.shared.domain.usecase.ObserveDailySummaryUseCase
 import com.strakk.shared.domain.usecase.ObserveFrequentItemsUseCase
 import com.strakk.shared.domain.usecase.ObserveMealContainersForDateUseCase
-import com.strakk.shared.domain.usecase.ObserveMealUseCase
 import com.strakk.shared.domain.usecase.ObserveMealsForDateUseCase
 import com.strakk.shared.domain.usecase.ObserveNutritionMutationsUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
@@ -57,7 +55,6 @@ import com.strakk.shared.domain.usecase.ObserveWaterEntriesForDateUseCase
 import com.strakk.shared.domain.usecase.ParseWorkoutPdfUseCase
 import com.strakk.shared.domain.usecase.ProcessMealDraftUseCase
 import com.strakk.shared.domain.usecase.QuickAddEntryUseCase
-import com.strakk.shared.domain.usecase.QuickAddFromBarcodeUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.domain.usecase.QuickAddKnownEntryUseCase
@@ -65,7 +62,6 @@ import com.strakk.shared.domain.usecase.QuickAddManualUseCase
 import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
 import com.strakk.shared.domain.usecase.RenameMealDraftUseCase
-import com.strakk.shared.domain.usecase.RenameMealUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.SearchFoodUseCase
 import com.strakk.shared.domain.usecase.SignInUseCase
@@ -185,11 +181,8 @@ internal val domainModule = module {
     factoryOf(::RemoveLastWaterEntryUseCase)
 
     // Meal container (Processed)
-    factoryOf(::ObserveMealUseCase)
     factoryOf(::ObserveMealContainersForDateUseCase)
-    factoryOf(::RenameMealUseCase)
     factoryOf(::DeleteMealContainerUseCase)
-    factoryOf(::AddItemToProcessedMealUseCase)
 
     // Meal draft lifecycle
     factoryOf(::ObserveActiveMealDraftUseCase)
@@ -207,7 +200,6 @@ internal val domainModule = module {
     factoryOf(::QuickAddManualUseCase)
     factoryOf(::QuickAddFromPhotoUseCase)
     factoryOf(::QuickAddFromTextUseCase)
-    factoryOf(::QuickAddFromBarcodeUseCase)
     factoryOf(::QuickAddKnownEntryUseCase)
 
     // Catalogue

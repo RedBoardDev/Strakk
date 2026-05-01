@@ -53,6 +53,7 @@ private const val BUCKET = "checkin-photos"
 private const val TABLE = "checkins"
 private const val PHOTOS_TABLE = "checkin_photos"
 private const val CHECKIN_COLUMNS = "*, checkin_photos(*)"
+private const val SIGNED_URL_TTL_SECONDS = 3600
 
 internal class CheckInRepositoryImpl(
     private val supabaseClient: SupabaseClient,
@@ -199,7 +200,7 @@ internal class CheckInRepositoryImpl(
     }
 
     override suspend fun getPhotoUrl(storagePath: String): String =
-        supabaseClient.storage.from(BUCKET).createSignedUrl(storagePath, 3600.seconds)
+        supabaseClient.storage.from(BUCKET).createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS.seconds)
 
     // -------------------------------------------------------------------------
     // Nutrition averages (client-side computation)

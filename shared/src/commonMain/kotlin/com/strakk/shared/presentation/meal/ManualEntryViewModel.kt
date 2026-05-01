@@ -41,7 +41,7 @@ class ManualEntryViewModel(
                 .onFailure { error ->
                     val message = (error as? DomainError.ValidationError)?.message
                         ?: error.message
-                        ?: "Enregistrement échoué."
+                        ?: "An error occurred"
                     setState { copy(errorMessage = message) }
                     emit(ManualEntryEffect.ShowError(message))
                 }

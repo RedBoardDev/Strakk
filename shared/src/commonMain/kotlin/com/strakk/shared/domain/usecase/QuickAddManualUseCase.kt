@@ -6,6 +6,7 @@ import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.ManualEntryDraft
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.MealEntryInput
+import com.strakk.shared.domain.model.NutritionDefaults
 import com.strakk.shared.domain.repository.NutritionRepository
 
 /**
@@ -39,25 +40,25 @@ class QuickAddManualUseCase(
 
     private fun validate(draft: ManualEntryDraft) {
         if (draft.name.isBlank()) {
-            throw DomainError.ValidationError("Un nom est requis.")
+            throw DomainError.ValidationError("Name is required.")
         }
         if (draft.name.length > 100) {
-            throw DomainError.ValidationError("Le nom ne peut pas dépasser 100 caractères.")
+            throw DomainError.ValidationError("Name must not exceed 100 characters.")
         }
-        if (draft.protein < 0 || draft.protein > 500) {
-            throw DomainError.ValidationError("Les protéines doivent être entre 0 et 500g.")
+        if (draft.protein < 0 || draft.protein > NutritionDefaults.MAX_MACRO_GRAMS) {
+            throw DomainError.ValidationError("Protein must be between 0 and ${NutritionDefaults.MAX_MACRO_GRAMS}g.")
         }
-        if (draft.calories < 0 || draft.calories > 5000) {
-            throw DomainError.ValidationError("Les calories doivent être entre 0 et 5000 kcal.")
+        if (draft.calories < 0 || draft.calories > NutritionDefaults.MAX_CALORIES_ENTRY) {
+            throw DomainError.ValidationError("Calories must be between 0 and ${NutritionDefaults.MAX_CALORIES_ENTRY} kcal.")
         }
         draft.fat?.let {
-            if (it < 0 || it > 500) {
-                throw DomainError.ValidationError("Les lipides doivent être entre 0 et 500g.")
+            if (it < 0 || it > NutritionDefaults.MAX_MACRO_GRAMS) {
+                throw DomainError.ValidationError("Fat must be between 0 and ${NutritionDefaults.MAX_MACRO_GRAMS}g.")
             }
         }
         draft.carbs?.let {
-            if (it < 0 || it > 500) {
-                throw DomainError.ValidationError("Les glucides doivent être entre 0 et 500g.")
+            if (it < 0 || it > NutritionDefaults.MAX_MACRO_GRAMS) {
+                throw DomainError.ValidationError("Carbs must be between 0 and ${NutritionDefaults.MAX_MACRO_GRAMS}g.")
             }
         }
     }
