@@ -30,6 +30,6 @@ tasks.register("detektAll") {
     description = "Run Detekt on all source sets (KMP + Android)"
     dependsOn(
         ":shared:detektMetadataCommonMain",
-        ":androidApp:detektAndroidDebug",
+        ":androidApp:detektAndroidProdDebug",
     )
 }

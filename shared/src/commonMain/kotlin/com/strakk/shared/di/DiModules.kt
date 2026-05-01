@@ -123,10 +123,12 @@ internal val dataModule = module {
 
     single<Settings> { Settings() }
 
+    single { Json { ignoreUnknownKeys = true } }
+
     single<HttpClient> {
         HttpClient {
             install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+                json(get())
             }
         }
     }
