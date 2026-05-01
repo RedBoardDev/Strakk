@@ -1,61 +1,60 @@
 # Strakk
 
-Personal nutrition & weekly check-in tracking app. Solo user, no coach/client model.
-KMP (Kotlin Multiplatform) — shared business logic, native UI on each platform.
-Backend: Supabase (Postgres, Auth, Storage, Edge Functions).
-
-**Base package:** `com.strakk.shared`
+Personal nutrition & weekly check-in app. KMP — shared logic, native UI.
+Backend: Supabase (Postgres, Auth, Storage, Edge Functions). Base pkg: `com.strakk.shared`
 
 ## Stack
-
-- **Shared:** Kotlin 2.1, supabase-kt, Ktor, Koin, kotlinx.serialization, SKIE (iOS bridge)
+- **Shared:** Kotlin 2.1, supabase-kt 3.1.1, Ktor, Koin, kotlinx.serialization, SKIE
 - **iOS:** Swift 6, SwiftUI, iOS 17+
 - **Android:** Jetpack Compose, Material 3, API 26+
-- **Design:** see `DESIGN.md` at project root — source of truth for all UI decisions
+- **Design:** `DESIGN.md` — source of truth for all UI. Read before any UI work.
 
-## Environment
+## Implemented Features
+- **Auth:** Login, Reset Password
+- **Onboarding V2:** Full flow — Welcome → Weight/Height → Bio → Goal → Activity → SignUp → AI Goals → Preview
+- **Home:** `TodayView` (2×2 macro grid), stub features
 
-- `JAVA_HOME` — JDK 17+ (`/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home`)
-- `ANDROID_HOME` — Android SDK (`~/Library/Android/sdk`)
-- Gradle wrapper: `./gradlew` (never install Gradle globally)
-- iOS: `cd iosApp && xcodegen generate` to regenerate Xcode project
+## Domain Model (`shared/domain/`)
+**Models:** `UserProfile`, `NutritionGoals`, `OnboardingData`, `AiGoalsResult`, `CalculateGoalsRequest`
+**Enums:** `BiologicalSex`, `FitnessGoal`, `TrainingType`, `ActivityLevel`
+**UseCases:** `CompleteOnboardingUseCase`, `CalculateGoalsUseCase`, `CreateProfileUseCase`, `ResetPasswordUseCase`
+**Repos (interfaces):** `ProfileRepository`, `GoalsRepository`, `AuthRepository`
 
-## Project Structure
-
+## Project Layout
 ```
-shared/src/commonMain/kotlin/com/strakk/shared/
-  domain/        # Models, UseCases, Repository interfaces — DEPENDS ON NOTHING
-  data/          # RepositoryImpl, DTOs, Mappers, Supabase calls — depends on domain only
-  presentation/  # ViewModels, UiState — depends on domain only
-  di/            # Koin modules
-androidApp/      # Jetpack Compose UI (Material 3)
-iosApp/          # SwiftUI views + ViewModel wrappers
-docs/specs/      # Feature specifications
+shared/src/commonMain/.../strakk/shared/
+  domain/       # Pure Kotlin, zero deps
+  data/         # internal — RepositoryImpl, DTOs, Mappers, Supabase calls
+  presentation/ # ViewModels (MVVM+ contract pattern), UiState
+  di/           # Koin modules
+iosApp/         # SwiftUI — @Observable wrappers, SKIE bridge
+androidApp/     # Compose — Route/Screen/Content pattern, Material 3
+supabase/       # Migrations + Edge Functions (Deno/TypeScript)
+docs/specs/     # Feature specs
 ```
 
-## Build
-
+## Build & Lint
 ```bash
-./gradlew :shared:allTests                # Shared tests
-./gradlew :androidApp:assembleDebug       # Android APK
-./gradlew :shared:linkDebugFrameworkIosSimulatorArm64  # iOS framework
+./gradlew :shared:allTests                                      # tests
+./gradlew :androidApp:assembleDebug                             # Android APK
+./gradlew :shared:linkDebugFrameworkIosSimulatorArm64           # iOS framework
+cd iosApp && xcodegen generate                                  # Regen Xcode project
+make lint           # all linters (Detekt + SwiftLint + Deno)
+make lint-kotlin    # Detekt strict, zero tolerance
 ```
+CI blocks merge on: lint-kotlin, lint-deno, test-shared, build-android.
 
-## Architecture (Clean Architecture)
-
-- **domain/** — ZERO dependencies. Pure Kotlin. See `architecture-rules` skill.
+## Architecture Rules
+- **domain/** — ZERO external deps. Interfaces only.
 - **data/** — depends on domain only. All classes `internal`.
-- **presentation/** — depends on domain only. ViewModels call UseCases, never Repositories.
-- **UI** (iosApp, androidApp) — depends on presentation + domain models. Never imports data/.
-
-Detailed conventions in skills: `kotlin-kmp-conventions`, `swiftui-conventions`, `compose-conventions`.
+- **presentation/** — ViewModels call UseCases only, never Repositories.
+- **UI** — depends on presentation + domain. Never imports data/.
 
 ## Anti-Patterns (NEVER)
-
-- Business logic in UI — delegate to UseCases
-- ViewModel calls Repository directly — go through UseCase
-- `collectAsState()` — use `collectAsStateWithLifecycle()`
-- `sealed class` — use `sealed interface` (exception: when class inheritance is required, e.g. extending `Exception`)
+- Business logic in UI → delegate to UseCases
+- ViewModel → Repository directly → go through UseCase
+- `collectAsState()` → use `collectAsStateWithLifecycle()`
+- `sealed class` → use `sealed interface` (except when extending Exception)
 - `java.time`, `Gson`, `MockK`, `Dispatchers.IO` in shared/
 - Generic LLM-looking UI — read DESIGN.md, every screen must feel intentional
 
@@ -85,6 +84,7 @@ Detailed conventions in skills: `kotlin-kmp-conventions`, `swiftui-conventions`,
 | docs/specs/ | @project-manager |
 
 ## Testing
+`kotlin.test` + Mokkery + Turbine + kotlinx-coroutines-test. **No MockK** (JVM-only).
 
 - `kotlin.test` + Mokkery (mocking) + Turbine (Flow) + kotlinx-coroutines-test
 - NO MockK (JVM-only, doesn't work on iOS/Native)
