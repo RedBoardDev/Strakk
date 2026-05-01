@@ -356,7 +356,8 @@ async function handle(req: Request): Promise<Response> {
 
   console.log(`[search-off-live] upserted ${upsertRes.data?.length ?? 0} rows`);
 
-  const items = (upsertRes.data ?? []).map((r) => ({
+  // deno-lint-ignore no-explicit-any
+  const items = ((upsertRes.data ?? []) as any[]).map((r: any) => ({
     id: r.id,
     source: r.source,
     name: r.name,

@@ -14,8 +14,9 @@ function json(body: unknown, status: number): Response {
  * Lists all file paths under a given Storage prefix and deletes them in batch.
  * Errors are logged but never thrown — user deletion must proceed regardless.
  */
+// deno-lint-ignore no-explicit-any
 async function purgeStoragePrefix(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: any,
   bucket: string,
   prefix: string,
 ): Promise<void> {
