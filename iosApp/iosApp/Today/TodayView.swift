@@ -19,23 +19,23 @@ enum AddPickerMode: String, Identifiable {
 // MARK: - TodayView
 
 struct TodayView: View {
-    @State private var viewModel = TodayViewModelWrapper()
-    @Environment(MealDraftViewModelWrapper.self) private var draftViewModel
+    @State var viewModel = TodayViewModelWrapper()
+    @Environment(MealDraftViewModelWrapper.self) var draftViewModel
 
     // Navigation
-    @State private var navigationPath = NavigationPath()
+    @State var navigationPath = NavigationPath()
 
     // Sheets
-    @State private var addPickerMode: AddPickerMode?
-    @State private var showHevyExport: Bool = false
-    @State private var shouldOpenDraftAfterStart: Bool = false
+    @State var addPickerMode: AddPickerMode?
+    @State var showHevyExport: Bool = false
+    @State var shouldOpenDraftAfterStart: Bool = false
 
     // Detail sheets
-    @State private var selectedMeal: MealData?
-    @State private var selectedEntry: MealEntryData?
+    @State var selectedMeal: MealData?
+    @State var selectedEntry: MealEntryData?
 
     // Edit entry sheet
-    @State private var editingEntry: MealEntryData?
+    @State var editingEntry: MealEntryData?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
