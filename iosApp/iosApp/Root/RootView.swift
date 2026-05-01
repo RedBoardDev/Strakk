@@ -14,13 +14,13 @@ struct RootView: View {
                 }
 
             case .unauthenticated:
-                AuthFlowView()
+                OnboardingFlowView()
 
-            case .authenticated(let hasProfile):
-                if hasProfile {
+            case .authenticated(let onboardingCompleted):
+                if onboardingCompleted {
                     MainTabView()
                 } else {
-                    OnboardingView()
+                    OnboardingFlowView()
                 }
             }
         }

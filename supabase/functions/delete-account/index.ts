@@ -80,9 +80,11 @@ Deno.serve(async (req: Request) => {
 
   try {
     // 6a. Purge meal photos — log errors, continue on failure
+    // @ts-expect-error supabase-js generic variance mismatch
     await purgeStoragePrefix(adminClient, "meal-photos", userId);
 
     // 6b. Purge check-in photos — log errors, continue on failure
+    // @ts-expect-error supabase-js generic variance mismatch
     await purgeStoragePrefix(adminClient, "checkin-photos", userId);
 
     // 6c. Delete the auth user — cascades to profiles (which triggers

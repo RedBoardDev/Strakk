@@ -5,11 +5,10 @@ paths:
 ---
 # Data Layer Encapsulation
 
-The data layer implements domain contracts and hides all infrastructure details.
+All data layer classes are `internal` — public API stays in `domain/repository`.
 
-- Data classes, DTOs, mappers, remote/local data sources, and repository implementations are `internal`.
-- Public API stays in `domain/repository`.
-- DTOs use `@Serializable` and `@SerialName("snake_case")` for Supabase fields.
-- Repository implementations map DTOs to domain models before returning.
-- Data may import domain, Supabase, Ktor, serialization, and Koin module APIs.
-- Data must never import presentation or UI code.
+- DTOs use `@Serializable` + `@SerialName("snake_case")` for Supabase fields.
+- Map DTOs to domain models before returning from repositories.
+- Data may import domain, Supabase, Ktor, serialization, Koin — never presentation or UI.
+
+See `architecture-rules` skill for full rules.

@@ -1,11 +1,10 @@
 import SwiftUI
 import shared
 
-/// Swift-side representation of RootUiState.
 enum RootState: Equatable {
     case loading
     case unauthenticated
-    case authenticated(hasProfile: Bool)
+    case authenticated(onboardingCompleted: Bool)
 }
 
 @MainActor
@@ -44,7 +43,7 @@ final class RootViewModelWrapper {
         } else if kmpState is RootUiStateUnauthenticated {
             return .unauthenticated
         } else if let auth = kmpState as? RootUiStateAuthenticated {
-            return .authenticated(hasProfile: auth.hasProfile)
+            return .authenticated(onboardingCompleted: auth.onboardingCompleted)
         }
         return .loading
     }

@@ -2,7 +2,6 @@
 .gradle/
 build/
 local.properties
-gradle/wrapper/gradle-wrapper.jar
 .kotlin/
 
 # Android
@@ -15,6 +14,7 @@ __pycache__/
 *.pyc
 
 # iOS
+iosApp/Config/*.xcconfig
 
 # Local agent/tooling state
 .claude/settings.local.json
@@ -34,3 +34,4 @@ iosApp/DerivedData/
 
 # Kotlin
 *.kotlin_module
+docs/

@@ -35,6 +35,8 @@ class ComputeNutritionSummaryUseCase(
             val goals = NutritionGoals(
                 proteinGoal = profile?.proteinGoal,
                 calorieGoal = profile?.calorieGoal,
+                fatGoal = profile?.fatGoal,
+                carbGoal = profile?.carbGoal,
                 waterGoal = profile?.waterGoal,
             )
 

@@ -69,7 +69,8 @@ Detailed conventions in skills: `kotlin-kmp-conventions`, `swiftui-conventions`,
 | `kotlin-shared` | Implements shared/ | Sonnet |
 | `swift-ios` | Implements iosApp/ | Sonnet |
 | `android-ui` | Implements androidApp/ | Sonnet |
-| `build-verify` | Runs builds, linters, tests | Sonnet |
+| `supabase-edge` | Implements Supabase migrations, RLS, Edge Functions | Sonnet |
+| `build-verify` | Runs builds, linters, tests — reports only | Haiku |
 | `quality-review` | Reviews architecture + conventions | Opus |
 | `test-writer` | Writes shared tests | Sonnet |
 
@@ -80,9 +81,20 @@ Detailed conventions in skills: `kotlin-kmp-conventions`, `swiftui-conventions`,
 | shared/ | @kotlin-shared |
 | iosApp/ | @swift-ios |
 | androidApp/ | @android-ui |
+| supabase/ | @supabase-edge |
 | docs/specs/ | @project-manager |
 
 ## Testing
 
 - `kotlin.test` + Mokkery (mocking) + Turbine (Flow) + kotlinx-coroutines-test
 - NO MockK (JVM-only, doesn't work on iOS/Native)
+
+## Linting & DevOps
+
+- **Detekt + ktlint**: `make lint-kotlin` — strict config at `config/detekt/detekt.yml`, zero tolerance
+- **SwiftLint**: `make lint-swift` — config at `iosApp/.swiftlint.yml`, local macOS only (no macOS CI runner)
+- **Deno lint + check**: `make lint-deno` — config at `supabase/functions/deno.json`
+- **All lints**: `make lint`
+- **Pre-commit hook**: Lefthook runs SwiftLint + Detekt on commit (`make setup` to activate)
+- **CI**: `.github/workflows/ci.yml` — lint-kotlin, lint-deno, test-shared, build-android (blocks merge)
+- **CD**: `.github/workflows/cd.yml` — on merge to `release` branch (skeleton)

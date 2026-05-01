@@ -79,12 +79,12 @@ BEGIN
 END;
 $$;
 
+-- Drop the old CHECK constraint before altering the type (required on fresh DBs)
+ALTER TABLE meal_entries DROP CONSTRAINT IF EXISTS meal_entries_source_check;
+
 -- Migrate the column to the new type
 ALTER TABLE meal_entries
     ALTER COLUMN source TYPE meal_entry_source USING source::meal_entry_source;
-
--- Drop the old CHECK constraint (auto-named by Postgres from the inline check)
-ALTER TABLE meal_entries DROP CONSTRAINT IF EXISTS meal_entries_source_check;
 
 ----------------------------------------------------------------
 -- 4. ENUM for checkins.ai_summary_lang
@@ -100,8 +100,14 @@ BEGIN
 END;
 $$;
 
+-- Drop the old CHECK constraint before altering the type (required on fresh DBs)
+ALTER TABLE checkins DROP CONSTRAINT IF EXISTS checkins_ai_summary_lang_check;
+
+-- Drop DEFAULT before type change (Postgres can't auto-cast text default to enum)
+ALTER TABLE checkins ALTER COLUMN ai_summary_lang DROP DEFAULT;
+
 ALTER TABLE checkins
     ALTER COLUMN ai_summary_lang TYPE checkin_ai_lang
         USING ai_summary_lang::checkin_ai_lang;
 
-ALTER TABLE checkins DROP CONSTRAINT IF EXISTS checkins_ai_summary_lang_check;
+ALTER TABLE checkins ALTER COLUMN ai_summary_lang SET DEFAULT 'fr'::checkin_ai_lang;

@@ -1,0 +1,161 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: true
+
+output-reports:
+  active: true
+
+complexity:
+  active: true
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 15
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 8
+  NestedBlockDepth:
+    active: true
+    threshold: 4
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 15
+    thresholdInInterfaces: 10
+    thresholdInObjects: 15
+    thresholdInEnums: 10
+  ComplexCondition:
+    active: true
+    threshold: 4
+
+coroutines:
+  active: true
+  GlobalCoroutineUsage:
+    active: true
+  SuspendFunSwallowedCancellation:
+    active: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: true
+    exceptionNames:
+      - 'Exception'
+      - 'RuntimeException'
+      - 'Throwable'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  TooGenericExceptionThrown:
+    active: true
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'ParseException'
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    excludes: ['**/test/**', '**/commonTest/**', '**/androidTest/**']
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+    propertyPattern: '[A-Za-z][A-Za-z0-9_]*'
+  VariableNaming:
+    active: true
+    variablePattern: '[a-z][A-Za-z0-9]*'
+  PackageNaming:
+    active: true
+    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
+
+style:
+  active: true
+  ForbiddenImport:
+    active: true
+    imports:
+      - 'java.time.*'
+      - 'com.google.gson.*'
+      - 'io.mockk.*'
+  MagicNumber:
+    active: true
+    excludes: ['**/test/**', '**/commonTest/**']
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+    ignoreHashCodeFunction: true
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: false
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreNamedArgument: true
+    ignoreEnums: true
+    ignoreRanges: true
+    ignoreExtensionFunctions: true
+  ReturnCount:
+    active: true
+    max: 3
+    excludeGuardClauses: true
+    excludeReturnFromLambda: true
+    excludedFunctions:
+      - 'equals'
+  UnusedImports:
+    active: true
+  UnusedPrivateMember:
+    active: true
+    allowedNames: '(_|ignored|expected|serialVersionUID)'
+  WildcardImport:
+    active: true
+    excludeImports:
+      - 'java.util.*'
+      - 'kotlinx.coroutines.*'
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
+    excludeRawStrings: true
+  ForbiddenComment:
+    active: false
+  UseDataClass:
+    active: true
+    allowVars: false
+
+formatting:
+  active: true
+  android: false
+  Indentation:
+    active: true
+    indentSize: 4
+  MaximumLineLength:
+    active: true
+    maxLineLength: 120
+    ignoreBackTickedIdentifier: true
+  NoWildcardImports:
+    active: true
+    packagesToUseImportOnDemandProperty: ''
+  TrailingCommaOnCallSite:
+    active: true
+    useTrailingCommaOnCallSite: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+    useTrailingCommaOnDeclarationSite: true
+  ParameterListWrapping:
+    active: true
+    maxLineLength: 120
+  FunctionSignature:
+    active: true
+    maxLineLength: 120

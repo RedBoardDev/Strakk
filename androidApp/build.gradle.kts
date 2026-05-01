@@ -1,8 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinMultiplatform)
+}
+
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.inputStream())
 }
 
 kotlin {
@@ -41,6 +48,20 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
+    }
+
+    flavorDimensions += "env"
+    productFlavors {
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "Strakk")
+        }
+        create("staging") {
+            dimension = "env"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "Strakk Dev")
+            versionNameSuffix = "-staging"
+        }
     }
 
     buildFeatures {

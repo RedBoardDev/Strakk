@@ -65,10 +65,115 @@
     <string name="search_food_add">Add</string>
     <string name="search_food_per_100g">⚖︎ values per 100 g</string>
 
-    <!-- Onboarding -->
+    <!-- Onboarding — common -->
     <string name="onboarding_get_started">Get started</string>
-    <string name="onboarding_continue">Continue</string>
-    <string name="onboarding_back">Back</string>
+    <string name="onboarding_continue">Continuer</string>
+    <string name="onboarding_back">Retour</string>
+
+    <!-- Onboarding — Welcome -->
+    <string name="onboarding_welcome_title">Strakk</string>
+    <string name="onboarding_welcome_subtitle">Ton coach nutrition &amp; fitness, simplifié.</string>
+    <string name="onboarding_welcome_cta">C\'est parti</string>
+    <string name="onboarding_welcome_already_account">Déjà un compte ?</string>
+
+    <!-- Onboarding — Weight -->
+    <string name="onboarding_weight_title">Quel est ton poids actuel ?</string>
+    <string name="onboarding_weight_unit">kg</string>
+
+    <!-- Onboarding — Bio -->
+    <string name="onboarding_bio_title">Quelques infos sur toi</string>
+    <string name="onboarding_bio_height_label">Taille</string>
+    <string name="onboarding_bio_height_unit">cm</string>
+    <string name="onboarding_bio_birth_date_label">Date de naissance</string>
+    <string name="onboarding_bio_birth_date_placeholder">Sélectionner une date</string>
+    <string name="onboarding_bio_sex_label">Sexe biologique</string>
+    <string name="onboarding_bio_sex_male">Homme</string>
+    <string name="onboarding_bio_sex_female">Femme</string>
+    <string name="onboarding_bio_sex_unspecified">Préfère ne pas dire</string>
+    <string name="onboarding_bio_optional">Optionnel — utilisé pour personnaliser tes objectifs</string>
+
+    <!-- Onboarding — Goal -->
+    <string name="onboarding_goal_title">Quel est ton objectif ?</string>
+    <string name="onboarding_goal_lose_fat">Perdre du gras</string>
+    <string name="onboarding_goal_lose_fat_desc">Déficit calorique ciblé</string>
+    <string name="onboarding_goal_gain_muscle">Prendre du muscle</string>
+    <string name="onboarding_goal_gain_muscle_desc">Surplus et protéines adaptés</string>
+    <string name="onboarding_goal_maintain">Maintenir</string>
+    <string name="onboarding_goal_maintain_desc">Équilibre et stabilité</string>
+    <string name="onboarding_goal_just_track">Juste tracker</string>
+    <string name="onboarding_goal_just_track_desc">Suivi sans objectif spécifique</string>
+
+    <!-- Onboarding — Activity Training -->
+    <string name="onboarding_training_title">Parle-moi de ton entraînement</string>
+    <string name="onboarding_training_frequency_label">Séances par semaine</string>
+    <string name="onboarding_training_types_label">Types d\'entraînement</string>
+    <string name="onboarding_training_type_strength">Muscu</string>
+    <string name="onboarding_training_type_cardio">Cardio</string>
+    <string name="onboarding_training_type_team">Sport co</string>
+    <string name="onboarding_training_type_yoga">Yoga / Flexi</string>
+    <string name="onboarding_training_type_other">Autre</string>
+
+    <!-- Onboarding — Activity Daily -->
+    <string name="onboarding_daily_title">Et au quotidien ?</string>
+    <string name="onboarding_daily_intensity_label">Intensité de tes entraînements</string>
+    <string name="onboarding_daily_intensity_light">Légère</string>
+    <string name="onboarding_daily_intensity_light_desc">Effort modéré, récupération facile</string>
+    <string name="onboarding_daily_intensity_moderate">Modérée</string>
+    <string name="onboarding_daily_intensity_moderate_desc">Transpiration, effort soutenu</string>
+    <string name="onboarding_daily_intensity_intense">Intense</string>
+    <string name="onboarding_daily_intensity_intense_desc">Effort maximal, épuisant</string>
+    <string name="onboarding_daily_activity_label">Activité au quotidien</string>
+    <string name="onboarding_daily_activity_sedentary">Sédentaire</string>
+    <string name="onboarding_daily_activity_sedentary_desc">Principalement assis (bureau, voiture)</string>
+    <string name="onboarding_daily_activity_moderate">Modérément actif</string>
+    <string name="onboarding_daily_activity_moderate_desc">Marche régulière, debout souvent</string>
+    <string name="onboarding_daily_activity_very">Très actif</string>
+    <string name="onboarding_daily_activity_very_desc">Travail physique, beaucoup de déplacements</string>
+
+    <!-- Onboarding — Sign Up -->
+    <string name="onboarding_signup_title">Crée ton compte</string>
+    <string name="onboarding_signup_email_label">Email</string>
+    <string name="onboarding_signup_password_label">Mot de passe</string>
+    <string name="onboarding_signup_password_caption">Minimum 6 caractères</string>
+    <string name="onboarding_signup_cta">Créer mon compte</string>
+    <string name="onboarding_signup_login_link">Se connecter</string>
+    <string name="onboarding_signup_password_show">Afficher le mot de passe</string>
+    <string name="onboarding_signup_password_hide">Masquer le mot de passe</string>
+
+    <!-- Onboarding — Nutrition Goals -->
+    <string name="onboarding_nutrition_title">Tes objectifs nutritionnels</string>
+    <string name="onboarding_nutrition_ai_available">Calculer avec l\'IA</string>
+    <string name="onboarding_nutrition_ai_loading">Calcul en cours…</string>
+    <string name="onboarding_nutrition_ai_completed">Objectifs calculés</string>
+    <string name="onboarding_nutrition_ai_failed">Réessayer avec l\'IA</string>
+    <string name="onboarding_nutrition_protein">Protéines</string>
+    <string name="onboarding_nutrition_calories">Calories</string>
+    <string name="onboarding_nutrition_fat">Lipides</string>
+    <string name="onboarding_nutrition_carbs">Glucides</string>
+    <string name="onboarding_nutrition_water">Eau</string>
+    <string name="onboarding_nutrition_unit_g">g</string>
+    <string name="onboarding_nutrition_unit_kcal">kcal</string>
+    <string name="onboarding_nutrition_unit_ml">mL</string>
+
+    <!-- Onboarding — Day Preview -->
+    <string name="onboarding_preview_title">Voilà à quoi ressemblera ta journée</string>
+    <string name="onboarding_preview_cta">Commencer à tracker</string>
+    <string name="onboarding_preview_protein">Protéines</string>
+    <string name="onboarding_preview_calories">Calories</string>
+    <string name="onboarding_preview_fat">Lipides</string>
+    <string name="onboarding_preview_carbs">Glucides</string>
+    <string name="onboarding_preview_water">Eau</string>
+    <string name="onboarding_preview_water_goal">/ %d mL</string>
+
+    <!-- Login -->
+    <string name="login_title">Content de te revoir</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Mot de passe</string>
+    <string name="login_forgot_password">Mot de passe oublié ?</string>
+    <string name="login_cta">Se connecter</string>
+    <string name="login_create_account">Créer un compte</string>
+    <string name="login_password_show">Afficher le mot de passe</string>
+    <string name="login_password_hide">Masquer le mot de passe</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

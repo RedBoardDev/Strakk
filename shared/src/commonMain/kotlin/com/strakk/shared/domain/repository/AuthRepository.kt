@@ -52,4 +52,12 @@ interface AuthRepository {
      * @return The email string, or `null` if no session exists.
      */
     suspend fun getCurrentUserEmail(): String?
+
+    /**
+     * Sends a password reset email via Supabase's built-in flow.
+     *
+     * @param email The email address to send the reset link to.
+     * @throws Exception on network or Supabase errors.
+     */
+    suspend fun resetPassword(email: String)
 }
