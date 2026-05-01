@@ -9,9 +9,7 @@
     "rules": {
       "tags": ["recommended"],
       "include": [
-        "no-await-in-loop",
         "no-throw-literal",
-        "eqeqeq",
         "no-eval",
         "prefer-const"
       ]

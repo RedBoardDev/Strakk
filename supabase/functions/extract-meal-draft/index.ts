@@ -273,7 +273,7 @@ function splitIntoBatches(items: HydratedItem[]): BatchItem[][] {
 // Per-item fallback
 // =============================================================================
 
-async function runSingleFallback(item: BatchItem): Promise<AnalyzedEntry> {
+function runSingleFallback(item: BatchItem): Promise<AnalyzedEntry> {
   if (item.type === "photo") {
     return analyzeSingle({ type: "photo", imageBase64: item.imageBase64, hint: item.hint });
   }

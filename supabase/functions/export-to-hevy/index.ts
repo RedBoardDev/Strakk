@@ -574,7 +574,7 @@ OUTPUT format (exact):
   }>;
   try {
     matches = JSON.parse(jsonStr);
-  } catch (err) {
+  } catch (_err) {
     // Attempt to repair common Claude JSON quirks: trailing commas, malformed
     // exponents (e.g. "1e," -> "1,"), unquoted special values.
     const repaired = jsonStr
@@ -697,7 +697,7 @@ async function exportSession(
     }
   }
 
-  let matchedByAlgo = matched.length;
+  const matchedByAlgo = matched.length;
   let matchedByAi = 0;
   let created = 0;
 
