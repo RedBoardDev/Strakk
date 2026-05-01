@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -77,9 +78,11 @@ fun NutritionCard(
         label = "proteinRingProgress",
     )
 
-    val cardBrush = Brush.verticalGradient(
-        colors = listOf(colors.surface1GradientTop, colors.surface1GradientBottom),
-    )
+    val cardBrush = remember(colors.surface1GradientTop, colors.surface1GradientBottom) {
+        Brush.verticalGradient(
+            colors = listOf(colors.surface1GradientTop, colors.surface1GradientBottom),
+        )
+    }
 
     Surface(
         shape = RoundedCornerShape(radius.xxl),
@@ -211,11 +214,13 @@ private fun ProteinRing(
     val textStyles = LocalStrakkTextStyles.current
     val colors = LocalStrakkColors.current
 
+    val ringBrush = remember(ringColor, ringColorEnd) {
+        Brush.sweepGradient(listOf(ringColor, ringColorEnd))
+    }
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.size(diameter),
     ) {
-        val ringBrush = Brush.sweepGradient(listOf(ringColor, ringColorEnd))
         Canvas(modifier = Modifier.size(diameter)) {
             val stroke = strokeWidth.toPx()
             val diam = size.minDimension - stroke
@@ -377,6 +382,9 @@ private fun MiniProgressBar(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalStrakkColors.current
+    val fillBrush = remember(fillColor, fillColorEnd) {
+        Brush.horizontalGradient(listOf(fillColor, fillColorEnd))
+    }
     Canvas(
         modifier = modifier.height(height),
     ) {
@@ -389,7 +397,7 @@ private fun MiniProgressBar(
         // Fill
         if (progress > 0f) {
             drawRoundRect(
-                brush = Brush.horizontalGradient(listOf(fillColor, fillColorEnd)),
+                brush = fillBrush,
                 size = Size(size.width * progress, size.height),
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius),
             )

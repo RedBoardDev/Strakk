@@ -9,13 +9,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import java.time.LocalDate
 
 /**
  * Stateful route for the Calendar tab.
  *
- * CalendarViewModel is not yet exposed by the KMP layer. The Route is wired
- * structurally so that connecting the real VM requires only changing the
- * state source — the composition tree stays the same.
+ * Uses local state for now. CalendarViewModel exists in KMP shared and can be
+ * wired here to get server-synced active days and daily detail data.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,9 +23,10 @@ fun CalendarRoute(modifier: Modifier = Modifier) {
     val snackbarHostState = remember { SnackbarHostState() }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Stub state — will be replaced by CalendarViewModel.uiState once KMP exposes it
-    var currentYear by remember { mutableStateOf(2026) }
-    var currentMonth by remember { mutableStateOf(4) } // April
+    // Local state — CalendarViewModel exists in KMP but is not wired here yet
+    val today = remember { LocalDate.now() }
+    var currentYear by remember { mutableStateOf(today.year) }
+    var currentMonth by remember { mutableStateOf(today.monthValue) }
     var selectedDay by remember { mutableStateOf<String?>(null) }
 
     CalendarContent(
