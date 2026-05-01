@@ -20,7 +20,7 @@ enum AddPickerMode: String, Identifiable {
 
 struct TodayView: View {
     @State private var viewModel = TodayViewModelWrapper()
-    @State private var draftViewModel = MealDraftViewModelWrapper()
+    @Environment(MealDraftViewModelWrapper.self) private var draftViewModel
 
     // Navigation
     @State private var navigationPath = NavigationPath()
@@ -564,4 +564,5 @@ struct TodayView: View {
 
 #Preview {
     TodayView()
+        .environment(MealDraftViewModelWrapper())
 }

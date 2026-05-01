@@ -15,7 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -70,12 +72,44 @@ private val tabs = listOf(
 // MainScreen
 // =============================================================================
 
+private val HomeBackStackSaver = Saver<SnapshotStateList<HomeRoute>, List<String>>(
+    save = { list -> list.map { it.toSaveKey() } },
+    restore = { keys ->
+        mutableStateListOf<HomeRoute>().apply {
+            addAll(keys.mapNotNull { it.toHomeRoute() })
+            if (isEmpty()) add(HomeRoute.Today)
+        }
+    },
+)
+
+private fun HomeRoute.toSaveKey(): String = when (this) {
+    is HomeRoute.Today -> "today"
+    is HomeRoute.Draft -> "draft"
+    is HomeRoute.Review -> "review"
+    is HomeRoute.Search -> "search:$inDraft"
+    is HomeRoute.Manual -> "manual:$inDraft"
+    is HomeRoute.Photo -> "photo:$inDraft"
+    is HomeRoute.TextEntry -> "text:$inDraft"
+}
+
+private fun String.toHomeRoute(): HomeRoute? = when {
+    this == "today" -> HomeRoute.Today
+    this == "draft" -> HomeRoute.Draft
+    this == "review" -> HomeRoute.Review
+    startsWith("search:") -> HomeRoute.Search(removePrefix("search:").toBooleanStrictOrNull() ?: false)
+    startsWith("manual:") -> HomeRoute.Manual(removePrefix("manual:").toBooleanStrictOrNull() ?: false)
+    startsWith("photo:") -> HomeRoute.Photo(removePrefix("photo:").toBooleanStrictOrNull() ?: false)
+    startsWith("text:") -> HomeRoute.TextEntry(removePrefix("text:").toBooleanStrictOrNull() ?: false)
+    else -> null
+}
+
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
-    // Simple stack for home sub-navigation (Today tab only)
-    val homeBackStack = remember { androidx.compose.runtime.mutableStateListOf<HomeRoute>(HomeRoute.Today) }
+    val homeBackStack = rememberSaveable(saver = HomeBackStackSaver) {
+        mutableStateListOf(HomeRoute.Today)
+    }
     val currentHomeRoute = homeBackStack.lastOrNull() ?: HomeRoute.Today
 
     // Hide the bottom bar when navigating away from Today root
