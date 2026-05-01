@@ -3,6 +3,7 @@ import shared
 
 struct MainTabView: View {
     @Environment(AppNavigator.self) private var navigator
+    @State private var draftViewModel = MealDraftViewModelWrapper()
 
     var body: some View {
         TabView(selection: Binding(
@@ -26,5 +27,6 @@ struct MainTabView: View {
                 .tag(3)
         }
         .tint(Color.strakkPrimary)
+        .environment(draftViewModel)
     }
 }

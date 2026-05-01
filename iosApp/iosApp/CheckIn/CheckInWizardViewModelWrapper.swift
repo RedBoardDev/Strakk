@@ -120,22 +120,16 @@ final class CheckInWizardViewModelWrapper {
     func consumeNavigateBack() { navigateBack = false }
     func consumeNavigateToDetail() { navigateToDetailId = nil }
 
-    /// Adds a photo from a Swift Data source.
-    /// The Data → KotlinByteArray conversion is done off the main thread to avoid
-    /// blocking the UI for large images (several MB is common for camera output).
     func addPhoto(imageData: Data) {
         pendingLocalPhotos.append(imageData)
-        let sharedVm = self.sharedVm
-        Task.detached(priority: .userInitiated) {
+        Task {
             let kotlinBytes = Self.makeKotlinByteArray(from: imageData)
-            await MainActor.run {
-                sharedVm.onEvent(event: CheckInWizardEventOnAddPhoto(imageData: kotlinBytes))
-            }
+            sharedVm.onEvent(event: CheckInWizardEventOnAddPhoto(imageData: kotlinBytes))
         }
     }
 
-    /// Converts Swift `Data` to `KotlinByteArray` off the main thread.
-    private static func makeKotlinByteArray(from data: Data) -> KotlinByteArray {
+    /// Converts Swift `Data` to `KotlinByteArray` — pure conversion, no actor state needed.
+    private nonisolated static func makeKotlinByteArray(from data: Data) -> KotlinByteArray {
         let kotlinBytes = KotlinByteArray(size: Int32(data.count))
         data.withUnsafeBytes { buffer in
             for (index, byte) in buffer.enumerated() {
