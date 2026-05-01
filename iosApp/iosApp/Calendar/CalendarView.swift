@@ -11,7 +11,7 @@ private struct CalendarAddDate: Identifiable {
 
 struct CalendarView: View {
     @State private var viewModel = CalendarViewModelWrapper()
-    @State private var draftViewModel = MealDraftViewModelWrapper()
+    @Environment(MealDraftViewModelWrapper.self) private var draftViewModel
     @State private var calendarAddDate: CalendarAddDate?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
