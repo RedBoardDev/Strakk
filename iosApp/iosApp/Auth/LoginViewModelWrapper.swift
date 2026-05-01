@@ -19,7 +19,8 @@ final class LoginViewModelWrapper {
 
     init() {
         self.sharedVm = KoinBridge.shared.getLoginViewModel()
-        self.state = (sharedVm.uiState.value as? LoginUiState) ?? LoginUiState()
+        // swiftlint:disable:next force_cast
+        self.state = sharedVm.uiState.value as! LoginUiState
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<LoginUiState> = observeFlow(sharedVm.uiState)

@@ -18,7 +18,8 @@ final class OnboardingFlowViewModelWrapper {
 
     init() {
         self.sharedVm = KoinBridge.shared.getOnboardingFlowViewModel()
-        self.state = (sharedVm.uiState.value as? OnboardingFlowUiState) ?? OnboardingFlowUiState()
+        // swiftlint:disable:next force_cast
+        self.state = sharedVm.uiState.value as! OnboardingFlowUiState
 
         stateTask = Task { [weak self, sharedVm] in
             let stream: AsyncStream<OnboardingFlowUiState> = observeFlow(sharedVm.uiState)
