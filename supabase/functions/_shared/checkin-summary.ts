@@ -1,6 +1,4 @@
-import { callClaude } from "./claude.ts";
-
-const HAIKU_MODEL = "claude-haiku-4-5-20251001";
+import { callClaude, HAIKU_MODEL } from "./claude.ts";
 
 const SYSTEM_PROMPT = `Tu es un analyste nutritionnel factuel. Tu rédiges le résumé d'une période de bilan pour qu'un coach comprenne rapidement l'alimentation et l'état général de son athlète sans lire chaque repas.
 

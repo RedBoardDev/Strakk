@@ -2,7 +2,8 @@
 // Handles retries, rate-limiting backoff, and response extraction.
 // No domain logic — just a thin HTTP wrapper around /v1/messages.
 
-const CLAUDE_MODEL = "claude-sonnet-4-20250514";
+const CLAUDE_MODEL = "claude-sonnet-4-6";
+export const HAIKU_MODEL = "claude-haiku-4-5-20251001";
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 2000;
 const MAX_DELAY_MS = 15000;
