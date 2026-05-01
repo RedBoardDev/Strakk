@@ -29,7 +29,7 @@ struct DayDetailSheet: View {
 
                         VStack(spacing: 8) {
                             macroRow(
-                                label: "Protéines",
+                                label: "Protein",
                                 value: String(format: "%.0fg", detail.summary.totalProtein),
                                 color: Color.strakkProtein,
                                 current: detail.summary.totalProtein,
@@ -43,11 +43,11 @@ struct DayDetailSheet: View {
                                 goal: detail.summary.calorieGoal.map { Double($0) }
                             )
                             simpleRow(
-                                label: "Lipides",
+                                label: "Fat",
                                 value: String(format: "%.0fg", detail.summary.totalFat)
                             )
                             simpleRow(
-                                label: "Glucides",
+                                label: "Carbs",
                                 value: String(format: "%.0fg", detail.summary.totalCarbs)
                             )
                         }
@@ -55,7 +55,7 @@ struct DayDetailSheet: View {
                         .padding(.top, 8)
 
                         // MARK: Water section
-                        SectionHeader(title: "EAU")
+                        SectionHeader(title: "WATER")
                             .padding(.horizontal, 20)
                             .padding(.top, 24)
 
@@ -69,7 +69,7 @@ struct DayDetailSheet: View {
 
                         // MARK: Meals/entries section
                         if !detail.mealContainers.isEmpty || !detail.meals.isEmpty {
-                            SectionHeader(title: "REPAS")
+                            SectionHeader(title: "MEALS")
                                 .padding(.horizontal, 20)
                                 .padding(.top, 24)
 
@@ -91,7 +91,7 @@ struct DayDetailSheet: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "plus.circle")
                                     .font(.system(size: 16, weight: .semibold))
-                                Text("Ajouter pour ce jour")
+                                Text("Add for this day")
                                     .font(.strakkBodyBold)
                             }
                             .foregroundStyle(.white)
@@ -100,7 +100,7 @@ struct DayDetailSheet: View {
                             .background(Color.strakkPrimary)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
-                        .accessibilityLabel("Ajouter un repas pour ce jour")
+                        .accessibilityLabel("Add a meal for this day")
                         .padding(.horizontal, 20)
                         .padding(.top, 28)
                         .padding(.bottom, 32)
@@ -209,14 +209,14 @@ struct DayDetailSheet: View {
             Button(role: .destructive) {
                 onDeleteMeal(meal)
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 onDeleteMeal(meal)
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
     }
@@ -258,17 +258,17 @@ struct DayDetailSheet: View {
             Button(role: .destructive) {
                 onDeleteEntry(entry)
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .contextMenu {
             Button { editingEntry = entry } label: {
-                Label("Modifier", systemImage: "pencil")
+                Label("Edit", systemImage: "pencil")
             }
             Button(role: .destructive) {
                 onDeleteEntry(entry)
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
     }
@@ -350,13 +350,13 @@ struct DayDetailSheet: View {
     private func formatDate(_ dateString: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.current
 
         guard let date = formatter.date(from: dateString) else { return dateString }
 
         let display = DateFormatter()
         display.dateFormat = "EEEE d MMMM"
-        display.locale = Locale(identifier: "fr_FR")
+        display.locale = Locale.current
         return display.string(from: date).capitalized
     }
 }

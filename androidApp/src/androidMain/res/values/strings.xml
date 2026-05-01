@@ -1,4 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Strakk</string>
+
+    <!-- Common -->
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_add">Add</string>
+    <string name="common_rename">Rename</string>
+    <string name="common_delete">Delete</string>
+
+    <!-- MealDraft -->
+    <string name="meal_draft_new_meal">New meal</string>
+    <string name="meal_draft_back">Back</string>
+    <string name="meal_draft_menu">Menu</string>
+    <string name="meal_draft_rename">Rename</string>
+    <string name="meal_draft_cancel_meal">Cancel meal</string>
+    <string name="meal_draft_meal_saved">Meal saved</string>
+    <string name="meal_draft_items_section">ITEMS</string>
+    <string name="meal_draft_empty_items">No items — tap + Add</string>
+    <string name="meal_draft_macro_protein">Protein</string>
+    <string name="meal_draft_macro_calories">Calories</string>
+    <string name="meal_draft_macro_fat">Fat</string>
+    <string name="meal_draft_macro_carbs">Carbs</string>
+    <string name="meal_draft_delete">Delete</string>
+    <string name="meal_draft_photo_no_hint">Photo without hint</string>
+    <string name="meal_draft_pending_photo">📷 Pending analysis</string>
+    <string name="meal_draft_pending_text">📝 Pending analysis</string>
+    <string name="meal_draft_add_button">+ Add</string>
+    <string name="meal_draft_finish_meal">Finish meal</string>
+    <string name="meal_draft_no_meal">No meal in progress</string>
+    <string name="meal_draft_start_meal">Start a meal</string>
+    <string name="meal_draft_discard_title">Cancel meal?</string>
+    <string name="meal_draft_discard_body">All entries will be lost.</string>
+    <string name="meal_draft_keep">Keep</string>
+    <string name="meal_draft_rename_title">Rename meal</string>
+    <string name="meal_draft_meal_name_label">Meal name</string>
+    <string name="meal_draft_rename_confirm">Rename</string>
+    <string name="meal_draft_rename_cancel">Cancel</string>
+
+    <!-- ManualEntry -->
+    <string name="manual_entry_title">Manual entry</string>
+    <string name="manual_entry_close">Close</string>
+    <string name="manual_entry_add">Add</string>
+    <string name="manual_entry_field_name">Name *</string>
+    <string name="manual_entry_field_protein">Protein (g) *</string>
+    <string name="manual_entry_field_calories">Calories (kcal) *</string>
+    <string name="manual_entry_field_fat">Fat (g)</string>
+    <string name="manual_entry_field_carbs">Carbs (g)</string>
+    <string name="manual_entry_field_quantity">Quantity</string>
+    <string name="manual_entry_error_name_required">Name is required</string>
+    <string name="manual_entry_error_numeric_required">Numeric value required</string>
+    <string name="manual_entry_quantity_placeholder">e.g. 150g or 1 bowl</string>
+
+    <!-- SearchFood -->
+    <string name="search_food_placeholder">Search for a food…</string>
+    <string name="search_food_clear">Clear</string>
+    <string name="search_food_back">Back</string>
+    <string name="search_food_retry">Retry</string>
+    <string name="search_food_section_frequent">FREQUENT</string>
+    <string name="search_food_section_my_foods">MY FOODS</string>
+    <string name="search_food_section_catalog">CATALOG</string>
+    <string name="search_food_empty_hint">Start typing to search</string>
+    <string name="search_food_no_results">No results for \"%s\"</string>
+    <string name="search_food_add">Add</string>
+    <string name="search_food_per_100g">⚖︎ values per 100 g</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_get_started">Get started</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_back">Back</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_account">ACCOUNT</string>
+    <string name="settings_section_daily_goals">DAILY GOALS</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_loading">Loading…</string>
+    <string name="settings_goal_protein">Protein (g)</string>
+    <string name="settings_goal_calories">Calories (kcal)</string>
+    <string name="settings_goal_water">Water (mL)</string>
+
+    <!-- Data Sources -->
+    <string name="settings_section_data_sources">DATA SOURCES</string>
+    <string name="settings_data_sources_body">Food data provided by:\n• Open Food Facts (ODbL)\n• CIQUAL 2020 — ANSES</string>
+
+    <!-- Today -->
+    <string name="today_title">Today</string>
+    <string name="today_timeline_header">TIMELINE</string>
+    <string name="today_empty_timeline">Nothing logged today</string>
+
+    <!-- Progress Section (macros) -->
+    <string name="progress_protein_label">PROTEINS</string>
+    <string name="progress_goal_reached">✓ Goal reached</string>
+    <string name="progress_calories_label">CALORIES</string>
+    <string name="progress_carbs_label">CARBS</string>
+    <string name="progress_fat_label">FAT</string>
+
+    <!-- Water -->
+    <string name="water_remove_cd">Remove 250 mL of water</string>
+    <string name="water_add_cd">Add 250 mL of water</string>
+    <string name="water_custom_cd">Custom amount</string>
+    <string name="water_dialog_title">Custom amount</string>
+    <string name="water_dialog_range">Between %1$d and %2$d mL</string>
+    <string name="water_dialog_label">mL</string>
+    <string name="water_dialog_remove">Remove</string>
+    <string name="water_dialog_add">Add</string>
+    <string name="water_dialog_cancel">Cancel</string>
+
+    <!-- Meal Container Card -->
+    <string name="meal_card_collapse_cd">Collapse</string>
+    <string name="meal_card_expand_cd">Expand</string>
+    <string name="meal_card_add_item">Add an item</string>
+
+    <!-- Meal Review -->
+    <string name="review_title">Meal review</string>
+    <string name="review_back_cd">Back</string>
+    <string name="review_committed_snackbar">Meal saved</string>
+    <string name="review_empty">No meal in progress</string>
+    <string name="review_subtitle">%d items analysed. Edit before confirming.</string>
+    <string name="review_confirm_button">Confirm meal</string>
+
+    <!-- Text Entry -->
+    <string name="text_entry_title">Free description</string>
+    <string name="text_entry_back_cd">Back</string>
+    <string name="text_entry_placeholder">e.g. 2 fried eggs and a slice of wholemeal bread</string>
+    <string name="text_entry_add_to_meal">Add to meal</string>
+
+    <!-- Photo Hint -->
+    <string name="photo_hint_title">Photo + hint</string>
+    <string name="photo_hint_back_cd">Back</string>
+    <string name="photo_hint_add_to_meal">Add to meal</string>
+    <string name="photo_hint_captured_cd">Captured photo</string>
+    <string name="photo_hint_retake_cd">Retake</string>
+    <string name="photo_hint_empty_label">Take or choose a photo</string>
+    <string name="photo_hint_camera_retake">Retake</string>
+    <string name="photo_hint_camera_open">Camera</string>
+    <string name="photo_hint_gallery_replace">Replace</string>
+    <string name="photo_hint_gallery_open">Gallery</string>
+    <string name="photo_hint_hint_label">Hint (optional)</string>
+    <string name="photo_hint_hint_placeholder">e.g. serving for 2</string>
+
+    <!-- Add Picker Sheet -->
+    <string name="add_picker_title_draft">Add to %s</string>
+    <string name="add_picker_title_quick">Quick add</string>
+    <string name="add_picker_subtitle">Choose a source</string>
+    <string name="add_picker_search_label">Search</string>
+    <string name="add_picker_search_desc">History + catalog</string>
+    <string name="add_picker_manual_label">Manual</string>
+    <string name="add_picker_manual_desc">Enter macros</string>
+    <string name="add_picker_text_label">Free text</string>
+    <string name="add_picker_text_desc">Describe your meal</string>
+    <string name="add_picker_photo_label">Photo + hint</string>
+    <string name="add_picker_photo_desc">AI analysis</string>
+
+    <!-- Calendar -->
+    <string name="calendar_prev_month_cd">Previous month</string>
+    <string name="calendar_next_month_cd">Next month</string>
+
+    <!-- Day Detail Sheet -->
+    <string name="day_detail_section_macros">MACROS</string>
+    <string name="day_detail_section_water">WATER</string>
+    <string name="day_detail_section_meals">MEALS</string>
+    <string name="day_detail_no_data">No data for this day.</string>
+    <string name="day_detail_add_button">+ Add for this day</string>
+    <string name="day_detail_protein_label">Proteins</string>
+    <string name="day_detail_calories_label">Calories</string>
+    <string name="day_detail_fat_label">Fat</string>
+    <string name="day_detail_carbs_label">Carbs</string>
+    <string name="day_detail_water_label">Water</string>
+    <string name="day_detail_meal_fallback">Meal</string>
+
+    <!-- Main / Tab labels -->
+    <string name="tab_today">Today</string>
+    <string name="tab_calendar">Calendar</string>
+    <string name="tab_settings">Settings</string>
 </resources>

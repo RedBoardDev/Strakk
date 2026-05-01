@@ -37,13 +37,13 @@ struct AddPickerSheet: View {
     }
 
     private var title: String {
-        isDraftMode ? "Ajouter au repas" : "Ajout rapide"
+        isDraftMode ? "Add to meal" : "Quick add"
     }
 
     private let tiles: [AddTile] = [
-        AddTile(id: "search",  icon: "magnifyingglass",     label: "Rechercher"),
-        AddTile(id: "manual",  icon: "pencil",              label: "Manuel"),
-        AddTile(id: "text",    icon: "text.quote",          label: "Texte libre"),
+        AddTile(id: "search",  icon: "magnifyingglass",     label: "Search"),
+        AddTile(id: "manual",  icon: "pencil",              label: "Manual"),
+        AddTile(id: "text",    icon: "text.quote",          label: "Free text"),
         AddTile(id: "photo",   icon: "camera.fill",         label: "Photo"),
     ]
 
@@ -72,7 +72,7 @@ struct AddPickerSheet: View {
                         HStack(spacing: 10) {
                             ProgressView()
                                 .tint(Color.strakkPrimary)
-                            Text("Analyse en cours…")
+                            Text("Analyzing…")
                                 .font(.strakkBody)
                                 .foregroundStyle(Color.strakkTextSecondary)
                         }
@@ -86,7 +86,7 @@ struct AddPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { onDismiss() }
+                    Button("Cancel") { onDismiss() }
                         .foregroundStyle(Color.strakkTextSecondary)
                 }
             }

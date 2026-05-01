@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="common_back">Retour</string>
+    <string name="common_cancel">Annuler</string>
+    <string name="common_add">Ajouter</string>
+    <string name="common_rename">Renommer</string>
+    <string name="common_delete">Supprimer</string>
+
+    <!-- MealDraft -->
+    <string name="meal_draft_new_meal">Nouveau repas</string>
+    <string name="meal_draft_back">Retour</string>
+    <string name="meal_draft_menu">Menu</string>
+    <string name="meal_draft_rename">Renommer</string>
+    <string name="meal_draft_cancel_meal">Annuler le repas</string>
+    <string name="meal_draft_meal_saved">Repas enregistré</string>
+    <string name="meal_draft_items_section">ITEMS</string>
+    <string name="meal_draft_empty_items">Aucun item — tape + Ajouter</string>
+    <string name="meal_draft_macro_protein">Protéines</string>
+    <string name="meal_draft_macro_calories">Calories</string>
+    <string name="meal_draft_macro_fat">Lipides</string>
+    <string name="meal_draft_macro_carbs">Glucides</string>
+    <string name="meal_draft_delete">Supprimer</string>
+    <string name="meal_draft_photo_no_hint">Photo sans indice</string>
+    <string name="meal_draft_pending_photo">📷 En attente d\'analyse</string>
+    <string name="meal_draft_pending_text">📝 En attente d\'analyse</string>
+    <string name="meal_draft_add_button">+ Ajouter</string>
+    <string name="meal_draft_finish_meal">Terminer le repas</string>
+    <string name="meal_draft_no_meal">Aucun repas en cours</string>
+    <string name="meal_draft_start_meal">Démarrer un repas</string>
+    <string name="meal_draft_discard_title">Annuler le repas ?</string>
+    <string name="meal_draft_discard_body">Toutes les entrées seront perdues.</string>
+    <string name="meal_draft_keep">Garder</string>
+    <string name="meal_draft_rename_title">Renommer le repas</string>
+    <string name="meal_draft_meal_name_label">Nom du repas</string>
+    <string name="meal_draft_rename_confirm">Renommer</string>
+    <string name="meal_draft_rename_cancel">Annuler</string>
+
+    <!-- ManualEntry -->
+    <string name="manual_entry_title">Ajout manuel</string>
+    <string name="manual_entry_close">Fermer</string>
+    <string name="manual_entry_add">Ajouter</string>
+    <string name="manual_entry_field_name">Nom *</string>
+    <string name="manual_entry_field_protein">Protéines (g) *</string>
+    <string name="manual_entry_field_calories">Calories (kcal) *</string>
+    <string name="manual_entry_field_fat">Lipides (g)</string>
+    <string name="manual_entry_field_carbs">Glucides (g)</string>
+    <string name="manual_entry_field_quantity">Quantité</string>
+    <string name="manual_entry_error_name_required">Le nom est requis</string>
+    <string name="manual_entry_error_numeric_required">Valeur numérique requise</string>
+    <string name="manual_entry_quantity_placeholder">ex : 150g ou 1 bol</string>
+
+    <!-- SearchFood -->
+    <string name="search_food_placeholder">Rechercher un aliment…</string>
+    <string name="search_food_clear">Effacer</string>
+    <string name="search_food_back">Retour</string>
+    <string name="search_food_retry">Réessayer</string>
+    <string name="search_food_section_frequent">FRÉQUENTS</string>
+    <string name="search_food_section_my_foods">MES ALIMENTS</string>
+    <string name="search_food_section_catalog">CATALOGUE</string>
+    <string name="search_food_empty_hint">Commencez à taper pour rechercher</string>
+    <string name="search_food_no_results">Aucun résultat pour « %s »</string>
+    <string name="search_food_add">Ajouter</string>
+    <string name="search_food_per_100g">⚖︎ valeurs pour 100 g</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_get_started">Commencer</string>
+    <string name="onboarding_continue">Continuer</string>
+    <string name="onboarding_back">Retour</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Réglages</string>
+    <string name="settings_section_account">COMPTE</string>
+    <string name="settings_section_daily_goals">OBJECTIFS QUOTIDIENS</string>
+    <string name="settings_sign_out">Se déconnecter</string>
+    <string name="settings_loading">Chargement…</string>
+    <string name="settings_goal_protein">Protéines (g)</string>
+    <string name="settings_goal_calories">Calories (kcal)</string>
+    <string name="settings_goal_water">Eau (mL)</string>
+
+    <!-- Data Sources -->
+    <string name="settings_section_data_sources">SOURCES DE DONNÉES</string>
+    <string name="settings_data_sources_body">Données alimentaires fournies par :\n• Open Food Facts (ODbL)\n• CIQUAL 2020 — ANSES</string>
+
+    <!-- Today -->
+    <string name="today_title">Aujourd\'hui</string>
+    <string name="today_timeline_header">CHRONOLOGIE</string>
+    <string name="today_empty_timeline">Rien enregistré aujourd\'hui</string>
+
+    <!-- Progress Section (macros) -->
+    <string name="progress_protein_label">PROTÉINES</string>
+    <string name="progress_goal_reached">✓ Objectif atteint</string>
+    <string name="progress_calories_label">CALORIES</string>
+    <string name="progress_carbs_label">GLUCIDES</string>
+    <string name="progress_fat_label">LIPIDES</string>
+
+    <!-- Water -->
+    <string name="water_remove_cd">Retirer 250 mL d\'eau</string>
+    <string name="water_add_cd">Ajouter 250 mL d\'eau</string>
+    <string name="water_custom_cd">Quantité personnalisée</string>
+    <string name="water_dialog_title">Quantité personnalisée</string>
+    <string name="water_dialog_range">Entre %1$d et %2$d mL</string>
+    <string name="water_dialog_label">mL</string>
+    <string name="water_dialog_remove">Retirer</string>
+    <string name="water_dialog_add">Ajouter</string>
+    <string name="water_dialog_cancel">Annuler</string>
+
+    <!-- Meal Container Card -->
+    <string name="meal_card_collapse_cd">Réduire</string>
+    <string name="meal_card_expand_cd">Développer</string>
+    <string name="meal_card_add_item">Ajouter un item</string>
+
+    <!-- Meal Review -->
+    <string name="review_title">Revue du repas</string>
+    <string name="review_back_cd">Retour</string>
+    <string name="review_committed_snackbar">Repas enregistré</string>
+    <string name="review_empty">Aucun repas en cours</string>
+    <string name="review_subtitle">%d items analysés. Modifiez avant de valider.</string>
+    <string name="review_confirm_button">Valider le repas</string>
+
+    <!-- Text Entry -->
+    <string name="text_entry_title">Description libre</string>
+    <string name="text_entry_back_cd">Retour</string>
+    <string name="text_entry_placeholder">ex : 2 œufs au plat et une tranche de pain complet</string>
+    <string name="text_entry_add_to_meal">Ajouter au repas</string>
+
+    <!-- Photo Hint -->
+    <string name="photo_hint_title">Photo + indication</string>
+    <string name="photo_hint_back_cd">Retour</string>
+    <string name="photo_hint_add_to_meal">Ajouter au repas</string>
+    <string name="photo_hint_captured_cd">Photo capturée</string>
+    <string name="photo_hint_retake_cd">Recommencer</string>
+    <string name="photo_hint_empty_label">Prenez ou choisissez une photo</string>
+    <string name="photo_hint_camera_retake">Reprendre</string>
+    <string name="photo_hint_camera_open">Caméra</string>
+    <string name="photo_hint_gallery_replace">Remplacer</string>
+    <string name="photo_hint_gallery_open">Galerie</string>
+    <string name="photo_hint_hint_label">Précision (optionnel)</string>
+    <string name="photo_hint_hint_placeholder">ex : portion pour 2</string>
+
+    <!-- Add Picker Sheet -->
+    <string name="add_picker_title_draft">Ajouter à %s</string>
+    <string name="add_picker_title_quick">Ajout rapide</string>
+    <string name="add_picker_subtitle">Choisissez une source</string>
+    <string name="add_picker_search_label">Rechercher</string>
+    <string name="add_picker_search_desc">Historique + catalogue</string>
+    <string name="add_picker_manual_label">Manuel</string>
+    <string name="add_picker_manual_desc">Saisir les macros</string>
+    <string name="add_picker_text_label">Texte libre</string>
+    <string name="add_picker_text_desc">Décris ton repas</string>
+    <string name="add_picker_photo_label">Photo + hint</string>
+    <string name="add_picker_photo_desc">Analyse IA</string>
+
+    <!-- Calendar -->
+    <string name="calendar_prev_month_cd">Mois précédent</string>
+    <string name="calendar_next_month_cd">Mois suivant</string>
+
+    <!-- Day Detail Sheet -->
+    <string name="day_detail_section_macros">MACROS</string>
+    <string name="day_detail_section_water">EAU</string>
+    <string name="day_detail_section_meals">REPAS</string>
+    <string name="day_detail_no_data">Aucune donnée pour ce jour.</string>
+    <string name="day_detail_add_button">+ Ajouter pour ce jour</string>
+    <string name="day_detail_protein_label">Protéines</string>
+    <string name="day_detail_calories_label">Calories</string>
+    <string name="day_detail_fat_label">Lipides</string>
+    <string name="day_detail_carbs_label">Glucides</string>
+    <string name="day_detail_water_label">Eau</string>
+    <string name="day_detail_meal_fallback">Repas</string>
+
+    <!-- Main / Tab labels -->
+    <string name="tab_today">Aujourd\'hui</string>
+    <string name="tab_calendar">Calendrier</string>
+    <string name="tab_settings">Réglages</string>
+</resources>

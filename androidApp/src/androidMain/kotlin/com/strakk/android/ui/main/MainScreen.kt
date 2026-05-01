@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -35,13 +34,10 @@ import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.android.ui.today.TodayRoute
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.MealEntry
-import com.strakk.shared.domain.usecase.QuickAddEntryUseCase
-import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
-import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.presentation.meal.MealDraftEvent
 import com.strakk.shared.presentation.meal.MealDraftViewModel
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import com.strakk.shared.presentation.meal.QuickAddEvent
+import com.strakk.shared.presentation.meal.QuickAddViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 // =============================================================================
@@ -140,13 +136,10 @@ private fun HomeTabContent(
     currentRoute: HomeRoute,
     modifier: Modifier = Modifier,
 ) {
-    // Shared Koin-scoped ViewModel + UseCases used to dispatch results from
+    // Shared Koin-scoped ViewModels used to dispatch results from
     // the Add flow back into either the active Draft or an orphan quick-add.
     val draftViewModel: MealDraftViewModel = koinViewModel()
-    val quickAddEntry: QuickAddEntryUseCase = koinInject()
-    val quickAddFromPhoto: QuickAddFromPhotoUseCase = koinInject()
-    val quickAddFromText: QuickAddFromTextUseCase = koinInject()
-    val scope = rememberCoroutineScope()
+    val quickAddViewModel: QuickAddViewModel = koinViewModel()
 
     fun push(route: HomeRoute) { backStack.add(route) }
     fun pop() { if (backStack.size > 1) backStack.removeLastOrNull() }
@@ -163,7 +156,17 @@ private fun HomeTabContent(
                 ),
             )
         } else {
-            scope.launch { quickAddEntry(entry) }
+            quickAddViewModel.onEvent(
+                QuickAddEvent.AddKnown(
+                    name = entry.name ?: "",
+                    protein = entry.protein,
+                    calories = entry.calories,
+                    fat = entry.fat,
+                    carbs = entry.carbs,
+                    quantity = entry.quantity,
+                    source = entry.source,
+                ),
+            )
         }
     }
 
@@ -182,12 +185,14 @@ private fun HomeTabContent(
             onNavigateToManual = { inDraft -> push(HomeRoute.Manual(inDraft)) },
             onNavigateToPhoto = { inDraft -> push(HomeRoute.Photo(inDraft)) },
             onNavigateToText = { inDraft -> push(HomeRoute.TextEntry(inDraft)) },
+            viewModel = draftViewModel,
             modifier = modifier,
         )
 
         is HomeRoute.Review -> MealReviewRoute(
             onNavigateBack = { pop() },
             onCommitted = { popToToday() },
+            viewModel = draftViewModel,
             modifier = modifier,
         )
 
@@ -217,7 +222,9 @@ private fun HomeTabContent(
                         MealDraftEvent.AddPendingPhoto(imageBase64 = base64, hint = hint),
                     )
                 } else {
-                    scope.launch { quickAddFromPhoto(base64, hint) }
+                    quickAddViewModel.onEvent(
+                        QuickAddEvent.AddFromPhoto(imageBase64 = base64, hint = hint),
+                    )
                 }
                 pop()
             },
@@ -232,7 +239,9 @@ private fun HomeTabContent(
                         MealDraftEvent.AddPendingText(description = description),
                     )
                 } else {
-                    scope.launch { quickAddFromText(description) }
+                    quickAddViewModel.onEvent(
+                        QuickAddEvent.AddFromText(description = description),
+                    )
                 }
                 pop()
             },

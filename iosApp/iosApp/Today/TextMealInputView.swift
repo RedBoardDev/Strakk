@@ -31,7 +31,7 @@ struct TextMealInputView: View {
                     VStack(alignment: .trailing, spacing: 6) {
                         ZStack(alignment: .topLeading) {
                             if text.isEmpty {
-                                Text("Ex: 200g poulet grillé, riz basmati, huile d'olive")
+                                Text("E.g. 200g grilled chicken, basmati rice, olive oil")
                                     .font(.strakkBody)
                                     .foregroundStyle(Color.strakkTextTertiary)
                                     .padding(.horizontal, 12)
@@ -85,7 +85,7 @@ struct TextMealInputView: View {
                         guard !trimmed.isEmpty else { return }
                         onSubmit(trimmed)
                     } label: {
-                        Text("Analyser")
+                        Text("Analyze")
                             .font(.strakkBodyBold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -96,12 +96,12 @@ struct TextMealInputView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!canSubmit)
-                    .accessibilityLabel("Analyser le repas décrit")
+                    .accessibilityLabel("Analyze described meal")
                     .padding(.horizontal, 20)
                     .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Décrire le repas")
+            .navigationTitle("Describe your meal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

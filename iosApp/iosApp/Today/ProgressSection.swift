@@ -25,15 +25,15 @@ struct ProgressSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header label "PROTÉINES" + check optionnel
+            // Header label "PROTEIN" + optional check
             HStack {
-                Text("PROTÉINES")
+                Text("PROTEIN")
                     .font(.strakkOverline)
                     .foregroundStyle(Color.strakkPrimary)
 
                 if isProteinReached {
                     Spacer()
-                    Text("✓ Objectif atteint")
+                    Text("✓ Goal reached")
                         .font(.strakkCaptionBold)
                         .foregroundStyle(Color.strakkSuccess)
                 }
@@ -69,7 +69,7 @@ struct ProgressSection: View {
                     LedgerRow(
                         icon: "leaf.fill",
                         iconTint: Color.strakkWater,
-                        label: "GLUCIDES",
+                        label: "CARBS",
                         value: "\(Int(summary.totalCarbs))",
                         suffix: "g"
                     )
@@ -79,7 +79,7 @@ struct ProgressSection: View {
                     LedgerRow(
                         icon: "drop.fill",
                         iconTint: Color.strakkWarning,
-                        label: "LIPIDES",
+                        label: "FAT",
                         value: "\(Int(summary.totalFat))",
                         suffix: "g"
                     )
@@ -96,11 +96,11 @@ struct ProgressSection: View {
 
     private var accessibilitySummary: String {
         var parts: [String] = []
-        parts.append("Protéines : \(Int(summary.totalProtein)) g")
-        if let goal = summary.proteinGoal { parts.append("sur \(goal) g") }
-        parts.append("Calories : \(Int(summary.totalCalories)) kcal")
-        parts.append("Glucides : \(Int(summary.totalCarbs)) g")
-        parts.append("Lipides : \(Int(summary.totalFat)) g")
+        parts.append("Protein: \(Int(summary.totalProtein)) g")
+        if let goal = summary.proteinGoal { parts.append("of \(goal) g") }
+        parts.append("Calories: \(Int(summary.totalCalories)) kcal")
+        parts.append("Carbs: \(Int(summary.totalCarbs)) g")
+        parts.append("Fat: \(Int(summary.totalFat)) g")
         return parts.joined(separator: ". ")
     }
 }

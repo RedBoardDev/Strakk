@@ -41,7 +41,7 @@ struct WizardStepSummaryView: View {
                     HStack(spacing: StrakkSpacing.sm) {
                         ProgressView()
                             .tint(Color.strakkPrimary)
-                        Text("Calcul en cours...")
+                        Text("Calculating...")
                             .font(.strakkBody)
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
@@ -50,7 +50,7 @@ struct WizardStepSummaryView: View {
                 } else if let summary = nutritionSummary {
                     nutritionSummaryContent(summary: summary)
                 } else {
-                    Text("Aucune donnée nutritionnelle pour ces jours.")
+                    Text("No nutrition data for these days.")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextTertiary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -66,7 +66,7 @@ struct WizardStepSummaryView: View {
     @ViewBuilder
     private func nutritionSummaryContent(summary: NutritionSummaryData) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.md) {
-            Text("Moy. journalière (\(summary.nutritionDays) jour\(summary.nutritionDays > 1 ? "s" : ""))")
+            Text("Daily avg. (\(summary.nutritionDays) day\(summary.nutritionDays > 1 ? "s" : ""))")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
@@ -75,11 +75,11 @@ struct WizardStepSummaryView: View {
                 columns: Array(repeating: GridItem(.flexible()), count: 2),
                 spacing: StrakkSpacing.sm
             ) {
-                macroCell(label: "Protéines", value: "\(Int(summary.avgProtein))g", color: Color.strakkPrimary)
+                macroCell(label: "Protein", value: "\(Int(summary.avgProtein))g", color: Color.strakkPrimary)
                 macroCell(label: "Calories", value: "\(Int(summary.avgCalories))", color: Color.strakkAccentOrangeLight)
-                macroCell(label: "Lipides", value: "\(Int(summary.avgFat))g", color: Color.strakkAccentYellow)
-                macroCell(label: "Glucides", value: "\(Int(summary.avgCarbs))g", color: Color.strakkAccentIndigo)
-                macroCell(label: "Eau", value: String(format: "%.1fL", Double(summary.avgWater) / 1000.0), color: Color.strakkWater)
+                macroCell(label: "Fat", value: "\(Int(summary.avgFat))g", color: Color.strakkAccentYellow)
+                macroCell(label: "Carbs", value: "\(Int(summary.avgCarbs))g", color: Color.strakkAccentIndigo)
+                macroCell(label: "Water", value: String(format: "%.1fL", Double(summary.avgWater) / 1000.0), color: Color.strakkWater)
             }
 
             // AI summary
@@ -113,14 +113,14 @@ struct WizardStepSummaryView: View {
 
     private var recapCard: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.md) {
-            Text("RÉCAP")
+            Text("SUMMARY")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
             VStack(alignment: .leading, spacing: StrakkSpacing.md) {
                 // Weight row
                 if !weight.isEmpty {
-                    recapRow(icon: "scalemass.fill", label: "Poids", value: weightWithDelta)
+                    recapRow(icon: "scalemass.fill", label: "Weight", value: weightWithDelta)
                 }
 
                 // Photo count
@@ -140,7 +140,7 @@ struct WizardStepSummaryView: View {
                 }
 
                 if !physicalFeeling.isEmpty {
-                    feelingPreview(title: "Physique", text: physicalFeeling)
+                    feelingPreview(title: "Physical", text: physicalFeeling)
                 }
             }
             .padding(StrakkSpacing.md)
@@ -207,7 +207,7 @@ struct WizardStepSummaryView: View {
                 Image(systemName: "tag.fill")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.strakkTextTertiary)
-                Text("Ressentis")
+                Text("Feelings")
                     .font(.strakkCaptionBold)
                     .foregroundStyle(Color.strakkTextSecondary)
             }
@@ -253,50 +253,6 @@ struct WizardStepSummaryView: View {
             "irritability": "Irritabilité",
             "low_mood": "Moral bas",
         ][slug] ?? slug
-    }
-}
-
-// MARK: - FlowLayout (local, non-private so visible to inner types)
-
-private struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
-        let availableWidth = proposal.width ?? 0
-        var height: CGFloat = 0
-        var currentRowWidth: CGFloat = 0
-        var currentRowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if currentRowWidth + size.width > availableWidth, currentRowWidth > 0 {
-                height += currentRowHeight + spacing
-                currentRowWidth = 0
-                currentRowHeight = 0
-            }
-            currentRowWidth += size.width + spacing
-            currentRowHeight = max(currentRowHeight, size.height)
-        }
-        height += currentRowHeight
-        return CGSize(width: availableWidth, height: height)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
-        var currentX = bounds.minX
-        var currentY = bounds.minY
-        var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if currentX + size.width > bounds.maxX, currentX > bounds.minX {
-                currentX = bounds.minX
-                currentY += rowHeight + spacing
-                rowHeight = 0
-            }
-            subview.place(at: CGPoint(x: currentX, y: currentY), proposal: ProposedViewSize(size))
-            currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
-        }
     }
 }
 

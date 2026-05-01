@@ -21,7 +21,7 @@ struct MealReviewView: View {
                 reviewBody(draft: draft)
             }
         }
-        .navigationTitle("Repas analysé")
+        .navigationTitle("Analyzed meal")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(false)
     }
@@ -32,7 +32,7 @@ struct MealReviewView: View {
     private func reviewBody(draft: EditingDraftData) -> some View {
         VStack(spacing: 0) {
             // Subtitle
-            Text("\(draft.resolvedCount) items détectés. Modifiez si nécessaire avant de valider.")
+            Text("\(draft.resolvedCount) items detected. Edit if needed before confirming.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .padding(.horizontal, 20)
@@ -41,7 +41,7 @@ struct MealReviewView: View {
 
             // Items list (resolved only in review)
             List {
-                ForEach(draft.items.filter(\.isResolved)) { item in
+                ForEach(draft.resolvedItems) { item in
                     if case .resolved(let entry) = item.kind {
                         reviewEntryRow(item: item, entry: entry)
                             .listRowBackground(Color.strakkSurface1)
@@ -49,9 +49,8 @@ struct MealReviewView: View {
                     }
                 }
                 .onDelete { offsets in
-                    let resolved = draft.items.filter(\.isResolved)
                     for idx in offsets {
-                        viewModel.onEvent(MealDraftEventRemoveItem(itemId: resolved[idx].id))
+                        viewModel.onEvent(MealDraftEventRemoveItem(itemId: draft.resolvedItems[idx].id))
                     }
                 }
             }
@@ -63,7 +62,7 @@ struct MealReviewView: View {
             Button {
                 viewModel.onEvent(MealDraftEventCommit.shared)
             } label: {
-                Text("Valider le repas")
+                Text("Confirm meal")
                     .font(.strakkBodyBold)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -74,7 +73,7 @@ struct MealReviewView: View {
             .disabled(draft.items.isEmpty)
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .accessibilityLabel("Valider le repas")
+            .accessibilityLabel("Confirm meal")
         }
     }
 

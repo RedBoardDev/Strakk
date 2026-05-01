@@ -90,7 +90,7 @@ struct BarcodeScannerView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14, weight: .semibold))
-                            Text("Annuler")
+                            Text("Cancel")
                                 .font(.strakkBody)
                         }
                         .foregroundStyle(.white)
@@ -98,7 +98,7 @@ struct BarcodeScannerView: View {
                         .padding(.vertical, 10)
                         .background(.ultraThinMaterial, in: Capsule())
                     }
-                    .accessibilityLabel("Annuler le scan")
+                    .accessibilityLabel("Cancel scan")
 
                     Spacer()
                 }
@@ -109,20 +109,20 @@ struct BarcodeScannerView: View {
 
                 // Bottom action
                 VStack(spacing: 12) {
-                    Text("Pointez la caméra sur un code-barres")
+                    Text("Point the camera at a barcode")
                         .font(.strakkCaption)
                         .foregroundStyle(.white.opacity(0.8))
                         .multilineTextAlignment(.center)
 
                     Button(action: onManual) {
-                        Text("Saisir manuellement")
+                        Text("Enter manually")
                             .font(.strakkBodyBold)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 14)
                             .background(.ultraThinMaterial, in: Capsule())
                     }
-                    .accessibilityLabel("Saisir le code-barres manuellement")
+                    .accessibilityLabel("Enter barcode manually")
                 }
                 .padding(.bottom, 60)
             }
@@ -138,18 +138,18 @@ struct BarcodeScannerView: View {
                     .font(.system(size: 60))
                     .foregroundStyle(Color.strakkTextTertiary)
 
-                Text("Scanner non disponible")
+                Text("Scanner unavailable")
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
 
-                Text("Le scanner de code-barres n'est pas disponible sur cet appareil.")
+                Text("The barcode scanner is not available on this device.")
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
 
                 Button(action: onManual) {
-                    Text("Saisir manuellement")
+                    Text("Enter manually")
                         .font(.strakkBodyBold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -158,7 +158,7 @@ struct BarcodeScannerView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(.horizontal, 40)
-                .accessibilityLabel("Saisir le repas manuellement")
+                .accessibilityLabel("Enter meal manually")
             }
         }
         .overlay(alignment: .topLeading) {
@@ -168,7 +168,7 @@ struct BarcodeScannerView: View {
                     .foregroundStyle(Color.strakkTextSecondary)
                     .frame(width: 48, height: 48)
             }
-            .accessibilityLabel("Fermer")
+            .accessibilityLabel("Close")
             .padding(.top, 60)
             .padding(.leading, 12)
         }

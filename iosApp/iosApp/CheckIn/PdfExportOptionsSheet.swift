@@ -30,30 +30,30 @@ struct PdfExportOptionsSheet: View {
                 Color.strakkBackground.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        optionSection("GÉNÉRAL") {
+                        optionSection("GENERAL") {
                             toggleRow("Photos", isOn: $options.includePhotos)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Mesures corporelles", isOn: $options.includeMeasurements)
+                            toggleRow("Body measurements", isOn: $options.includeMeasurements)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Ressentis", isOn: $options.includeFeelings)
+                            toggleRow("Feelings", isOn: $options.includeFeelings)
                         }
 
                         optionSection("NUTRITION") {
                             toggleRow("Calories", isOn: $options.includeCalories)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Protéines", isOn: $options.includeProtein)
+                            toggleRow("Protein", isOn: $options.includeProtein)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Glucides", isOn: $options.includeCarbs)
+                            toggleRow("Carbs", isOn: $options.includeCarbs)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Lipides", isOn: $options.includeFat)
+                            toggleRow("Fat", isOn: $options.includeFat)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Eau", isOn: $options.includeWater)
+                            toggleRow("Water", isOn: $options.includeWater)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Moyennes", isOn: $options.includeAverages)
+                            toggleRow("Averages", isOn: $options.includeAverages)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Par jour", isOn: $options.includeDailyData)
+                            toggleRow("Per day", isOn: $options.includeDailyData)
                             Divider().background(Color.strakkDivider).padding(.leading, 16)
-                            toggleRow("Résumé IA", isOn: $options.includeAiSummary)
+                            toggleRow("AI Summary", isOn: $options.includeAiSummary)
                         }
 
                         Button(action: onExport) {
@@ -66,7 +66,7 @@ struct PdfExportOptionsSheet: View {
                                     Image(systemName: "doc.fill")
                                         .font(.system(size: 14, weight: .semibold))
                                 }
-                                Text(isGenerating ? "Génération…" : "Générer le PDF")
+                                Text(isGenerating ? "Generating..." : "Generate PDF")
                                     .font(.strakkBodyBold)
                             }
                             .foregroundStyle(.white)
@@ -79,15 +79,15 @@ struct PdfExportOptionsSheet: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
                         .padding(.bottom, 32)
-                        .accessibilityLabel(isGenerating ? "Génération du PDF en cours" : "Générer le PDF")
+                        .accessibilityLabel(isGenerating ? "Generating PDF" : "Generate PDF")
                     }
                 }
             }
-            .navigationTitle("Contenu du PDF")
+            .navigationTitle("PDF content")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler", action: onCancel)
+                    Button("Cancel", action: onCancel)
                         .foregroundStyle(Color.strakkTextSecondary)
                         .disabled(isGenerating)
                 }

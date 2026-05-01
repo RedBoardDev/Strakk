@@ -37,7 +37,7 @@ struct EntryDetailSheet: View {
                             .font(.system(size: 20))
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
-                    .accessibilityLabel("Fermer")
+                    .accessibilityLabel("Close")
                 }
             }
         }
@@ -69,17 +69,17 @@ struct EntryDetailSheet: View {
 
     private var macroBreakdown: some View {
         var items: [MacroBreakdownItem] = [
-            .init(label: "Protéines", value: String(format: "%.0fg", entry.protein), color: .strakkProtein),
+            .init(label: "Protein", value: String(format: "%.0fg", entry.protein), color: .strakkProtein),
             .init(label: "Calories", value: String(format: "%.0f kcal", entry.calories), color: .strakkCalories),
         ]
         if let fat = entry.fat {
-            items.append(.init(label: "Lipides", value: String(format: "%.0fg", fat), color: .strakkAccentYellow))
+            items.append(.init(label: "Fat", value: String(format: "%.0fg", fat), color: .strakkAccentYellow))
         }
         if let carbs = entry.carbs {
-            items.append(.init(label: "Glucides", value: String(format: "%.0fg", carbs), color: .strakkAccentIndigo))
+            items.append(.init(label: "Carbs", value: String(format: "%.0fg", carbs), color: .strakkAccentIndigo))
         }
         if let qty = entry.quantity {
-            items.append(.init(label: "Quantité", value: qty, color: .strakkTextSecondary))
+            items.append(.init(label: "Quantity", value: qty, color: .strakkTextSecondary))
         }
         return MacroBreakdown(items: items)
     }
@@ -95,7 +95,7 @@ struct EntryDetailSheet: View {
                 HStack(spacing: 6) {
                     Image(systemName: "pencil")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Modifier")
+                    Text("Edit")
                         .font(.strakkBodyBold)
                 }
                 .foregroundStyle(Color.strakkTextPrimary)
@@ -104,7 +104,7 @@ struct EntryDetailSheet: View {
                 .background(Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
             }
-            .accessibilityLabel("Modifier l'entrée")
+            .accessibilityLabel("Edit entry")
 
             Button(role: .destructive) {
                 onDelete()
@@ -112,7 +112,7 @@ struct EntryDetailSheet: View {
                 HStack(spacing: 6) {
                     Image(systemName: "trash")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Supprimer")
+                    Text("Delete")
                         .font(.strakkBodyBold)
                 }
                 .foregroundStyle(Color.strakkError)
@@ -121,7 +121,7 @@ struct EntryDetailSheet: View {
                 .background(Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
             }
-            .accessibilityLabel("Supprimer l'entrée")
+            .accessibilityLabel("Delete entry")
         }
     }
 

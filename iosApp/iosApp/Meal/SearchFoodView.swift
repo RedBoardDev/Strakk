@@ -33,15 +33,15 @@ struct SearchFoodView: View {
                 Color.strakkBackground.ignoresSafeArea()
                 content
             }
-            .navigationTitle("Rechercher un aliment")
+            .navigationTitle("Search for a food")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { onDismiss() }
+                    Button("Cancel") { onDismiss() }
                         .foregroundStyle(Color.strakkTextSecondary)
                 }
             }
-            .searchable(text: $query, prompt: "Pomme, poulet...")
+            .searchable(text: $query, prompt: "Apple, chicken...")
             .onChange(of: query) { _, newQuery in
                 searchViewModel.onEvent(SearchFoodEventQueryChanged(query: newQuery))
             }
@@ -75,7 +75,7 @@ struct SearchFoodView: View {
                     .foregroundStyle(Color.strakkTextSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
-                Button("Réessayer") {
+                Button("Retry") {
                     searchViewModel.onEvent(SearchFoodEventRetry.shared)
                 }
                 .foregroundStyle(Color.strakkPrimary)
@@ -99,7 +99,7 @@ struct SearchFoodView: View {
                     if results.userItems.isEmpty {
                         emptyFrequentsView
                     } else {
-                        SectionHeader(title: "FRÉQUENTS")
+                        SectionHeader(title: "FREQUENT")
                             .padding(.horizontal, 20)
                             .padding(.top, 16)
                             .padding(.bottom, 4)
@@ -113,7 +113,7 @@ struct SearchFoodView: View {
                         noResultsView(query: query)
                     } else {
                         if !results.userItems.isEmpty {
-                            SectionHeader(title: "MES ITEMS")
+                            SectionHeader(title: "MY ITEMS")
                                 .padding(.horizontal, 20)
                                 .padding(.top, 16)
                                 .padding(.bottom, 4)
@@ -122,7 +122,7 @@ struct SearchFoodView: View {
                             }
                         }
                         if !results.catalogItems.isEmpty {
-                            SectionHeader(title: "CATALOGUE")
+                            SectionHeader(title: "CATALOG")
                                 .padding(.horizontal, 20)
                                 .padding(.top, 16)
                                 .padding(.bottom, 4)
@@ -261,7 +261,7 @@ struct SearchFoodView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "scalemass")
                             .font(.system(size: 10, weight: .medium))
-                        Text("valeurs pour 100 g")
+                        Text("values per 100 g")
                             .font(.strakkCaption)
                     }
                     .foregroundStyle(Color.strakkTextTertiary)
@@ -380,7 +380,7 @@ struct SearchFoodView: View {
                             .tint(.white)
                             .scaleEffect(0.7)
                     }
-                    Text(quickAddViewModel.isProcessing ? "Ajout..." : "Ajouter")
+                    Text(quickAddViewModel.isProcessing ? "Adding..." : "Add")
                         .font(.strakkCaptionBold)
                 }
                 .foregroundStyle(.white)
@@ -390,7 +390,7 @@ struct SearchFoodView: View {
                 .clipShape(Capsule())
             }
             .disabled(quickAddViewModel.isProcessing)
-            .accessibilityLabel("Ajouter \(name)")
+            .accessibilityLabel("Add \(name)")
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -426,10 +426,10 @@ struct SearchFoodView: View {
             Image(systemName: "clock")
                 .font(.system(size: 32))
                 .foregroundStyle(Color.strakkTextTertiary)
-            Text("Aucun aliment récent")
+            Text("No recent foods")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
-            Text("Ajoutez-en un pour alimenter votre historique.")
+            Text("Add one to build your history.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .multilineTextAlignment(.center)
@@ -441,12 +441,12 @@ struct SearchFoodView: View {
 
     private func noResultsView(query: String) -> some View {
         VStack(spacing: 12) {
-            Text("Aucun résultat pour \"\(query)\"")
+            Text("No results for \"\(query)\"")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
-            Button("Ajout manuel") {
+            Button("Manual entry") {
                 // Dismiss and open manual entry
                 onDismiss()
             }

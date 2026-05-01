@@ -48,9 +48,9 @@ struct EditEntrySheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        StrakkFieldGroup(label: "Nom *", required: true) {
+                        StrakkFieldGroup(label: "Name *", required: true) {
                             StrakkInputField(
-                                placeholder: "ex : Poulet grillé",
+                                placeholder: "e.g. Grilled chicken",
                                 text: $name,
                                 isValid: name.count <= 100,
                                 focusState: $focusedField,
@@ -59,7 +59,7 @@ struct EditEntrySheet: View {
                         }
 
                         HStack(spacing: 12) {
-                            StrakkFieldGroup(label: "Protéines (g) *", required: true) {
+                            StrakkFieldGroup(label: "Protein (g) *", required: true) {
                                 StrakkNumericField(
                                     placeholder: "35",
                                     text: $protein,
@@ -81,7 +81,7 @@ struct EditEntrySheet: View {
                         }
 
                         HStack(spacing: 12) {
-                            StrakkFieldGroup(label: "Lipides (g)", required: false) {
+                            StrakkFieldGroup(label: "Fat (g)", required: false) {
                                 StrakkNumericField(
                                     placeholder: "15",
                                     text: $fat,
@@ -120,7 +120,7 @@ struct EditEntrySheet: View {
                             let quantityVal = quantity.trimmingCharacters(in: .whitespaces).isEmpty ? nil : quantity
                             onSave(name, proteinVal, caloriesVal, fatVal, carbsVal, quantityVal)
                         } label: {
-                            Text("Enregistrer")
+                            Text("Save")
                                 .font(.strakkBodyBold)
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -136,7 +136,7 @@ struct EditEntrySheet: View {
                     .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Modifier l'entrée")
+            .navigationTitle("Edit entry")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

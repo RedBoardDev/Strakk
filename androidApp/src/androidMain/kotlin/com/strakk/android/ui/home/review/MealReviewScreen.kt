@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,12 +34,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.DraftItem
@@ -63,11 +66,12 @@ fun MealReviewRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is MealDraftEffect.Committed -> {
-                    snackbarHostState.showSnackbar("Repas enregistré")
+                    snackbarHostState.showSnackbar(context.getString(R.string.review_committed_snackbar))
                     onCommitted()
                 }
                 is MealDraftEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
@@ -104,10 +108,10 @@ private fun MealReviewScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Revue du repas") },
+                title = { Text(stringResource(R.string.review_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Outlined.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.review_back_cd))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -133,7 +137,7 @@ private fun MealReviewScreen(
                             .padding(horizontal = 20.dp, vertical = 12.dp)
                             .height(52.dp),
                     ) {
-                        Text("Valider le repas")
+                        Text(stringResource(R.string.review_confirm_button))
                     }
                 }
             }
@@ -153,7 +157,7 @@ private fun MealReviewScreen(
                 }
                 is MealDraftUiState.Empty -> {
                     Text(
-                        text = "Aucun repas en cours",
+                        text = stringResource(R.string.review_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalStrakkColors.current.textSecondary,
                         modifier = Modifier.align(Alignment.Center),
@@ -175,7 +179,7 @@ private fun ReviewContent(
     state: MealDraftUiState.Editing,
     modifier: Modifier = Modifier,
 ) {
-    val resolvedItems = state.draft.items.filterIsInstance<DraftItem.Resolved>()
+    val resolvedItems = remember(state.draft.items) { state.draft.items.filterIsInstance<DraftItem.Resolved>() }
     val totalItems = resolvedItems.size
 
     LazyColumn(
@@ -184,7 +188,7 @@ private fun ReviewContent(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "$totalItems items analysés. Modifiez avant de valider.",
+                text = stringResource(R.string.review_subtitle, totalItems),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LocalStrakkColors.current.textSecondary,
             )

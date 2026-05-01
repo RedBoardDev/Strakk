@@ -80,39 +80,39 @@ struct WizardStepFeelingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
                 // Title
-                Text("Comment tu te sens ?")
+                Text("How are you feeling?")
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
 
-                Text("Choisis les sensations qui résument ta semaine, puis détaille séparément le mental et le physique.")
+                Text("Pick the feelings that summarize your week, then describe your mental and physical state separately.")
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
 
                 // Positive tags
                 tagSection(
-                    title: "Sensations positives",
+                    title: "Positive feelings",
                     tags: FeelingCategory.positive,
                     selectedColor: Color.strakkSuccess
                 )
 
                 // Negative tags
                 tagSection(
-                    title: "Sensations négatives",
+                    title: "Negative feelings",
                     tags: FeelingCategory.negative,
                     selectedColor: Color.strakkError
                 )
 
                 feelingTextSection(
-                    title: "RESSENTI MENTAL",
-                    placeholder: "Ex: motivation, stress, humeur, confiance, charge mentale...",
+                    title: "MENTAL FEELING",
+                    placeholder: "E.g. motivation, stress, mood...",
                     text: $draftMentalFeeling,
                     focusedField: .mental,
                     onChanged: onMentalFeelingChanged
                 )
 
                 feelingTextSection(
-                    title: "RESSENTI PHYSIQUE",
-                    placeholder: "Ex: énergie, sommeil, digestion, douleurs, récupération...",
+                    title: "PHYSICAL FEELING",
+                    placeholder: "E.g. energy, sleep, digestion...",
                     text: $draftPhysicalFeeling,
                     focusedField: .physical,
                     onChanged: onPhysicalFeelingChanged
@@ -160,7 +160,7 @@ struct WizardStepFeelingsView: View {
                 .background(isSelected ? selectedColor : Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .accessibilityLabel("\(tag.label), \(isSelected ? "sélectionné" : "non sélectionné")")
+        .accessibilityLabel("\(tag.label), \(isSelected ? "selected" : "not selected")")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
@@ -211,51 +211,6 @@ struct WizardStepFeelingsView: View {
                     .foregroundStyle(Color.strakkTextTertiary)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
-        }
-    }
-}
-
-// MARK: - FlowLayout
-
-private struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
-        let availableWidth = proposal.width ?? 0
-        var height: CGFloat = 0
-        var currentRowWidth: CGFloat = 0
-        var currentRowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if currentRowWidth + size.width > availableWidth, currentRowWidth > 0 {
-                height += currentRowHeight + spacing
-                currentRowWidth = 0
-                currentRowHeight = 0
-            }
-            currentRowWidth += size.width + spacing
-            currentRowHeight = max(currentRowHeight, size.height)
-        }
-        height += currentRowHeight
-
-        return CGSize(width: availableWidth, height: height)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
-        var currentX = bounds.minX
-        var currentY = bounds.minY
-        var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if currentX + size.width > bounds.maxX, currentX > bounds.minX {
-                currentX = bounds.minX
-                currentY += rowHeight + spacing
-                rowHeight = 0
-            }
-            subview.place(at: CGPoint(x: currentX, y: currentY), proposal: ProposedViewSize(size))
-            currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
         }
     }
 }

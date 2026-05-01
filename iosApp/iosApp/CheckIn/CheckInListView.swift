@@ -20,7 +20,7 @@ struct CheckInListView: View {
                     mainContent(checkIns: checkIns, quickStats: quickStats)
                 }
             }
-            .navigationTitle("Bilans")
+            .navigationTitle("Check-ins")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -30,7 +30,7 @@ struct CheckInListView: View {
                             .font(.title3)
                             .foregroundStyle(Color.strakkPrimary)
                     }
-                    .accessibilityLabel("Nouveau bilan")
+                    .accessibilityLabel("New check-in")
                 }
             }
             .navigationDestination(item: $vm.navigateToDetailId) { id in
@@ -69,25 +69,25 @@ struct CheckInListView: View {
     @ViewBuilder
     private func quickStatsSection(stats: QuickStatsData) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("STATS RAPIDES")
+            Text("QUICK STATS")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
             HStack(spacing: StrakkSpacing.xs) {
                 quickStatCard(
-                    title: "Poids",
+                    title: "Weight",
                     value: stats.lastWeight.map { String(format: "%.1f", $0) },
                     unit: "kg",
                     delta: stats.weightDelta
                 )
                 quickStatCard(
-                    title: "Bras moy.",
+                    title: "Avg. arms",
                     value: stats.lastAvgArm.map { String(format: "%.1f", $0) },
                     unit: "cm",
                     delta: stats.armDelta
                 )
                 quickStatCard(
-                    title: "Taille",
+                    title: "Waist",
                     value: stats.lastWaist.map { String(format: "%.1f", $0) },
                     unit: "cm",
                     delta: stats.waistDelta
@@ -98,7 +98,7 @@ struct CheckInListView: View {
                 vm.onEvent(CheckInListEventOnOpenStats())
             } label: {
                 HStack(spacing: StrakkSpacing.xs) {
-                    Text("Voir les stats détaillées")
+                    Text("View detailed stats")
                         .font(.strakkCaptionBold)
                         .foregroundStyle(Color.strakkPrimary)
                     Image(systemName: "chevron.right")
@@ -108,7 +108,7 @@ struct CheckInListView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, StrakkSpacing.xxs)
             }
-            .accessibilityLabel("Voir les stats détaillées")
+            .accessibilityLabel("View detailed stats")
         }
     }
 
@@ -175,7 +175,7 @@ struct CheckInListView: View {
             emptyState
         } else {
             VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-                Text("BILANS RÉCENTS")
+                Text("RECENT CHECK-INS")
                     .font(.strakkOverline)
                     .foregroundStyle(Color.strakkTextTertiary)
 
@@ -237,11 +237,11 @@ struct CheckInListView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(Color.strakkTextTertiary)
 
-            Text("Pas encore de bilan")
+            Text("No check-ins yet")
                 .font(.strakkHeading3)
                 .foregroundStyle(Color.strakkTextPrimary)
 
-            Text("Commencez à suivre votre progression en créant votre premier bilan hebdomadaire.")
+            Text("Start tracking your progress by creating your first weekly check-in.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .multilineTextAlignment(.center)
@@ -249,7 +249,7 @@ struct CheckInListView: View {
             Button {
                 vm.onEvent(CheckInListEventOnCreateNew())
             } label: {
-                Text("Commencer")
+                Text("Get started")
                     .font(.strakkBodyBold)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -257,7 +257,7 @@ struct CheckInListView: View {
                     .background(Color.strakkPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .accessibilityLabel("Créer mon premier bilan")
+            .accessibilityLabel("Create my first check-in")
             .padding(.top, StrakkSpacing.xs)
         }
         .padding(.horizontal, StrakkSpacing.md)

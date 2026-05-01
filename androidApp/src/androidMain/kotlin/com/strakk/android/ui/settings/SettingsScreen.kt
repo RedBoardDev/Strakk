@@ -54,6 +54,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.presentation.settings.SettingsEvent
@@ -87,7 +89,7 @@ private fun LoadingView(padding: PaddingValues) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("Loading…", color = LocalStrakkColors.current.textSecondary)
+        Text(stringResource(R.string.settings_loading), color = LocalStrakkColors.current.textSecondary)
     }
 }
 
@@ -106,7 +108,7 @@ private fun ReadyView(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Text(
-            text = "Settings",
+            text = stringResource(R.string.settings_title),
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -122,6 +124,8 @@ private fun ReadyView(
             onWaterChanged = { onEvent(SettingsEvent.OnWaterGoalChanged(it)) },
         )
 
+        DataSourcesSection()
+
         Button(
             onClick = { onEvent(SettingsEvent.OnSignOut) },
             modifier = Modifier
@@ -133,7 +137,7 @@ private fun ReadyView(
                 contentColor = MaterialTheme.colorScheme.onError,
             ),
         ) {
-            Text("Sign out", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings_sign_out), fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -142,7 +146,7 @@ private fun ReadyView(
 
 @Composable
 private fun AccountSection(email: String?) {
-    SectionCard(title = "ACCOUNT") {
+    SectionCard(title = stringResource(R.string.settings_section_account)) {
         Text(
             text = email ?: "—",
             style = MaterialTheme.typography.bodyLarge,
@@ -160,19 +164,19 @@ private fun GoalsSection(
     onCalorieChanged: (String) -> Unit,
     onWaterChanged: (String) -> Unit,
 ) {
-    SectionCard(title = "DAILY GOALS") {
+    SectionCard(title = stringResource(R.string.settings_section_daily_goals)) {
         GoalField(
-            label = "Protein (g)",
+            label = stringResource(R.string.settings_goal_protein),
             value = protein,
             onValueChange = onProteinChanged,
         )
         GoalField(
-            label = "Calories (kcal)",
+            label = stringResource(R.string.settings_goal_calories),
             value = calorie,
             onValueChange = onCalorieChanged,
         )
         GoalField(
-            label = "Water (mL)",
+            label = stringResource(R.string.settings_goal_water),
             value = water,
             onValueChange = onWaterChanged,
             imeAction = ImeAction.Done,
@@ -202,6 +206,17 @@ private fun GoalField(
         ),
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@Composable
+private fun DataSourcesSection() {
+    SectionCard(title = stringResource(R.string.settings_section_data_sources)) {
+        Text(
+            text = stringResource(R.string.settings_data_sources_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = LocalStrakkColors.current.textSecondary,
+        )
+    }
 }
 
 @Composable

@@ -53,7 +53,7 @@ struct MealDetailSheet: View {
                             .font(.system(size: 20))
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
-                    .accessibilityLabel("Fermer")
+                    .accessibilityLabel("Close")
                 }
             }
         }
@@ -97,14 +97,14 @@ struct MealDetailSheet: View {
 
     private var totalMacros: some View {
         var items: [MacroBreakdownItem] = [
-            .init(label: "Protéines", value: String(format: "%.0fg", meal.totalProtein), color: .strakkProtein),
+            .init(label: "Protein", value: String(format: "%.0fg", meal.totalProtein), color: .strakkProtein),
             .init(label: "Calories", value: String(format: "%.0f kcal", meal.totalCalories), color: .strakkCalories),
         ]
         if totalFat > 0 {
-            items.append(.init(label: "Lipides", value: String(format: "%.0fg", totalFat), color: .strakkAccentYellow))
+            items.append(.init(label: "Fat", value: String(format: "%.0fg", totalFat), color: .strakkAccentYellow))
         }
         if totalCarbs > 0 {
-            items.append(.init(label: "Glucides", value: String(format: "%.0fg", totalCarbs), color: .strakkAccentIndigo))
+            items.append(.init(label: "Carbs", value: String(format: "%.0fg", totalCarbs), color: .strakkAccentIndigo))
         }
         return MacroBreakdown(items: items)
     }
@@ -170,15 +170,15 @@ struct MealDetailSheet: View {
             Button(role: .destructive) {
                 onDeleteEntry(entry)
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .contextMenu {
             Button { onEditEntry(entry) } label: {
-                Label("Modifier", systemImage: "pencil")
+                Label("Edit", systemImage: "pencil")
             }
             Button(role: .destructive) { onDeleteEntry(entry) } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
     }
@@ -192,7 +192,7 @@ struct MealDetailSheet: View {
             HStack(spacing: 6) {
                 Image(systemName: "trash")
                     .font(.system(size: 14, weight: .semibold))
-                Text("Supprimer le repas")
+                Text("Delete meal")
                     .font(.strakkBodyBold)
             }
             .foregroundStyle(Color.strakkError)
@@ -201,7 +201,7 @@ struct MealDetailSheet: View {
             .background(Color.strakkSurface2)
             .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
-        .accessibilityLabel("Supprimer le repas")
+        .accessibilityLabel("Delete meal")
     }
 
     // MARK: - Computed

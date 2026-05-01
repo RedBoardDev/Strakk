@@ -30,7 +30,7 @@ struct PhotoHintView: View {
                             Button {
                                 showCamera = true
                             } label: {
-                                Label("Caméra", systemImage: "camera.fill")
+                                Label("Camera", systemImage: "camera.fill")
                                     .font(.strakkBodyBold)
                                     .foregroundStyle(Color.strakkTextPrimary)
                                     .frame(maxWidth: .infinity)
@@ -57,7 +57,7 @@ struct PhotoHintView: View {
 
                         // Hint field
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Hint (optionnel)")
+                            Text("Hint (optional)")
                                 .font(.strakkCaptionBold)
                                 .foregroundStyle(Color.strakkTextSecondary)
 
@@ -105,7 +105,7 @@ struct PhotoHintView: View {
                                 if isCompressing {
                                     ProgressView().tint(.white).scaleEffect(0.8)
                                 } else {
-                                    Text("Ajouter au repas")
+                                    Text("Add to meal")
                                         .font(.strakkBodyBold)
                                         .foregroundStyle(.white)
                                 }
@@ -190,7 +190,7 @@ struct PhotoHintView: View {
                     Image(systemName: "camera.fill")
                         .font(.system(size: 36))
                         .foregroundStyle(Color.strakkTextTertiary)
-                    Text("Sélectionnez une photo")
+                    Text("Select a photo")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextTertiary)
                 }

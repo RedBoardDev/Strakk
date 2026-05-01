@@ -9,6 +9,7 @@ struct HevyExportFlow: View {
     @State private var showPdfPicker = true
     @State private var pulseScale: CGFloat = 1.0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppNavigator.self) private var navigator
 
     var body: some View {
         NavigationStack {
@@ -58,7 +59,7 @@ struct HevyExportFlow: View {
         .alert("Hevy API Key Required", isPresented: $viewModel.requiresApiKey) {
             Button("Go to Settings") {
                 onDismiss()
-                AppNavigator.shared.selectedTab = 3
+                navigator.selectedTab = 3
             }
             Button("Cancel", role: .cancel) {}
         } message: {

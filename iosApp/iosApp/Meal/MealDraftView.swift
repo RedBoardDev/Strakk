@@ -35,13 +35,13 @@ struct MealDraftView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    Button("Renommer") {
+                    Button("Rename") {
                         if case .editing(let d) = viewModel.state {
                             renameText = d.name
                         }
                         showRenameAlert = true
                     }
-                    Button("Annuler le repas", role: .destructive) {
+                    Button("Cancel meal", role: .destructive) {
                         showDiscardConfirm = true
                     }
                 } label: {
@@ -50,8 +50,8 @@ struct MealDraftView: View {
                 }
             }
         }
-        .alert("Renommer le repas", isPresented: $showRenameAlert) {
-            TextField("Nom du repas", text: $renameText)
+        .alert("Rename meal", isPresented: $showRenameAlert) {
+            TextField("Meal name", text: $renameText)
                 .autocorrectionDisabled(false)
             Button("OK") {
                 let trimmed = renameText.trimmingCharacters(in: .whitespaces)
@@ -59,34 +59,34 @@ struct MealDraftView: View {
                     viewModel.onEvent(MealDraftEventRename(name: trimmed))
                 }
             }
-            Button("Annuler", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("1 à 60 caractères")
+            Text("1 to 60 characters")
         }
         .confirmationDialog(
-            "Annuler le repas ?",
+            "Cancel meal?",
             isPresented: $showDiscardConfirm,
             titleVisibility: .visible
         ) {
-            Button("Annuler le repas", role: .destructive) {
+            Button("Cancel meal", role: .destructive) {
                 viewModel.onEvent(MealDraftEventDiscard.shared)
                 dismiss()
             }
-            Button("Garder", role: .cancel) {}
+            Button("Keep", role: .cancel) {}
         } message: {
-            Text("Votre repas en cours sera supprimé.")
+            Text("Your current meal will be deleted.")
         }
         .confirmationDialog(
-            "Analyser le repas ?",
+            "Analyze meal?",
             isPresented: $showProcessConfirm,
             titleVisibility: .visible
         ) {
-            Button("Lancer l'analyse") {
+            Button("Start analysis") {
                 viewModel.onEvent(MealDraftEventProcess.shared)
             }
-            Button("Annuler", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Des items en attente seront analysés par IA. L'opération prend quelques secondes.")
+            Text("Pending items will be analyzed by AI. This takes a few seconds.")
         }
         .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: viewModel.navigateToReview) { _, navigate in
@@ -126,7 +126,7 @@ struct MealDraftView: View {
 
     private var draftName: String {
         if case .editing(let d) = viewModel.state { return d.name }
-        return "Repas en cours"
+        return "Meal in progress"
     }
 
     // MARK: - Editing body
@@ -168,7 +168,7 @@ struct MealDraftView: View {
                 ProgressView()
                     .tint(Color.strakkPrimary)
                     .scaleEffect(1.5)
-                Text("Analyse de votre repas...")
+                Text("Analyzing your meal...")
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextPrimary)
             }
@@ -199,7 +199,7 @@ struct MealDraftView: View {
                 }
             }
 
-            Text("Compose ton repas, ajuste les portions, puis lance l'analyse si besoin.")
+            Text("Compose your meal, adjust portions, then analyze if needed.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -210,7 +210,7 @@ struct MealDraftView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .lastTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("TOTAL REPAS")
+                    Text("MEAL TOTAL")
                         .font(.strakkOverline)
                         .foregroundStyle(Color.strakkTextTertiary)
                         .kerning(1.0)
@@ -227,8 +227,8 @@ struct MealDraftView: View {
             }
 
             HStack(spacing: 8) {
-                macroPill(label: "Lipides", value: draft.totals.fat, unit: "g")
-                macroPill(label: "Glucides", value: draft.totals.carbs, unit: "g")
+                macroPill(label: "Fat", value: draft.totals.fat, unit: "g")
+                macroPill(label: "Carbs", value: draft.totals.carbs, unit: "g")
                 macroPill(label: "Items", value: Double(draft.resolvedCount), unit: "")
             }
         }
@@ -296,11 +296,11 @@ struct MealDraftView: View {
                         .background(Color.strakkSurface2)
                         .clipShape(Circle())
                 }
-                .accessibilityLabel("Modifier \(entry.name ?? "l'item")")
+                .accessibilityLabel("Edit \(entry.name ?? "item")")
 
             case .pendingPhoto(let hint):
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Analyse en attente")
+                    Text("Pending analysis")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextSecondary)
                     if let h = hint, !h.isEmpty {
@@ -316,7 +316,7 @@ struct MealDraftView: View {
 
             case .pendingText(let description):
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Texte en attente")
+                    Text("Pending text")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextSecondary)
                     Text(description)
@@ -339,7 +339,7 @@ struct MealDraftView: View {
                     .background(Color.strakkSurface2)
                     .clipShape(Circle())
             }
-            .accessibilityLabel("Supprimer")
+            .accessibilityLabel("Delete")
         }
         .padding(16)
         .background(Color.strakkSurface1)
@@ -352,10 +352,10 @@ struct MealDraftView: View {
             Image(systemName: "fork.knife.circle")
                 .font(.system(size: 28, weight: .medium))
                 .foregroundStyle(Color.strakkPrimary)
-            Text("Ton repas est vide")
+            Text("Your meal is empty")
                 .font(.strakkHeading3)
                 .foregroundStyle(Color.strakkTextPrimary)
-            Text("Ajoute un aliment manuel, une recherche CIQUAL, un barcode, une photo ou un texte.")
+            Text("Add a manual item, a CIQUAL search, a barcode, a photo or text.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
         }
@@ -375,7 +375,7 @@ struct MealDraftView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "plus")
-                    Text("Ajouter")
+                    Text("Add")
                 }
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkPrimary)
@@ -384,7 +384,7 @@ struct MealDraftView: View {
                 .background(Color.strakkSurface1)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .accessibilityLabel("Ajouter un item")
+            .accessibilityLabel("Add an item")
 
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -394,7 +394,7 @@ struct MealDraftView: View {
                     viewModel.onEvent(MealDraftEventProcess.shared)
                 }
             } label: {
-                Text("Terminer le repas")
+                Text("Finish meal")
                     .font(.strakkBodyBold)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -403,7 +403,7 @@ struct MealDraftView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .disabled(draft.items.isEmpty)
-            .accessibilityLabel("Terminer le repas")
+            .accessibilityLabel("Finish meal")
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
@@ -417,13 +417,13 @@ struct MealDraftView: View {
             Image(systemName: "tray")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.strakkTextTertiary)
-            Text("Aucun repas en cours")
+            Text("No meal in progress")
                 .font(.strakkHeading3)
                 .foregroundStyle(Color.strakkTextSecondary)
             Button {
                 viewModel.onEvent(MealDraftEventStartDraft(initialName: nil, date: nil))
             } label: {
-                Text("Créer un repas")
+                Text("Create a meal")
                     .font(.strakkBodyBold)
                     .foregroundStyle(.white)
                     .frame(height: 52)
@@ -439,8 +439,8 @@ struct MealDraftView: View {
     private func draftItemLabel(item: DraftItemData) -> String {
         switch item.kind {
         case .resolved(let entry): return entry.name ?? "Item"
-        case .pendingPhoto: return "Photo en attente d'analyse"
-        case .pendingText(let d): return "Texte en attente: \(d)"
+        case .pendingPhoto: return "Photo pending analysis"
+        case .pendingText(let d): return "Pending text: \(d)"
         }
     }
 

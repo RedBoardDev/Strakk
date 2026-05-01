@@ -175,7 +175,7 @@ struct TodayView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "fork.knife")
                         .font(.system(size: 16, weight: .semibold))
-                    Text("Repas")
+                    Text("Meal")
                         .font(.strakkBodyBold)
                 }
                 .foregroundStyle(Color.strakkTextPrimary)
@@ -184,9 +184,9 @@ struct TodayView: View {
                 .background(Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-            .accessibilityLabel("Nouveau repas")
+            .accessibilityLabel("New meal")
 
-            // Rapide button
+            // Quick button
             Button {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 addPickerMode = .quickAdd
@@ -194,7 +194,7 @@ struct TodayView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 16, weight: .semibold))
-                    Text("Rapide")
+                    Text("Quick")
                         .font(.strakkBodyBold)
                 }
                 .foregroundStyle(.white)
@@ -203,7 +203,7 @@ struct TodayView: View {
                 .background(Color.strakkPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-            .accessibilityLabel("Ajout rapide")
+            .accessibilityLabel("Quick add")
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
@@ -257,9 +257,9 @@ struct TodayView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
 
-                // 3. Eau
+                // 3. Water
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("EAU")
+                    Text("WATER")
                         .font(.strakkOverline)
                         .foregroundStyle(Color.strakkTextTertiary)
 
@@ -285,7 +285,7 @@ struct TodayView: View {
                     if timeline.isEmpty {
                         emptyTimelineView
                     } else {
-                        VStack(spacing: 6) {
+                        LazyVStack(spacing: 6) {
                             ForEach(timeline) { item in
                                 timelineRow(item: item)
                             }
@@ -355,14 +355,14 @@ struct TodayView: View {
             Button(role: .destructive) {
                 viewModel.onEvent(TodayEventOnDeleteMeal(mealId: meal.id))
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 viewModel.onEvent(TodayEventOnDeleteMeal(mealId: meal.id))
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .accessibilityLabel("\(meal.name), \(meal.entries.count) items")
@@ -405,17 +405,17 @@ struct TodayView: View {
             Button(role: .destructive) {
                 viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .contextMenu {
             Button { editingEntry = entry } label: {
-                Label("Modifier", systemImage: "pencil")
+                Label("Edit", systemImage: "pencil")
             }
             Button(role: .destructive) {
                 viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
             } label: {
-                Label("Supprimer", systemImage: "trash")
+                Label("Delete", systemImage: "trash")
             }
         }
         .accessibilityLabel(entry.name ?? "Item")
@@ -449,7 +449,7 @@ struct TodayView: View {
             Button {
                 addPickerMode = .draft
             } label: {
-                Text("+ Ajouter")
+                Text("+ Add")
                     .font(.strakkCaptionBold)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12)
@@ -457,7 +457,7 @@ struct TodayView: View {
                     .background(.white.opacity(0.2))
                     .clipShape(Capsule())
             }
-            .accessibilityLabel("Ajouter un item au repas en cours")
+            .accessibilityLabel("Add item to current meal")
 
             Button {
                 if isEmpty {
@@ -466,7 +466,7 @@ struct TodayView: View {
                     draftViewModel.onEvent(MealDraftEventProcess.shared)
                 }
             } label: {
-                Text(isEmpty ? "Annuler" : "Terminer")
+                Text(isEmpty ? "Cancel" : "Finish")
                     .font(.strakkCaptionBold)
                     .foregroundStyle(isEmpty ? .white : Color.strakkPrimary)
                     .padding(.horizontal, 12)
@@ -474,7 +474,7 @@ struct TodayView: View {
                     .background(isEmpty ? .white.opacity(0.2) : .white)
                     .clipShape(Capsule())
             }
-            .accessibilityLabel(isEmpty ? "Annuler le repas vide" : "Terminer le repas")
+            .accessibilityLabel(isEmpty ? "Cancel empty meal" : "Finish meal")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -523,10 +523,10 @@ struct TodayView: View {
             }
 
             VStack(spacing: 5) {
-                Text("Aucun item aujourd'hui")
+                Text("No items today")
                     .font(.strakkBodyBold)
                     .foregroundStyle(Color.strakkTextPrimary)
-                Text("Utilisez les boutons ci-dessous pour commencer")
+                Text("Use the buttons below to get started")
                     .font(.strakkCaption)
                     .foregroundStyle(Color.strakkTextTertiary)
                     .multilineTextAlignment(.center)
@@ -544,7 +544,7 @@ struct TodayView: View {
             parts.append("\(draft.resolvedCount) item\(draft.resolvedCount > 1 ? "s" : "")")
         }
         if draft.pendingCount > 0 {
-            parts.append("\(draft.pendingCount) en attente")
+            parts.append("\(draft.pendingCount) pending")
         }
         parts.append(String(format: "%.0f kcal", draft.totalCalories))
         return parts.joined(separator: " · ")

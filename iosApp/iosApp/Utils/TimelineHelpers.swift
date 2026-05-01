@@ -4,7 +4,7 @@ import shared
 func formatTimeLabel(from isoString: String) -> String {
     let formats = ["yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss"]
     let df = DateFormatter()
-    df.locale = Locale(identifier: "fr_FR")
+    df.locale = Locale.current
     for fmt in formats {
         df.dateFormat = fmt
         if let date = df.date(from: isoString) {
@@ -46,11 +46,11 @@ func entrySourceIcon(for source: EntrySource) -> some View {
 func entrySourceLabel(for source: EntrySource) -> String {
     switch source {
     case .photoai: return "Photo AI"
-    case .barcode: return "Code-barres"
-    case .manual: return "Manuel"
-    case .textai: return "Texte AI"
-    case .search: return "Recherche"
-    case .frequent: return "Fréquent"
+    case .barcode: return "Barcode"
+    case .manual: return "Manual"
+    case .textai: return "Text AI"
+    case .search: return "Search"
+    case .frequent: return "Frequent"
     default: return ""
     }
 }

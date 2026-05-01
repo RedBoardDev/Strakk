@@ -1,15 +1,8 @@
 package com.strakk.android.ui.home.search
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
@@ -37,7 +30,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -52,13 +44,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.FoodCatalogItem
@@ -137,7 +128,7 @@ private fun SearchFoodScreen(
                         onValueChange = { onEvent(SearchFoodEvent.QueryChanged(it)) },
                         placeholder = {
                             Text(
-                                text = "Rechercher un aliment…",
+                                text = stringResource(R.string.search_food_placeholder),
                                 color = LocalStrakkColors.current.textTertiary,
                             )
                         },
@@ -149,7 +140,7 @@ private fun SearchFoodScreen(
                                 IconButton(onClick = { onEvent(SearchFoodEvent.QueryChanged("")) }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Clear,
-                                        contentDescription = "Effacer",
+                                        contentDescription = stringResource(R.string.search_food_clear),
                                         tint = LocalStrakkColors.current.textTertiary,
                                     )
                                 }
@@ -176,7 +167,7 @@ private fun SearchFoodScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Outlined.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.search_food_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -217,7 +208,7 @@ private fun SearchFoodScreen(
                                 containerColor = MaterialTheme.colorScheme.primary,
                             ),
                         ) {
-                            Text("Réessayer")
+                            Text(stringResource(R.string.search_food_retry))
                         }
                     }
                 }
@@ -245,7 +236,6 @@ private fun SearchFoodContent(
     onConfirm: (MealEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Track which item is expanded inline (null = none)
     var expandedUserItemName by rememberSaveable { mutableStateOf<String?>(null) }
     var expandedCatalogItemId by rememberSaveable { mutableStateOf<Long?>(null) }
 
@@ -257,7 +247,7 @@ private fun SearchFoodContent(
             if (state.results.userItems.isNotEmpty()) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    SectionOverline(text = "FRÉQUENTS")
+                    SectionOverline(text = stringResource(R.string.search_food_section_frequent))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 items(
@@ -289,7 +279,7 @@ private fun SearchFoodContent(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = "Commencez à taper pour rechercher",
+                            text = stringResource(R.string.search_food_empty_hint),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalStrakkColors.current.textSecondary,
                         )
@@ -301,7 +291,7 @@ private fun SearchFoodContent(
             if (state.results.userItems.isNotEmpty()) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    SectionOverline(text = "MES ALIMENTS")
+                    SectionOverline(text = stringResource(R.string.search_food_section_my_foods))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 items(
@@ -330,7 +320,7 @@ private fun SearchFoodContent(
             // Section CATALOGUE
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                SectionOverline(text = "CATALOGUE")
+                SectionOverline(text = stringResource(R.string.search_food_section_catalog))
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
@@ -358,7 +348,7 @@ private fun SearchFoodContent(
                             .padding(vertical = 24.dp),
                     ) {
                         Text(
-                            text = "Aucun résultat pour \"${state.query}\"",
+                            text = stringResource(R.string.search_food_no_results, state.query),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalStrakkColors.current.textSecondary,
                         )
@@ -391,314 +381,6 @@ private fun SearchFoodContent(
 
         item { Spacer(modifier = Modifier.height(24.dp)) }
     }
-}
-
-// =============================================================================
-// Frequent item row (expandable)
-// =============================================================================
-
-@Composable
-private fun FrequentItemRow(
-    item: FrequentItem,
-    isExpanded: Boolean,
-    onTap: () -> Unit,
-    onConfirm: (MealEntry) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        onClick = onTap,
-        shape = RoundedCornerShape(12.dp),
-        color = if (isExpanded) LocalStrakkColors.current.surface2 else MaterialTheme.colorScheme.surface,
-        modifier = modifier.animateContentSize(animationSpec = tween(200)),
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.name ?: item.normalizedName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("${item.protein.toInt()}g prot")
-                            }
-                            withStyle(SpanStyle(color = LocalStrakkColors.current.textSecondary)) {
-                                append(" · ${item.calories.toInt()} kcal")
-                            }
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Text(
-                    text = "🕒",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically(animationSpec = tween(200)),
-                exit = shrinkVertically(animationSpec = tween(200)),
-            ) {
-                var gramsInput by rememberSaveable { mutableStateOf("100") }
-                ItemQuantityStepper(
-                    gramsInput = gramsInput,
-                    onGramsChange = { gramsInput = it },
-                    onConfirm = {
-                        val grams = gramsInput.toDoubleOrNull() ?: 100.0
-                        val factor = grams / 100.0
-                        val entry = MealEntry(
-                            id = "",
-                            logDate = "",
-                            name = item.name ?: item.normalizedName,
-                            protein = item.protein * factor,
-                            calories = item.calories * factor,
-                            fat = item.fat?.times(factor),
-                            carbs = item.carbs?.times(factor),
-                            source = com.strakk.shared.domain.model.EntrySource.Frequent,
-                            createdAt = "",
-                            quantity = "${gramsInput}g",
-                        )
-                        onConfirm(entry)
-                    },
-                )
-            }
-        }
-    }
-}
-
-// =============================================================================
-// Catalog item row (expandable)
-// =============================================================================
-
-@Composable
-private fun CatalogItemRow(
-    item: FoodCatalogItem,
-    isExpanded: Boolean,
-    onTap: () -> Unit,
-    onConfirm: (MealEntry) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        onClick = onTap,
-        shape = RoundedCornerShape(12.dp),
-        color = if (isExpanded) LocalStrakkColors.current.surface2 else MaterialTheme.colorScheme.surface,
-        modifier = modifier.animateContentSize(animationSpec = tween(200)),
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    item.brand?.let { brand ->
-                        Text(
-                            text = brand,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = LocalStrakkColors.current.textSecondary,
-                        )
-                    }
-                }
-                item.nutriscore?.firstOrNull()?.let { grade ->
-                    NutriscoreBadge(grade = grade)
-                }
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = LocalStrakkColors.current.calories)) {
-                        append("${item.calories.toInt()} kcal")
-                    }
-                    withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("${item.protein.toInt()} g prot")
-                    }
-                    item.fat?.let {
-                        withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
-                        withStyle(SpanStyle(color = LocalStrakkColors.current.accentYellow)) {
-                            append("${it.toInt()} g lip")
-                        }
-                    }
-                    item.carbs?.let {
-                        withStyle(SpanStyle(color = LocalStrakkColors.current.textTertiary)) { append(" · ") }
-                        withStyle(SpanStyle(color = LocalStrakkColors.current.accentIndigo)) {
-                            append("${it.toInt()} g gluc")
-                        }
-                    }
-                },
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "⚖︎ valeurs pour 100 g",
-                style = MaterialTheme.typography.labelSmall,
-                color = LocalStrakkColors.current.textTertiary,
-            )
-
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically(animationSpec = tween(200)),
-                exit = shrinkVertically(animationSpec = tween(200)),
-            ) {
-                var gramsInput by rememberSaveable { mutableStateOf(item.defaultPortionGrams.toInt().toString()) }
-                ItemQuantityStepper(
-                    gramsInput = gramsInput,
-                    onGramsChange = { gramsInput = it },
-                    onConfirm = {
-                        val grams = gramsInput.toDoubleOrNull() ?: item.defaultPortionGrams
-                        val factor = grams / 100.0
-                        val entry = MealEntry(
-                            id = "",
-                            logDate = "",
-                            name = item.name,
-                            protein = item.protein * factor,
-                            calories = item.calories * factor,
-                            fat = item.fat?.times(factor),
-                            carbs = item.carbs?.times(factor),
-                            source = com.strakk.shared.domain.model.EntrySource.Search,
-                            createdAt = "",
-                            quantity = "${gramsInput}g",
-                        )
-                        onConfirm(entry)
-                    },
-                )
-            }
-        }
-    }
-}
-
-// =============================================================================
-// Nutri-Score badge (small a..e color chip)
-// =============================================================================
-
-@Composable
-private fun NutriscoreBadge(grade: Char, modifier: Modifier = Modifier) {
-    val color = when (grade) {
-        'a' -> androidx.compose.ui.graphics.Color(0xFF1F8E3D)
-        'b' -> androidx.compose.ui.graphics.Color(0xFF85BB2F)
-        'c' -> androidx.compose.ui.graphics.Color(0xFFF1C232)
-        'd' -> androidx.compose.ui.graphics.Color(0xFFE67E22)
-        'e' -> androidx.compose.ui.graphics.Color(0xFFC0392B)
-        else -> LocalStrakkColors.current.textTertiary
-    }
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = color,
-        modifier = modifier.size(width = 22.dp, height = 22.dp),
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = grade.uppercaseChar().toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = androidx.compose.ui.graphics.Color.White,
-            )
-        }
-    }
-}
-
-// =============================================================================
-// Stepper inline
-// =============================================================================
-
-@Composable
-private fun ItemQuantityStepper(
-    gramsInput: String,
-    onGramsChange: (String) -> Unit,
-    onConfirm: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val grams = gramsInput.toIntOrNull() ?: 100
-
-    Column(modifier = modifier.padding(top = 12.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Surface(
-                onClick = {
-                    val newVal = (grams - 10).coerceAtLeast(10)
-                    onGramsChange(newVal.toString())
-                },
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.size(40.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "−",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier
-                    .size(width = 80.dp, height = 40.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "${gramsInput}g",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-            Surface(
-                onClick = {
-                    val newVal = (grams + 10).coerceAtMost(2000)
-                    onGramsChange(newVal.toString())
-                },
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.size(40.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "+",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = onConfirm,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                modifier = Modifier.height(40.dp),
-            ) {
-                Text("Ajouter", style = MaterialTheme.typography.labelMedium)
-            }
-        }
-    }
-}
-
-// =============================================================================
-// Section overline
-// =============================================================================
-
-@Composable
-private fun SectionOverline(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = LocalStrakkColors.current.textSecondary,
-        letterSpacing = androidx.compose.ui.unit.TextUnit(0.5f, androidx.compose.ui.unit.TextUnitType.Sp),
-        modifier = modifier,
-    )
 }
 
 // =============================================================================

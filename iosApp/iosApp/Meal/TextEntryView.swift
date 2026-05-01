@@ -15,14 +15,14 @@ struct TextEntryView: View {
                 Color.strakkBackground.ignoresSafeArea()
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Décrivez ce que vous avez mangé")
+                    Text("Describe what you ate")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextSecondary)
                         .padding(.top, 16)
 
                     ZStack(alignment: .topLeading) {
                         if text.isEmpty {
-                            Text("Ex : 200g poulet grillé, riz basmati, une pomme…")
+                            Text("E.g. 200g grilled chicken, basmati rice...")
                                 .font(.strakkBody)
                                 .foregroundStyle(Color.strakkTextTertiary)
                                 .padding(.horizontal, 14)
@@ -42,7 +42,7 @@ struct TextEntryView: View {
                                     text = String(v.prefix(300))
                                 }
                             }
-                            .accessibilityLabel("Description du repas")
+                            .accessibilityLabel("Meal description")
                     }
                     .background(Color.strakkSurface1)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -57,11 +57,11 @@ struct TextEntryView: View {
 
                     HStack {
                         if text.count > 300 {
-                            Text("Maximum 300 caractères")
+                            Text("Maximum 300 characters")
                                 .font(.strakkCaption)
                                 .foregroundStyle(Color.strakkError)
                         } else if text.count < 3 && !text.isEmpty {
-                            Text("Minimum 3 caractères")
+                            Text("Minimum 3 characters")
                                 .font(.strakkCaption)
                                 .foregroundStyle(Color.strakkError)
                         }
@@ -76,7 +76,7 @@ struct TextEntryView: View {
                     Button {
                         onAdd(text.trimmingCharacters(in: .whitespacesAndNewlines))
                     } label: {
-                        Text("Ajouter au repas")
+                        Text("Add to meal")
                             .font(.strakkBodyBold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -85,17 +85,17 @@ struct TextEntryView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!isValid)
-                    .accessibilityLabel("Ajouter le texte au repas")
+                    .accessibilityLabel("Add text to meal")
 
                     Spacer()
                 }
                 .padding(.horizontal, 20)
             }
-            .navigationTitle("Ajouter un texte")
+            .navigationTitle("Add text entry")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { onCancel() }
+                    Button("Cancel") { onCancel() }
                         .foregroundStyle(Color.strakkTextSecondary)
                 }
             }

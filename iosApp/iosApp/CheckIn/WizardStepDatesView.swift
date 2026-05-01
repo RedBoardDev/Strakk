@@ -27,7 +27,7 @@ struct WizardStepDatesView: View {
                 dayChipsSection
 
                 // Counter
-                Text("\(coveredDates.count) jour\(coveredDates.count > 1 ? "s" : "") sélectionné\(coveredDates.count > 1 ? "s" : "")")
+                Text("\(coveredDates.count) day\(coveredDates.count > 1 ? "s" : "") selected")
                     .font(.strakkCaption)
                     .foregroundStyle(Color.strakkTextSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -41,7 +41,7 @@ struct WizardStepDatesView: View {
 
     private var weekPickerSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("SEMAINE")
+            Text("WEEK")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
@@ -60,7 +60,7 @@ struct WizardStepDatesView: View {
                 .frame(height: 48)
                 .background(Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .accessibilityLabel("Semaine verrouillée : \(currentWeekDisplayLabel)")
+                .accessibilityLabel("Locked week : \(currentWeekDisplayLabel)")
             } else {
                 Menu {
                     ForEach(availableWeeks) { week in
@@ -83,7 +83,7 @@ struct WizardStepDatesView: View {
                     .background(Color.strakkSurface2)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .accessibilityLabel("Sélectionner la semaine")
+                .accessibilityLabel("Select week")
             }
         }
     }
@@ -94,7 +94,7 @@ struct WizardStepDatesView: View {
                 .font(.system(size: 16))
                 .foregroundStyle(Color.strakkError)
 
-            Text("Un bilan existe déjà pour cette semaine.")
+            Text("A check-in already exists for this week.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkError)
 
@@ -107,12 +107,12 @@ struct WizardStepDatesView: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(Color.strakkError.opacity(0.3), lineWidth: 1)
         )
-        .accessibilityLabel("Avertissement : un bilan existe déjà pour cette semaine.")
+        .accessibilityLabel("Warning: a check-in already exists for this week.")
     }
 
     private var dayChipsSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("JOURS COUVERTS")
+            Text("COVERED DAYS")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
@@ -140,7 +140,7 @@ struct WizardStepDatesView: View {
                 .background(isSelected ? Color.strakkPrimary : Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .accessibilityLabel("\(day.displayLabel), \(isSelected ? "sélectionné" : "non sélectionné")")
+        .accessibilityLabel("\(day.displayLabel), \(isSelected ? "selected" : "not selected")")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

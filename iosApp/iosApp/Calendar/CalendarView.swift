@@ -11,10 +11,11 @@ private struct CalendarAddDate: Identifiable {
 
 struct CalendarView: View {
     @State private var viewModel = CalendarViewModelWrapper()
+    @State private var draftViewModel = MealDraftViewModelWrapper()
     @State private var calendarAddDate: CalendarAddDate?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
-    private let weekdaySymbols = ["L", "M", "M", "J", "V", "S", "D"]
+    private let weekdaySymbols = ["M", "T", "W", "T", "F", "S", "S"]
 
     var body: some View {
         NavigationStack {
@@ -22,14 +23,14 @@ struct CalendarView: View {
                 Color.strakkBackground.ignoresSafeArea()
                 calendarContent
             }
-            .navigationTitle("Calendrier")
+            .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.large)
         }
         .errorAlert(message: $viewModel.errorMessage)
         .sheet(item: $calendarAddDate) { addDate in
             AddPickerSheet(
                 isDraftMode: false,
-                draftViewModel: MealDraftViewModelWrapper(),
+                draftViewModel: draftViewModel,
                 onDismiss: { calendarAddDate = nil },
                 logDate: addDate.id
             )
@@ -131,7 +132,7 @@ struct CalendarView: View {
                     .foregroundStyle(Color.strakkTextPrimary)
                     .frame(width: 44, height: 44)
             }
-            .accessibilityLabel("Mois précédent")
+            .accessibilityLabel("Previous month")
 
             Spacer()
 
@@ -149,7 +150,7 @@ struct CalendarView: View {
                     .foregroundStyle(Color.strakkTextPrimary)
                     .frame(width: 44, height: 44)
             }
-            .accessibilityLabel("Mois suivant")
+            .accessibilityLabel("Next month")
         }
     }
 
@@ -247,7 +248,7 @@ struct CalendarView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Jour \(day)\(isActive ? ", repas enregistrés" : "")")
+        .accessibilityLabel("Day \(day)\(isActive ? ", meals logged" : "")")
     }
 
     // MARK: - Helpers
@@ -287,7 +288,7 @@ struct CalendarView: View {
     private func monthLabel(year: Int, month: Int) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.current
         var components = DateComponents()
         components.year = year
         components.month = month

@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
+import java.time.format.TextStyle
+import java.util.Locale
 
 private val DAY_LABELS = listOf("L", "M", "M", "J", "V", "S", "D")
 
@@ -81,7 +84,7 @@ fun CalendarContent(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Calendar grid
-        val cells = buildCalendarCells(year, month)
+        val cells = remember(year, month) { buildCalendarCells(year, month) }
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
@@ -233,21 +236,10 @@ private fun buildCalendarCells(year: Int, month: Int): List<CalendarCell> {
     return cells
 }
 
-private fun monthName(month: Int): String = when (month) {
-    1 -> "Janvier"
-    2 -> "Février"
-    3 -> "Mars"
-    4 -> "Avril"
-    5 -> "Mai"
-    6 -> "Juin"
-    7 -> "Juillet"
-    8 -> "Août"
-    9 -> "Septembre"
-    10 -> "Octobre"
-    11 -> "Novembre"
-    12 -> "Décembre"
-    else -> "?"
-}
+private fun monthName(month: Int): String =
+    java.time.Month.of(month)
+        .getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())
+        .replaceFirstChar { it.uppercaseChar() }
 
 // =============================================================================
 // Preview

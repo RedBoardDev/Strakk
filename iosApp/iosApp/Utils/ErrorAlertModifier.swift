@@ -2,7 +2,7 @@ import SwiftUI
 
 extension View {
     func errorAlert(message: Binding<String?>) -> some View {
-        alert("Erreur", isPresented: Binding(
+        alert("Error", isPresented: Binding(
             get: { message.wrappedValue != nil },
             set: { if !$0 { message.wrappedValue = nil } }
         )) {

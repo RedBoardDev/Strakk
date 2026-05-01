@@ -39,18 +39,18 @@ struct SettingsView: View {
 
     private var withAlerts: some View {
         baseView
-            .alert("Erreur", isPresented: errorAlertBinding) {
+            .alert("Error", isPresented: errorAlertBinding) {
                 Button("OK", role: .cancel) { viewModel.errorMessage = nil }
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
-            .alert("Se déconnecter", isPresented: $showSignOutAlert) {
-                Button("Annuler", role: .cancel) {}
-                Button("Se déconnecter", role: .destructive) {
+            .alert("Sign out", isPresented: $showSignOutAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Sign out", role: .destructive) {
                     viewModel.onEvent(SettingsEventOnSignOut())
                 }
             } message: {
-                Text("Voulez-vous vraiment vous déconnecter ?")
+                Text("Are you sure you want to sign out?")
             }
     }
 
@@ -76,7 +76,7 @@ struct SettingsView: View {
 
     private var loadingView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Réglages")
+            Text("Settings")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, 20)
@@ -96,7 +96,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 // Header
-                Text("Réglages")
+                Text("Settings")
                     .font(.strakkHeading1)
                     .foregroundStyle(Color.strakkTextPrimary)
                     .padding(.horizontal, 20)
@@ -113,6 +113,10 @@ struct SettingsView: View {
                 Spacer().frame(height: 24)
 
                 hevySection
+
+                Spacer().frame(height: 24)
+
+                dataSourcesSection
 
                 Spacer().frame(height: 32)
 
@@ -139,6 +143,9 @@ struct SettingsView: View {
             viewModel.onEvent(SettingsEventOnWaterGoalChanged(value: newValue))
         }
         .onChange(of: hevyApiKeyText) { _, newValue in
+            // Do NOT update serverHevyKey here — the KMP ViewModel handles debounce
+            // internally via scheduleHevyKeySave (500 ms). serverHevyKey only changes
+            // on the initial server load so re-loading doesn't re-trigger a save.
             guard didInitialize, newValue != serverHevyKey else { return }
             viewModel.onEvent(SettingsEventOnHevyApiKeyChanged(value: newValue))
         }
@@ -148,7 +155,7 @@ struct SettingsView: View {
 
     private func accountSection(email: String?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("COMPTE")
+            Text("ACCOUNT")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .kerning(1.0)
@@ -182,7 +189,7 @@ struct SettingsView: View {
     private var goalsSection: some View {
         let anyFocused = focusedField != nil
         return VStack(alignment: .leading, spacing: 8) {
-            Text("OBJECTIFS QUOTIDIENS")
+            Text("DAILY GOALS")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .kerning(1.0)
@@ -191,7 +198,7 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 goalRow(
                     color: .strakkProtein,
-                    label: "Protéines",
+                    label: "Protein",
                     placeholder: "150",
                     unit: "g",
                     text: $proteinText,
@@ -217,7 +224,7 @@ struct SettingsView: View {
 
                 goalRow(
                     color: .strakkWater,
-                    label: "Eau",
+                    label: "Water",
                     placeholder: "2000",
                     unit: "mL",
                     text: $waterText,
@@ -276,7 +283,7 @@ struct SettingsView: View {
 
     private var hevySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("INTÉGRATION HEVY")
+            Text("HEVY INTEGRATION")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .kerning(1.0)
@@ -288,11 +295,11 @@ struct SettingsView: View {
                         .font(.system(size: 13))
                         .foregroundStyle(Color.strakkTextTertiary)
                     Spacer().frame(width: 8)
-                    Text("Clé API")
+                    Text("API Key")
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextPrimary)
                     Spacer()
-                    SecureField("Coller la clé API Hevy", text: $hevyApiKeyText)
+                    SecureField("Paste Hevy API key", text: $hevyApiKeyText)
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextPrimary)
                         .multilineTextAlignment(.trailing)
@@ -307,6 +314,30 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Data Sources (ODbL attribution)
+
+    private var dataSourcesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("DATA SOURCES")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .padding(.horizontal, 20)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Food data provided by:")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextSecondary)
+                Text("• Open Food Facts (ODbL)")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextSecondary)
+                Text("• CIQUAL 2020 — ANSES")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextSecondary)
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
     // MARK: - Sign Out button
 
     private var signOutButton: some View {
@@ -314,7 +345,7 @@ struct SettingsView: View {
             HapticEngine.light()
             showSignOutAlert = true
         } label: {
-            Text("Se déconnecter")
+            Text("Sign out")
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkError)
                 .frame(maxWidth: .infinity)
@@ -322,7 +353,7 @@ struct SettingsView: View {
                 .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
         }
         .padding(.horizontal, 20)
-        .accessibilityLabel("Se déconnecter de Strakk")
+        .accessibilityLabel("Sign out of Strakk")
     }
 
     // MARK: - Keyboard toolbar

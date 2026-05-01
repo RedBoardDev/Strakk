@@ -42,9 +42,9 @@ struct ManualEntryView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        fieldGroup(label: "Nom *", required: true) {
+                        fieldGroup(label: "Name *", required: true) {
                             inputField(
-                                placeholder: "ex : Poulet grillé",
+                                placeholder: "e.g. Grilled chicken",
                                 text: $name,
                                 field: .name,
                                 isValid: formViewModel.formData.name.count <= 100
@@ -55,7 +55,7 @@ struct ManualEntryView: View {
                         }
 
                         HStack(spacing: 12) {
-                            fieldGroup(label: "Protéines (g) *", required: true) {
+                            fieldGroup(label: "Protein (g) *", required: true) {
                                 numericField(
                                     placeholder: "35",
                                     text: $protein,
@@ -81,7 +81,7 @@ struct ManualEntryView: View {
                         }
 
                         HStack(spacing: 12) {
-                            fieldGroup(label: "Lipides (g)", required: false) {
+                            fieldGroup(label: "Fat (g)", required: false) {
                                 numericField(
                                     placeholder: "15",
                                     text: $fat,
@@ -93,7 +93,7 @@ struct ManualEntryView: View {
                                 }
                             }
 
-                            fieldGroup(label: "Glucides (g)", required: false) {
+                            fieldGroup(label: "Carbs (g)", required: false) {
                                 numericField(
                                     placeholder: "40",
                                     text: $carbs,
@@ -106,9 +106,9 @@ struct ManualEntryView: View {
                             }
                         }
 
-                        fieldGroup(label: "Quantité", required: false) {
+                        fieldGroup(label: "Quantity", required: false) {
                             inputField(
-                                placeholder: "ex : 150g, 1 bol",
+                                placeholder: "e.g. 150g, 1 bowl",
                                 text: $quantity,
                                 field: .quantity,
                                 isValid: quantity.count <= 50
@@ -138,7 +138,7 @@ struct ManualEntryView: View {
                                         .tint(.white)
                                         .scaleEffect(0.8)
                                 } else {
-                                    Text("Ajouter")
+                                    Text("Add")
                                         .font(.strakkBodyBold)
                                         .foregroundStyle(.white)
                                 }
@@ -153,14 +153,14 @@ struct ManualEntryView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         .disabled(!formViewModel.formData.isSubmittable || formViewModel.formData.isSubmitting)
-                        .accessibilityLabel("Ajouter l'aliment")
+                        .accessibilityLabel("Add food item")
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
                     .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Ajout manuel")
+            .navigationTitle("Manual entry")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -170,7 +170,7 @@ struct ManualEntryView: View {
                         Image(systemName: "xmark")
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
-                    .accessibilityLabel("Annuler")
+                    .accessibilityLabel("Cancel")
                 }
             }
         }

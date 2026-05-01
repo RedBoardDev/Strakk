@@ -2,7 +2,7 @@ import SwiftUI
 import shared
 
 struct MainTabView: View {
-    private var navigator = AppNavigator.shared
+    @Environment(AppNavigator.self) private var navigator
 
     var body: some View {
         TabView(selection: Binding(
@@ -18,7 +18,7 @@ struct MainTabView: View {
                 .tag(1)
 
             CheckInListView()
-                .tabItem { Label("Bilans", systemImage: "chart.bar.doc.horizontal") }
+                .tabItem { Label("Check-ins", systemImage: "chart.bar.doc.horizontal") }
                 .tag(2)
 
             SettingsView()

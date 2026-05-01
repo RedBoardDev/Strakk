@@ -33,7 +33,7 @@ struct CheckInStatsView: View {
                 )
             }
         }
-        .navigationTitle("Évolution")
+        .navigationTitle("Trends")
         .navigationBarTitleDisplayMode(.large)
     }
 
@@ -59,7 +59,7 @@ struct CheckInStatsView: View {
                 }
                 if weightPoints.count >= 2 {
                     chartCard(
-                        title: "POIDS",
+                        title: "WEIGHT",
                         unit: "kg",
                         color: .strakkPrimary,
                         points: weightPoints,
@@ -74,7 +74,7 @@ struct CheckInStatsView: View {
                 }
                 if waistPoints.count >= 2 {
                     chartCard(
-                        title: "TAILLE",
+                        title: "WAIST",
                         unit: "cm",
                         color: .strakkWarning,
                         points: waistPoints,
@@ -89,7 +89,7 @@ struct CheckInStatsView: View {
                 }
                 if armPoints.count >= 2 {
                     chartCard(
-                        title: "BRAS (MOY.)",
+                        title: "ARMS (AVG.)",
                         unit: "cm",
                         color: .strakkSuccess,
                         points: armPoints,
@@ -146,7 +146,7 @@ struct CheckInStatsView: View {
 
     @ViewBuilder
     private func periodPicker(selectedPeriod: CheckInStatsPeriod) -> some View {
-        Picker("Période", selection: Binding(
+        Picker("Period", selection: Binding(
             get: { selectedPeriod },
             set: { period in
                 switch period {
@@ -159,12 +159,12 @@ struct CheckInStatsView: View {
                 }
             }
         )) {
-            Text("4 sem").tag(CheckInStatsPeriod.fourWeeks)
-            Text("12 sem").tag(CheckInStatsPeriod.twelveWeeks)
-            Text("Tout").tag(CheckInStatsPeriod.all)
+            Text("4 wk").tag(CheckInStatsPeriod.fourWeeks)
+            Text("12 wk").tag(CheckInStatsPeriod.twelveWeeks)
+            Text("All").tag(CheckInStatsPeriod.all)
         }
         .pickerStyle(.segmented)
-        .accessibilityLabel("Période d'affichage")
+        .accessibilityLabel("Display period")
     }
 
     // MARK: - Chart card
@@ -254,7 +254,7 @@ struct CheckInStatsView: View {
                 .font(.system(size: 36))
                 .foregroundStyle(Color.strakkTextTertiary)
 
-            Text("Pas assez de données pour afficher les tendances.")
+            Text("Not enough data to show trends.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .multilineTextAlignment(.center)
@@ -270,7 +270,7 @@ struct CheckInStatsView: View {
     @ViewBuilder
     private func regularityCard(regularity: RegularityInfoData) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("RÉGULARITÉ")
+            Text("CONSISTENCY")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
@@ -301,7 +301,7 @@ struct CheckInStatsView: View {
                     }
                 }
                 .frame(height: 8)
-                .accessibilityLabel("Régularité : \(regularity.percentage)%")
+                .accessibilityLabel("Consistency : \(regularity.percentage)%")
             }
             .padding(StrakkSpacing.md)
             .background(Color.strakkSurface1)

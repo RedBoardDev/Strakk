@@ -31,9 +31,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.DailySummary
@@ -76,7 +78,7 @@ fun ProgressSection(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = "PROTÉINES",
+                    text = stringResource(R.string.progress_protein_label),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.sp,
@@ -86,7 +88,7 @@ fun ProgressSection(
                 if (isProteinReached) {
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = "✓ Objectif atteint",
+                        text = stringResource(R.string.progress_goal_reached),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                         ),
@@ -112,7 +114,7 @@ fun ProgressSection(
                 // Ledger 3 macros (droite)
                 Column(modifier = Modifier.weight(1f)) {
                     LedgerRow(
-                        label = "CALORIES",
+                        label = stringResource(R.string.progress_calories_label),
                         value = summary.totalCalories.toInt().toString(),
                         suffix = summary.calorieGoal?.let { "/ $it kcal" } ?: "kcal",
                     )
@@ -122,7 +124,7 @@ fun ProgressSection(
                         modifier = Modifier.padding(vertical = 10.dp),
                     )
                     LedgerRow(
-                        label = "GLUCIDES",
+                        label = stringResource(R.string.progress_carbs_label),
                         value = summary.totalCarbs.toInt().toString(),
                         suffix = "g",
                     )
@@ -132,7 +134,7 @@ fun ProgressSection(
                         modifier = Modifier.padding(vertical = 10.dp),
                     )
                     LedgerRow(
-                        label = "LIPIDES",
+                        label = stringResource(R.string.progress_fat_label),
                         value = summary.totalFat.toInt().toString(),
                         suffix = "g",
                     )

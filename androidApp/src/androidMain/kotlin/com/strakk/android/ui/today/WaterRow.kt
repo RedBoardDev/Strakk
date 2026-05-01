@@ -40,8 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.ColorWater
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
@@ -50,7 +52,7 @@ import com.strakk.shared.presentation.today.TodayEvent
 
 private const val DEFAULT_AMOUNT_ML = 250
 private const val MIN_AMOUNT_ML = 50
-private const val MAX_AMOUNT_ML = 2000
+private val MAX_AMOUNT_ML = com.strakk.shared.domain.model.NutritionDefaults.MAX_WATER_ENTRY_ML
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +104,7 @@ fun WaterRow(
             // − bouton
             WaterIconButton(
                 icon = Icons.Filled.Remove,
-                contentDescription = "Retirer 250 mL d'eau",
+                contentDescription = stringResource(R.string.water_remove_cd),
                 background = colors.surface3,
                 tint = if (isEmpty) colors.textTertiary else MaterialTheme.colorScheme.onSurface,
                 enabled = !isEmpty,
@@ -114,7 +116,7 @@ fun WaterRow(
             // + bouton
             WaterIconButton(
                 icon = Icons.Filled.Add,
-                contentDescription = "Ajouter 250 mL d'eau",
+                contentDescription = stringResource(R.string.water_add_cd),
                 background = ColorWater.copy(alpha = 0.18f),
                 tint = ColorWater,
                 onClick = {
@@ -125,7 +127,7 @@ fun WaterRow(
             // 3ème bouton — quantité personnalisée
             WaterIconButton(
                 icon = Icons.Filled.Tune,
-                contentDescription = "Quantité personnalisée",
+                contentDescription = stringResource(R.string.water_custom_cd),
                 background = colors.surface3,
                 tint = MaterialTheme.colorScheme.onSurface,
                 onClick = { dialogOpen = true },
@@ -163,7 +165,7 @@ private fun WaterIconButton(
         enabled = enabled,
         shape = RoundedCornerShape(10.dp),
         color = background,
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier.size(48.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -192,14 +194,14 @@ private fun WaterCustomDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Quantité personnalisée",
+                text = stringResource(R.string.water_dialog_title),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
         },
         text = {
             Column {
                 Text(
-                    text = "Entre $MIN_AMOUNT_ML et $MAX_AMOUNT_ML mL",
+                    text = stringResource(R.string.water_dialog_range, MIN_AMOUNT_ML, MAX_AMOUNT_ML),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textTertiary,
                 )
@@ -211,7 +213,7 @@ private fun WaterCustomDialog(
                             text = newValue
                         }
                     },
-                    label = { Text("mL") },
+                    label = { Text(stringResource(R.string.water_dialog_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     isError = text.isNotBlank() && !isValid,
@@ -230,7 +232,7 @@ private fun WaterCustomDialog(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(6.dp))
-                        Text("Retirer")
+                        Text(stringResource(R.string.water_dialog_remove))
                     }
                     androidx.compose.material3.Button(
                         enabled = isValid,
@@ -247,7 +249,7 @@ private fun WaterCustomDialog(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(6.dp))
-                        Text("Ajouter")
+                        Text(stringResource(R.string.water_dialog_add))
                     }
                 }
             }
@@ -255,7 +257,7 @@ private fun WaterCustomDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annuler")
+                Text(stringResource(R.string.water_dialog_cancel))
             }
         },
         containerColor = colors.surface2,

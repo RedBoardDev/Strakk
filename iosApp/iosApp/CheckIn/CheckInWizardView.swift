@@ -84,7 +84,7 @@ struct CheckInWizardView: View {
                 }
             }
         }
-        .alert("Erreur", isPresented: Binding(
+        .alert("Error", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }
         )) {
@@ -115,16 +115,16 @@ struct CheckInWizardView: View {
                 HStack(spacing: StrakkSpacing.xxs) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 14, weight: .semibold))
-                    Text(currentStep == .dates ? "Annuler" : "Retour")
+                    Text(currentStep == .dates ? "Cancel" : "Back")
                         .font(.strakkBody)
                 }
                 .foregroundStyle(Color.strakkTextSecondary)
             }
-            .accessibilityLabel(currentStep == .dates ? "Annuler" : "Étape précédente")
+            .accessibilityLabel(currentStep == .dates ? "Cancel" : "Previous step")
 
             Spacer()
 
-            Text("Étape \(stepIndex(currentStep))/5")
+            Text("Step \(stepIndex(currentStep))/5")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
         }
@@ -253,7 +253,7 @@ struct CheckInWizardView: View {
                                     .tint(.white)
                                     .scaleEffect(0.8)
                             }
-                            Text(saving ? "Enregistrement..." : "Enregistrer")
+                            Text(saving ? "Saving..." : "Save")
                                 .font(.strakkBodyBold)
                                 .foregroundStyle(.white)
                         }
@@ -263,12 +263,12 @@ struct CheckInWizardView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!canGoNext || saving)
-                    .accessibilityLabel("Enregistrer le bilan")
+                    .accessibilityLabel("Save check-in")
                 } else {
                     Button {
                         vm.onEvent(CheckInWizardEventOnNext())
                     } label: {
-                        Text("Suivant")
+                        Text("Next")
                             .font(.strakkBodyBold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -277,7 +277,7 @@ struct CheckInWizardView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!canGoNext)
-                    .accessibilityLabel("Étape suivante")
+                    .accessibilityLabel("Next step")
                 }
             }
             .padding(.horizontal, StrakkSpacing.lg)

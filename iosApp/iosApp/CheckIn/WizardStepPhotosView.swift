@@ -29,7 +29,7 @@ struct WizardStepPhotosView: View {
                         .foregroundStyle(Color.strakkTextSecondary)
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                    Text("Prends tes photos dans les mêmes conditions chaque semaine pour un meilleur suivi.")
+                    Text("Take your photos in the same conditions for consistent tracking.")
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextTertiary)
                         .multilineTextAlignment(.center)
@@ -73,14 +73,14 @@ struct WizardStepPhotosView: View {
                 photoPickerItem = nil
             }
         }
-        .confirmationDialog("Supprimer cette photo ?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-            Button("Supprimer", role: .destructive) {
+        .confirmationDialog("Delete this photo?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
                 if let photo = photoToDelete {
                     onRemovePhoto(photo.id)
                 }
                 photoToDelete = nil
             }
-            Button("Annuler", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 photoToDelete = nil
             }
         }
@@ -95,17 +95,17 @@ struct WizardStepPhotosView: View {
                 .onTapGesture { showSourcePicker = false }
 
             VStack(alignment: .leading, spacing: StrakkSpacing.md) {
-                Text("Ajouter une photo")
+                Text("Add a photo")
                     .font(.strakkHeading3)
                     .foregroundStyle(Color.strakkTextPrimary)
 
-                Text("Choisis une photo récente ou prends-en une maintenant.")
+                Text("Choose a recent photo or take one now.")
                     .font(.strakkCaption)
                     .foregroundStyle(Color.strakkTextSecondary)
 
                 VStack(spacing: StrakkSpacing.xs) {
                     sourceButton(
-                        title: "Appareil photo",
+                        title: "Camera",
                         systemImage: "camera.fill",
                         action: {
                             showSourcePicker = false
@@ -114,7 +114,7 @@ struct WizardStepPhotosView: View {
                     )
 
                     sourceButton(
-                        title: "Galerie",
+                        title: "Gallery",
                         systemImage: "photo.on.rectangle",
                         action: {
                             showSourcePicker = false
@@ -123,7 +123,7 @@ struct WizardStepPhotosView: View {
                     )
                 }
 
-                Button("Annuler") {
+                Button("Cancel") {
                     showSourcePicker = false
                 }
                 .font(.strakkBody)
@@ -227,7 +227,7 @@ struct WizardStepPhotosView: View {
             photoToDelete = photo
             showDeleteConfirm = true
         }
-        .accessibilityLabel("Photo. Appuyer longuement pour supprimer.")
+        .accessibilityLabel("Photo. Long press to delete.")
     }
 
     // MARK: - Placeholder
@@ -259,7 +259,7 @@ struct WizardStepPhotosView: View {
             }
             .aspectRatio(1, contentMode: .fit)
         }
-        .accessibilityLabel("Ajouter une photo")
+        .accessibilityLabel("Add a photo")
     }
 }
 

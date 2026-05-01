@@ -19,6 +19,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import android.util.Log
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.MealEntry
+
+private const val TAG = "DayDetailSheet"
 
 /**
  * Bottom sheet showing the detail of a selected calendar day.
@@ -299,7 +302,8 @@ private fun formatDayDetailDate(date: String): String {
             }
             "$day $month ${parts[0]}"
         } else date
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Log.w(TAG, "formatDayDetailDate: failed to parse date='$date'", e)
         date
     }
 }

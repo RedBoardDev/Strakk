@@ -88,9 +88,9 @@ struct WizardStepMeasurementsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
                 // Poids
-                measurementSection(title: "POIDS") {
+                measurementSection(title: "WEIGHT") {
                     measurementRow(
-                        label: "Poids (kg)",
+                        label: "Weight (kg)",
                         value: $draftWeight,
                         deltaValue: delta?.weight,
                         onChange: onWeightChanged
@@ -98,31 +98,31 @@ struct WizardStepMeasurementsView: View {
                 }
 
                 // Haut du corps
-                measurementSection(title: "HAUT DU CORPS") {
+                measurementSection(title: "UPPER BODY") {
                     VStack(spacing: StrakkSpacing.sm) {
                         measurementRow(
-                            label: "Épaules (cm)",
+                            label: "Shoulders (cm)",
                             value: $draftShoulders,
                             deltaValue: delta?.shoulders,
                             onChange: onShouldersChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Poitrine (cm)",
+                            label: "Chest (cm)",
                             value: $draftChest,
                             deltaValue: delta?.chest,
                             onChange: onChestChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Bras gauche (cm)",
+                            label: "Left arm (cm)",
                             value: $draftArmLeft,
                             deltaValue: delta?.armLeft,
                             onChange: onArmLeftChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Bras droit (cm)",
+                            label: "Right arm (cm)",
                             value: $draftArmRight,
                             deltaValue: delta?.armRight,
                             onChange: onArmRightChanged
@@ -131,31 +131,31 @@ struct WizardStepMeasurementsView: View {
                 }
 
                 // Bas du corps
-                measurementSection(title: "BAS DU CORPS") {
+                measurementSection(title: "LOWER BODY") {
                     VStack(spacing: StrakkSpacing.sm) {
                         measurementRow(
-                            label: "Tour de taille (cm)",
+                            label: "Waist (cm)",
                             value: $draftWaist,
                             deltaValue: delta?.waist,
                             onChange: onWaistChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Hanches (cm)",
+                            label: "Hips (cm)",
                             value: $draftHips,
                             deltaValue: delta?.hips,
                             onChange: onHipsChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Cuisse gauche (cm)",
+                            label: "Left thigh (cm)",
                             value: $draftThighLeft,
                             deltaValue: delta?.thighLeft,
                             onChange: onThighLeftChanged
                         )
                         Divider().background(Color.strakkDivider)
                         measurementRow(
-                            label: "Cuisse droite (cm)",
+                            label: "Right thigh (cm)",
                             value: $draftThighRight,
                             deltaValue: delta?.thighRight,
                             onChange: onThighRightChanged

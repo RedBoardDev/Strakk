@@ -44,9 +44,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.MealEntry
@@ -110,14 +112,14 @@ private fun ManualEntryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Ajout manuel",
+                        text = stringResource(R.string.manual_entry_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Outlined.Close, contentDescription = "Fermer")
+                        Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.manual_entry_close))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -152,7 +154,7 @@ private fun ManualEntryScreen(
                             strokeWidth = 2.dp,
                         )
                     } else {
-                        Text("Ajouter")
+                        Text(stringResource(R.string.manual_entry_add))
                     }
                 }
             }
@@ -192,11 +194,11 @@ private fun ManualEntryForm(
     ) {
         // Name (required)
         FormField(
-            label = "Nom *",
+            label = stringResource(R.string.manual_entry_field_name),
             value = uiState.name,
             onValueChange = { onEvent(ManualEntryEvent.NameChanged(it)) },
             isError = nameTouched && uiState.name.isBlank(),
-            errorMessage = "Le nom est requis",
+            errorMessage = stringResource(R.string.manual_entry_error_name_required),
             onFocusLost = { nameTouched = true },
             imeAction = ImeAction.Next,
             onImeAction = { focusManager.moveFocus(FocusDirection.Down) },
@@ -204,11 +206,11 @@ private fun ManualEntryForm(
 
         // Protein (required)
         FormField(
-            label = "Protéines (g) *",
+            label = stringResource(R.string.manual_entry_field_protein),
             value = uiState.protein,
             onValueChange = { onEvent(ManualEntryEvent.ProteinChanged(it)) },
             isError = proteinTouched && uiState.protein.toDoubleOrNull() == null,
-            errorMessage = "Valeur numérique requise",
+            errorMessage = stringResource(R.string.manual_entry_error_numeric_required),
             onFocusLost = { proteinTouched = true },
             keyboardType = KeyboardType.Decimal,
             imeAction = ImeAction.Next,
@@ -217,11 +219,11 @@ private fun ManualEntryForm(
 
         // Calories (required)
         FormField(
-            label = "Calories (kcal) *",
+            label = stringResource(R.string.manual_entry_field_calories),
             value = uiState.calories,
             onValueChange = { onEvent(ManualEntryEvent.CaloriesChanged(it)) },
             isError = caloriesTouched && uiState.calories.toDoubleOrNull() == null,
-            errorMessage = "Valeur numérique requise",
+            errorMessage = stringResource(R.string.manual_entry_error_numeric_required),
             onFocusLost = { caloriesTouched = true },
             keyboardType = KeyboardType.Decimal,
             imeAction = ImeAction.Next,
@@ -230,7 +232,7 @@ private fun ManualEntryForm(
 
         // Fat (optional)
         FormField(
-            label = "Lipides (g)",
+            label = stringResource(R.string.manual_entry_field_fat),
             value = uiState.fat,
             onValueChange = { onEvent(ManualEntryEvent.FatChanged(it)) },
             isError = false,
@@ -243,7 +245,7 @@ private fun ManualEntryForm(
 
         // Carbs (optional)
         FormField(
-            label = "Glucides (g)",
+            label = stringResource(R.string.manual_entry_field_carbs),
             value = uiState.carbs,
             onValueChange = { onEvent(ManualEntryEvent.CarbsChanged(it)) },
             isError = false,
@@ -256,13 +258,13 @@ private fun ManualEntryForm(
 
         // Quantity (optional, text)
         FormField(
-            label = "Quantité",
+            label = stringResource(R.string.manual_entry_field_quantity),
             value = uiState.quantity,
             onValueChange = { onEvent(ManualEntryEvent.QuantityChanged(it)) },
             isError = false,
             errorMessage = null,
             onFocusLost = {},
-            placeholder = "ex : 150g ou 1 bol",
+            placeholder = stringResource(R.string.manual_entry_quantity_placeholder),
             imeAction = ImeAction.Done,
             onImeAction = { focusManager.clearFocus() },
         )

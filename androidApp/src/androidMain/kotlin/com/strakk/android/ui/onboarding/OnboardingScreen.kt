@@ -29,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.presentation.onboarding.OnboardingEvent
@@ -111,7 +113,7 @@ fun OnboardingScreen(
                     .height(52.dp),
             ) {
                 Text(
-                    text = if (uiState.isLastStep) "Get started" else "Continue",
+                    text = if (uiState.isLastStep) stringResource(R.string.onboarding_get_started) else stringResource(R.string.onboarding_continue),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -120,7 +122,7 @@ fun OnboardingScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 TextButton(onClick = { onEvent(OnboardingEvent.OnBack) }) {
                     Text(
-                        text = "Back",
+                        text = stringResource(R.string.onboarding_back),
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalStrakkColors.current.textSecondary,
                     )

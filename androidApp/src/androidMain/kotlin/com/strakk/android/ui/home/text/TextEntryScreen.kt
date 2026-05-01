@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,8 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 
@@ -68,14 +70,14 @@ fun TextEntryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Description libre",
+                        text = stringResource(R.string.text_entry_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Outlined.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.text_entry_back_cd))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -103,7 +105,7 @@ fun TextEntryScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                 ) {
-                    Text("Ajouter au repas")
+                    Text(stringResource(R.string.text_entry_add_to_meal))
                 }
             }
         },
@@ -119,7 +121,7 @@ fun TextEntryScreen(
                 onValueChange = { if (it.length <= MAX_CHARS) text = it },
                 placeholder = {
                     Text(
-                        text = "ex : 2 œufs au plat et une tranche de pain complet",
+                        text = stringResource(R.string.text_entry_placeholder),
                         color = LocalStrakkColors.current.textTertiary,
                     )
                 },
