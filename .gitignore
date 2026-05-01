@@ -34,3 +34,4 @@ iosApp/DerivedData/
 
 # Kotlin
 *.kotlin_module
+docs/

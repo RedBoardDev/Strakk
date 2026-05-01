@@ -1,0 +1,9 @@
+pre-commit:
+  parallel: true
+  commands:
+    swiftlint:
+      glob: "iosApp/**/*.swift"
+      run: cd iosApp && swiftlint lint --strict --quiet
+    detekt:
+      glob: "*.kt"
+      run: ./gradlew detektAll --daemon --quiet

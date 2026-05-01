@@ -16,34 +16,34 @@ You are the **Build Verification** agent for Strakk. You run builds, linters, an
 
 ## Commands to Run
 
-### 1. Kotlin Lint
+### 1. Kotlin Lint (Detekt + ktlint)
 ```bash
-./gradlew ktlintCheck --daemon 2>&1 | tail -30
+make lint-kotlin 2>&1 | tail -30
 ```
 
-### 2. Detekt (Static Analysis)
+### 2. Shared Module Tests
 ```bash
-./gradlew detektAll --daemon 2>&1 | tail -30
+make test 2>&1 | tail -50
 ```
 
-### 3. Shared Module Tests
+### 3. Android Build
 ```bash
-./gradlew :shared:allTests --daemon 2>&1 | tail -50
+make build 2>&1 | tail -30
 ```
 
-### 4. Android Build
+### 4. iOS Build
 ```bash
-./gradlew :androidApp:assembleDebug --daemon 2>&1 | tail -30
+cd iosApp && xcodebuild build -project Strakk.xcodeproj -scheme Strakk -sdk iphonesimulator -arch arm64 -configuration Debug CODE_SIGNING_ALLOWED=NO -quiet 2>&1 | tail -30
 ```
 
-### 5. iOS Build
+### 5. Swift Lint
 ```bash
-cd iosApp && xcodebuild -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -30
+make lint-swift 2>&1 | tail -30
 ```
 
-### 6. Swift Lint
+### 6. Deno Lint
 ```bash
-cd iosApp && swiftlint lint 2>&1 | tail -30
+make lint-deno 2>&1 | tail -30
 ```
 
 ## Output Format
@@ -55,12 +55,12 @@ Report results as:
 
 | Check           | Status | Details |
 |-----------------|--------|---------|
-| ktlint          | PASS/FAIL | ... |
-| detekt          | PASS/FAIL | ... |
+| detekt + ktlint | PASS/FAIL | ... |
 | shared tests    | PASS/FAIL | X passed, Y failed |
 | Android build   | PASS/FAIL | ... |
 | iOS build       | PASS/FAIL | ... |
 | swiftlint       | PASS/FAIL | X warnings, Y errors |
+| deno lint       | PASS/FAIL | ... |
 ```
 
 ## Rules
