@@ -107,15 +107,14 @@ struct StepperRow: View {
     private func startLongPress(increment: Bool) {
         accelerationCount = 0
         longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            accelerationCount += 1
-            let effectiveStep = accelerationCount > 20 ? step * 5 : step
-            if increment {
-                if value + effectiveStep <= range.upperBound {
-                    onIncrement()
-                }
-            } else {
-                if value - effectiveStep >= range.lowerBound {
-                    onDecrement()
+            // Timer fires on the main RunLoop — safe to assume MainActor isolation
+            MainActor.assumeIsolated {
+                accelerationCount += 1
+                let effectiveStep = accelerationCount > 20 ? step * 5 : step
+                if increment {
+                    if value + effectiveStep <= range.upperBound { onIncrement() }
+                } else {
+                    if value - effectiveStep >= range.lowerBound { onDecrement() }
                 }
             }
         }
