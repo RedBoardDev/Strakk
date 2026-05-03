@@ -7,4 +7,5 @@ interface SubscriptionRepository {
     fun observeState(): Flow<SubscriptionState>
     suspend fun getState(): SubscriptionState
     suspend fun refreshState()
+    val cachedState: SubscriptionState
 }

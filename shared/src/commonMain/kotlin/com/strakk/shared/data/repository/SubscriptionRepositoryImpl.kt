@@ -24,6 +24,8 @@ internal class SubscriptionRepositoryImpl(
     private var fetched = false
     private val fetchMutex = Mutex()
 
+    override val cachedState: SubscriptionState get() = cache.value
+
     override fun observeState(): Flow<SubscriptionState> = cache.onStart { ensureFetched() }
 
     override suspend fun getState(): SubscriptionState {

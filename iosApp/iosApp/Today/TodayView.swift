@@ -37,6 +37,9 @@ struct TodayView: View {
     // Edit entry sheet
     @State var editingEntry: MealEntryData?
 
+    // Feature gating (fed by AddPickerSheet.onFeatureGated + CheckIn effect)
+    @State var gatedFeature: ProFeature?
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
@@ -82,7 +85,8 @@ struct TodayView: View {
                     AddPickerSheet(
                         isDraftMode: isDraft,
                         draftViewModel: draftViewModel,
-                        onDismiss: { navigationPath.removeLast() }
+                        onDismiss: { navigationPath.removeLast() },
+                        onFeatureGated: { gatedFeature = $0 }
                     )
                 }
             }
@@ -91,7 +95,8 @@ struct TodayView: View {
             AddPickerSheet(
                 isDraftMode: mode.isDraft,
                 draftViewModel: draftViewModel,
-                onDismiss: { addPickerMode = nil }
+                onDismiss: { addPickerMode = nil },
+                onFeatureGated: { gatedFeature = $0 }
             )
         }
         .sheet(item: $selectedMeal) { meal in
@@ -157,6 +162,7 @@ struct TodayView: View {
         .fullScreenCover(isPresented: $viewModel.showPaywall) {
             PaywallView(onDismiss: { viewModel.showPaywall = false })
         }
+        .featureGate($gatedFeature)
         .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: draftViewModel.committedMeal) { _, meal in
             if meal != nil {

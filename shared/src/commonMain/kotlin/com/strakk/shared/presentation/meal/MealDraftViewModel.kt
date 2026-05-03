@@ -4,9 +4,12 @@ import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.ClockProvider
 import com.strakk.shared.domain.common.DomainError
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.MealEntryInput
+import com.strakk.shared.domain.model.ProFeature
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
+import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.CommitMealDraftUseCase
 import com.strakk.shared.domain.usecase.CreateMealDraftUseCase
 import com.strakk.shared.domain.usecase.DiscardMealDraftUseCase
@@ -29,6 +32,7 @@ import kotlinx.datetime.toLocalDateTime
  * local persisted draft. The UI can start a new draft, add/remove items,
  * rename, discard, process (IA batch), and commit (server-side persistence).
  */
+@Suppress("LongParameterList")
 class MealDraftViewModel(
     private val observeActiveDraft: ObserveActiveMealDraftUseCase,
     private val createDraft: CreateMealDraftUseCase,
@@ -40,6 +44,7 @@ class MealDraftViewModel(
     private val commitDraft: CommitMealDraftUseCase,
     private val updateDraftItem: UpdateDraftItemUseCase,
     private val buildMealEntry: BuildMealEntryUseCase,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
     private val clock: ClockProvider,
 ) : MviViewModel<MealDraftUiState, MealDraftEvent, MealDraftEffect>(MealDraftUiState.Loading) {
 
@@ -62,17 +67,26 @@ class MealDraftViewModel(
         is MealDraftEvent.Rename -> handleRename(event.name)
         is MealDraftEvent.RemoveItem -> handleRemoveItem(event.itemId)
         is MealDraftEvent.AddResolvedItem -> handleAddItem(event.item)
-        is MealDraftEvent.AddPendingPhoto -> handleAddItem(
-            DraftItem.PendingPhoto(id = generateId(), imageBase64 = event.imageBase64, hint = event.hint),
-        )
-        is MealDraftEvent.AddPendingText -> handleAddItem(
-            DraftItem.PendingText(id = generateId(), description = event.description),
-        )
+        is MealDraftEvent.AddPendingPhoto -> handleGatedAdd(ProFeature.AI_PHOTO_ANALYSIS) {
+            handleAddItem(DraftItem.PendingPhoto(id = generateId(), imageBase64 = event.imageBase64, hint = event.hint))
+        }
+        is MealDraftEvent.AddPendingText -> handleGatedAdd(ProFeature.AI_TEXT_ANALYSIS) {
+            handleAddItem(DraftItem.PendingText(id = generateId(), description = event.description))
+        }
         is MealDraftEvent.AddManualItem -> handleAddKnownItem(event)
         is MealDraftEvent.UpdateResolvedItem -> handleUpdateResolvedItem(event)
         MealDraftEvent.Discard -> handleDiscard()
         MealDraftEvent.Process -> handleProcess()
         MealDraftEvent.Commit -> handleCommit()
+    }
+
+    private fun handleGatedAdd(feature: ProFeature, onGranted: () -> Unit) {
+        viewModelScope.launch {
+            when (checkFeatureAccess(feature)) {
+                is FeatureAccess.Granted -> onGranted()
+                is FeatureAccess.Gated -> emit(MealDraftEffect.FeatureGated(feature))
+            }
+        }
     }
 
     private fun handleStartDraft(event: MealDraftEvent.StartDraft) {

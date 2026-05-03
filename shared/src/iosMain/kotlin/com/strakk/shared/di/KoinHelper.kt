@@ -1,6 +1,9 @@
 package com.strakk.shared.di
 
 import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.UserTier
+import com.strakk.shared.domain.model.tier
+import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
 import com.strakk.shared.presentation.auth.LoginViewModel
 import com.strakk.shared.presentation.checkin.CheckInDetailViewModel
@@ -47,4 +50,5 @@ class KoinHelper : KoinComponent {
     fun getCheckInStatsViewModel(): CheckInStatsViewModel = get()
     fun getPaywallViewModel(highlightedFeature: ProFeature? = null): PaywallViewModel = get { parametersOf(highlightedFeature) }
     fun getGenerateCheckInPdfUseCase(): GenerateCheckInPdfUseCase = get()
+    fun isProUser(): Boolean = get<SubscriptionRepository>().cachedState.tier == UserTier.PRO
 }

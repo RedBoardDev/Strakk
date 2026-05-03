@@ -1,8 +1,8 @@
 package com.strakk.android.ui.home.draft
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,8 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.strakk.android.R
 import com.strakk.android.ui.home.add.AddPickerSheet
+import com.strakk.android.ui.paywall.FeatureGateSheet
+import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
+import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.allProFeatures
 import com.strakk.shared.presentation.meal.MealDraftEffect
 import com.strakk.shared.presentation.meal.MealDraftEvent
 import com.strakk.shared.presentation.meal.MealDraftUiState
@@ -54,6 +58,7 @@ import org.koin.compose.viewmodel.koinViewModel
 // Route
 // =============================================================================
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDraftRoute(
     onNavigateBack: () -> Unit,
@@ -68,6 +73,8 @@ fun MealDraftRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    var gatedFeature by remember { mutableStateOf<ProFeature?>(null) }
+    var showPaywall by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -80,8 +87,27 @@ fun MealDraftRoute(
                 }
                 is MealDraftEffect.Discarded -> onNavigateBack()
                 is MealDraftEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is MealDraftEffect.FeatureGated -> gatedFeature = effect.feature
             }
         }
+    }
+
+    gatedFeature?.let { feature ->
+        FeatureGateSheet(
+            featureInfo = allProFeatures().first { it.feature == feature },
+            onDiscoverPro = {
+                showPaywall = true
+                gatedFeature = null
+            },
+            onDismiss = { gatedFeature = null },
+        )
+    }
+
+    if (showPaywall) {
+        PaywallRoute(
+            highlightedFeature = null,
+            onDismiss = { showPaywall = false },
+        )
     }
 
     MealDraftScreen(

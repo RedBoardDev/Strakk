@@ -1,7 +1,8 @@
+// swiftlint:disable file_length type_body_length
 import SwiftUI
 import shared
 
-struct MealDraftView: View {
+struct MealDraftView: View { // swiftlint:disable:this type_body_length
     @Bindable var viewModel: MealDraftViewModelWrapper
     let onAdd: () -> Void
 
@@ -36,8 +37,8 @@ struct MealDraftView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button("Rename") {
-                        if case .editing(let d) = viewModel.state {
-                            renameText = d.name
+                        if case .editing(let draft) = viewModel.state {
+                            renameText = draft.name
                         }
                         showRenameAlert = true
                     }
@@ -88,6 +89,7 @@ struct MealDraftView: View {
         } message: {
             Text("Pending items will be analyzed by AI. This takes a few seconds.")
         }
+        .featureGate($viewModel.gatedFeature)
         .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: viewModel.navigateToReview) { _, navigate in
             if navigate {
@@ -125,7 +127,7 @@ struct MealDraftView: View {
     // MARK: - Draft name from state
 
     private var draftName: String {
-        if case .editing(let d) = viewModel.state { return d.name }
+        if case .editing(let draft) = viewModel.state { return draft.name }
         return "Meal in progress"
     }
 
@@ -256,6 +258,7 @@ struct MealDraftView: View {
 
     // MARK: - Draft item cards
 
+    // swiftlint:disable:next function_body_length
     private func draftItemCard(item: DraftItemData) -> some View {
         HStack(spacing: 12) {
             itemIcon(item: item)
@@ -440,7 +443,7 @@ struct MealDraftView: View {
         switch item.kind {
         case .resolved(let entry): return entry.name ?? "Item"
         case .pendingPhoto: return "Photo pending analysis"
-        case .pendingText(let d): return "Pending text: \(d)"
+        case .pendingText(let desc): return "Pending text: \(desc)"
         }
     }
 

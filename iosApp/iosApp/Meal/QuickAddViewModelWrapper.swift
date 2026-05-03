@@ -10,6 +10,7 @@ final class QuickAddViewModelWrapper {
     var isProcessing = false
     var errorMessage: String?
     var didComplete = false
+    var gatedFeature: ProFeature?
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -39,6 +40,7 @@ final class QuickAddViewModelWrapper {
         effectTask?.cancel()
     }
 
+    // swiftlint:disable:next function_parameter_count
     func addKnown(
         name: String,
         protein: Double,
@@ -86,6 +88,8 @@ final class QuickAddViewModelWrapper {
             didComplete = true
         } else if let error = effect as? QuickAddEffectShowError {
             errorMessage = error.message
+        } else if let gated = effect as? QuickAddEffectFeatureGated {
+            gatedFeature = gated.feature
         }
     }
 }

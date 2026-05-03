@@ -16,6 +16,7 @@ struct AddPickerSheet: View {
     let isDraftMode: Bool
     let draftViewModel: MealDraftViewModelWrapper
     let onDismiss: () -> Void
+    let onFeatureGated: (ProFeature) -> Void
     let logDate: String?
 
     @State private var quickAddViewModel: QuickAddViewModelWrapper
@@ -28,11 +29,13 @@ struct AddPickerSheet: View {
         isDraftMode: Bool,
         draftViewModel: MealDraftViewModelWrapper,
         onDismiss: @escaping () -> Void,
+        onFeatureGated: @escaping (ProFeature) -> Void = { _ in },
         logDate: String? = nil
     ) {
         self.isDraftMode = isDraftMode
         self.draftViewModel = draftViewModel
         self.onDismiss = onDismiss
+        self.onFeatureGated = onFeatureGated
         self.logDate = logDate
         self._quickAddViewModel = State(initialValue: QuickAddViewModelWrapper(logDate: logDate))
     }
@@ -163,8 +166,8 @@ struct AddPickerSheet: View {
             switch tile.id {
             case "search":  showSearch = true
             case "manual":  showManual = true
-            case "text":    showText = true
-            case "photo":   showPhoto = true
+            case "text":    guardProFeature(.aiTextAnalysis) { showText = true }
+            case "photo":   guardProFeature(.aiPhotoAnalysis) { showPhoto = true }
             default: break
             }
         } label: {
@@ -190,6 +193,17 @@ struct AddPickerSheet: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(tile.label + (tile.isPro ? ", Pro" : ""))
+    }
+
+    // MARK: - Pro guard
+
+    private func guardProFeature(_ feature: ProFeature, onGranted: () -> Void) {
+        if KoinBridge.shared.isProUser() {
+            onGranted()
+        } else {
+            onFeatureGated(feature)
+            onDismiss()
+        }
     }
 
     // MARK: - Quick-add dispatchers

@@ -112,3 +112,49 @@ private func sfSymbol(for feature: ProFeature) -> String {
     default: return "star"
     }
 }
+
+// MARK: - ProFeature → ProFeatureInfo lookup
+
+func proFeatureInfo(for feature: ProFeature) -> ProFeatureInfo? {
+    ProFeatureInfoKt.allProFeatures().first { ($0 as? ProFeatureInfo)?.feature == feature } as? ProFeatureInfo
+}
+
+// MARK: - ViewModifier for gated feature flow
+
+private struct FeatureGateModifier: ViewModifier {
+    @Binding var gatedFeature: ProFeature?
+    @State private var showPaywall = false
+    @State private var highlightedFeature: ProFeature?
+
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: Binding(
+                get: { gatedFeature != nil },
+                set: { if !$0 { gatedFeature = nil } }
+            )) {
+                if let feature = gatedFeature, let info = proFeatureInfo(for: feature) {
+                    FeatureGateSheet(
+                        featureInfo: info,
+                        onDiscoverPro: {
+                            highlightedFeature = feature
+                            gatedFeature = nil
+                            showPaywall = true
+                        },
+                        onDismiss: { gatedFeature = nil }
+                    )
+                }
+            }
+            .fullScreenCover(isPresented: $showPaywall) {
+                PaywallView(
+                    highlightedFeature: highlightedFeature,
+                    onDismiss: { showPaywall = false }
+                )
+            }
+    }
+}
+
+extension View {
+    func featureGate(_ gatedFeature: Binding<ProFeature?>) -> some View {
+        modifier(FeatureGateModifier(gatedFeature: gatedFeature))
+    }
+}
