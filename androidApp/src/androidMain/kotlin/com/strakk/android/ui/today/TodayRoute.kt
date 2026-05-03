@@ -10,10 +10,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.shared.presentation.today.TodayEffect
 import com.strakk.shared.presentation.today.TodayUiState
 import com.strakk.shared.presentation.today.TodayViewModel
@@ -29,13 +32,23 @@ fun TodayRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showPaywall by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is TodayEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is TodayEffect.NavigateToPaywall -> showPaywall = true
             }
         }
+    }
+
+    if (showPaywall) {
+        PaywallRoute(
+            onDismiss = { showPaywall = false },
+            modifier = modifier,
+        )
+        return
     }
 
     Box(modifier = modifier) {

@@ -279,4 +279,60 @@
     <string name="tab_today">Today</string>
     <string name="tab_calendar">Calendar</string>
     <string name="tab_settings">Settings</string>
+
+    <!-- Paywall -->
+    <string name="paywall_label">STRAKK PRO</string>
+    <string name="paywall_headline">AI tracks your meals for you.</string>
+    <string name="paywall_subheadline">Take a photo or describe your meal in a sentence. Strakk Pro does the rest.</string>
+    <string name="paywall_plan_monthly">Monthly</string>
+    <string name="paywall_plan_annual">Annual</string>
+    <string name="paywall_plan_popular">POPULAR</string>
+    <string name="paywall_price_annual">19.99 €/year</string>
+    <string name="paywall_price_annual_monthly">i.e. 1.67 €/month · 2 months free</string>
+    <string name="paywall_price_monthly">1.99 €/month</string>
+    <string name="paywall_price_monthly_detail">No commitment</string>
+    <string name="paywall_cta">Try 7 days free</string>
+    <string name="paywall_footer_cancel">Cancel anytime · No commitment</string>
+    <string name="paywall_footer_secure">Secure payment via Play Store</string>
+    <string name="paywall_restore">Restore a purchase</string>
+    <string name="paywall_coming_soon">Coming soon</string>
+
+    <!-- Feature Gate -->
+    <string name="feature_gate_suffix">is in Strakk Pro</string>
+    <string name="feature_gate_cta">Unlock with Pro</string>
+    <string name="feature_gate_later">Later</string>
+
+    <!-- Trial Banner -->
+    <string name="trial_banner_expires_days">Your Pro trial expires in %d day(s)</string>
+    <string name="trial_banner_expires_tomorrow">Your Pro trial expires tomorrow</string>
+
+    <!-- Trial Expired Modal -->
+    <string name="trial_expired_title">Your trial ends today</string>
+    <string name="trial_expired_body">Continue with Strakk Pro to keep AI, Health sync and unlimited history.</string>
+    <string name="trial_expired_price">19.99 €/year · 1.67 €/month</string>
+    <string name="trial_expired_cta">Discover plans</string>
+    <string name="trial_expired_free">Continue for free</string>
+
+    <!-- Settings Subscription -->
+    <string name="settings_section_pro">STRAKK PRO</string>
+    <string name="settings_pro_free_title">AI tracks your meals for you.</string>
+    <string name="settings_pro_free_subtitle">Photo, text, weekly summary.</string>
+    <string name="settings_pro_upgrade">Upgrade to Pro</string>
+    <string name="settings_pro_trial_title">Free trial</string>
+    <string name="settings_pro_trial_expires">Expires in %d day(s)</string>
+    <string name="settings_pro_trial_billing_note">Your subscription starts on %s. Cancel before to avoid being charged.</string>
+    <string name="settings_pro_active_label">%s · Active</string>
+    <string name="settings_pro_active_renews">Renews on %s</string>
+    <string name="settings_pro_manage">Manage subscription</string>
+    <string name="settings_pro_payment_failed_title">Payment issue</string>
+    <string name="settings_pro_payment_failed_body">Update your payment method to keep Pro access.</string>
+    <string name="settings_pro_payment_failed_cta">Fix the issue</string>
+    <string name="settings_pro_badge">PRO</string>
+
+    <!-- Onboarding Pro Offer -->
+    <string name="onboarding_pro_before">Great news!</string>
+    <string name="onboarding_pro_headline">Your 7-day Pro trial is active!</string>
+    <string name="onboarding_pro_cta">Let\'s go!</string>
+    <string name="onboarding_pro_later">Later</string>
+    <string name="onboarding_pro_footer">Enjoy all Pro features for 7 days.</string>
 </resources>

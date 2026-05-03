@@ -1,6 +1,7 @@
 package com.strakk.android.ui.home.add
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.strakk.android.ui.components.ProBadge
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 
@@ -118,27 +120,41 @@ private fun AddPickerContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Row 2 — Text, Photo (only in draft context, greyed out otherwise)
+        // Row 2 — Text, Photo (AI-gated — Pro badge overlay)
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            PickerTile(
-                icon = Icons.Outlined.TextSnippet,
-                label = "Texte libre",
-                description = "Décris ton repas",
-                onClick = onText,
-                enabled = true,
-                modifier = Modifier.weight(1f),
-            )
-            PickerTile(
-                icon = Icons.Outlined.CameraAlt,
-                label = "Photo + hint",
-                description = "Analyse IA",
-                onClick = onPhoto,
-                enabled = true,
-                modifier = Modifier.weight(1f),
-            )
+            Box(modifier = Modifier.weight(1f)) {
+                PickerTile(
+                    icon = Icons.Outlined.TextSnippet,
+                    label = "Texte libre",
+                    description = "Décris ton repas",
+                    onClick = onText,
+                    enabled = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                ProBadge(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp),
+                )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                PickerTile(
+                    icon = Icons.Outlined.CameraAlt,
+                    label = "Photo + hint",
+                    description = "Analyse IA",
+                    onClick = onPhoto,
+                    enabled = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                ProBadge(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp),
+                )
+            }
             // Spacer to balance the 3+2 layout
             Spacer(modifier = Modifier.weight(1f))
         }
