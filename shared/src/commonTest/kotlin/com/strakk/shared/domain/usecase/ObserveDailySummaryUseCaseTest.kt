@@ -165,9 +165,21 @@ private class FakeProfileRepository : ProfileRepository {
     private val profile = MutableStateFlow(
         UserProfile(
             id = "user",
+            weightKg = null,
+            heightCm = null,
+            birthDate = null,
+            biologicalSex = null,
+            fitnessGoal = null,
+            trainingFrequency = null,
+            trainingTypes = emptySet(),
+            trainingIntensity = null,
+            dailyActivityLevel = null,
             proteinGoal = 150,
             calorieGoal = 2200,
+            fatGoal = null,
+            carbGoal = null,
             waterGoal = 2500,
+            onboardingCompleted = true,
         ),
     )
 
@@ -181,6 +193,7 @@ private class FakeProfileRepository : ProfileRepository {
     ): UserProfile = profile.value
     override suspend fun getHevyApiKey(): String? = null
     override suspend fun updateHevyApiKey(apiKey: String) = Unit
+    override suspend fun completeOnboarding(goals: com.strakk.shared.domain.model.NutritionGoals): UserProfile = profile.value
     override fun observeProfile(): Flow<UserProfile?> = profile
     override fun clearCache() = Unit
 }

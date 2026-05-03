@@ -2,10 +2,11 @@ package com.strakk.shared.presentation.auth
 
 import app.cash.turbine.test
 import com.strakk.shared.domain.model.AuthStatus
-import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
+import com.strakk.shared.domain.usecase.ObserveProfileUseCase
 import com.strakk.shared.fixtures.FakeAuthRepository
 import com.strakk.shared.fixtures.FakeProfileRepository
+import com.strakk.shared.fixtures.TestFixtures
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -41,7 +42,7 @@ class RootViewModelTest {
 
     private fun createViewModel(): RootViewModel = RootViewModel(
         observeAuthStatus = ObserveAuthStatusUseCase(authRepository),
-        checkProfileExists = CheckProfileExistsUseCase(profileRepository),
+        observeProfile = ObserveProfileUseCase(profileRepository),
     )
 
     @Test
@@ -69,8 +70,8 @@ class RootViewModelTest {
     }
 
     @Test
-    fun whenAuthenticatedAndProfileExistsHasProfileIsTrue() = runTest {
-        profileRepository.profileExistsResult = true
+    fun whenAuthenticatedAndOnboardingCompletedIsTrue() = runTest {
+        profileRepository.getProfileResult = TestFixtures.defaultUserProfile.copy(onboardingCompleted = true)
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -80,14 +81,14 @@ class RootViewModelTest {
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertTrue(state.hasProfile, "Expected hasProfile = true")
+            assertTrue(state.onboardingCompleted, "Expected onboardingCompleted = true")
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun whenAuthenticatedAndNoProfileHasProfileIsFalse() = runTest {
-        profileRepository.profileExistsResult = false
+    fun whenAuthenticatedAndNoProfileOnboardingCompletedIsFalse() = runTest {
+        profileRepository.getProfileResult = null
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -97,14 +98,14 @@ class RootViewModelTest {
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertFalse(state.hasProfile, "Expected hasProfile = false")
+            assertFalse(state.onboardingCompleted, "Expected onboardingCompleted = false")
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun whenProfileCheckFailsDefaultsToNoProfile() = runTest {
-        profileRepository.shouldThrow = RuntimeException("db error")
+    fun whenAuthenticatedAndOnboardingNotCompletedIsFalse() = runTest {
+        // Default profile has onboardingCompleted = false
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -114,7 +115,7 @@ class RootViewModelTest {
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertFalse(state.hasProfile, "Expected hasProfile = false on error")
+            assertFalse(state.onboardingCompleted, "Expected onboardingCompleted = false")
             cancelAndIgnoreRemainingEvents()
         }
     }
