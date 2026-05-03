@@ -46,7 +46,7 @@ struct FeatureGateSheet: View {
                 Spacer().frame(height: StrakkSpacing.sm)
 
                 // Title
-                Text(String(localized: String.LocalizationValue(metadata.titleKey)))
+                Text(featureTitle(for: metadata.feature))
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
                     .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct FeatureGateSheet: View {
                 Spacer().frame(height: StrakkSpacing.xs)
 
                 // Description
-                Text(String(localized: String.LocalizationValue(metadata.descriptionKey)))
+                Text(featureDescription(for: metadata.feature))
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
                     .multilineTextAlignment(.center)
@@ -96,6 +96,34 @@ struct FeatureGateSheet: View {
         }
         .presentationDetents([.height(420)])
         .presentationDragIndicator(.visible)
+    }
+}
+
+// MARK: - Feature localization helpers
+
+private func featureTitle(for feature: Feature) -> String {
+    switch feature {
+    case .aiPhotoAnalysis: return String(localized: "AI photo analysis")
+    case .aiTextAnalysis: return String(localized: "AI text analysis")
+    case .aiWeeklySummary: return String(localized: "AI weekly summary")
+    case .healthSync: return String(localized: "Health sync")
+    case .unlimitedHistory: return String(localized: "Unlimited history")
+    case .photoComparison: return String(localized: "Photo comparison")
+    case .hevyExport: return String(localized: "Hevy export")
+    default: return ""
+    }
+}
+
+private func featureDescription(for feature: Feature) -> String {
+    switch feature {
+    case .aiPhotoAnalysis: return String(localized: "Snap a photo, AI estimates your macros.")
+    case .aiTextAnalysis: return String(localized: "Describe your meal, AI does the rest.")
+    case .aiWeeklySummary: return String(localized: "A personalized AI summary every week.")
+    case .healthSync: return String(localized: "Sync with Apple Health or Google Fit.")
+    case .unlimitedHistory: return String(localized: "Access your full history without limit.")
+    case .photoComparison: return String(localized: "Compare your check-in photos side by side.")
+    case .hevyExport: return String(localized: "Export your sessions to Hevy.")
+    default: return ""
     }
 }
 

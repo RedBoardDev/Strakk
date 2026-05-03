@@ -1013,9 +1013,6 @@
         }
       }
     },
-    "Débloquer avec Pro" : {
-
-    },
     "Découvrir les offres" : {
 
     },
@@ -1751,6 +1748,9 @@
     "L'IA tracke tes repas pour toi." : {
 
     },
+    "Later" : {
+
+    },
     "Left arm (cm)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2378,9 +2378,6 @@
           }
         }
       }
-    },
-    "Plus tard" : {
-
     },
     "Point the camera at a barcode" : {
       "localizations" : {
@@ -3092,6 +3089,9 @@
       }
     },
     "Types d'entraînement" : {
+
+    },
+    "Unlock with Pro" : {
 
     },
     "Unlock your full\ntracking potential" : {

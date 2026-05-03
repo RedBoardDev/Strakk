@@ -195,6 +195,22 @@
     <string name="feature_gate_cta">Débloquer avec Pro</string>
     <string name="feature_gate_later">Plus tard</string>
 
+    <!-- Feature Metadata -->
+    <string name="feature_ai_photo_title">Analyse photo IA</string>
+    <string name="feature_ai_photo_description">Prends une photo de ton repas et laisse l\'IA estimer les macros automatiquement.</string>
+    <string name="feature_ai_text_title">Analyse texte IA</string>
+    <string name="feature_ai_text_description">Décris ton repas en une phrase et obtiens des estimations de macros instantanées.</string>
+    <string name="feature_ai_summary_title">Bilan hebdo IA</string>
+    <string name="feature_ai_summary_description">Reçois une analyse personnalisée de ta nutrition et de tes progrès chaque semaine.</string>
+    <string name="feature_health_sync_title">Sync Santé</string>
+    <string name="feature_health_sync_description">Synchronise tes données nutritionnelles avec Google Fit automatiquement.</string>
+    <string name="feature_unlimited_history_title">Historique illimité</string>
+    <string name="feature_unlimited_history_description">Accède à tout ton historique de repas sans limite de durée.</string>
+    <string name="feature_photo_comparison_title">Comparaison photos</string>
+    <string name="feature_photo_comparison_description">Compare tes photos de progression côte à côte au fil du temps.</string>
+    <string name="feature_hevy_export_title">Export Hevy</string>
+    <string name="feature_hevy_export_description">Exporte tes données d\'entraînement directement vers l\'application Hevy.</string>
+
     <!-- Trial Banner -->
     <string name="trial_banner_expires_days">Ton essai Pro expire dans %d jour(s)</string>
     <string name="trial_banner_expires_tomorrow">Ton essai Pro expire demain</string>

@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length
+// swiftlint:disable type_body_length file_length
 import SwiftUI
 import shared
 
@@ -156,9 +156,17 @@ struct PaywallView: View {
                     in: RoundedRectangle(cornerRadius: 8)
                 )
 
-            Text(String(localized: String.LocalizationValue(metadata.titleKey)))
-                .font(highlighted ? .strakkBodyBold : .strakkBody)
-                .foregroundStyle(Color.strakkTextPrimary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(featureTitle(for: metadata.feature))
+                    .font(highlighted ? .strakkBodyBold : .strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+
+                if let quota = featureQuotaLabel(for: metadata.feature) {
+                    Text(quota)
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
+            }
 
             Spacer()
 
@@ -172,6 +180,29 @@ struct PaywallView: View {
             highlighted ? Color.strakkSurface1 : Color.clear,
             in: RoundedRectangle(cornerRadius: 10)
         )
+    }
+
+    private func featureTitle(for feature: Feature) -> String {
+        switch feature {
+        case .aiPhotoAnalysis: return String(localized: "AI photo analysis")
+        case .aiTextAnalysis: return String(localized: "AI text analysis")
+        case .aiWeeklySummary: return String(localized: "AI weekly summary")
+        case .healthSync: return String(localized: "Health sync")
+        case .unlimitedHistory: return String(localized: "Unlimited history")
+        case .photoComparison: return String(localized: "Photo comparison")
+        case .hevyExport: return String(localized: "Hevy export")
+        default: return metadata.titleKey
+        }
+    }
+
+    private func featureQuotaLabel(for feature: Feature) -> String? {
+        switch feature {
+        case .aiPhotoAnalysis: return String(localized: "100/month")
+        case .aiTextAnalysis: return String(localized: "100/month")
+        case .aiWeeklySummary: return String(localized: "5/month")
+        case .hevyExport: return String(localized: "2/month")
+        default: return nil
+        }
     }
 
     // MARK: - Plan cards
@@ -360,6 +391,7 @@ struct PaywallView: View {
                 .opacity(0.95)
                 .background(.ultraThinMaterial)
         )
+        .ignoresSafeArea(edges: .bottom)
     }
 
     private var priceRecap: String {

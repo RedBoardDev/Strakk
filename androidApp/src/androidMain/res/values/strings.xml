@@ -302,6 +302,22 @@
     <string name="feature_gate_cta">Unlock with Pro</string>
     <string name="feature_gate_later">Later</string>
 
+    <!-- Feature Metadata -->
+    <string name="feature_ai_photo_title">AI Photo Analysis</string>
+    <string name="feature_ai_photo_description">Take a photo of your meal and let the AI estimate macros automatically.</string>
+    <string name="feature_ai_text_title">AI Text Analysis</string>
+    <string name="feature_ai_text_description">Describe your meal in a sentence and get instant macro estimates.</string>
+    <string name="feature_ai_summary_title">AI Weekly Summary</string>
+    <string name="feature_ai_summary_description">Get a personalised weekly analysis of your nutrition and progress.</string>
+    <string name="feature_health_sync_title">Health Sync</string>
+    <string name="feature_health_sync_description">Sync your nutrition data with Google Fit automatically.</string>
+    <string name="feature_unlimited_history_title">Unlimited History</string>
+    <string name="feature_unlimited_history_description">Access your full meal history without any time limit.</string>
+    <string name="feature_photo_comparison_title">Photo Comparison</string>
+    <string name="feature_photo_comparison_description">Compare your progress photos side by side over time.</string>
+    <string name="feature_hevy_export_title">Hevy Export</string>
+    <string name="feature_hevy_export_description">Export your training data directly to the Hevy app.</string>
+
     <!-- Trial Banner -->
     <string name="trial_banner_expires_days">Your Pro trial expires in %d day(s)</string>
     <string name="trial_banner_expires_tomorrow">Your Pro trial expires tomorrow</string>
