@@ -182,6 +182,7 @@ struct TodayView: View {
     // MARK: - Main content
 
     @ViewBuilder
+    // swiftlint:disable:next function_body_length
     private func mainContent(
         dateLabel: String,
         summary: DailySummaryData,
@@ -203,7 +204,11 @@ struct TodayView: View {
                         .foregroundStyle(Color.strakkTextSecondary)
 
                     Button {
-                        showHevyExport = true
+                        if KoinBridge.shared.isProUser() {
+                            showHevyExport = true
+                        } else {
+                            gatedFeature = .hevyExport
+                        }
                     } label: {
                         Image(systemName: "dumbbell.fill")
                             .font(.system(size: 18))

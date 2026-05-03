@@ -44,4 +44,10 @@ fun allProFeatures(): List<ProFeatureInfo> = listOf(
         "Comparaison photo",
         "Compare tes photos check-in côte à côte.",
     ),
+    ProFeatureInfo(
+        ProFeature.HEVY_EXPORT,
+        "dumbbell.export",
+        "Export Hevy",
+        "Exporte tes séances vers Hevy.",
+    ),
 )

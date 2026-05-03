@@ -277,7 +277,7 @@ struct CheckInListView: View {
         return weekLabel
     }
 
-    private func checkInAccessibilityLabel(for item: CheckInListItem) -> String {
+    private func checkInAccessibilityLabel(for item: CheckInListItemData) -> String {
         let week = weekDisplayLabel(from: item.weekLabel)
         let weight = item.weight.map { ", \(String(format: "%.1f kg", $0))" } ?? ""
         return "\(week)\(weight)"

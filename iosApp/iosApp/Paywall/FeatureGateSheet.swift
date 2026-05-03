@@ -109,6 +109,7 @@ private func sfSymbol(for feature: ProFeature) -> String {
     case .healthSync: return "heart.circle"
     case .unlimitedHistory: return "clock.arrow.circlepath"
     case .photoComparison: return "photo.on.rectangle.angled"
+    case .hevyExport: return "dumbbell.fill"
     default: return "star"
     }
 }

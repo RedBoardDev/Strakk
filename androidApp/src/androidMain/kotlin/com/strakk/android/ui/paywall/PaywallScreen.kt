@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Compare
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.TextFields
+import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -340,6 +341,7 @@ internal fun ProFeature.toIcon(): ImageVector = when (this) {
     ProFeature.HEALTH_SYNC -> Icons.Outlined.MonitorHeart
     ProFeature.UNLIMITED_HISTORY -> Icons.Outlined.History
     ProFeature.PHOTO_COMPARISON -> Icons.Outlined.Compare
+    ProFeature.HEVY_EXPORT -> Icons.Outlined.Upload
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF050918)

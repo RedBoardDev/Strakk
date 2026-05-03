@@ -7,4 +7,5 @@ enum class ProFeature {
     HEALTH_SYNC,
     UNLIMITED_HISTORY,
     PHOTO_COMPARISON,
+    HEVY_EXPORT,
 }
