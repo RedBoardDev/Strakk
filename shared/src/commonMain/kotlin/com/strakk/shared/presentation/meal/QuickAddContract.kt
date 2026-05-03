@@ -2,6 +2,7 @@ package com.strakk.shared.presentation.meal
 
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.ProFeature
 
 data class QuickAddUiState(
     val isProcessing: Boolean = false,
@@ -37,4 +38,5 @@ sealed interface QuickAddEvent {
 sealed interface QuickAddEffect {
     data class Completed(val entry: MealEntry) : QuickAddEffect
     data class ShowError(val message: String) : QuickAddEffect
+    data class FeatureGated(val feature: ProFeature) : QuickAddEffect
 }

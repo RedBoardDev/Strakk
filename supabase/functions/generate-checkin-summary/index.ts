@@ -2,6 +2,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
 import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 import { generateCheckinSummary, CheckinSummaryInput } from "../_shared/checkin-summary.ts";
+import { requirePro } from "../_shared/entitlement-guard.ts";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -20,6 +21,9 @@ Deno.serve(async (req) => {
     }
 
     const { userId } = await requireUser(req);
+
+    const proGate = await requirePro(userId);
+    if (proGate) return proGate;
 
     if (!(await checkRateLimit(userId, "generate-checkin-summary", 5, 60))) {
       return jsonResponse({ error: "Rate limit exceeded" }, 429);

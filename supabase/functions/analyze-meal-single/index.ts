@@ -19,6 +19,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
 import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
 import { analyzeSingle, SingleInput } from "../_shared/meal-analysis.ts";
+import { requirePro } from "../_shared/entitlement-guard.ts";
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB (covers base64 photo)
 const RATE_LIMIT = 10; // requests per window
@@ -41,6 +42,9 @@ Deno.serve(async (req) => {
     }
 
     const { userId } = await requireUser(req);
+
+    const proGate = await requirePro(userId);
+    if (proGate) return proGate;
 
     if (!(await checkRateLimit(userId, "analyze-meal-single", RATE_LIMIT, RATE_WINDOW_S))) {
       return jsonResponse({ error: "Rate limit exceeded" }, 429);
