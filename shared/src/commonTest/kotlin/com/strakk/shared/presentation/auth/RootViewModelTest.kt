@@ -2,19 +2,26 @@ package com.strakk.shared.presentation.auth
 
 import app.cash.turbine.test
 import com.strakk.shared.domain.model.AuthStatus
-import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
+import com.strakk.shared.domain.model.SubscriptionState
+import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
+import com.strakk.shared.domain.usecase.ObserveProfileUseCase
+import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
 import com.strakk.shared.fixtures.FakeAuthRepository
 import com.strakk.shared.fixtures.FakeProfileRepository
+import com.strakk.shared.fixtures.FakeSubscriptionRepository
+import com.strakk.shared.fixtures.TestFixtures
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Instant
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -26,12 +33,14 @@ class RootViewModelTest {
 
     private lateinit var authRepository: FakeAuthRepository
     private lateinit var profileRepository: FakeProfileRepository
+    private lateinit var subscriptionRepository: FakeSubscriptionRepository
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         authRepository = FakeAuthRepository()
         profileRepository = FakeProfileRepository()
+        subscriptionRepository = FakeSubscriptionRepository()
     }
 
     @AfterTest
@@ -41,11 +50,12 @@ class RootViewModelTest {
 
     private fun createViewModel(): RootViewModel = RootViewModel(
         observeAuthStatus = ObserveAuthStatusUseCase(authRepository),
-        checkProfileExists = CheckProfileExistsUseCase(profileRepository),
+        observeProfile = ObserveProfileUseCase(profileRepository),
+        observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
     )
 
     @Test
-    fun initialStateIsLoading() = runTest {
+    fun `initial state is Loading`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -55,7 +65,7 @@ class RootViewModelTest {
     }
 
     @Test
-    fun whenUnauthenticatedStateBecomesUnauthenticated() = runTest {
+    fun `unauthenticated status becomes Unauthenticated`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -69,25 +79,27 @@ class RootViewModelTest {
     }
 
     @Test
-    fun whenAuthenticatedAndProfileExistsHasProfileIsTrue() = runTest {
-        profileRepository.profileExistsResult = true
+    fun `authenticated with completed profile sets onboardingCompleted true`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile.copy(
+            onboardingCompleted = true,
+        )
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             assertIs<RootUiState.Loading>(awaitItem())
 
-            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = false))
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertTrue(state.hasProfile, "Expected hasProfile = true")
+            assertTrue(state.onboardingCompleted)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun whenAuthenticatedAndNoProfileHasProfileIsFalse() = runTest {
-        profileRepository.profileExistsResult = false
+    fun `authenticated with no profile sets onboardingCompleted false`() = runTest {
+        profileRepository.profileFlow.value = null
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -97,24 +109,110 @@ class RootViewModelTest {
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertFalse(state.hasProfile, "Expected hasProfile = false")
+            assertFalse(state.onboardingCompleted)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun whenProfileCheckFailsDefaultsToNoProfile() = runTest {
-        profileRepository.shouldThrow = RuntimeException("db error")
+    fun `authenticated with incomplete onboarding sets onboardingCompleted false`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile.copy(
+            onboardingCompleted = false,
+        )
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             assertIs<RootUiState.Loading>(awaitItem())
 
-            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = false))
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
 
             val state = awaitItem()
             assertIs<RootUiState.Authenticated>(state)
-            assertFalse(state.hasProfile, "Expected hasProfile = false on error")
+            assertFalse(state.onboardingCompleted)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `expired trial shows trial expired modal`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile
+        subscriptionRepository.emit(
+            SubscriptionState.Trial(endsAt = Instant.parse("2020-01-01T00:00:00Z")),
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertIs<RootUiState.Loading>(awaitItem())
+
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
+
+            val state = awaitItem()
+            assertIs<RootUiState.Authenticated>(state)
+            assertTrue(state.showTrialExpiredModal)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `active trial does not show trial expired modal`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile
+        subscriptionRepository.emit(
+            SubscriptionState.Trial(endsAt = Instant.parse("2099-01-01T00:00:00Z")),
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertIs<RootUiState.Loading>(awaitItem())
+
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
+
+            val state = awaitItem()
+            assertIs<RootUiState.Authenticated>(state)
+            assertFalse(state.showTrialExpiredModal)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `free subscription does not show trial expired modal`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile
+        subscriptionRepository.emit(SubscriptionState.Free)
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertIs<RootUiState.Loading>(awaitItem())
+
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
+
+            val state = awaitItem()
+            assertIs<RootUiState.Authenticated>(state)
+            assertFalse(state.showTrialExpiredModal)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `dismissTrialModal sets showTrialExpiredModal to false`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile
+        subscriptionRepository.emit(
+            SubscriptionState.Trial(endsAt = Instant.parse("2020-01-01T00:00:00Z")),
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertIs<RootUiState.Loading>(awaitItem())
+
+            authRepository.authStatusFlow.emit(AuthStatus.Authenticated(hasProfile = true))
+
+            val authenticatedState = awaitItem()
+            assertIs<RootUiState.Authenticated>(authenticatedState)
+            assertTrue(authenticatedState.showTrialExpiredModal)
+
+            viewModel.dismissTrialModal()
+
+            val dismissed = awaitItem()
+            assertIs<RootUiState.Authenticated>(dismissed)
+            assertFalse(dismissed.showTrialExpiredModal)
             cancelAndIgnoreRemainingEvents()
         }
     }

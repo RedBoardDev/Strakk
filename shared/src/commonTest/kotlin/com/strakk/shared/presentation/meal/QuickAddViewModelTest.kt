@@ -11,10 +11,14 @@ import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.WaterEntry
 import com.strakk.shared.domain.repository.MealRepository
 import com.strakk.shared.domain.repository.NutritionRepository
+import com.strakk.shared.domain.model.SubscriptionPlan
+import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
+import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.domain.usecase.QuickAddKnownEntryUseCase
+import com.strakk.shared.fixtures.FakeSubscriptionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -96,6 +100,11 @@ class QuickAddViewModelTest {
 
     private fun createViewModel(): QuickAddViewModel {
         val mealRepository = FakeMealRepository()
+        val subRepo = FakeSubscriptionRepository()
+        subRepo.emit(SubscriptionState.Active(
+            plan = SubscriptionPlan.ANNUAL,
+            expiresAt = Instant.parse("2099-01-01T00:00:00Z"),
+        ))
         return QuickAddViewModel(
             quickAddKnownEntry = QuickAddKnownEntryUseCase(
                 nutritionRepository = nutritionRepository,
@@ -109,6 +118,7 @@ class QuickAddViewModelTest {
                 mealRepository = mealRepository,
                 nutritionRepository = nutritionRepository,
             ),
+            checkFeatureAccess = CheckFeatureAccessUseCase(subRepo),
             logger = object : Logger {
                 override fun d(tag: String, message: String) {}
                 override fun e(tag: String, message: String, throwable: Throwable?) {}
