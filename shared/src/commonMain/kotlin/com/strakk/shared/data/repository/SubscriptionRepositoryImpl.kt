@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 internal class SubscriptionRepositoryImpl(
     private val supabaseClient: SupabaseClient,
@@ -53,17 +55,36 @@ internal class SubscriptionRepositoryImpl(
         }
 
         return try {
-            supabaseClient
+            val dto = supabaseClient
                 .from("subscriptions")
                 .select {
                     filter { eq("user_id", userId) }
                 }
                 .decodeList<SubscriptionDto>()
                 .firstOrNull()
-                ?.toDomain()
-                ?: SubscriptionState.Free
+                ?: return SubscriptionState.Free
+
+            val state = dto.toDomain()
+
+            if (dto.status == "trial" && state is SubscriptionState.Expired) {
+                expireTrialRemote(userId)
+            }
+
+            state
         } catch (_: Exception) {
             SubscriptionState.Free
+        }
+    }
+
+    private suspend fun expireTrialRemote(userId: String) {
+        try {
+            supabaseClient
+                .from("subscriptions")
+                .update(buildJsonObject { put("status", "expired") }) {
+                    filter { eq("user_id", userId) }
+                }
+        } catch (_: Exception) {
+            // Best-effort — client already treats it as expired
         }
     }
 }
