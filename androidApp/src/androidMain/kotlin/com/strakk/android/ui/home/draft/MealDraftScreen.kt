@@ -46,6 +46,7 @@ import com.strakk.android.ui.paywall.FeatureGateSheet
 import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
+import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.ProFeature
 import com.strakk.shared.domain.model.allProFeatures
 import com.strakk.shared.presentation.meal.MealDraftEffect
@@ -87,7 +88,16 @@ fun MealDraftRoute(
                 }
                 is MealDraftEffect.Discarded -> onNavigateBack()
                 is MealDraftEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
-                is MealDraftEffect.FeatureGated -> gatedFeature = effect.feature
+                is MealDraftEffect.FeatureGated -> {
+                    val feature = when (val a = effect.access) {
+                        is FeatureAccess.ProRequired -> a.feature
+                        is FeatureAccess.QuotaExhausted -> a.feature
+                        else -> null
+                    }
+                    if (feature != null) {
+                        gatedFeature = ProFeature.entries.find { it.name == feature.name }
+                    }
+                }
             }
         }
     }

@@ -31,7 +31,7 @@
 
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
-import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
+import { checkPayloadSize } from "../_shared/rate-limit.ts";
 import {
   analyzeBatch,
   analyzeSingle,
@@ -40,6 +40,7 @@ import {
   BatchResult,
 } from "../_shared/meal-analysis.ts";
 import { assertOwnedPath, downloadPhotoAsBase64 } from "../_shared/storage.ts";
+import { requireFeatureAccess, recordFeatureUsage } from "../_shared/feature-guard.ts";
 
 const MAX_PHOTOS_PER_BATCH = 2;
 const MAX_ITEMS_PER_REQUEST = 16;
@@ -85,10 +86,6 @@ Deno.serve(async (req) => {
 
     const { userId } = await requireUser(req);
 
-    if (!(await checkRateLimit(userId, "extract-meal-draft", 10, 60))) {
-      return jsonResponse({ error: "Rate limit exceeded" }, 429);
-    }
-
     let body: Record<string, unknown>;
     try {
       body = await req.json();
@@ -98,6 +95,19 @@ Deno.serve(async (req) => {
 
     const items = parseInput(body, userId);
     if (items.length === 0) return jsonResponse({ items: [], failures: [] });
+
+    // Gate check — photos and texts use separate feature keys.
+    const photoCount = items.filter((i) => i.type === "photo").length;
+    const textCount = items.filter((i) => i.type === "text").length;
+
+    if (photoCount > 0) {
+      const photoGate = await requireFeatureAccess(userId, "ai_photo_analysis");
+      if (photoGate) return photoGate;
+    }
+    if (textCount > 0) {
+      const textGate = await requireFeatureAccess(userId, "ai_text_analysis");
+      if (textGate) return textGate;
+    }
 
     // 1. Resolve photo payloads (download from Storage).
     const hydrated = await hydratePhotos(items);
@@ -136,6 +146,25 @@ Deno.serve(async (req) => {
         502,
       );
     }
+
+    // Record usage for successful items
+    const successPhotoCount = successes.filter((s) => {
+      const item = items.find((i) => i.id === s.id);
+      return item?.type === "photo";
+    }).length;
+    const successTextCount = successes.filter((s) => {
+      const item = items.find((i) => i.id === s.id);
+      return item?.type === "text";
+    }).length;
+
+    const usagePromises: Promise<void>[] = [];
+    for (let i = 0; i < successPhotoCount; i++) {
+      usagePromises.push(recordFeatureUsage(userId, "ai_photo_analysis"));
+    }
+    for (let i = 0; i < successTextCount; i++) {
+      usagePromises.push(recordFeatureUsage(userId, "ai_text_analysis"));
+    }
+    await Promise.allSettled(usagePromises);
 
     return jsonResponse({ items: successes, failures });
   } catch (error) {

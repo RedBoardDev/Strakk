@@ -2,8 +2,8 @@ package com.strakk.shared.presentation.checkin
 
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.model.CheckInQuickStats
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureAccess
-import com.strakk.shared.domain.model.ProFeature
 import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInQuickStatsUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
@@ -29,9 +29,9 @@ class CheckInListViewModel(
 
     private fun handleCreateNew() {
         viewModelScope.launch {
-            when (checkFeatureAccess(ProFeature.AI_WEEKLY_SUMMARY)) {
+            when (val access = checkFeatureAccess(Feature.AI_WEEKLY_SUMMARY)) {
                 is FeatureAccess.Granted -> emit(CheckInListEffect.NavigateToWizard)
-                is FeatureAccess.Gated -> emit(CheckInListEffect.FeatureGated(ProFeature.AI_WEEKLY_SUMMARY))
+                else -> emit(CheckInListEffect.FeatureGated(access))
             }
         }
     }

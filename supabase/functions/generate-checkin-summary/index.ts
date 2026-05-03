@@ -1,8 +1,8 @@
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
-import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
+import { checkPayloadSize } from "../_shared/rate-limit.ts";
 import { generateCheckinSummary, CheckinSummaryInput } from "../_shared/checkin-summary.ts";
-import { requirePro } from "../_shared/entitlement-guard.ts";
+import { requireFeatureAccess, recordFeatureUsage } from "../_shared/feature-guard.ts";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -22,12 +22,8 @@ Deno.serve(async (req) => {
 
     const { userId } = await requireUser(req);
 
-    const proGate = await requirePro(userId);
-    if (proGate) return proGate;
-
-    if (!(await checkRateLimit(userId, "generate-checkin-summary", 5, 60))) {
-      return jsonResponse({ error: "Rate limit exceeded" }, 429);
-    }
+    const gate = await requireFeatureAccess(userId, "ai_weekly_summary");
+    if (gate) return gate;
 
     let body: Record<string, unknown>;
     try {
@@ -37,7 +33,9 @@ Deno.serve(async (req) => {
     }
 
     const input = parseInput(body);
+
     const summary = await generateCheckinSummary(input);
+    await recordFeatureUsage(userId, "ai_weekly_summary");
     return jsonResponse({ summary });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

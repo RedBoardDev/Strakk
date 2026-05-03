@@ -8,6 +8,8 @@ import com.strakk.shared.data.remote.SupabaseProvider
 import com.strakk.shared.data.repository.AuthRepositoryImpl
 import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
 import com.strakk.shared.data.repository.CheckInRepositoryImpl
+import com.strakk.shared.data.repository.FeatureLimitsRepositoryImpl
+import com.strakk.shared.data.repository.FeatureUsageRepositoryImpl
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
 import com.strakk.shared.data.repository.GoalsRepositoryImpl
 import com.strakk.shared.data.repository.MealDraftRepositoryImpl
@@ -24,6 +26,8 @@ import com.strakk.shared.domain.common.createLogger
 import com.strakk.shared.domain.repository.AuthRepository
 import com.strakk.shared.domain.repository.BarcodeLookupRepository
 import com.strakk.shared.domain.repository.CheckInRepository
+import com.strakk.shared.domain.repository.FeatureLimitsRepository
+import com.strakk.shared.domain.repository.FeatureUsageRepository
 import com.strakk.shared.domain.repository.FoodCatalogRepository
 import com.strakk.shared.domain.repository.GoalsRepository
 import com.strakk.shared.domain.repository.MealDraftRepository
@@ -57,13 +61,14 @@ import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
 import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
 import com.strakk.shared.domain.usecase.GetCheckInStatsUseCase
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
+import com.strakk.shared.domain.usecase.GetFeatureQuotaStatusUseCase
 import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.GetMonthlyActivityUseCase
 import com.strakk.shared.domain.usecase.ObserveActiveMealDraftUseCase
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInQuickStatsUseCase
-import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInUseCase
+import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
 import com.strakk.shared.domain.usecase.ObserveDailySummaryUseCase
 import com.strakk.shared.domain.usecase.ObserveFrequentItemsUseCase
 import com.strakk.shared.domain.usecase.ObserveMealContainersForDateUseCase
@@ -119,7 +124,6 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-
 internal val dataModule = module {
     single<SupabaseClient> { SupabaseProvider.createClient() }
     singleOf(::CurrentUserIdProvider)
@@ -152,6 +156,8 @@ internal val dataModule = module {
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
     singleOf(::BarcodeLookupRepositoryImpl) { bind<BarcodeLookupRepository>() }
     singleOf(::SubscriptionRepositoryImpl) { bind<SubscriptionRepository>() }
+    singleOf(::FeatureLimitsRepositoryImpl) { bind<FeatureLimitsRepository>() }
+    singleOf(::FeatureUsageRepositoryImpl) { bind<FeatureUsageRepository>() }
 
     factoryOf(::CheckInPdfBuilderImpl) { bind<CheckInPdfGenerator>() }
 }
@@ -237,9 +243,10 @@ internal val domainModule = module {
     // Check-in PDF
     factoryOf(::GenerateCheckInPdfUseCase)
 
-    // Subscription
+    // Subscription + Feature gating
     factoryOf(::ObserveSubscriptionStateUseCase)
     factoryOf(::CheckFeatureAccessUseCase)
+    factoryOf(::GetFeatureQuotaStatusUseCase)
 }
 
 internal val presentationModule = module {

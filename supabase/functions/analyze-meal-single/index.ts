@@ -17,13 +17,11 @@
 
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
-import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
+import { checkPayloadSize } from "../_shared/rate-limit.ts";
 import { analyzeSingle, SingleInput } from "../_shared/meal-analysis.ts";
-import { requirePro } from "../_shared/entitlement-guard.ts";
+import { requireFeatureAccess, recordFeatureUsage } from "../_shared/feature-guard.ts";
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB (covers base64 photo)
-const RATE_LIMIT = 10; // requests per window
-const RATE_WINDOW_S = 60; // 1 minute
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -43,13 +41,6 @@ Deno.serve(async (req) => {
 
     const { userId } = await requireUser(req);
 
-    const proGate = await requirePro(userId);
-    if (proGate) return proGate;
-
-    if (!(await checkRateLimit(userId, "analyze-meal-single", RATE_LIMIT, RATE_WINDOW_S))) {
-      return jsonResponse({ error: "Rate limit exceeded" }, 429);
-    }
-
     let body: Record<string, unknown>;
     try {
       body = await req.json();
@@ -58,7 +49,13 @@ Deno.serve(async (req) => {
     }
 
     const input = parseInput(body);
+
+    const featureKey = input.type === "photo" ? "ai_photo_analysis" : "ai_text_analysis";
+    const gate = await requireFeatureAccess(userId, featureKey);
+    if (gate) return gate;
+
     const entry = await analyzeSingle(input);
+    await recordFeatureUsage(userId, featureKey);
     return jsonResponse(entry);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

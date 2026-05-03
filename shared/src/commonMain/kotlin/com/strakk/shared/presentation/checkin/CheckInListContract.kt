@@ -1,7 +1,7 @@
 package com.strakk.shared.presentation.checkin
 
 import com.strakk.shared.domain.model.CheckInListItem
-import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.FeatureAccess
 
 sealed interface CheckInListUiState {
     data object Loading : CheckInListUiState
@@ -30,5 +30,5 @@ sealed interface CheckInListEffect {
     data object NavigateToWizard : CheckInListEffect
     data class NavigateToDetail(val id: String) : CheckInListEffect
     data object NavigateToStats : CheckInListEffect
-    data class FeatureGated(val feature: ProFeature) : CheckInListEffect
+    data class FeatureGated(val access: FeatureAccess) : CheckInListEffect
 }

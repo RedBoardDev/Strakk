@@ -4,9 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.ClockProvider
 import com.strakk.shared.domain.common.DomainError
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.MealEntryInput
-import com.strakk.shared.domain.model.ProFeature
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
 import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
@@ -67,10 +67,10 @@ class MealDraftViewModel(
         is MealDraftEvent.Rename -> handleRename(event.name)
         is MealDraftEvent.RemoveItem -> handleRemoveItem(event.itemId)
         is MealDraftEvent.AddResolvedItem -> handleAddItem(event.item)
-        is MealDraftEvent.AddPendingPhoto -> handleGatedAdd(ProFeature.AI_PHOTO_ANALYSIS) {
+        is MealDraftEvent.AddPendingPhoto -> handleGatedAdd(Feature.AI_PHOTO_ANALYSIS) {
             handleAddItem(DraftItem.PendingPhoto(id = generateId(), imageBase64 = event.imageBase64, hint = event.hint))
         }
-        is MealDraftEvent.AddPendingText -> handleGatedAdd(ProFeature.AI_TEXT_ANALYSIS) {
+        is MealDraftEvent.AddPendingText -> handleGatedAdd(Feature.AI_TEXT_ANALYSIS) {
             handleAddItem(DraftItem.PendingText(id = generateId(), description = event.description))
         }
         is MealDraftEvent.AddManualItem -> handleAddKnownItem(event)
@@ -80,11 +80,11 @@ class MealDraftViewModel(
         MealDraftEvent.Commit -> handleCommit()
     }
 
-    private fun handleGatedAdd(feature: ProFeature, onGranted: () -> Unit) {
+    private fun handleGatedAdd(feature: Feature, onGranted: () -> Unit) {
         viewModelScope.launch {
-            when (checkFeatureAccess(feature)) {
+            when (val access = checkFeatureAccess(feature)) {
                 is FeatureAccess.Granted -> onGranted()
-                is FeatureAccess.Gated -> emit(MealDraftEffect.FeatureGated(feature))
+                else -> emit(MealDraftEffect.FeatureGated(access))
             }
         }
     }

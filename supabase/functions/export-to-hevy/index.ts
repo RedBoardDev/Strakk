@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
-import { checkRateLimit, checkPayloadSize } from "../_shared/rate-limit.ts";
+import { checkPayloadSize } from "../_shared/rate-limit.ts";
+import { requireFeatureAccess, recordFeatureUsage } from "../_shared/feature-guard.ts";
 
 // =============================================================================
 // Types — Input
@@ -794,9 +795,8 @@ Deno.serve(async (req: Request) => {
     const { userId } = await requireUser(req);
     const userJwt = req.headers.get("Authorization")!.replace(/^Bearer\s+/i, "").trim();
 
-    if (!(await checkRateLimit(userId, "export-to-hevy", 5, 60))) {
-      return json({ error: "Rate limit exceeded" }, 429);
-    }
+    const gate = await requireFeatureAccess(userId, "hevy_export");
+    if (gate) return gate;
 
     let hevyApiKey: string;
     try {
@@ -818,6 +818,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const result = await exportSession(body.session, hevyApiKey);
+
+    await recordFeatureUsage(userId, "hevy_export");
 
     return json(result, 200);
   } catch (error) {
