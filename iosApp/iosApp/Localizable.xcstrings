@@ -4,6 +4,9 @@
     " · " : {
 
     },
+    " est activé !" : {
+
+    },
     "—" : {
 
     },
@@ -63,6 +66,9 @@
       }
     },
     "%@ en attente" : {
+
+    },
+    "%@ est dans Strakk Pro" : {
 
     },
     "%@ from catalog · %@ via AI" : {
@@ -177,6 +183,9 @@
         }
       }
     },
+    "1,67 €/mois" : {
+
+    },
     "4 wk" : {
       "localizations" : {
         "fr" : {
@@ -187,6 +196,9 @@
         }
       }
     },
+    "7 jours" : {
+
+    },
     "12 wk" : {
       "localizations" : {
         "fr" : {
@@ -196,6 +208,9 @@
           }
         }
       }
+    },
+    "19,99 €/an · " : {
+
     },
     "A check-in already exists for this week." : {
       "localizations" : {
@@ -216,6 +231,9 @@
           }
         }
       }
+    },
+    "Actif" : {
+
     },
     "Activité hors entraînement" : {
 
@@ -451,6 +469,9 @@
         }
       }
     },
+    "Annule à tout moment · Aucun engagement" : {
+
+    },
     "API Key" : {
       "localizations" : {
         "fr" : {
@@ -554,7 +575,13 @@
         }
       }
     },
+    "Bonne nouvelle !" : {
+
+    },
     "C'est parti" : {
+
+    },
+    "C'est parti !" : {
 
     },
     "Cal." : {
@@ -806,6 +833,9 @@
         }
       }
     },
+    "Continue avec Strakk Pro pour garder l'IA, la sync Santé et l'historique illimité." : {
+
+    },
     "Continue to next step" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -829,6 +859,9 @@
       }
     },
     "Continuer" : {
+
+    },
+    "Continuer en gratuit" : {
 
     },
     "COVERED DAYS" : {
@@ -964,6 +997,12 @@
           }
         }
       }
+    },
+    "Découvrir les offres" : {
+
+    },
+    "Découvrir Pro" : {
+
     },
     "Déjà un compte ?" : {
 
@@ -1221,6 +1260,12 @@
         }
       }
     },
+    "Essai gratuit" : {
+
+    },
+    "Essayer 7 jours gratuit" : {
+
+    },
     "Et au quotidien ?" : {
 
     },
@@ -1230,6 +1275,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "exercices"
+          }
+        }
+      }
+    },
+    "Expire dans %@ jour%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Expire dans %1$@ jour%2$@"
           }
         }
       }
@@ -1442,6 +1497,9 @@
           }
         }
       }
+    },
+    "Gérer l'abonnement" : {
+
     },
     "Get started" : {
       "localizations" : {
@@ -1672,6 +1730,9 @@
         }
       }
     },
+    "L'IA tracke tes repas pour toi." : {
+
+    },
     "Left arm (cm)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1876,6 +1937,9 @@
           }
         }
       }
+    },
+    "Mets à jour ton moyen de paiement pour conserver l'accès Pro." : {
+
     },
     "Minimum 3 characters" : {
       "localizations" : {
@@ -2109,7 +2173,13 @@
         }
       }
     },
+    "Paiement sécurisé via App Store" : {
+
+    },
     "Parle-moi de ton entraînement" : {
+
+    },
+    "Passer à Pro" : {
 
     },
     "Password" : {
@@ -2218,6 +2288,9 @@
         }
       }
     },
+    "Photo, texte, bilan hebdo." : {
+
+    },
     "Photo. Long press to delete." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2228,6 +2301,9 @@
           }
         }
       }
+    },
+    "Photographie ton assiette ou décris ton repas en une phrase. Strakk Pro fait le reste." : {
+
     },
     "Photos" : {
       "extractionState" : "stale",
@@ -2282,6 +2358,9 @@
         }
       }
     },
+    "Plus tard" : {
+
+    },
     "Point the camera at a barcode" : {
       "localizations" : {
         "fr" : {
@@ -2323,6 +2402,15 @@
           }
         }
       }
+    },
+    "PRO" : {
+
+    },
+    "Problème de paiement" : {
+
+    },
+    "Profite de toutes les fonctionnalités Pro pendant 7 jours." : {
+
     },
     "Prot." : {
 
@@ -2424,6 +2512,9 @@
     "Réessaie ou ajuste manuellement" : {
 
     },
+    "Régler le problème" : {
+
+    },
     "Remove" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2456,6 +2547,9 @@
           }
         }
       }
+    },
+    "Restaurer un achat" : {
+
     },
     "Retry" : {
       "extractionState" : "stale",
@@ -2532,6 +2626,9 @@
       }
     },
     "Se connecter" : {
+
+    },
+    "Se renouvelle le %@" : {
 
     },
     "Séances par semaine" : {
@@ -2802,6 +2899,9 @@
     "Strakk" : {
 
     },
+    "STRAKK PRO" : {
+
+    },
     "Stress" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2924,6 +3024,22 @@
       }
     },
     "Ton coach nutrition & fitness, simplifié." : {
+
+    },
+    "Ton essai Pro de " : {
+
+    },
+    "Ton essai Pro expire dans %@ jour%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ton essai Pro expire dans %1$@ jour%2$@"
+          }
+        }
+      }
+    },
+    "Ton essai se termine aujourd'hui" : {
 
     },
     "Track your fitness journey" : {

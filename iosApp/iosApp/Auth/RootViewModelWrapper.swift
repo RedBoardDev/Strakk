@@ -4,7 +4,7 @@ import shared
 enum RootState: Equatable {
     case loading
     case unauthenticated
-    case authenticated(onboardingCompleted: Bool)
+    case authenticated(onboardingCompleted: Bool, showTrialExpiredModal: Bool)
 }
 
 @MainActor
@@ -13,6 +13,7 @@ final class RootViewModelWrapper {
     private let sharedVm: RootViewModel
 
     var state: RootState = .loading
+    var showPaywall: Bool = false
 
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
@@ -36,6 +37,10 @@ final class RootViewModelWrapper {
         sharedVm.refreshProfile()
     }
 
+    func dismissTrialModal() {
+        sharedVm.dismissTrialModal()
+    }
+
     private static func map(_ kmpState: RootUiState?) -> RootState {
         guard let kmpState else { return .loading }
         if kmpState is RootUiStateLoading {
@@ -43,7 +48,10 @@ final class RootViewModelWrapper {
         } else if kmpState is RootUiStateUnauthenticated {
             return .unauthenticated
         } else if let auth = kmpState as? RootUiStateAuthenticated {
-            return .authenticated(onboardingCompleted: auth.onboardingCompleted)
+            return .authenticated(
+                onboardingCompleted: auth.onboardingCompleted,
+                showTrialExpiredModal: auth.showTrialExpiredModal
+            )
         }
         return .loading
     }

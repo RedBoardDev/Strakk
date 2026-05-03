@@ -7,6 +7,7 @@ private struct AddTile: Identifiable {
     let id: String
     let icon: String
     let label: String
+    var isPro: Bool = false
 }
 
 // MARK: - AddPickerSheet
@@ -41,10 +42,10 @@ struct AddPickerSheet: View {
     }
 
     private let tiles: [AddTile] = [
-        AddTile(id: "search",  icon: "magnifyingglass",     label: "Search"),
-        AddTile(id: "manual",  icon: "pencil",              label: "Manual"),
-        AddTile(id: "text",    icon: "text.quote",          label: "Free text"),
-        AddTile(id: "photo",   icon: "camera.fill",         label: "Photo"),
+        AddTile(id: "search", icon: "magnifyingglass", label: "Search"),
+        AddTile(id: "manual", icon: "pencil", label: "Manual"),
+        AddTile(id: "text", icon: "text.quote", label: "Free text", isPro: true),
+        AddTile(id: "photo", icon: "camera.fill", label: "Photo", isPro: true)
     ]
 
     var body: some View {
@@ -57,7 +58,7 @@ struct AddPickerSheet: View {
                     let columns = [
                         GridItem(.flexible(), spacing: 12),
                         GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12),
+                        GridItem(.flexible(), spacing: 12)
                     ]
 
                     LazyVGrid(columns: columns, spacing: 12) {
@@ -180,9 +181,15 @@ struct AddPickerSheet: View {
             .frame(height: 88)
             .background(Color.strakkSurface1)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(alignment: .topTrailing) {
+                if tile.isPro {
+                    ProBadge()
+                        .padding(6)
+                }
+            }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(tile.label)
+        .accessibilityLabel(tile.label + (tile.isPro ? ", Pro" : ""))
     }
 
     // MARK: - Quick-add dispatchers

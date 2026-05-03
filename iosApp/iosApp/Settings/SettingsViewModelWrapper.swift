@@ -1,6 +1,15 @@
 import SwiftUI
 import shared
 
+// MARK: - Subscription display state
+
+enum SubscriptionDisplayData: Equatable {
+    case free
+    case trial(daysRemaining: Int)
+    case active(planLabel: String, expiresLabel: String)
+    case paymentFailed
+}
+
 // MARK: - Swift-side data types
 
 struct SettingsData: Equatable {
@@ -9,6 +18,7 @@ struct SettingsData: Equatable {
     let calorieGoal: String
     let waterGoal: String
     let hevyApiKey: String
+    let subscriptionDisplay: SubscriptionDisplayData
 }
 
 enum SettingsState: Equatable {
@@ -25,6 +35,8 @@ final class SettingsViewModelWrapper {
 
     var state: SettingsState = .loading
     var errorMessage: String?
+    var toastMessage: String?
+    var showPaywall: Bool = false
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -60,6 +72,10 @@ final class SettingsViewModelWrapper {
     private func handleEffect(_ effect: SettingsEffect) {
         if let showError = effect as? SettingsEffectShowError {
             errorMessage = showError.message
+        } else if effect is SettingsEffectNavigateToPaywall {
+            showPaywall = true
+        } else if let toast = effect as? SettingsEffectShowToast {
+            toastMessage = toast.message
         }
     }
 
@@ -71,12 +87,27 @@ final class SettingsViewModelWrapper {
         if kmpState is SettingsUiStateLoading {
             return .loading
         } else if let ready = kmpState as? SettingsUiStateReady {
+            let subDisplay: SubscriptionDisplayData = {
+                let sub = ready.subscriptionDisplay
+                if sub is SubscriptionDisplayFree {
+                    return .free
+                } else if let trial = sub as? SubscriptionDisplayTrial {
+                    return .trial(daysRemaining: Int(trial.daysRemaining))
+                } else if let active = sub as? SubscriptionDisplayActive {
+                    return .active(planLabel: active.planLabel, expiresLabel: active.expiresLabel)
+                } else if sub is SubscriptionDisplayPaymentFailed {
+                    return .paymentFailed
+                }
+                return .free
+            }()
+
             return .ready(data: SettingsData(
                 email: ready.email,
                 proteinGoal: ready.proteinGoal,
                 calorieGoal: ready.calorieGoal,
                 waterGoal: ready.waterGoal,
-                hevyApiKey: ready.hevyApiKey
+                hevyApiKey: ready.hevyApiKey,
+                subscriptionDisplay: subDisplay
             ))
         }
         return .loading
