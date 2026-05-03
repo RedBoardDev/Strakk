@@ -29,6 +29,12 @@
         }
       }
     },
+    "/mo" : {
+
+    },
+    "/yr" : {
+
+    },
     "%@" : {
 
     },
@@ -66,9 +72,6 @@
       }
     },
     "%@ en attente" : {
-
-    },
-    "%@ est dans Strakk Pro" : {
 
     },
     "%@ from catalog · %@ via AI" : {
@@ -186,6 +189,15 @@
     "1,67 €/mois" : {
 
     },
+    "1.99 €" : {
+
+    },
+    "2 MONTHS FREE" : {
+
+    },
+    "2,400+ athletes" : {
+
+    },
     "4 wk" : {
       "localizations" : {
         "fr" : {
@@ -195,6 +207,9 @@
           }
         }
       }
+    },
+    "4.8" : {
+
     },
     "7 jours" : {
 
@@ -210,6 +225,9 @@
       }
     },
     "19,99 €/an · " : {
+
+    },
+    "19.99 €" : {
 
     },
     "A check-in already exists for this week." : {
@@ -469,7 +487,7 @@
         }
       }
     },
-    "Annule à tout moment · Aucun engagement" : {
+    "Annual" : {
 
     },
     "API Key" : {
@@ -759,6 +777,9 @@
         }
       }
     },
+    "CHOOSE YOUR PLAN" : {
+
+    },
     "Close" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -998,10 +1019,10 @@
         }
       }
     },
-    "Découvrir les offres" : {
+    "Débloquer avec Pro" : {
 
     },
-    "Découvrir Pro" : {
+    "Découvrir les offres" : {
 
     },
     "Déjà un compte ?" : {
@@ -1263,10 +1284,10 @@
     "Essai gratuit" : {
 
     },
-    "Essayer 7 jours gratuit" : {
+    "Et au quotidien ?" : {
 
     },
-    "Et au quotidien ?" : {
+    "EVERYTHING IN PRO" : {
 
     },
     "exercises" : {
@@ -1684,6 +1705,9 @@
         }
       }
     },
+    "i.e. 1.67 €/month" : {
+
+    },
     "Intensité de tes séances" : {
 
     },
@@ -1954,6 +1978,9 @@
     "Minimum 6 caractères" : {
 
     },
+    "Monthly" : {
+
+    },
     "Mot de passe" : {
 
     },
@@ -2055,6 +2082,12 @@
           }
         }
       }
+    },
+    "No commitment" : {
+
+    },
+    "No commitment · Cancel anytime" : {
+
     },
     "No feelings recorded" : {
       "extractionState" : "stale",
@@ -2172,9 +2205,6 @@
           }
         }
       }
-    },
-    "Paiement sécurisé via App Store" : {
-
     },
     "Parle-moi de ton entraînement" : {
 
@@ -2301,9 +2331,6 @@
           }
         }
       }
-    },
-    "Photographie ton assiette ou décris ton repas en une phrase. Strakk Pro fait le reste." : {
-
     },
     "Photos" : {
       "extractionState" : "stale",
@@ -2549,6 +2576,9 @@
       }
     },
     "Restaurer un achat" : {
+
+    },
+    "Restore purchase" : {
 
     },
     "Retry" : {
@@ -2960,6 +2990,9 @@
     "Tes objectifs nutritionnels" : {
 
     },
+    "The AI that understands your plate." : {
+
+    },
     "The barcode scanner is not available on this device." : {
       "localizations" : {
         "fr" : {
@@ -3065,6 +3098,9 @@
       }
     },
     "Types d'entraînement" : {
+
+    },
+    "Unlock your full\ntracking potential" : {
 
     },
     "UPPER BODY" : {

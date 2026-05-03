@@ -1,7 +1,8 @@
+// swiftlint:disable type_body_length
 import SwiftUI
 import shared
 
-// MARK: - SF Symbol mapping for ProFeature
+// MARK: - SF Symbol mapping
 
 private func sfSymbol(for feature: ProFeature) -> String {
     switch feature {
@@ -26,57 +27,29 @@ struct PaywallView: View {
         self.onDismiss = onDismiss
     }
 
+    private var data: PaywallData { viewModel.paywallData }
+    private var isAnnual: Bool { data.selectedPlan == .annual }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             Color.strakkBackground.ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    closeButton
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.lg)
-
-                    overlineLabel
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xs)
-
-                    headline
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xs)
-
-                    subheadline
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xs)
-
-                    featureList
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xl)
-
-                    planToggle
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xl)
-
-                    priceCard
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.md)
-
-                    ctaButton
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.xl)
-
-                    footerText
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.md)
-
-                    restoreButton
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, StrakkSpacing.lg)
-                        .padding(.top, StrakkSpacing.md)
-                        .padding(.bottom, StrakkSpacing.xxl)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    heroSection
+                    featuresSection
+                        .padding(.top, StrakkSpacing.xxl)
+                    planCardsSection
+                        .padding(.top, StrakkSpacing.xxl)
+                    Spacer()
+                        .frame(height: 200)
                 }
+                .padding(.horizontal, StrakkSpacing.lg)
             }
+
+            stickyBottomBar
         }
+        .overlay(alignment: .topTrailing) { closeButton }
         .onChange(of: viewModel.shouldDismiss) { _, shouldDismiss in
             if shouldDismiss { onDismiss() }
         }
@@ -100,204 +73,328 @@ struct PaywallView: View {
             viewModel.onEvent(PaywallEventOnDismiss())
         } label: {
             Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Color.strakkTextSecondary)
-                .frame(width: 36, height: 36)
-                .background(Color.strakkSurface1, in: Circle())
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.strakkTextTertiary)
+                .frame(width: 30, height: 30)
+                .background(Color.strakkSurface2, in: Circle())
         }
-        .accessibilityLabel("Fermer")
+        .padding(.trailing, StrakkSpacing.lg)
+        .padding(.top, StrakkSpacing.xxl)
+        .accessibilityLabel("Close")
     }
 
-    // MARK: - Overline / headline / subheadline
+    // MARK: - Hero
 
-    private var overlineLabel: some View {
-        Text("STRAKK PRO")
-            .font(.strakkOverline)
-            .foregroundStyle(Color.strakkPrimaryLight)
-            .kerning(1.0)
+    private var heroSection: some View {
+        VStack(spacing: 0) {
+            Spacer().frame(height: 56)
+
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.strakkPrimary.opacity(0.20),
+                                Color.strakkPrimary.opacity(0.05),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 90
+                        )
+                    )
+                    .frame(width: 180, height: 180)
+
+                Circle()
+                    .fill(Color.strakkSurface1)
+                    .frame(width: 72, height: 72)
+
+                Image(systemName: "sparkles")
+                    .font(.system(size: 32, weight: .medium))
+                    .foregroundStyle(Color.strakkPrimary)
+            }
+
+            Spacer().frame(height: StrakkSpacing.lg)
+
+            ProBadge()
+
+            Spacer().frame(height: StrakkSpacing.sm)
+
+            Text("Unlock your full\ntracking potential")
+                .font(.strakkHeading1)
+                .foregroundStyle(Color.strakkTextPrimary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(2)
+
+            Spacer().frame(height: StrakkSpacing.xs)
+
+            Text("The AI that understands your plate.")
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+                .multilineTextAlignment(.center)
+
+            Spacer().frame(height: StrakkSpacing.md)
+        }
     }
 
-    private var headline: some View {
-        Text("L'IA tracke tes repas pour toi.")
-            .font(.strakkHeading1)
-            .foregroundStyle(Color.strakkTextPrimary)
-    }
+    // MARK: - Features
 
-    private var subheadline: some View {
-        Text("Photographie ton assiette ou décris ton repas en une phrase. Strakk Pro fait le reste.")
-            .font(.strakkBody)
-            .foregroundStyle(Color.strakkTextSecondary)
-            .fixedSize(horizontal: false, vertical: true)
-    }
+    private var featuresSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("EVERYTHING IN PRO")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .kerning(0.8)
+                .padding(.bottom, StrakkSpacing.md)
 
-    // MARK: - Feature list
-
-    private var featureList: some View {
-        let data = viewModel.paywallData
-        return VStack(spacing: StrakkSpacing.md) {
-            ForEach(data.features, id: \.feature) { info in
-                featureRow(info: info, highlighted: info.feature == data.highlightedFeature)
+            VStack(spacing: 6) {
+                ForEach(data.features, id: \.feature) { info in
+                    featureRow(
+                        info: info,
+                        highlighted: info.feature == data.highlightedFeature
+                    )
+                }
             }
         }
     }
 
     @ViewBuilder
     private func featureRow(info: ProFeatureInfo, highlighted: Bool) -> some View {
-        HStack(alignment: .top, spacing: StrakkSpacing.md) {
+        HStack(spacing: StrakkSpacing.sm) {
             Image(systemName: sfSymbol(for: info.feature))
-                .font(.system(size: 20))
-                .foregroundStyle(Color.strakkPrimary)
-                .frame(width: 28)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(highlighted ? Color.strakkPrimary : Color.strakkTextSecondary)
+                .frame(width: 30, height: 30)
+                .background(
+                    highlighted ? Color.strakkPrimary.opacity(0.10) : Color.strakkSurface2,
+                    in: RoundedRectangle(cornerRadius: 8)
+                )
 
-            VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
-                Text(info.title)
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Text(info.description_)
-                    .font(.strakkCaption)
-                    .foregroundStyle(Color.strakkTextSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Text(info.title)
+                .font(highlighted ? .strakkBodyBold : .strakkBody)
+                .foregroundStyle(Color.strakkTextPrimary)
+
+            Spacer()
+
+            Image(systemName: "checkmark")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color.strakkSuccess)
         }
-        .padding(StrakkSpacing.md)
-        .background(highlighted ? Color.strakkSurface1 : Color.clear)
-        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        .overlay(alignment: .leading) {
-            if highlighted {
-                Rectangle()
-                    .fill(Color.strakkPrimary)
-                    .frame(width: 3)
-                    .clipShape(RoundedRectangle(cornerRadius: 2))
+        .padding(.horizontal, StrakkSpacing.sm)
+        .padding(.vertical, 10)
+        .background(
+            highlighted ? Color.strakkSurface1 : Color.clear,
+            in: RoundedRectangle(cornerRadius: 10)
+        )
+    }
+
+    // MARK: - Plan cards
+
+    private var planCardsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("CHOOSE YOUR PLAN")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .kerning(0.8)
+                .padding(.bottom, StrakkSpacing.md)
+
+            HStack(spacing: StrakkSpacing.sm) {
+                annualPlanCard
+                monthlyPlanCard
             }
         }
     }
 
-    // MARK: - Plan toggle
-
-    private var planToggle: some View {
-        let data = viewModel.paywallData
-        return HStack(spacing: 0) {
-            planTab(
-                label: "Mensuel",
-                badge: nil,
-                isSelected: data.selectedPlan == .monthly
-            ) {
-                viewModel.onEvent(PaywallEventOnPlanSelected(plan: .monthly))
-            }
-            planTab(
-                label: "Annuel",
-                badge: "POPULAIRE",
-                isSelected: data.selectedPlan == .annual
-            ) {
-                viewModel.onEvent(PaywallEventOnPlanSelected(plan: .annual))
-            }
-        }
-        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
-    }
-
-    @ViewBuilder
-    private func planTab(label: String, badge: String?, isSelected: Bool, onTap: @escaping () -> Void) -> some View {
-        Button(action: onTap) {
-            HStack(spacing: StrakkSpacing.xxs) {
-                Text(label)
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(isSelected ? .white : Color.strakkTextSecondary)
-                if let badge {
-                    Text(badge)
+    private var annualPlanCard: some View {
+        let selected = data.selectedPlan == .annual
+        return Button {
+            HapticEngine.light()
+            viewModel.onEvent(PaywallEventOnPlanSelected(plan: .annual))
+        } label: {
+            VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+                HStack {
+                    Text("Annual")
+                        .font(.strakkCaptionBold)
+                        .foregroundStyle(selected ? Color.strakkPrimary : Color.strakkTextSecondary)
+                    Spacer()
+                    Text("2 MONTHS FREE")
                         .font(.strakkOverline)
-                        .foregroundStyle(isSelected ? Color.strakkPrimary : Color.strakkTextTertiary)
+                        .foregroundStyle(Color.strakkSuccess)
                         .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 3)
                         .background(
-                            isSelected ? Color.strakkPrimary.opacity(0.15) : Color.strakkSurface2,
+                            Color.strakkSuccess.opacity(0.10),
                             in: RoundedRectangle(cornerRadius: 4)
                         )
                 }
+
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text("19.99\u{00A0}€")
+                        .font(.strakkHeading2)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                    Text("/yr")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
+
+                Text("i.e. 1.67\u{00A0}€/month")
+                    .font(.strakkCaption)
+                    .foregroundStyle(selected ? Color.strakkSuccess : Color.strakkTextTertiary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 44)
-            .background(
-                isSelected ? Color.strakkPrimary : Color.clear,
-                in: RoundedRectangle(cornerRadius: StrakkRadius.sm)
+            .padding(StrakkSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
+            .overlay(
+                RoundedRectangle(cornerRadius: StrakkRadius.sm)
+                    .strokeBorder(
+                        selected ? Color.strakkPrimary : Color.strakkBorderFaint,
+                        lineWidth: selected ? 1.5 : 1
+                    )
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label + (badge.map { ", \($0)" } ?? ""))
+        .accessibilityLabel("Annual plan, 19.99 euros per year")
     }
 
-    // MARK: - Price card
-
-    private var priceCard: some View {
-        let isAnnual = viewModel.paywallData.selectedPlan == .annual
-        return VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
-            Text(isAnnual ? "19,99 €/an" : "1,99 €/mois")
-                .font(.strakkHeading2)
-                .foregroundStyle(Color.strakkTextPrimary)
-            Text(isAnnual ? "soit 1,67 €/mois · 2 mois offerts" : "Sans engagement")
-                .font(.strakkBody)
-                .foregroundStyle(isAnnual ? Color.strakkSuccess : Color.strakkTextSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(StrakkSpacing.md)
-        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.md))
-    }
-
-    // MARK: - CTA
-
-    private var ctaButton: some View {
-        let data = viewModel.paywallData
+    private var monthlyPlanCard: some View {
+        let selected = data.selectedPlan == .monthly
         return Button {
             HapticEngine.light()
-            viewModel.onEvent(PaywallEventOnSubscribeTapped())
+            viewModel.onEvent(PaywallEventOnPlanSelected(plan: .monthly))
         } label: {
-            Group {
-                if data.isProcessing {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Essayer 7 jours gratuit")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+                Text("Monthly")
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(selected ? Color.strakkPrimary : Color.strakkTextSecondary)
+
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text("1.99\u{00A0}€")
+                        .font(.strakkHeading2)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                    Text("/mo")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
                 }
+
+                Text("No commitment")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(
-                data.isProcessing ? Color.strakkPrimary.opacity(0.6) : Color.strakkPrimary,
-                in: RoundedRectangle(cornerRadius: StrakkRadius.sm)
+            .padding(StrakkSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
+            .overlay(
+                RoundedRectangle(cornerRadius: StrakkRadius.sm)
+                    .strokeBorder(
+                        selected ? Color.strakkPrimary : Color.strakkBorderFaint,
+                        lineWidth: selected ? 1.5 : 1
+                    )
             )
         }
-        .disabled(data.isProcessing || data.isAlreadyPro)
-        .accessibilityLabel("Essayer Strakk Pro gratuitement pendant 7 jours")
+        .buttonStyle(.plain)
+        .accessibilityLabel("Monthly plan, 1.99 euros per month")
     }
 
-    // MARK: - Footer
+    // MARK: - Sticky bottom bar
 
-    private var footerText: some View {
-        VStack(spacing: StrakkSpacing.xxs) {
-            Text("Annule à tout moment · Aucun engagement")
-                .font(.strakkCaption)
+    private var stickyBottomBar: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(Color.strakkDivider)
+                .frame(height: 0.5)
+
+            VStack(spacing: StrakkSpacing.sm) {
+                // Price recap above CTA
+                if !data.isAlreadyPro {
+                    Text(priceRecap)
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                        .multilineTextAlignment(.center)
+                }
+
+                // CTA
+                Button {
+                    HapticEngine.medium()
+                    viewModel.onEvent(PaywallEventOnSubscribeTapped())
+                } label: {
+                    Group {
+                        if data.isProcessing {
+                            ProgressView().tint(.white)
+                        } else {
+                            HStack(spacing: 6) {
+                                Text(ctaLabel)
+                                    .font(.strakkBodyBold)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
+                            .foregroundStyle(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(
+                        LinearGradient(
+                            colors: data.isProcessing
+                                ? [Color.strakkPrimary.opacity(0.5)]
+                                : [Color.strakkPrimary, Color.strakkPrimaryLight],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        in: RoundedRectangle(cornerRadius: StrakkRadius.sm)
+                    )
+                }
+                .disabled(data.isProcessing || data.isAlreadyPro)
+                .accessibilityLabel("Subscribe to Strakk Pro")
+
+                // Trust line
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 10))
+                    Text("No commitment · Cancel anytime")
+                        .font(.strakkCaption)
+                }
                 .foregroundStyle(Color.strakkTextTertiary)
-            Text("Paiement sécurisé via App Store")
-                .font(.strakkCaption)
-                .foregroundStyle(Color.strakkTextTertiary)
+
+                // Restore
+                Button {
+                    viewModel.onEvent(PaywallEventOnRestoreTapped())
+                } label: {
+                    Text("Restore purchase")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                        .underline(color: Color.strakkTextTertiary.opacity(0.4))
+                }
+            }
+            .padding(.horizontal, StrakkSpacing.lg)
+            .padding(.top, StrakkSpacing.md)
+            .padding(.bottom, StrakkSpacing.lg)
         }
-        .frame(maxWidth: .infinity)
-        .multilineTextAlignment(.center)
+        .background(
+            Color.strakkBackground
+                .opacity(0.95)
+                .background(.ultraThinMaterial)
+        )
     }
 
-    private var restoreButton: some View {
-        Button {
-            viewModel.onEvent(PaywallEventOnRestoreTapped())
-        } label: {
-            Text("Restaurer un achat")
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkPrimary)
+    private var priceRecap: String {
+        if isAnnual {
+            return String(localized: "19.99\u{00A0}€/year · That's only 0.38\u{00A0}€/week")
         }
-        .accessibilityLabel("Restaurer un achat précédent")
+        return String(localized: "1.99\u{00A0}€/month · Cancel anytime")
+    }
+
+    private var ctaLabel: String {
+        if data.isAlreadyPro { return String(localized: "Already Pro") }
+        return String(localized: "Continue")
     }
 }
 
+// MARK: - Preview
+
 #Preview {
     PaywallView(onDismiss: {})
+}
+
+#Preview("With highlight") {
+    PaywallView(highlightedFeature: .aiPhotoAnalysis, onDismiss: {})
 }
