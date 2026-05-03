@@ -36,12 +36,6 @@ jobs:
     runs-on: [self-hosted, macos]
     steps:
       - uses: actions/checkout@v4
-      - name: Install SwiftLint (portable binary, no Xcode required)
-        run: |
-          curl -fsSL "https://github.com/realm/SwiftLint/releases/download/0.57.1/portable_swiftlint.zip" \
-            -o /tmp/swiftlint.zip
-          unzip -qo /tmp/swiftlint.zip -d /tmp/swiftlint
-          sudo install -m 755 /tmp/swiftlint/swiftlint /usr/local/bin/swiftlint
       - run: make lint-swift
 
   test-shared:
