@@ -191,7 +191,6 @@ struct PaywallView: View {
         case .unlimitedHistory: return String(localized: "Unlimited history")
         case .photoComparison: return String(localized: "Photo comparison")
         case .hevyExport: return String(localized: "Hevy export")
-        default: return metadata.titleKey
         }
     }
 
