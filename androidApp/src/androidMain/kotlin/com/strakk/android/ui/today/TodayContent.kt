@@ -1,5 +1,7 @@
 package com.strakk.android.ui.today
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,18 +9,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
+import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.EntrySource
@@ -27,6 +38,7 @@ import com.strakk.shared.domain.model.WaterEntry
 import com.strakk.shared.presentation.today.TimelineItem
 import com.strakk.shared.presentation.today.TodayEvent
 import com.strakk.shared.presentation.today.TodayUiState
+import com.strakk.shared.presentation.today.TrialBannerState
 
 // =============================================================================
 // Main content
@@ -65,6 +77,19 @@ fun TodayContent(
                         text = uiState.dateLabel,
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalStrakkColors.current.textSecondary,
+                    )
+                }
+            }
+
+            // Trial banner (shown when trial is expiring)
+            val trialBanner = uiState.trialBanner
+            if (trialBanner != null) {
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    TrialBanner(
+                        state = trialBanner,
+                        onTap = { onEvent(TodayEvent.OnTrialBannerTapped) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -171,6 +196,51 @@ fun TodayContent(
                 )
             }
         }
+    }
+}
+
+// =============================================================================
+// Trial Banner
+// =============================================================================
+
+@Composable
+private fun TrialBanner(state: TrialBannerState, onTap: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = LocalStrakkColors.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.surface1)
+            .clickable(onClick = onTap)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Schedule,
+            contentDescription = null,
+            tint = colors.warning,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = when (state) {
+                is TrialBannerState.ExpiringIn -> if (state.daysRemaining <= 1) {
+                    stringResource(R.string.trial_banner_expires_tomorrow)
+                } else {
+                    stringResource(R.string.trial_banner_expires_days, state.daysRemaining)
+                }
+            },
+            style = LocalStrakkTextStyles.current.caption,
+            color = colors.textSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = colors.textTertiary,
+            modifier = Modifier.size(16.dp),
+        )
     }
 }
 

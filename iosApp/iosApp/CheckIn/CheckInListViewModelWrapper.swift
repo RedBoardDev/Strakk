@@ -37,6 +37,7 @@ final class CheckInListViewModelWrapper {
     var navigateToDetailId: String?
     var navigateToWizard = false
     var navigateToStats = false
+    var gatedFeature: Feature?
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -77,6 +78,12 @@ final class CheckInListViewModelWrapper {
             navigateToDetailId = detail.id
         } else if effect is CheckInListEffectNavigateToStats {
             navigateToStats = true
+        } else if let gated = effect as? CheckInListEffectFeatureGated {
+            if let proRequired = gated.access as? FeatureAccessProRequired {
+                gatedFeature = proRequired.feature
+            } else if let quotaExhausted = gated.access as? FeatureAccessQuotaExhausted {
+                gatedFeature = quotaExhausted.feature
+            }
         }
     }
 

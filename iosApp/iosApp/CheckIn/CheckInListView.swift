@@ -42,6 +42,7 @@ struct CheckInListView: View {
             .fullScreenCover(isPresented: $vm.navigateToWizard) {
                 CheckInWizardView(checkInId: nil)
             }
+            .featureGate($vm.gatedFeature)
         }
     }
 
@@ -226,7 +227,7 @@ struct CheckInListView: View {
             .background(Color.strakkSurface1)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .accessibilityLabel("\(weekDisplayLabel(from: item.weekLabel))\(item.weight.map { ", \(String(format: "%.1f kg", $0))" } ?? "")")
+        .accessibilityLabel(checkInAccessibilityLabel(for: item))
     }
 
     // MARK: - Empty state
@@ -274,6 +275,12 @@ struct CheckInListView: View {
             return "Semaine \(weekNumber)"
         }
         return weekLabel
+    }
+
+    private func checkInAccessibilityLabel(for item: CheckInListItemData) -> String {
+        let week = weekDisplayLabel(from: item.weekLabel)
+        let weight = item.weight.map { ", \(String(format: "%.1f kg", $0))" } ?? ""
+        return "\(week)\(weight)"
     }
 }
 

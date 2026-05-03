@@ -53,6 +53,12 @@ class OnboardingFlowViewModel(
             is OnboardingFlowEvent.OnEmailChanged -> setState { copy(email = event.email, signUpError = null) }
             is OnboardingFlowEvent.OnPasswordChanged -> setState { copy(password = event.password, signUpError = null) }
 
+            is OnboardingFlowEvent.OnSkipProOffer -> emit(OnboardingFlowEffect.NavigateToHome)
+            is OnboardingFlowEvent.OnStartFreeTrial -> {
+                // TODO: Integrate RevenueCat trial start
+                emit(OnboardingFlowEffect.NavigateToHome)
+            }
+
             is OnboardingFlowEvent.OnCalculateWithAi -> handleCalculateWithAi()
             is OnboardingFlowEvent.OnProteinGoalChanged -> setState { copy(proteinGoal = event.value) }
             is OnboardingFlowEvent.OnCalorieGoalChanged -> setState { copy(calorieGoal = event.value) }
@@ -69,6 +75,7 @@ class OnboardingFlowViewModel(
         when (state.currentStep) {
             OnboardingStep.SIGN_UP -> handleSignUp(state)
             OnboardingStep.DAY_PREVIEW -> handleComplete(state)
+            OnboardingStep.PRO_OFFER -> return
             else -> advanceStep(state.currentStep)
         }
     }
@@ -85,6 +92,7 @@ class OnboardingFlowViewModel(
             OnboardingStep.SIGN_UP -> OnboardingStep.ACTIVITY_DAILY
             OnboardingStep.NUTRITION_GOALS -> return
             OnboardingStep.DAY_PREVIEW -> OnboardingStep.NUTRITION_GOALS
+            OnboardingStep.PRO_OFFER -> return
         }
         setState { copy(currentStep = previousStep) }
     }
@@ -100,6 +108,7 @@ class OnboardingFlowViewModel(
             OnboardingStep.SIGN_UP -> OnboardingStep.NUTRITION_GOALS
             OnboardingStep.NUTRITION_GOALS -> OnboardingStep.DAY_PREVIEW
             OnboardingStep.DAY_PREVIEW -> return
+            OnboardingStep.PRO_OFFER -> return
         }
         setState { copy(currentStep = nextStep) }
     }
@@ -185,7 +194,9 @@ class OnboardingFlowViewModel(
             )
 
             completeOnboarding(goals)
-                .onSuccess { emit(OnboardingFlowEffect.NavigateToHome) }
+                .onSuccess {
+                    setState { copy(isSaving = false, currentStep = OnboardingStep.PRO_OFFER) }
+                }
                 .onFailure { error ->
                     setState { copy(isSaving = false) }
                     emit(OnboardingFlowEffect.ShowError(error.message ?: "Erreur lors de la sauvegarde."))

@@ -1,6 +1,12 @@
 import SwiftUI
 import shared
 
+// MARK: - Trial banner state
+
+enum TrialBannerData: Equatable {
+    case expiringIn(daysRemaining: Int)
+}
+
 // MARK: - Swift-side data types
 
 struct DailySummaryData: Equatable {
@@ -50,15 +56,15 @@ enum TimelineItemData: Identifiable {
 
     var id: String {
         switch self {
-        case .mealContainer(let m): return "meal-\(m.id)"
-        case .orphanEntry(let e): return "entry-\(e.id)"
+        case .mealContainer(let meal): return "meal-\(meal.id)"
+        case .orphanEntry(let entry): return "entry-\(entry.id)"
         }
     }
 
     var createdAt: String {
         switch self {
-        case .mealContainer(let m): return m.createdAt
-        case .orphanEntry(let e): return e.createdAt
+        case .mealContainer(let meal): return meal.createdAt
+        case .orphanEntry(let entry): return entry.createdAt
         }
     }
 }
@@ -79,7 +85,8 @@ enum TodayState {
         summary: DailySummaryData,
         timeline: [TimelineItemData],
         waterEntries: [WaterEntryData],
-        activeDraft: ActiveDraftData?
+        activeDraft: ActiveDraftData?,
+        trialBanner: TrialBannerData?
     )
 }
 
@@ -92,6 +99,7 @@ final class TodayViewModelWrapper {
 
     var state: TodayState = .loading
     var errorMessage: String?
+    var showPaywall: Bool = false
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -129,6 +137,8 @@ final class TodayViewModelWrapper {
     private func handleEffect(_ effect: TodayEffect) {
         if let showError = effect as? TodayEffectShowError {
             errorMessage = showError.message
+        } else if effect is TodayEffectNavigateToPaywall {
+            showPaywall = true
         }
     }
 
@@ -166,12 +176,21 @@ final class TodayViewModelWrapper {
                 )
             }
 
+            let trialBanner: TrialBannerData? = {
+                guard let banner = ready.trialBanner else { return nil }
+                if let expiring = banner as? TrialBannerStateExpiringIn {
+                    return .expiringIn(daysRemaining: Int(expiring.daysRemaining))
+                }
+                return nil
+            }()
+
             return .ready(
                 dateLabel: ready.dateLabel,
                 summary: KMPMappers.dailySummary(ready.summary),
                 timeline: timeline,
                 waterEntries: ready.waterEntries.map(KMPMappers.waterEntry),
-                activeDraft: activeDraft
+                activeDraft: activeDraft,
+                trialBanner: trialBanner
             )
         }
         return .loading

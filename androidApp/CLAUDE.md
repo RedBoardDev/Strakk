@@ -27,5 +27,12 @@ src/main/kotlin/com/strakk/android/
 Two flavors: `prod` and `staging`. See `ENVIRONMENTS.md`.
 Build: `./gradlew :androidApp:assembleDebug`
 
+## Localization
+- English strings in `res/values/strings.xml`
+- French strings in `res/values-fr/strings.xml`
+- Use `stringResource(R.string.key)` in composables
+- **Never** write French directly in `.kt` files
+- Key naming: `snake_case`, prefixed by screen — `paywall_cta`, `checkin_empty_title`
+
 ## Lint
 `make lint-kotlin` (Detekt strict, zero tolerance). Runs in CI.

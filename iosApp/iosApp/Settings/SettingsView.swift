@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 import SwiftUI
 import shared
 
@@ -52,6 +53,17 @@ struct SettingsView: View {
             } message: {
                 Text("Are you sure you want to sign out?")
             }
+            .alert("Strakk Pro", isPresented: Binding(
+                get: { viewModel.toastMessage != nil },
+                set: { if !$0 { viewModel.toastMessage = nil } }
+            )) {
+                Button("OK") { viewModel.toastMessage = nil }
+            } message: {
+                Text(viewModel.toastMessage ?? "")
+            }
+            .fullScreenCover(isPresented: $viewModel.showPaywall) {
+                PaywallView(onDismiss: { viewModel.showPaywall = false })
+            }
     }
 
     // MARK: - Base view
@@ -105,6 +117,10 @@ struct SettingsView: View {
                 Spacer().frame(height: 24)
 
                 accountSection(email: data.email)
+
+                Spacer().frame(height: 24)
+
+                proSection(display: data.subscriptionDisplay)
 
                 Spacer().frame(height: 24)
 
@@ -279,6 +295,178 @@ struct SettingsView: View {
         .padding(.vertical, 14)
     }
 
+    // MARK: - Strakk Pro section
+
+    @ViewBuilder
+    private func proSection(display: SubscriptionDisplayData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("STRAKK PRO")
+                    .font(.strakkOverline)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .kerning(1.0)
+
+                Spacer()
+
+                if display != .free {
+                    Text("PRO")
+                        .font(.strakkCaptionBold)
+                        .foregroundStyle(Color.strakkPrimary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.strakkPrimary.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
+                }
+            }
+            .padding(.horizontal, 20)
+
+            switch display {
+            case .free:
+                proFreeCard
+            case .trial(let daysRemaining):
+                proTrialCard(daysRemaining: daysRemaining)
+            case .active(let planLabel, let expiresLabel):
+                proActiveCard(planLabel: planLabel, expiresLabel: expiresLabel)
+            case .paymentFailed:
+                proPaymentFailedCard
+            }
+        }
+    }
+
+    private var proFreeCard: some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            Text("L'IA tracke tes repas pour toi.")
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+            Text("Photo, texte, bilan hebdo.")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+
+            Button {
+                HapticEngine.light()
+                viewModel.onEvent(SettingsEventOnUpgradeTapped())
+            } label: {
+                Text("Passer à Pro")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: 12))
+            }
+
+            Button {
+                viewModel.onEvent(SettingsEventOnRestorePurchase())
+            } label: {
+                Text("Restaurer un achat")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkPrimary)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(16)
+        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+    }
+
+    private func proTrialCard(daysRemaining: Int) -> some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            Text("Essai gratuit")
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+            Text("Expire dans \(daysRemaining) jour\(daysRemaining > 1 ? "s" : "")")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkWarning)
+
+            Button {
+                viewModel.onEvent(SettingsEventOnManageSubscription())
+            } label: {
+                Text("Gérer l'abonnement")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .padding(16)
+        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+    }
+
+    private func proActiveCard(planLabel: String, expiresLabel: String) -> some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            HStack(spacing: StrakkSpacing.xs) {
+                Text(planLabel)
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                Circle()
+                    .fill(Color.strakkSuccess)
+                    .frame(width: 8, height: 8)
+                Text("Actif")
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkSuccess)
+            }
+
+            Text("Se renouvelle le \(expiresLabel)")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+
+            Button {
+                viewModel.onEvent(SettingsEventOnManageSubscription())
+            } label: {
+                Text("Gérer l'abonnement")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 12))
+            }
+
+            Button {
+                viewModel.onEvent(SettingsEventOnRestorePurchase())
+            } label: {
+                Text("Restaurer un achat")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkPrimary)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(16)
+        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+    }
+
+    private var proPaymentFailedCard: some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            Text("Problème de paiement")
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkError)
+            Text("Mets à jour ton moyen de paiement pour conserver l'accès Pro.")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+
+            Button {
+                viewModel.onEvent(SettingsEventOnManageSubscription())
+            } label: {
+                Text("Régler le problème")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color.strakkError, in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .padding(16)
+        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(Color.strakkError)
+                .frame(width: 3)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+    }
+
     // MARK: - Hevy section
 
     private var hevySection: some View {
@@ -402,18 +590,13 @@ struct SettingsView: View {
         didInitialize = true
     }
 
-    private enum FocusDirection { case previous, next }
-
     private func navigateFocus(direction: FocusDirection) {
         let order: [SettingsField] = [.protein, .calories, .water]
         guard let current = focusedField,
               let idx = order.firstIndex(of: current) else { return }
-        switch direction {
-        case .previous:
-            if idx > 0 { focusedField = order[idx - 1] }
-        case .next:
-            if idx < order.count - 1 { focusedField = order[idx + 1] }
-        }
+        if direction == .previous, idx > 0 { focusedField = order[idx - 1] }
+        if direction == .next, idx < order.count - 1 { focusedField = order[idx + 1] }
     }
-
 }
+
+private enum FocusDirection { case previous, next }

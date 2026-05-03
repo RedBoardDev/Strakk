@@ -1,6 +1,17 @@
 package com.strakk.shared.presentation.settings
 
 // =============================================================================
+// Subscription display
+// =============================================================================
+
+sealed interface SubscriptionDisplay {
+    data object Free : SubscriptionDisplay
+    data class Trial(val daysRemaining: Int) : SubscriptionDisplay
+    data class Active(val planLabel: String, val expiresLabel: String) : SubscriptionDisplay
+    data object PaymentFailed : SubscriptionDisplay
+}
+
+// =============================================================================
 // UiState
 // =============================================================================
 
@@ -29,6 +40,7 @@ sealed interface SettingsUiState {
         val waterGoal: String,
         /** Hevy API key as editable text (empty = not configured). */
         val hevyApiKey: String,
+        val subscriptionDisplay: SubscriptionDisplay = SubscriptionDisplay.Free,
     ) : SettingsUiState
 }
 
@@ -52,6 +64,10 @@ sealed interface SettingsEvent {
 
     /** User taps sign out. */
     data object OnSignOut : SettingsEvent
+
+    data object OnUpgradeTapped : SettingsEvent
+    data object OnManageSubscription : SettingsEvent
+    data object OnRestorePurchase : SettingsEvent
 }
 
 // =============================================================================
@@ -62,4 +78,6 @@ sealed interface SettingsEvent {
 sealed interface SettingsEffect {
     /** Display an error message (snackbar or inline). */
     data class ShowError(val message: String) : SettingsEffect
+    data object NavigateToPaywall : SettingsEffect
+    data class ShowToast(val message: String) : SettingsEffect
 }

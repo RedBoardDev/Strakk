@@ -24,5 +24,12 @@ Sources/Features/
 Two schemes: **Strakk** (prod) and **Strakk Dev** (staging) via `Config/Production.xcconfig` / `Config/Staging.xcconfig` (gitignored — see `ENVIRONMENTS.md`).
 Regenerate Xcode project: `cd iosApp && xcodegen generate`
 
+## Localization
+- Source language: **English** in Swift code — `Text("Start now")`
+- Xcode String Catalog: `Localizable.xcstrings` — auto-extracts English keys
+- French translations added in String Catalog under `fr` locale
+- **Never** write French directly in `.swift` files
+- Programmatic strings: `String(localized: "key")`
+
 ## Lint
 `make lint-swift` (local only, not in CI). Config: `iosApp/.swiftlint.yml`.

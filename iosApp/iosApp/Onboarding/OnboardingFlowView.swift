@@ -55,6 +55,8 @@ struct OnboardingFlowView: View {
             NutritionGoalsStepView(wrapper: wrapper)
         case .dayPreview:
             DayPreviewStepView(wrapper: wrapper)
+        case .proOffer:
+            ProOfferStepView(wrapper: wrapper)
         default:
             EmptyView()
         }

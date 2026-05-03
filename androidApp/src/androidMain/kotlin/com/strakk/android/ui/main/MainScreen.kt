@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -16,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -30,16 +33,24 @@ import com.strakk.android.ui.home.photo.PhotoHintScreen
 import com.strakk.android.ui.home.review.MealReviewRoute
 import com.strakk.android.ui.home.search.SearchFoodRoute
 import com.strakk.android.ui.home.text.TextEntryScreen
+import com.strakk.android.ui.paywall.FeatureGateSheet
+import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.android.ui.settings.SettingsRoute
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.android.ui.today.TodayRoute
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.UserTier
+import com.strakk.shared.domain.model.tier
+import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.presentation.meal.MealDraftEvent
 import com.strakk.shared.presentation.meal.MealDraftViewModel
 import com.strakk.shared.presentation.meal.QuickAddEvent
 import com.strakk.shared.presentation.meal.QuickAddViewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 // =============================================================================
@@ -164,6 +175,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
 // Home tab — routing based on back stack
 // =============================================================================
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTabContent(
     backStack: SnapshotStateList<HomeRoute>,
@@ -174,10 +187,40 @@ private fun HomeTabContent(
     // the Add flow back into either the active Draft or an orphan quick-add.
     val draftViewModel: MealDraftViewModel = koinViewModel()
     val quickAddViewModel: QuickAddViewModel = koinViewModel()
+    val subscriptionRepo: SubscriptionRepository = koinInject()
+
+    var gatedFeature by remember { mutableStateOf<Feature?>(null) }
+    var showPaywall by remember { mutableStateOf(false) }
+
+    gatedFeature?.let { feature ->
+        FeatureGateSheet(
+            metadata = FeatureRegistry.get(feature),
+            onDiscoverPro = {
+                showPaywall = true
+                gatedFeature = null
+            },
+            onDismiss = { gatedFeature = null },
+        )
+    }
+
+    if (showPaywall) {
+        PaywallRoute(
+            highlightedFeature = null,
+            onDismiss = { showPaywall = false },
+        )
+    }
 
     fun push(route: HomeRoute) { backStack.add(route) }
     fun pop() { if (backStack.size > 1) backStack.removeLastOrNull() }
     fun popToToday() { backStack.clear(); backStack.add(HomeRoute.Today) }
+
+    fun guardProFeature(feature: Feature, onGranted: () -> Unit) {
+        if (subscriptionRepo.cachedState.tier == UserTier.PRO) {
+            onGranted()
+        } else {
+            gatedFeature = feature
+        }
+    }
 
     fun dispatchEntry(inDraft: Boolean, entry: MealEntry) {
         if (inDraft) {
@@ -217,8 +260,12 @@ private fun HomeTabContent(
             onNavigateToReview = { push(HomeRoute.Review) },
             onNavigateToSearch = { inDraft -> push(HomeRoute.Search(inDraft)) },
             onNavigateToManual = { inDraft -> push(HomeRoute.Manual(inDraft)) },
-            onNavigateToPhoto = { inDraft -> push(HomeRoute.Photo(inDraft)) },
-            onNavigateToText = { inDraft -> push(HomeRoute.TextEntry(inDraft)) },
+            onNavigateToPhoto = { inDraft ->
+                guardProFeature(Feature.AI_PHOTO_ANALYSIS) { push(HomeRoute.Photo(inDraft)) }
+            },
+            onNavigateToText = { inDraft ->
+                guardProFeature(Feature.AI_TEXT_ANALYSIS) { push(HomeRoute.TextEntry(inDraft)) }
+            },
             viewModel = draftViewModel,
             modifier = modifier,
         )

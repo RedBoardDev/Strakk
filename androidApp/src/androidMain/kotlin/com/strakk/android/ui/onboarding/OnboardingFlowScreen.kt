@@ -36,6 +36,7 @@ import com.strakk.android.ui.onboarding.components.OnboardingProgressBar
 import com.strakk.android.ui.onboarding.goal.GoalStepContent
 import com.strakk.android.ui.onboarding.goals.NutritionGoalsContent
 import com.strakk.android.ui.onboarding.preview.DayPreviewContent
+import com.strakk.android.ui.onboarding.prooffer.ProOfferContent
 import com.strakk.android.ui.onboarding.signup.SignUpStepContent
 import com.strakk.android.ui.onboarding.weight.WeightStepContent
 import com.strakk.android.ui.onboarding.welcome.WelcomeContent
@@ -87,85 +88,18 @@ fun OnboardingFlowScreen(
                     .padding(horizontal = spacing.xl)
                     .padding(top = spacing.xxl, bottom = spacing.xl),
             ) { step ->
-                when (step) {
-                    OnboardingStep.WELCOME -> WelcomeContent(
-                        onContinue = { onEvent(OnboardingFlowEvent.OnContinue) },
-                        onNavigateToLogin = onNavigateToLogin,
-                    )
-
-                    OnboardingStep.WEIGHT -> WeightStepContent(
-                        weightKg = uiState.weightKg,
-                        onWeightChanged = { onEvent(OnboardingFlowEvent.OnWeightChanged(it)) },
-                    )
-
-                    OnboardingStep.BIO -> BioStepContent(
-                        heightCm = uiState.heightCm,
-                        heightSelected = uiState.heightSelected,
-                        birthDate = uiState.birthDate,
-                        biologicalSex = uiState.biologicalSex,
-                        onHeightChanged = { onEvent(OnboardingFlowEvent.OnHeightChanged(it)) },
-                        onBirthDateChanged = { onEvent(OnboardingFlowEvent.OnBirthDateChanged(it)) },
-                        onBiologicalSexChanged = { onEvent(OnboardingFlowEvent.OnBiologicalSexChanged(it)) },
-                    )
-
-                    OnboardingStep.GOAL -> GoalStepContent(
-                        fitnessGoal = uiState.fitnessGoal,
-                        onFitnessGoalChanged = { onEvent(OnboardingFlowEvent.OnFitnessGoalChanged(it)) },
-                    )
-
-                    OnboardingStep.ACTIVITY_TRAINING -> ActivityTrainingContent(
-                        trainingFrequency = uiState.trainingFrequency,
-                        trainingTypes = uiState.trainingTypes,
-                        onTrainingFrequencyChanged = { onEvent(OnboardingFlowEvent.OnTrainingFrequencyChanged(it)) },
-                        onTrainingTypeToggled = { onEvent(OnboardingFlowEvent.OnTrainingTypeToggled(it)) },
-                    )
-
-                    OnboardingStep.ACTIVITY_DAILY -> ActivityDailyContent(
-                        trainingIntensity = uiState.trainingIntensity,
-                        dailyActivityLevel = uiState.dailyActivityLevel,
-                        onTrainingIntensityChanged = { onEvent(OnboardingFlowEvent.OnTrainingIntensityChanged(it)) },
-                        onDailyActivityChanged = { onEvent(OnboardingFlowEvent.OnDailyActivityChanged(it)) },
-                    )
-
-                    OnboardingStep.SIGN_UP -> SignUpStepContent(
-                        email = uiState.email,
-                        password = uiState.password,
-                        isLoading = uiState.isSigningUp,
-                        error = uiState.signUpError,
-                        onEmailChanged = { onEvent(OnboardingFlowEvent.OnEmailChanged(it)) },
-                        onPasswordChanged = { onEvent(OnboardingFlowEvent.OnPasswordChanged(it)) },
-                        onSignUp = { onEvent(OnboardingFlowEvent.OnContinue) },
-                        onNavigateToLogin = onNavigateToLogin,
-                    )
-
-                    OnboardingStep.NUTRITION_GOALS -> NutritionGoalsContent(
-                        proteinGoal = uiState.proteinGoal,
-                        calorieGoal = uiState.calorieGoal,
-                        fatGoal = uiState.fatGoal,
-                        carbGoal = uiState.carbGoal,
-                        waterGoal = uiState.waterGoal,
-                        aiState = uiState.aiState,
-                        onCalculateWithAi = { onEvent(OnboardingFlowEvent.OnCalculateWithAi) },
-                        onProteinGoalChanged = { onEvent(OnboardingFlowEvent.OnProteinGoalChanged(it)) },
-                        onCalorieGoalChanged = { onEvent(OnboardingFlowEvent.OnCalorieGoalChanged(it)) },
-                        onFatGoalChanged = { onEvent(OnboardingFlowEvent.OnFatGoalChanged(it)) },
-                        onCarbGoalChanged = { onEvent(OnboardingFlowEvent.OnCarbGoalChanged(it)) },
-                        onWaterGoalChanged = { onEvent(OnboardingFlowEvent.OnWaterGoalChanged(it)) },
-                    )
-
-                    OnboardingStep.DAY_PREVIEW -> DayPreviewContent(
-                        proteinGoal = uiState.proteinGoal,
-                        calorieGoal = uiState.calorieGoal,
-                        fatGoal = uiState.fatGoal,
-                        carbGoal = uiState.carbGoal,
-                        waterGoal = uiState.waterGoal,
-                    )
-                }
+                OnboardingStepContent(
+                    step = step,
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    onNavigateToLogin = onNavigateToLogin,
+                )
             }
 
             // Bottom action bar — hidden for WELCOME (it has its own CTA) and SIGN_UP
             val showBottomBar = uiState.currentStep != OnboardingStep.WELCOME &&
-                uiState.currentStep != OnboardingStep.SIGN_UP
+                uiState.currentStep != OnboardingStep.SIGN_UP &&
+                uiState.currentStep != OnboardingStep.PRO_OFFER
             if (showBottomBar) {
                 BottomActionBar(
                     currentStep = uiState.currentStep,
@@ -176,6 +110,85 @@ fun OnboardingFlowScreen(
                 )
             }
         }
+    }
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Composable
+private fun OnboardingStepContent(
+    step: OnboardingStep,
+    uiState: OnboardingFlowUiState,
+    onEvent: (OnboardingFlowEvent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+) {
+    when (step) {
+        OnboardingStep.WELCOME -> WelcomeContent(
+            onContinue = { onEvent(OnboardingFlowEvent.OnContinue) },
+            onNavigateToLogin = onNavigateToLogin,
+        )
+        OnboardingStep.WEIGHT -> WeightStepContent(
+            weightKg = uiState.weightKg,
+            onWeightChanged = { onEvent(OnboardingFlowEvent.OnWeightChanged(it)) },
+        )
+        OnboardingStep.BIO -> BioStepContent(
+            heightCm = uiState.heightCm,
+            heightSelected = uiState.heightSelected,
+            birthDate = uiState.birthDate,
+            biologicalSex = uiState.biologicalSex,
+            onHeightChanged = { onEvent(OnboardingFlowEvent.OnHeightChanged(it)) },
+            onBirthDateChanged = { onEvent(OnboardingFlowEvent.OnBirthDateChanged(it)) },
+            onBiologicalSexChanged = { onEvent(OnboardingFlowEvent.OnBiologicalSexChanged(it)) },
+        )
+        OnboardingStep.GOAL -> GoalStepContent(
+            fitnessGoal = uiState.fitnessGoal,
+            onFitnessGoalChanged = { onEvent(OnboardingFlowEvent.OnFitnessGoalChanged(it)) },
+        )
+        OnboardingStep.ACTIVITY_TRAINING -> ActivityTrainingContent(
+            trainingFrequency = uiState.trainingFrequency,
+            trainingTypes = uiState.trainingTypes,
+            onTrainingFrequencyChanged = { onEvent(OnboardingFlowEvent.OnTrainingFrequencyChanged(it)) },
+            onTrainingTypeToggled = { onEvent(OnboardingFlowEvent.OnTrainingTypeToggled(it)) },
+        )
+        OnboardingStep.ACTIVITY_DAILY -> ActivityDailyContent(
+            trainingIntensity = uiState.trainingIntensity,
+            dailyActivityLevel = uiState.dailyActivityLevel,
+            onTrainingIntensityChanged = { onEvent(OnboardingFlowEvent.OnTrainingIntensityChanged(it)) },
+            onDailyActivityChanged = { onEvent(OnboardingFlowEvent.OnDailyActivityChanged(it)) },
+        )
+        OnboardingStep.SIGN_UP -> SignUpStepContent(
+            email = uiState.email,
+            password = uiState.password,
+            isLoading = uiState.isSigningUp,
+            error = uiState.signUpError,
+            onEmailChanged = { onEvent(OnboardingFlowEvent.OnEmailChanged(it)) },
+            onPasswordChanged = { onEvent(OnboardingFlowEvent.OnPasswordChanged(it)) },
+            onSignUp = { onEvent(OnboardingFlowEvent.OnContinue) },
+            onNavigateToLogin = onNavigateToLogin,
+        )
+        OnboardingStep.NUTRITION_GOALS -> NutritionGoalsContent(
+            proteinGoal = uiState.proteinGoal,
+            calorieGoal = uiState.calorieGoal,
+            fatGoal = uiState.fatGoal,
+            carbGoal = uiState.carbGoal,
+            waterGoal = uiState.waterGoal,
+            aiState = uiState.aiState,
+            onCalculateWithAi = { onEvent(OnboardingFlowEvent.OnCalculateWithAi) },
+            onProteinGoalChanged = { onEvent(OnboardingFlowEvent.OnProteinGoalChanged(it)) },
+            onCalorieGoalChanged = { onEvent(OnboardingFlowEvent.OnCalorieGoalChanged(it)) },
+            onFatGoalChanged = { onEvent(OnboardingFlowEvent.OnFatGoalChanged(it)) },
+            onCarbGoalChanged = { onEvent(OnboardingFlowEvent.OnCarbGoalChanged(it)) },
+            onWaterGoalChanged = { onEvent(OnboardingFlowEvent.OnWaterGoalChanged(it)) },
+        )
+        OnboardingStep.DAY_PREVIEW -> DayPreviewContent(
+            proteinGoal = uiState.proteinGoal,
+            calorieGoal = uiState.calorieGoal,
+            fatGoal = uiState.fatGoal,
+            carbGoal = uiState.carbGoal,
+            waterGoal = uiState.waterGoal,
+        )
+        OnboardingStep.PRO_OFFER -> ProOfferContent(
+            onStartFreeTrial = { onEvent(OnboardingFlowEvent.OnStartFreeTrial) },
+        )
     }
 }
 

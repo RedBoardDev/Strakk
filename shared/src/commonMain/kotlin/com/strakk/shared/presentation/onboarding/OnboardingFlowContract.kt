@@ -18,6 +18,7 @@ enum class OnboardingStep {
     SIGN_UP,
     NUTRITION_GOALS,
     DAY_PREVIEW,
+    PRO_OFFER,
 }
 
 enum class AiCalculationState {
@@ -77,7 +78,9 @@ data class OnboardingFlowUiState(
             OnboardingStep.ACTIVITY_DAILY -> 0.8f
             OnboardingStep.SIGN_UP -> 1.0f
             OnboardingStep.NUTRITION_GOALS,
-            OnboardingStep.DAY_PREVIEW -> 1.0f
+            OnboardingStep.DAY_PREVIEW,
+            OnboardingStep.PRO_OFFER,
+            -> 1.0f
         }
 
     val showProgressBar: Boolean
@@ -86,7 +89,8 @@ data class OnboardingFlowUiState(
     val showBackButton: Boolean
         get() = currentStep != OnboardingStep.WELCOME &&
             currentStep != OnboardingStep.NUTRITION_GOALS &&
-            currentStep != OnboardingStep.DAY_PREVIEW
+            currentStep != OnboardingStep.DAY_PREVIEW &&
+            currentStep != OnboardingStep.PRO_OFFER
 }
 
 sealed interface OnboardingFlowEvent {
@@ -117,6 +121,10 @@ sealed interface OnboardingFlowEvent {
     // Step 5: Sign Up
     data class OnEmailChanged(val email: String) : OnboardingFlowEvent
     data class OnPasswordChanged(val password: String) : OnboardingFlowEvent
+
+    // Step 7: Pro Offer
+    data object OnSkipProOffer : OnboardingFlowEvent
+    data object OnStartFreeTrial : OnboardingFlowEvent
 
     // Step 6: Nutrition Goals
     data object OnCalculateWithAi : OnboardingFlowEvent

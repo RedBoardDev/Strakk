@@ -7,6 +7,7 @@ private struct AddTile: Identifiable {
     let id: String
     let icon: String
     let label: String
+    var isPro: Bool = false
 }
 
 // MARK: - AddPickerSheet
@@ -15,6 +16,7 @@ struct AddPickerSheet: View {
     let isDraftMode: Bool
     let draftViewModel: MealDraftViewModelWrapper
     let onDismiss: () -> Void
+    let onFeatureGated: (Feature) -> Void
     let logDate: String?
 
     @State private var quickAddViewModel: QuickAddViewModelWrapper
@@ -27,11 +29,13 @@ struct AddPickerSheet: View {
         isDraftMode: Bool,
         draftViewModel: MealDraftViewModelWrapper,
         onDismiss: @escaping () -> Void,
+        onFeatureGated: @escaping (Feature) -> Void = { _ in },
         logDate: String? = nil
     ) {
         self.isDraftMode = isDraftMode
         self.draftViewModel = draftViewModel
         self.onDismiss = onDismiss
+        self.onFeatureGated = onFeatureGated
         self.logDate = logDate
         self._quickAddViewModel = State(initialValue: QuickAddViewModelWrapper(logDate: logDate))
     }
@@ -41,10 +45,10 @@ struct AddPickerSheet: View {
     }
 
     private let tiles: [AddTile] = [
-        AddTile(id: "search",  icon: "magnifyingglass",     label: "Search"),
-        AddTile(id: "manual",  icon: "pencil",              label: "Manual"),
-        AddTile(id: "text",    icon: "text.quote",          label: "Free text"),
-        AddTile(id: "photo",   icon: "camera.fill",         label: "Photo"),
+        AddTile(id: "search", icon: "magnifyingglass", label: "Search"),
+        AddTile(id: "manual", icon: "pencil", label: "Manual"),
+        AddTile(id: "text", icon: "text.quote", label: "Free text", isPro: true),
+        AddTile(id: "photo", icon: "camera.fill", label: "Photo", isPro: true)
     ]
 
     var body: some View {
@@ -53,11 +57,11 @@ struct AddPickerSheet: View {
                 Color.strakkBackground.ignoresSafeArea()
 
                 VStack(spacing: 24) {
-                    // Grid 3 columns (5 tiles → 3+2)
+                    // Grid 3 columns (5 tiles -> 3+2)
                     let columns = [
                         GridItem(.flexible(), spacing: 12),
                         GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12),
+                        GridItem(.flexible(), spacing: 12)
                     ]
 
                     LazyVGrid(columns: columns, spacing: 12) {
@@ -162,8 +166,8 @@ struct AddPickerSheet: View {
             switch tile.id {
             case "search":  showSearch = true
             case "manual":  showManual = true
-            case "text":    showText = true
-            case "photo":   showPhoto = true
+            case "text":    guardFeature(.aiTextAnalysis) { showText = true }
+            case "photo":   guardFeature(.aiPhotoAnalysis) { showPhoto = true }
             default: break
             }
         } label: {
@@ -180,9 +184,26 @@ struct AddPickerSheet: View {
             .frame(height: 88)
             .background(Color.strakkSurface1)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(alignment: .topTrailing) {
+                if tile.isPro {
+                    ProBadge()
+                        .padding(6)
+                }
+            }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(tile.label)
+        .accessibilityLabel(tile.label + (tile.isPro ? ", Pro" : ""))
+    }
+
+    // MARK: - Feature guard
+
+    private func guardFeature(_ feature: Feature, onGranted: () -> Void) {
+        if KoinBridge.shared.isProUser() {
+            onGranted()
+        } else {
+            onFeatureGated(feature)
+            onDismiss()
+        }
     }
 
     // MARK: - Quick-add dispatchers

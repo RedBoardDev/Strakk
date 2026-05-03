@@ -172,4 +172,76 @@
     <string name="tab_today">Aujourd\'hui</string>
     <string name="tab_calendar">Calendrier</string>
     <string name="tab_settings">Réglages</string>
+
+    <!-- Paywall -->
+    <string name="paywall_label">STRAKK PRO</string>
+    <string name="paywall_headline">L\'IA tracke tes repas pour toi.</string>
+    <string name="paywall_subheadline">Photographie ton assiette ou décris ton repas en une phrase. Strakk Pro fait le reste.</string>
+    <string name="paywall_plan_monthly">Mensuel</string>
+    <string name="paywall_plan_annual">Annuel</string>
+    <string name="paywall_plan_popular">POPULAIRE</string>
+    <string name="paywall_price_annual">19,99 €/an</string>
+    <string name="paywall_price_annual_monthly">soit 1,67 €/mois · 2 mois offerts</string>
+    <string name="paywall_price_monthly">1,99 €/mois</string>
+    <string name="paywall_price_monthly_detail">Sans engagement</string>
+    <string name="paywall_cta">Essayer 7 jours gratuit</string>
+    <string name="paywall_footer_cancel">Annule à tout moment · Aucun engagement</string>
+    <string name="paywall_footer_secure">Paiement sécurisé via Play Store</string>
+    <string name="paywall_restore">Restaurer un achat</string>
+    <string name="paywall_coming_soon">Bientôt disponible</string>
+
+    <!-- Feature Gate -->
+    <string name="feature_gate_suffix">est dans Strakk Pro</string>
+    <string name="feature_gate_cta">Débloquer avec Pro</string>
+    <string name="feature_gate_later">Plus tard</string>
+
+    <!-- Feature Metadata -->
+    <string name="feature_ai_photo_title">Analyse photo IA</string>
+    <string name="feature_ai_photo_description">Prends une photo de ton repas et laisse l\'IA estimer les macros automatiquement.</string>
+    <string name="feature_ai_text_title">Analyse texte IA</string>
+    <string name="feature_ai_text_description">Décris ton repas en une phrase et obtiens des estimations de macros instantanées.</string>
+    <string name="feature_ai_summary_title">Bilan hebdo IA</string>
+    <string name="feature_ai_summary_description">Reçois une analyse personnalisée de ta nutrition et de tes progrès chaque semaine.</string>
+    <string name="feature_health_sync_title">Sync Santé</string>
+    <string name="feature_health_sync_description">Synchronise tes données nutritionnelles avec Google Fit automatiquement.</string>
+    <string name="feature_unlimited_history_title">Historique illimité</string>
+    <string name="feature_unlimited_history_description">Accède à tout ton historique de repas sans limite de durée.</string>
+    <string name="feature_photo_comparison_title">Comparaison photos</string>
+    <string name="feature_photo_comparison_description">Compare tes photos de progression côte à côte au fil du temps.</string>
+    <string name="feature_hevy_export_title">Export Hevy</string>
+    <string name="feature_hevy_export_description">Exporte tes données d\'entraînement directement vers l\'application Hevy.</string>
+
+    <!-- Trial Banner -->
+    <string name="trial_banner_expires_days">Ton essai Pro expire dans %d jour(s)</string>
+    <string name="trial_banner_expires_tomorrow">Ton essai Pro expire demain</string>
+
+    <!-- Trial Expired Modal -->
+    <string name="trial_expired_title">Ton essai se termine aujourd\'hui</string>
+    <string name="trial_expired_body">Continue avec Strakk Pro pour garder l\'IA, la sync Santé et l\'historique illimité.</string>
+    <string name="trial_expired_price">19,99 €/an · 1,67 €/mois</string>
+    <string name="trial_expired_cta">Découvrir les offres</string>
+    <string name="trial_expired_free">Continuer en gratuit</string>
+
+    <!-- Settings Subscription -->
+    <string name="settings_section_pro">STRAKK PRO</string>
+    <string name="settings_pro_free_title">L\'IA tracke tes repas pour toi.</string>
+    <string name="settings_pro_free_subtitle">Photo, texte, bilan hebdo.</string>
+    <string name="settings_pro_upgrade">Passer à Pro</string>
+    <string name="settings_pro_trial_title">Essai gratuit</string>
+    <string name="settings_pro_trial_expires">Expire dans %d jour(s)</string>
+    <string name="settings_pro_trial_billing_note">Ton abonnement débute le %s. Annule avant pour ne pas être facturé.</string>
+    <string name="settings_pro_active_label">%s · Actif</string>
+    <string name="settings_pro_active_renews">Se renouvelle le %s</string>
+    <string name="settings_pro_manage">Gérer l\'abonnement</string>
+    <string name="settings_pro_payment_failed_title">Problème de paiement</string>
+    <string name="settings_pro_payment_failed_body">Mets à jour ton moyen de paiement pour conserver l\'accès Pro.</string>
+    <string name="settings_pro_payment_failed_cta">Régler le problème</string>
+    <string name="settings_pro_badge">PRO</string>
+
+    <!-- Onboarding Pro Offer -->
+    <string name="onboarding_pro_before">Bonne nouvelle !</string>
+    <string name="onboarding_pro_headline">Ton essai Pro de 7 jours est activé !</string>
+    <string name="onboarding_pro_cta">C\'est parti !</string>
+    <string name="onboarding_pro_later">Plus tard</string>
+    <string name="onboarding_pro_footer">Profite de toutes les fonctionnalités Pro pendant 7 jours.</string>
 </resources>

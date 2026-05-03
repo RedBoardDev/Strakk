@@ -37,6 +37,9 @@ struct TodayView: View {
     // Edit entry sheet
     @State var editingEntry: MealEntryData?
 
+    // Feature gating (fed by AddPickerSheet.onFeatureGated + CheckIn effect)
+    @State var gatedFeature: Feature?
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
@@ -47,13 +50,21 @@ struct TodayView: View {
                     ProgressView()
                         .tint(Color.strakkPrimary)
 
-                case .ready(let dateLabel, let summary, let timeline, let waterEntries, let activeDraft):
+                case .ready(
+                    let dateLabel,
+                    let summary,
+                    let timeline,
+                    let waterEntries,
+                    let activeDraft,
+                    let trialBanner
+                ):
                     mainContent(
                         dateLabel: dateLabel,
                         summary: summary,
                         timeline: timeline,
                         waterEntries: waterEntries,
-                        activeDraft: activeDraft
+                        activeDraft: activeDraft,
+                        trialBanner: trialBanner
                     )
                     .safeAreaInset(edge: .bottom) {
                         if let draft = activeDraft {
@@ -74,7 +85,8 @@ struct TodayView: View {
                     AddPickerSheet(
                         isDraftMode: isDraft,
                         draftViewModel: draftViewModel,
-                        onDismiss: { navigationPath.removeLast() }
+                        onDismiss: { navigationPath.removeLast() },
+                        onFeatureGated: { gatedFeature = $0 }
                     )
                 }
             }
@@ -83,7 +95,8 @@ struct TodayView: View {
             AddPickerSheet(
                 isDraftMode: mode.isDraft,
                 draftViewModel: draftViewModel,
-                onDismiss: { addPickerMode = nil }
+                onDismiss: { addPickerMode = nil },
+                onFeatureGated: { gatedFeature = $0 }
             )
         }
         .sheet(item: $selectedMeal) { meal in
@@ -146,6 +159,10 @@ struct TodayView: View {
         .fullScreenCover(isPresented: $showHevyExport) {
             HevyExportFlow(onDismiss: { showHevyExport = false })
         }
+        .fullScreenCover(isPresented: $viewModel.showPaywall) {
+            PaywallView(onDismiss: { viewModel.showPaywall = false })
+        }
+        .featureGate($gatedFeature)
         .errorAlert(message: $viewModel.errorMessage)
         .onChange(of: draftViewModel.committedMeal) { _, meal in
             if meal != nil {
@@ -165,12 +182,14 @@ struct TodayView: View {
     // MARK: - Main content
 
     @ViewBuilder
+    // swiftlint:disable:next function_body_length
     private func mainContent(
         dateLabel: String,
         summary: DailySummaryData,
         timeline: [TimelineItemData],
         waterEntries: [WaterEntryData],
-        activeDraft: ActiveDraftData?
+        activeDraft: ActiveDraftData?,
+        trialBanner: TrialBannerData?
     ) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -185,7 +204,11 @@ struct TodayView: View {
                         .foregroundStyle(Color.strakkTextSecondary)
 
                     Button {
-                        showHevyExport = true
+                        if KoinBridge.shared.isProUser() {
+                            showHevyExport = true
+                        } else {
+                            gatedFeature = .hevyExport
+                        }
                     } label: {
                         Image(systemName: "dumbbell.fill")
                             .font(.system(size: 18))
@@ -196,6 +219,13 @@ struct TodayView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+
+                // 1b. Trial banner (between header and macro grid)
+                if let banner = trialBanner {
+                    trialBannerView(banner: banner)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                }
 
                 // 2. 4 macro cards
                 ProgressSection(summary: summary)
@@ -233,6 +263,38 @@ struct TodayView: View {
                 Spacer().frame(height: 120)
             }
         }
+    }
+
+    // MARK: - Trial banner
+
+    @ViewBuilder
+    private func trialBannerView(banner: TrialBannerData) -> some View {
+        let days: Int = {
+            if case .expiringIn(let remaining) = banner { return remaining }
+            return 0
+        }()
+
+        Button {
+            viewModel.onEvent(TodayEventOnTrialBannerTapped())
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "clock.fill")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.strakkWarning)
+                Text("Ton essai Pro expire dans \(days) jour\(days > 1 ? "s" : "")")
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Color.strakkTextSecondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Ton essai Pro expire dans \(days) jours. Appuie pour découvrir les offres.")
     }
 
     // timeline rows, action bars, empty state — TodayView+Timeline.swift / TodayView+ActionBars.swift

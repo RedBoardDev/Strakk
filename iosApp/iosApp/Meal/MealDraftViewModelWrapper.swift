@@ -57,6 +57,7 @@ final class MealDraftViewModelWrapper {
     var navigateToReview: Bool = false
     var committedMeal: MealData?
     var errorMessage: String?
+    var gatedFeature: Feature?
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -106,6 +107,12 @@ final class MealDraftViewModelWrapper {
             )
         } else if let showError = effect as? MealDraftEffectShowError {
             errorMessage = showError.message
+        } else if let gated = effect as? MealDraftEffectFeatureGated {
+            if let proRequired = gated.access as? FeatureAccessProRequired {
+                gatedFeature = proRequired.feature
+            } else if let quotaExhausted = gated.access as? FeatureAccessQuotaExhausted {
+                gatedFeature = quotaExhausted.feature
+            }
         }
     }
 

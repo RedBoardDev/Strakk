@@ -13,6 +13,7 @@ struct CalendarView: View {
     @State private var viewModel = CalendarViewModelWrapper()
     @Environment(MealDraftViewModelWrapper.self) private var draftViewModel
     @State private var calendarAddDate: CalendarAddDate?
+    @State private var gatedFeature: Feature?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
     private let weekdaySymbols = ["M", "T", "W", "T", "F", "S", "S"]
@@ -27,11 +28,13 @@ struct CalendarView: View {
             .navigationBarTitleDisplayMode(.large)
         }
         .errorAlert(message: $viewModel.errorMessage)
+        .featureGate($gatedFeature)
         .sheet(item: $calendarAddDate) { addDate in
             AddPickerSheet(
                 isDraftMode: false,
                 draftViewModel: draftViewModel,
                 onDismiss: { calendarAddDate = nil },
+                onFeatureGated: { gatedFeature = $0 },
                 logDate: addDate.id
             )
         }
@@ -125,7 +128,9 @@ struct CalendarView: View {
     private func monthNavigator(year: Int, month: Int) -> some View {
         HStack {
             Button {
-                viewModel.onEvent(CalendarEventSelectMonth(year: Int32(previousYear(year: year, month: month)), month: Int32(previousMonth(month: month))))
+                let prevYear = Int32(previousYear(year: year, month: month))
+                let prevMonth = Int32(previousMonth(month: month))
+                viewModel.onEvent(CalendarEventSelectMonth(year: prevYear, month: prevMonth))
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
@@ -143,7 +148,9 @@ struct CalendarView: View {
             Spacer()
 
             Button {
-                viewModel.onEvent(CalendarEventSelectMonth(year: Int32(nextYear(year: year, month: month)), month: Int32(nextMonth(month: month))))
+                let nxtYear = Int32(nextYear(year: year, month: month))
+                let nxtMonth = Int32(nextMonth(month: month))
+                viewModel.onEvent(CalendarEventSelectMonth(year: nxtYear, month: nxtMonth))
             } label: {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 16, weight: .semibold))
@@ -265,7 +272,7 @@ struct CalendarView: View {
         // Convert Sunday=1 to Monday=1 offset
         let offset = (firstWeekday + 5) % 7
 
-        let range = Calendar.current.range(of: .day, in: .month, for: firstDate)!
+        guard let range = Calendar.current.range(of: .day, in: .month, for: firstDate) else { return [] }
         let daysInMonth = range.count
 
         var cells: [Int?] = Array(repeating: nil, count: offset)

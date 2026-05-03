@@ -3,8 +3,8 @@ package com.strakk.shared.presentation.meal
 import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.EntrySource
+import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.Meal
-
 // =============================================================================
 // UiState
 // =============================================================================
@@ -105,4 +105,5 @@ sealed interface MealDraftEffect {
     data class Committed(val meal: Meal) : MealDraftEffect
     data object Discarded : MealDraftEffect
     data class ShowError(val message: String) : MealDraftEffect
+    data class FeatureGated(val access: FeatureAccess) : MealDraftEffect
 }

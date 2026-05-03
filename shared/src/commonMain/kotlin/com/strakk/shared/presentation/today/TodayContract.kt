@@ -23,6 +23,10 @@ sealed interface TimelineItem {
     }
 }
 
+sealed interface TrialBannerState {
+    data class ExpiringIn(val daysRemaining: Int) : TrialBannerState
+}
+
 /** Today screen state. */
 sealed interface TodayUiState {
     data object Loading : TodayUiState
@@ -42,6 +46,7 @@ sealed interface TodayUiState {
         val timeline: List<TimelineItem>,
         val waterEntries: List<WaterEntry>,
         val activeDraft: ActiveMealDraft?,
+        val trialBanner: TrialBannerState? = null,
     ) : TodayUiState
 }
 
@@ -54,6 +59,8 @@ sealed interface TodayEvent {
     data class OnDeleteOrphanEntry(val id: String) : TodayEvent
     /** Delete a whole meal container with all its entries. */
     data class OnDeleteMeal(val mealId: String) : TodayEvent
+
+    data object OnTrialBannerTapped : TodayEvent
 
     data class OnUpdateEntry(
         val id: String,
@@ -72,4 +79,5 @@ sealed interface TodayEvent {
 
 sealed interface TodayEffect {
     data class ShowError(val message: String) : TodayEffect
+    data object NavigateToPaywall : TodayEffect
 }

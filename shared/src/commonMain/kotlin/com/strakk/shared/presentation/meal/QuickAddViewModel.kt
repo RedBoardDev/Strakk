@@ -2,7 +2,10 @@ package com.strakk.shared.presentation.meal
 
 import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.common.Logger
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.domain.usecase.QuickAddKnownEntryUseCase
@@ -15,6 +18,7 @@ class QuickAddViewModel(
     private val quickAddKnownEntry: QuickAddKnownEntryUseCase,
     private val quickAddFromText: QuickAddFromTextUseCase,
     private val quickAddFromPhoto: QuickAddFromPhotoUseCase,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
     private val logger: Logger,
 ) : MviViewModel<QuickAddUiState, QuickAddEvent, QuickAddEffect>(QuickAddUiState()) {
 
@@ -41,11 +45,23 @@ class QuickAddViewModel(
     }
 
     private fun addFromText(description: String, logDate: String?) {
-        launchQuickAdd { quickAddFromText(description, logDate) }
+        viewModelScope.launch {
+            when (val access = checkFeatureAccess(Feature.AI_TEXT_ANALYSIS)) {
+                is FeatureAccess.Granted -> launchQuickAdd { quickAddFromText(description, logDate) }
+                else -> emit(QuickAddEffect.FeatureGated(access))
+            }
+        }
     }
 
     private fun addFromPhoto(imageBase64: String, hint: String?, logDate: String?) {
-        launchQuickAdd { quickAddFromPhoto(imageBase64 = imageBase64, hint = hint, logDate = logDate) }
+        viewModelScope.launch {
+            when (val access = checkFeatureAccess(Feature.AI_PHOTO_ANALYSIS)) {
+                is FeatureAccess.Granted -> launchQuickAdd {
+                    quickAddFromPhoto(imageBase64 = imageBase64, hint = hint, logDate = logDate)
+                }
+                else -> emit(QuickAddEffect.FeatureGated(access))
+            }
+        }
     }
 
     private fun launchQuickAdd(block: suspend () -> Result<MealEntry>) {
