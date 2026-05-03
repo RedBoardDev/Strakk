@@ -1,6 +1,7 @@
 package com.strakk.shared.fixtures
 
 import com.strakk.shared.domain.model.AuthStatus
+import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.OnboardingData
 import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.repository.AuthRepository
@@ -9,9 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/**
- * Reusable test data shared across all test suites.
- */
 object TestFixtures {
 
     const val VALID_EMAIL = "user@example.com"
@@ -25,22 +23,42 @@ object TestFixtures {
     const val SHORT_PASSWORD = "abc"
 
     val defaultOnboardingData = OnboardingData(
+        weightKg = 75.0,
+        heightCm = null,
+        birthDate = null,
+        biologicalSex = null,
+        fitnessGoal = null,
+        trainingFrequency = null,
+        trainingTypes = emptySet(),
+        trainingIntensity = null,
+        dailyActivityLevel = null,
         proteinGoal = 150,
         calorieGoal = 2000,
+        fatGoal = null,
+        carbGoal = null,
         waterGoal = 2500,
     )
 
     val defaultUserProfile = UserProfile(
         id = "user-id-123",
+        weightKg = null,
+        heightCm = null,
+        birthDate = null,
+        biologicalSex = null,
+        fitnessGoal = null,
+        trainingFrequency = null,
+        trainingTypes = emptySet(),
+        trainingIntensity = null,
+        dailyActivityLevel = null,
         proteinGoal = 150,
         calorieGoal = 2000,
+        fatGoal = null,
+        carbGoal = null,
         waterGoal = 2500,
+        onboardingCompleted = false,
     )
 }
 
-/**
- * Fake AuthRepository for testing — avoids Mokkery version issues.
- */
 class FakeAuthRepository : AuthRepository {
     val authStatusFlow = MutableSharedFlow<AuthStatus>(replay = 1)
     var signInCalls = mutableListOf<Pair<String, String>>()
@@ -67,14 +85,18 @@ class FakeAuthRepository : AuthRepository {
     }
 
     override suspend fun getCurrentUserEmail(): String? = currentEmail
+
+    override suspend fun resetPassword(email: String) {
+        shouldThrow?.let { throw it }
+    }
 }
 
-/**
- * Fake ProfileRepository for testing.
- */
 class FakeProfileRepository : ProfileRepository {
     var profileExistsResult: Boolean = false
-    var getProfileResult: UserProfile? = TestFixtures.defaultUserProfile
+    val profileFlow = MutableStateFlow<UserProfile?>(TestFixtures.defaultUserProfile)
+    var getProfileResult: UserProfile?
+        get() = profileFlow.value
+        set(value) { profileFlow.value = value }
     var createProfileResult: UserProfile = TestFixtures.defaultUserProfile
     var updateProfileResult: UserProfile = TestFixtures.defaultUserProfile
     var shouldThrow: Throwable? = null
@@ -103,9 +125,7 @@ class FakeProfileRepository : ProfileRepository {
         waterGoal: Int?,
     ): UserProfile {
         shouldThrow?.let { throw it }
-        updateProfileCalls.add(
-            listOf(proteinGoal, calorieGoal, waterGoal)
-        )
+        updateProfileCalls.add(listOf(proteinGoal, calorieGoal, waterGoal))
         return updateProfileResult
     }
 
@@ -118,7 +138,10 @@ class FakeProfileRepository : ProfileRepository {
         shouldThrow?.let { throw it }
     }
 
-    private val profileFlow = MutableStateFlow(getProfileResult)
+    override suspend fun completeOnboarding(goals: NutritionGoals): UserProfile {
+        shouldThrow?.let { throw it }
+        return updateProfileResult
+    }
 
     override fun observeProfile(): Flow<UserProfile?> = profileFlow
 
