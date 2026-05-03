@@ -1,9 +1,12 @@
 package com.strakk.shared.presentation.settings
 
 import androidx.lifecycle.viewModelScope
+import com.strakk.shared.domain.model.SubscriptionPlan
+import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
 import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
+import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.SignOutUseCase
 import com.strakk.shared.domain.usecase.UpdateProfileUseCase
@@ -12,8 +15,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 private const val DEBOUNCE_DELAY_MS = 500L
+private const val ISO_DATE_PREFIX_LENGTH = 10
 
 /**
  * Manages the Settings screen.
@@ -28,6 +33,7 @@ class SettingsViewModel(
     private val signOut: SignOutUseCase,
     private val saveHevyApiKey: SaveHevyApiKeyUseCase,
     private val getHevyApiKey: GetHevyApiKeyUseCase,
+    private val observeSubscriptionState: ObserveSubscriptionStateUseCase,
 ) : MviViewModel<SettingsUiState, SettingsEvent, SettingsEffect>(SettingsUiState.Loading) {
 
     private var saveDebounceJob: Job? = null
@@ -58,6 +64,9 @@ class SettingsViewModel(
             SettingsEvent.OnSignOut -> viewModelScope.launch {
                 signOut().onFailure { emitError(it) }
             }
+            SettingsEvent.OnUpgradeTapped -> emit(SettingsEffect.NavigateToPaywall)
+            SettingsEvent.OnManageSubscription -> emit(SettingsEffect.ShowToast("Bientôt disponible"))
+            SettingsEvent.OnRestorePurchase -> emit(SettingsEffect.ShowToast("Bientôt disponible"))
         }
     }
 
@@ -77,6 +86,33 @@ class SettingsViewModel(
                 )
             }
         }
+        observeSubscription()
+    }
+
+    private fun observeSubscription() {
+        viewModelScope.launch {
+            observeSubscriptionState().collect { sub ->
+                val display = mapSubscriptionDisplay(sub)
+                updateReady { copy(subscriptionDisplay = display) }
+            }
+        }
+    }
+
+    private fun mapSubscriptionDisplay(state: SubscriptionState): SubscriptionDisplay = when (state) {
+        is SubscriptionState.Free, is SubscriptionState.Expired -> SubscriptionDisplay.Free
+        is SubscriptionState.Trial -> {
+            val days = (state.endsAt - Clock.System.now()).inWholeDays.toInt()
+            SubscriptionDisplay.Trial(daysRemaining = maxOf(days, 0))
+        }
+        is SubscriptionState.Active -> {
+            val planLabel = when (state.plan) {
+                SubscriptionPlan.MONTHLY -> "Mensuel"
+                SubscriptionPlan.ANNUAL -> "Annuel"
+            }
+            val expiresLabel = state.expiresAt.toString().take(ISO_DATE_PREFIX_LENGTH)
+            SubscriptionDisplay.Active(planLabel = planLabel, expiresLabel = expiresLabel)
+        }
+        is SubscriptionState.PaymentFailed -> SubscriptionDisplay.PaymentFailed
     }
 
     private inline fun updateReady(crossinline transform: SettingsUiState.Ready.() -> SettingsUiState.Ready) {

@@ -5,6 +5,7 @@ import com.strakk.shared.domain.common.ClockProvider
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.model.WaterEntry
 import com.strakk.shared.domain.usecase.AddWaterUseCase
 import com.strakk.shared.domain.usecase.DeleteMealContainerUseCase
@@ -14,13 +15,16 @@ import com.strakk.shared.domain.usecase.ObserveActiveMealDraftUseCase
 import com.strakk.shared.domain.usecase.ObserveDailySummaryUseCase
 import com.strakk.shared.domain.usecase.ObserveMealContainersForDateUseCase
 import com.strakk.shared.domain.usecase.ObserveMealsForDateUseCase
+import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
 import com.strakk.shared.domain.usecase.ObserveWaterEntriesForDateUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
 import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import com.strakk.shared.presentation.common.formatDateLabel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 /**
  * Manages the Today screen: daily summary, chronological timeline
@@ -29,6 +33,7 @@ import kotlinx.coroutines.launch
  * Observes reactive Flows from the repository cache — state updates
  * automatically after any mutation without requiring an explicit reload.
  */
+@Suppress("LongParameterList")
 class TodayViewModel(
     private val observeDailySummary: ObserveDailySummaryUseCase,
     private val observeMeals: ObserveMealsForDateUseCase,
@@ -41,11 +46,15 @@ class TodayViewModel(
     private val deleteOrphanEntry: DeleteMealUseCase,
     private val deleteMealContainer: DeleteMealContainerUseCase,
     private val updateEntry: UpdateMealEntryUseCase,
+    private val observeSubscriptionState: ObserveSubscriptionStateUseCase,
     private val clock: ClockProvider,
 ) : MviViewModel<TodayUiState, TodayEvent, TodayEffect>(TodayUiState.Loading) {
 
+    private val subscriptionState = MutableStateFlow<SubscriptionState>(SubscriptionState.Free)
+
     init {
         observeToday()
+        observeSubscription()
     }
 
     override fun onEvent(event: TodayEvent) {
@@ -56,6 +65,7 @@ class TodayViewModel(
             is TodayEvent.OnDeleteOrphanEntry -> launchDeleteOrphan(event.id)
             is TodayEvent.OnDeleteMeal -> launchDeleteMeal(event.mealId)
             is TodayEvent.OnUpdateEntry -> launchUpdateEntry(event)
+            is TodayEvent.OnTrialBannerTapped -> emit(TodayEffect.NavigateToPaywall)
         }
     }
 
@@ -77,6 +87,27 @@ class TodayViewModel(
         }
     }
 
+    private fun observeSubscription() {
+        viewModelScope.launch {
+            observeSubscriptionState().collect { sub ->
+                subscriptionState.value = sub
+                setState {
+                    when (this) {
+                        is TodayUiState.Ready -> copy(trialBanner = computeTrialBanner(sub))
+                        else -> this
+                    }
+                }
+            }
+        }
+    }
+
+    private fun computeTrialBanner(sub: SubscriptionState): TrialBannerState? {
+        if (sub !is SubscriptionState.Trial) return null
+        val now = Clock.System.now()
+        val remaining = (sub.endsAt - now).inWholeDays.toInt()
+        return if (remaining in 1..2) TrialBannerState.ExpiringIn(remaining) else null
+    }
+
     private fun buildReadyState(
         dateLabel: String,
         summary: DailySummary,
@@ -96,6 +127,7 @@ class TodayViewModel(
             timeline = timeline,
             waterEntries = water,
             activeDraft = draft,
+            trialBanner = computeTrialBanner(subscriptionState.value),
         )
     }
 

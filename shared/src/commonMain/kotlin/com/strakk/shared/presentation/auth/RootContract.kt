@@ -5,5 +5,6 @@ sealed interface RootUiState {
     data object Unauthenticated : RootUiState
     data class Authenticated(
         val onboardingCompleted: Boolean,
+        val showTrialExpiredModal: Boolean = false,
     ) : RootUiState
 }

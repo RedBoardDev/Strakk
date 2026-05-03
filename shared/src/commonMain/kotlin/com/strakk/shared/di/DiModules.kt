@@ -105,6 +105,7 @@ import com.strakk.shared.presentation.meal.MealDraftViewModel
 import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
 import com.strakk.shared.presentation.onboarding.OnboardingFlowViewModel
+import com.strakk.shared.presentation.paywall.PaywallViewModel
 import com.strakk.shared.presentation.settings.SettingsViewModel
 import com.strakk.shared.presentation.today.TodayViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -281,6 +282,14 @@ internal val presentationModule = module {
         )
     }
     viewModelOf(::CheckInStatsViewModel)
+
+    // Paywall
+    viewModel { params ->
+        PaywallViewModel(
+            observeSubscriptionState = get(),
+            highlightedFeature = params.getOrNull(),
+        )
+    }
 }
 
 val sharedModule = module {
