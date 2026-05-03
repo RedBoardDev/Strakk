@@ -1,13 +1,13 @@
 package com.strakk.shared.presentation.paywall
 
-import com.strakk.shared.domain.model.ProFeature
-import com.strakk.shared.domain.model.ProFeatureInfo
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureMetadata
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.SubscriptionPlan
-import com.strakk.shared.domain.model.allProFeatures
 
 data class PaywallUiState(
-    val features: List<ProFeatureInfo> = allProFeatures(),
-    val highlightedFeature: ProFeature? = null,
+    val features: List<FeatureMetadata> = FeatureRegistry.all(),
+    val highlightedFeature: Feature? = null,
     val selectedPlan: SubscriptionPlan = SubscriptionPlan.ANNUAL,
     val isProcessing: Boolean = false,
     val isAlreadyPro: Boolean = false,

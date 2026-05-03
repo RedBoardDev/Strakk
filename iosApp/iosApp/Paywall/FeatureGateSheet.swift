@@ -4,7 +4,7 @@ import shared
 // MARK: - FeatureGateSheet
 
 struct FeatureGateSheet: View {
-    let featureInfo: ProFeatureInfo
+    let metadata: FeatureMetadata
     var onDiscoverPro: () -> Void
     var onDismiss: () -> Void
 
@@ -33,7 +33,7 @@ struct FeatureGateSheet: View {
                         .fill(Color.strakkSurface2)
                         .frame(width: 72, height: 72)
 
-                    Image(systemName: sfSymbol(for: featureInfo.feature))
+                    Image(systemName: metadata.iconIos)
                         .font(.system(size: 32, weight: .medium))
                         .foregroundStyle(Color.strakkPrimary)
                 }
@@ -46,7 +46,7 @@ struct FeatureGateSheet: View {
                 Spacer().frame(height: StrakkSpacing.sm)
 
                 // Title
-                Text(featureInfo.title)
+                Text(String(localized: String.LocalizationValue(metadata.titleKey)))
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
                     .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct FeatureGateSheet: View {
                 Spacer().frame(height: StrakkSpacing.xs)
 
                 // Description
-                Text(featureInfo.description_)
+                Text(String(localized: String.LocalizationValue(metadata.descriptionKey)))
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
                     .multilineTextAlignment(.center)
@@ -69,7 +69,7 @@ struct FeatureGateSheet: View {
                     onDismiss()
                     onDiscoverPro()
                 } label: {
-                    Text("Débloquer avec Pro")
+                    Text("Unlock with Pro")
                         .font(.strakkBodyBold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -77,7 +77,7 @@ struct FeatureGateSheet: View {
                         .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: StrakkRadius.md))
                 }
                 .padding(.horizontal, StrakkSpacing.lg)
-                .accessibilityLabel("Débloquer cette fonctionnalité avec Strakk Pro")
+                .accessibilityLabel("Unlock this feature with Strakk Pro")
 
                 Spacer().frame(height: StrakkSpacing.sm)
 
@@ -85,7 +85,7 @@ struct FeatureGateSheet: View {
                 Button {
                     onDismiss()
                 } label: {
-                    Text("Plus tard")
+                    Text("Later")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextTertiary)
                         .frame(height: 44)
@@ -99,33 +99,12 @@ struct FeatureGateSheet: View {
     }
 }
 
-// MARK: - SF Symbol helper (file-private)
-
-private func sfSymbol(for feature: ProFeature) -> String {
-    switch feature {
-    case .aiPhotoAnalysis: return "camera.viewfinder"
-    case .aiTextAnalysis: return "text.bubble"
-    case .aiWeeklySummary: return "chart.bar.xaxis"
-    case .healthSync: return "heart.circle"
-    case .unlimitedHistory: return "clock.arrow.circlepath"
-    case .photoComparison: return "photo.on.rectangle.angled"
-    case .hevyExport: return "dumbbell.fill"
-    default: return "star"
-    }
-}
-
-// MARK: - ProFeature → ProFeatureInfo lookup
-
-func proFeatureInfo(for feature: ProFeature) -> ProFeatureInfo? {
-    ProFeatureInfoKt.allProFeatures().first { ($0 as? ProFeatureInfo)?.feature == feature } as? ProFeatureInfo
-}
-
 // MARK: - ViewModifier for gated feature flow
 
 private struct FeatureGateModifier: ViewModifier {
-    @Binding var gatedFeature: ProFeature?
+    @Binding var gatedFeature: Feature?
     @State private var showPaywall = false
-    @State private var highlightedFeature: ProFeature?
+    @State private var highlightedFeature: Feature?
 
     func body(content: Content) -> some View {
         content
@@ -133,9 +112,10 @@ private struct FeatureGateModifier: ViewModifier {
                 get: { gatedFeature != nil },
                 set: { if !$0 { gatedFeature = nil } }
             )) {
-                if let feature = gatedFeature, let info = proFeatureInfo(for: feature) {
+                if let feature = gatedFeature {
+                    let metadata = FeatureRegistry.companion.get(feature: feature)
                     FeatureGateSheet(
-                        featureInfo: info,
+                        metadata: metadata,
                         onDiscoverPro: {
                             highlightedFeature = feature
                             gatedFeature = nil
@@ -155,7 +135,7 @@ private struct FeatureGateModifier: ViewModifier {
 }
 
 extension View {
-    func featureGate(_ gatedFeature: Binding<ProFeature?>) -> some View {
+    func featureGate(_ gatedFeature: Binding<Feature?>) -> some View {
         modifier(FeatureGateModifier(gatedFeature: gatedFeature))
     }
 }

@@ -13,7 +13,7 @@ struct CalendarView: View {
     @State private var viewModel = CalendarViewModelWrapper()
     @Environment(MealDraftViewModelWrapper.self) private var draftViewModel
     @State private var calendarAddDate: CalendarAddDate?
-    @State private var gatedFeature: ProFeature?
+    @State private var gatedFeature: Feature?
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
     private let weekdaySymbols = ["M", "T", "W", "T", "F", "S", "S"]

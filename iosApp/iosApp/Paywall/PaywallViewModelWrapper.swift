@@ -11,8 +11,8 @@ enum SwiftSubscriptionPlan: Equatable {
 // MARK: - Swift-side state
 
 struct PaywallData: Equatable {
-    let features: [ProFeatureInfo]
-    let highlightedFeature: ProFeature?
+    let features: [FeatureMetadata]
+    let highlightedFeature: Feature?
     let selectedPlan: SwiftSubscriptionPlan
     let isProcessing: Bool
     let isAlreadyPro: Bool
@@ -32,7 +32,7 @@ final class PaywallViewModelWrapper {
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
 
-    init(highlightedFeature: ProFeature? = nil) {
+    init(highlightedFeature: Feature? = nil) {
         self.sharedVm = KoinBridge.shared.getPaywallViewModel(highlightedFeature: highlightedFeature)
         // swiftlint:disable:next force_cast
         let initial = sharedVm.uiState.value as! PaywallUiState
@@ -76,7 +76,7 @@ final class PaywallViewModelWrapper {
 
     private static func mapState(_ kmpState: PaywallUiState) -> PaywallData {
         let plan: SwiftSubscriptionPlan = kmpState.selectedPlan == .annual ? .annual : .monthly
-        let features: [ProFeatureInfo] = kmpState.features.compactMap { $0 as? ProFeatureInfo }
+        let features: [FeatureMetadata] = kmpState.features.compactMap { $0 as? FeatureMetadata }
         return PaywallData(
             features: features,
             highlightedFeature: kmpState.highlightedFeature,

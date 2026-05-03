@@ -1,21 +1,6 @@
-// swiftlint:disable type_body_length file_length
+// swiftlint:disable type_body_length
 import SwiftUI
 import shared
-
-// MARK: - SF Symbol mapping
-
-private func sfSymbol(for feature: ProFeature) -> String {
-    switch feature {
-    case .aiPhotoAnalysis: return "camera.viewfinder"
-    case .aiTextAnalysis: return "text.bubble"
-    case .aiWeeklySummary: return "chart.bar.xaxis"
-    case .healthSync: return "heart.circle"
-    case .unlimitedHistory: return "clock.arrow.circlepath"
-    case .photoComparison: return "photo.on.rectangle.angled"
-    case .hevyExport: return "dumbbell.fill"
-    default: return "star"
-    }
-}
 
 // MARK: - PaywallView
 
@@ -23,7 +8,7 @@ struct PaywallView: View {
     @State var viewModel: PaywallViewModelWrapper
     var onDismiss: () -> Void
 
-    init(highlightedFeature: ProFeature? = nil, onDismiss: @escaping () -> Void) {
+    init(highlightedFeature: Feature? = nil, onDismiss: @escaping () -> Void) {
         self._viewModel = State(wrappedValue: PaywallViewModelWrapper(highlightedFeature: highlightedFeature))
         self.onDismiss = onDismiss
     }
@@ -149,10 +134,10 @@ struct PaywallView: View {
                 .padding(.bottom, StrakkSpacing.md)
 
             VStack(spacing: 6) {
-                ForEach(data.features, id: \.feature) { info in
+                ForEach(data.features, id: \.feature) { metadata in
                     featureRow(
-                        info: info,
-                        highlighted: info.feature == data.highlightedFeature
+                        metadata: metadata,
+                        highlighted: metadata.feature == data.highlightedFeature
                     )
                 }
             }
@@ -160,9 +145,9 @@ struct PaywallView: View {
     }
 
     @ViewBuilder
-    private func featureRow(info: ProFeatureInfo, highlighted: Bool) -> some View {
+    private func featureRow(metadata: FeatureMetadata, highlighted: Bool) -> some View {
         HStack(spacing: StrakkSpacing.sm) {
-            Image(systemName: sfSymbol(for: info.feature))
+            Image(systemName: metadata.iconIos)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(highlighted ? Color.strakkPrimary : Color.strakkTextSecondary)
                 .frame(width: 30, height: 30)
@@ -171,7 +156,7 @@ struct PaywallView: View {
                     in: RoundedRectangle(cornerRadius: 8)
                 )
 
-            Text(info.title)
+            Text(String(localized: String.LocalizationValue(metadata.titleKey)))
                 .font(highlighted ? .strakkBodyBold : .strakkBody)
                 .foregroundStyle(Color.strakkTextPrimary)
 

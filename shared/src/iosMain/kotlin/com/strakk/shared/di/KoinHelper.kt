@@ -1,6 +1,6 @@
 package com.strakk.shared.di
 
-import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.UserTier
 import com.strakk.shared.domain.model.tier
 import com.strakk.shared.domain.repository.SubscriptionRepository
@@ -48,7 +48,7 @@ class KoinHelper : KoinComponent {
     fun getCheckInDetailViewModel(checkInId: String): CheckInDetailViewModel = get { parametersOf(checkInId) }
     fun getCheckInWizardViewModel(checkInId: String?): CheckInWizardViewModel = get { parametersOf(checkInId) }
     fun getCheckInStatsViewModel(): CheckInStatsViewModel = get()
-    fun getPaywallViewModel(highlightedFeature: ProFeature? = null): PaywallViewModel = get { parametersOf(highlightedFeature) }
+    fun getPaywallViewModel(highlightedFeature: Feature? = null): PaywallViewModel = get { parametersOf(highlightedFeature) }
     fun getGenerateCheckInPdfUseCase(): GenerateCheckInPdfUseCase = get()
     fun isProUser(): Boolean = get<SubscriptionRepository>().cachedState.tier == UserTier.PRO
 }

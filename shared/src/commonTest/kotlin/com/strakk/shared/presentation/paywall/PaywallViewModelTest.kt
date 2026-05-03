@@ -1,10 +1,10 @@
 package com.strakk.shared.presentation.paywall
 
 import app.cash.turbine.test
-import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.domain.model.SubscriptionState
-import com.strakk.shared.domain.model.allProFeatures
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
 import com.strakk.shared.fixtures.FakeSubscriptionRepository
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ class PaywallViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(highlightedFeature: ProFeature? = null): PaywallViewModel =
+    private fun createViewModel(highlightedFeature: Feature? = null): PaywallViewModel =
         PaywallViewModel(
             observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
             highlightedFeature = highlightedFeature,
@@ -72,19 +72,19 @@ class PaywallViewModelTest {
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(allProFeatures().size, state.features.size)
-            assertEquals(6, state.features.size)
+            assertEquals(FeatureRegistry.all().size, state.features.size)
+            assertEquals(Feature.entries.size, state.features.size)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `highlightedFeature is forwarded to initial state`() = runTest {
-        val viewModel = createViewModel(highlightedFeature = ProFeature.AI_PHOTO_ANALYSIS)
+        val viewModel = createViewModel(highlightedFeature = Feature.AI_PHOTO_ANALYSIS)
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(ProFeature.AI_PHOTO_ANALYSIS, state.highlightedFeature)
+            assertEquals(Feature.AI_PHOTO_ANALYSIS, state.highlightedFeature)
             cancelAndIgnoreRemainingEvents()
         }
     }

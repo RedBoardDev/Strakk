@@ -10,7 +10,7 @@ final class QuickAddViewModelWrapper {
     var isProcessing = false
     var errorMessage: String?
     var didComplete = false
-    var gatedFeature: ProFeature?
+    var gatedFeature: Feature?
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -89,7 +89,11 @@ final class QuickAddViewModelWrapper {
         } else if let error = effect as? QuickAddEffectShowError {
             errorMessage = error.message
         } else if let gated = effect as? QuickAddEffectFeatureGated {
-            gatedFeature = gated.feature
+            if let proRequired = gated.access as? FeatureAccessProRequired {
+                gatedFeature = proRequired.feature
+            } else if let quotaExhausted = gated.access as? FeatureAccessQuotaExhausted {
+                gatedFeature = quotaExhausted.feature
+            }
         }
     }
 }

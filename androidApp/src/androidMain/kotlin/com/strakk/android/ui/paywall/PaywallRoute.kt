@@ -7,14 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.presentation.paywall.PaywallEffect
 import com.strakk.shared.presentation.paywall.PaywallViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun PaywallRoute(highlightedFeature: ProFeature? = null, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+fun PaywallRoute(highlightedFeature: Feature? = null, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val viewModel: PaywallViewModel = koinViewModel { parametersOf(highlightedFeature) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -51,10 +51,10 @@ import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
-import com.strakk.shared.domain.model.ProFeature
-import com.strakk.shared.domain.model.ProFeatureInfo
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureMetadata
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.SubscriptionPlan
-import com.strakk.shared.domain.model.allProFeatures
 import com.strakk.shared.presentation.paywall.PaywallEvent
 import com.strakk.shared.presentation.paywall.PaywallUiState
 
@@ -193,9 +193,9 @@ private fun PaywallCtaSection(uiState: PaywallUiState, onEvent: (PaywallEvent) -
 }
 
 @Composable
-private fun FeatureRow(featureInfo: ProFeatureInfo, isHighlighted: Boolean, modifier: Modifier = Modifier) {
+private fun FeatureRow(featureInfo: FeatureMetadata, isHighlighted: Boolean, modifier: Modifier = Modifier) {
     val colors = LocalStrakkColors.current
-    val icon = featureInfo.feature.toIcon()
+    val icon = iconForAndroid(featureInfo.iconAndroid)
 
     val rowModifier = if (isHighlighted) {
         modifier
@@ -227,12 +227,12 @@ private fun FeatureRow(featureInfo: ProFeatureInfo, isHighlighted: Boolean, modi
         Spacer(Modifier.width(12.dp))
         Column {
             Text(
-                text = featureInfo.title,
+                text = resolveFeatureTitle(featureInfo.titleKey),
                 style = LocalStrakkTextStyles.current.bodyBold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = featureInfo.description,
+                text = resolveFeatureDescription(featureInfo.descriptionKey),
                 style = LocalStrakkTextStyles.current.caption,
                 color = colors.textSecondary,
             )
@@ -334,15 +334,44 @@ private fun PriceCard(selectedPlan: SubscriptionPlan, modifier: Modifier = Modif
     }
 }
 
-internal fun ProFeature.toIcon(): ImageVector = when (this) {
-    ProFeature.AI_PHOTO_ANALYSIS -> Icons.Outlined.CameraAlt
-    ProFeature.AI_TEXT_ANALYSIS -> Icons.Outlined.TextFields
-    ProFeature.AI_WEEKLY_SUMMARY -> Icons.Outlined.BarChart
-    ProFeature.HEALTH_SYNC -> Icons.Outlined.MonitorHeart
-    ProFeature.UNLIMITED_HISTORY -> Icons.Outlined.History
-    ProFeature.PHOTO_COMPARISON -> Icons.Outlined.Compare
-    ProFeature.HEVY_EXPORT -> Icons.Outlined.Upload
+internal fun iconForAndroid(iconKey: String): ImageVector = when (iconKey) {
+    "CameraAlt" -> Icons.Outlined.CameraAlt
+    "TextFields" -> Icons.Outlined.TextFields
+    "BarChart" -> Icons.Outlined.BarChart
+    "MonitorHeart" -> Icons.Outlined.MonitorHeart
+    "History" -> Icons.Outlined.History
+    "Compare" -> Icons.Outlined.Compare
+    "Upload" -> Icons.Outlined.Upload
+    else -> Icons.Outlined.BarChart
 }
+
+@Composable
+internal fun resolveFeatureTitle(titleKey: String): String = stringResource(
+    when (titleKey) {
+        "feature_ai_photo_title" -> R.string.feature_ai_photo_title
+        "feature_ai_text_title" -> R.string.feature_ai_text_title
+        "feature_ai_summary_title" -> R.string.feature_ai_summary_title
+        "feature_health_sync_title" -> R.string.feature_health_sync_title
+        "feature_unlimited_history_title" -> R.string.feature_unlimited_history_title
+        "feature_photo_comparison_title" -> R.string.feature_photo_comparison_title
+        "feature_hevy_export_title" -> R.string.feature_hevy_export_title
+        else -> R.string.feature_ai_photo_title
+    },
+)
+
+@Composable
+internal fun resolveFeatureDescription(descriptionKey: String): String = stringResource(
+    when (descriptionKey) {
+        "feature_ai_photo_description" -> R.string.feature_ai_photo_description
+        "feature_ai_text_description" -> R.string.feature_ai_text_description
+        "feature_ai_summary_description" -> R.string.feature_ai_summary_description
+        "feature_health_sync_description" -> R.string.feature_health_sync_description
+        "feature_unlimited_history_description" -> R.string.feature_unlimited_history_description
+        "feature_photo_comparison_description" -> R.string.feature_photo_comparison_description
+        "feature_hevy_export_description" -> R.string.feature_hevy_export_description
+        else -> R.string.feature_ai_photo_description
+    },
+)
 
 @Preview(showBackground = true, backgroundColor = 0xFF050918)
 @Composable
@@ -350,8 +379,8 @@ internal fun PaywallScreenPreview() {
     StrakkTheme {
         PaywallScreen(
             uiState = PaywallUiState(
-                features = allProFeatures(),
-                highlightedFeature = ProFeature.AI_PHOTO_ANALYSIS,
+                features = FeatureRegistry.all(),
+                highlightedFeature = Feature.AI_PHOTO_ANALYSIS,
                 selectedPlan = SubscriptionPlan.ANNUAL,
             ),
             snackbarHostState = SnackbarHostState(),

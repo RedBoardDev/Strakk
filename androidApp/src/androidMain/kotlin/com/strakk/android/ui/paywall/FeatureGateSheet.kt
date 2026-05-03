@@ -36,13 +36,13 @@ import com.strakk.android.ui.components.ProBadge
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkSemanticColors
 import com.strakk.android.ui.theme.StrakkTheme
-import com.strakk.shared.domain.model.ProFeature
-import com.strakk.shared.domain.model.ProFeatureInfo
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureMetadata
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureGateSheet(
-    featureInfo: ProFeatureInfo,
+    metadata: FeatureMetadata,
     onDiscoverPro: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -55,7 +55,7 @@ fun FeatureGateSheet(
         modifier = modifier,
     ) {
         FeatureGateSheetContent(
-            featureInfo = featureInfo,
+            metadata = metadata,
             onDiscoverPro = onDiscoverPro,
             onDismiss = onDismiss,
         )
@@ -63,7 +63,7 @@ fun FeatureGateSheet(
 }
 
 @Composable
-private fun FeatureGateSheetContent(featureInfo: ProFeatureInfo, onDiscoverPro: () -> Unit, onDismiss: () -> Unit) {
+private fun FeatureGateSheetContent(metadata: FeatureMetadata, onDiscoverPro: () -> Unit, onDismiss: () -> Unit) {
     val colors = LocalStrakkColors.current
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -72,19 +72,19 @@ private fun FeatureGateSheetContent(featureInfo: ProFeatureInfo, onDiscoverPro: 
             .padding(horizontal = 24.dp)
             .padding(bottom = 32.dp),
     ) {
-        FeatureGateIcon(featureInfo = featureInfo, colors = colors)
+        FeatureGateIcon(metadata = metadata, colors = colors)
         Spacer(Modifier.height(20.dp))
         ProBadge()
         Spacer(Modifier.height(8.dp))
         Text(
-            text = featureInfo.title,
+            text = resolveFeatureTitle(metadata.titleKey),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = featureInfo.description,
+            text = resolveFeatureDescription(metadata.descriptionKey),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.textSecondary,
             textAlign = TextAlign.Center,
@@ -122,7 +122,7 @@ private fun FeatureGateSheetContent(featureInfo: ProFeatureInfo, onDiscoverPro: 
 }
 
 @Composable
-private fun FeatureGateIcon(featureInfo: ProFeatureInfo, colors: StrakkSemanticColors) {
+private fun FeatureGateIcon(metadata: FeatureMetadata, colors: StrakkSemanticColors) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(120.dp)) {
         Box(
             modifier = Modifier
@@ -142,7 +142,7 @@ private fun FeatureGateIcon(featureInfo: ProFeatureInfo, colors: StrakkSemanticC
             modifier = Modifier.size(72.dp).clip(CircleShape).background(colors.surface2),
         ) {
             Icon(
-                imageVector = featureInfo.feature.toIcon(),
+                imageVector = iconForAndroid(metadata.iconAndroid),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp),
@@ -157,11 +157,12 @@ private fun FeatureGateIcon(featureInfo: ProFeatureInfo, colors: StrakkSemanticC
 internal fun FeatureGateSheetPreview() {
     StrakkTheme {
         FeatureGateSheet(
-            featureInfo = ProFeatureInfo(
-                feature = ProFeature.AI_PHOTO_ANALYSIS,
-                iconId = "camera.ai",
-                title = "Photo Analysis",
-                description = "Take a photo of your meal and let the AI estimate macros automatically.",
+            metadata = FeatureMetadata(
+                feature = Feature.AI_PHOTO_ANALYSIS,
+                titleKey = "feature_ai_photo_title",
+                descriptionKey = "feature_ai_photo_description",
+                iconIos = "camera.fill",
+                iconAndroid = "CameraAlt",
             ),
             onDiscoverPro = {},
             onDismiss = {},

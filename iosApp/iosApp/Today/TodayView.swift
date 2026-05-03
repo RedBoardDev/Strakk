@@ -38,7 +38,7 @@ struct TodayView: View {
     @State var editingEntry: MealEntryData?
 
     // Feature gating (fed by AddPickerSheet.onFeatureGated + CheckIn effect)
-    @State var gatedFeature: ProFeature?
+    @State var gatedFeature: Feature?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {

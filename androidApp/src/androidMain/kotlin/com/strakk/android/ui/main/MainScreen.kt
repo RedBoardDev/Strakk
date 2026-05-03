@@ -40,10 +40,10 @@ import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.android.ui.today.TodayRoute
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.MealEntry
-import com.strakk.shared.domain.model.ProFeature
 import com.strakk.shared.domain.model.UserTier
-import com.strakk.shared.domain.model.allProFeatures
 import com.strakk.shared.domain.model.tier
 import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.presentation.meal.MealDraftEvent
@@ -189,12 +189,12 @@ private fun HomeTabContent(
     val quickAddViewModel: QuickAddViewModel = koinViewModel()
     val subscriptionRepo: SubscriptionRepository = koinInject()
 
-    var gatedFeature by remember { mutableStateOf<ProFeature?>(null) }
+    var gatedFeature by remember { mutableStateOf<Feature?>(null) }
     var showPaywall by remember { mutableStateOf(false) }
 
     gatedFeature?.let { feature ->
         FeatureGateSheet(
-            featureInfo = allProFeatures().first { it.feature == feature },
+            metadata = FeatureRegistry.get(feature),
             onDiscoverPro = {
                 showPaywall = true
                 gatedFeature = null
@@ -214,7 +214,7 @@ private fun HomeTabContent(
     fun pop() { if (backStack.size > 1) backStack.removeLastOrNull() }
     fun popToToday() { backStack.clear(); backStack.add(HomeRoute.Today) }
 
-    fun guardProFeature(feature: ProFeature, onGranted: () -> Unit) {
+    fun guardProFeature(feature: Feature, onGranted: () -> Unit) {
         if (subscriptionRepo.cachedState.tier == UserTier.PRO) {
             onGranted()
         } else {
@@ -261,10 +261,10 @@ private fun HomeTabContent(
             onNavigateToSearch = { inDraft -> push(HomeRoute.Search(inDraft)) },
             onNavigateToManual = { inDraft -> push(HomeRoute.Manual(inDraft)) },
             onNavigateToPhoto = { inDraft ->
-                guardProFeature(ProFeature.AI_PHOTO_ANALYSIS) { push(HomeRoute.Photo(inDraft)) }
+                guardProFeature(Feature.AI_PHOTO_ANALYSIS) { push(HomeRoute.Photo(inDraft)) }
             },
             onNavigateToText = { inDraft ->
-                guardProFeature(ProFeature.AI_TEXT_ANALYSIS) { push(HomeRoute.TextEntry(inDraft)) }
+                guardProFeature(Feature.AI_TEXT_ANALYSIS) { push(HomeRoute.TextEntry(inDraft)) }
             },
             viewModel = draftViewModel,
             modifier = modifier,

@@ -16,7 +16,7 @@ struct AddPickerSheet: View {
     let isDraftMode: Bool
     let draftViewModel: MealDraftViewModelWrapper
     let onDismiss: () -> Void
-    let onFeatureGated: (ProFeature) -> Void
+    let onFeatureGated: (Feature) -> Void
     let logDate: String?
 
     @State private var quickAddViewModel: QuickAddViewModelWrapper
@@ -29,7 +29,7 @@ struct AddPickerSheet: View {
         isDraftMode: Bool,
         draftViewModel: MealDraftViewModelWrapper,
         onDismiss: @escaping () -> Void,
-        onFeatureGated: @escaping (ProFeature) -> Void = { _ in },
+        onFeatureGated: @escaping (Feature) -> Void = { _ in },
         logDate: String? = nil
     ) {
         self.isDraftMode = isDraftMode
@@ -57,7 +57,7 @@ struct AddPickerSheet: View {
                 Color.strakkBackground.ignoresSafeArea()
 
                 VStack(spacing: 24) {
-                    // Grid 3 columns (5 tiles → 3+2)
+                    // Grid 3 columns (5 tiles -> 3+2)
                     let columns = [
                         GridItem(.flexible(), spacing: 12),
                         GridItem(.flexible(), spacing: 12),
@@ -166,8 +166,8 @@ struct AddPickerSheet: View {
             switch tile.id {
             case "search":  showSearch = true
             case "manual":  showManual = true
-            case "text":    guardProFeature(.aiTextAnalysis) { showText = true }
-            case "photo":   guardProFeature(.aiPhotoAnalysis) { showPhoto = true }
+            case "text":    guardFeature(.aiTextAnalysis) { showText = true }
+            case "photo":   guardFeature(.aiPhotoAnalysis) { showPhoto = true }
             default: break
             }
         } label: {
@@ -195,9 +195,9 @@ struct AddPickerSheet: View {
         .accessibilityLabel(tile.label + (tile.isPro ? ", Pro" : ""))
     }
 
-    // MARK: - Pro guard
+    // MARK: - Feature guard
 
-    private func guardProFeature(_ feature: ProFeature, onGranted: () -> Void) {
+    private func guardFeature(_ feature: Feature, onGranted: () -> Void) {
         if KoinBridge.shared.isProUser() {
             onGranted()
         } else {

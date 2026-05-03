@@ -46,9 +46,9 @@ import com.strakk.android.ui.paywall.FeatureGateSheet
 import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureAccess
-import com.strakk.shared.domain.model.ProFeature
-import com.strakk.shared.domain.model.allProFeatures
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.presentation.meal.MealDraftEffect
 import com.strakk.shared.presentation.meal.MealDraftEvent
 import com.strakk.shared.presentation.meal.MealDraftUiState
@@ -74,7 +74,7 @@ fun MealDraftRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    var gatedFeature by remember { mutableStateOf<ProFeature?>(null) }
+    var gatedFeature by remember { mutableStateOf<Feature?>(null) }
     var showPaywall by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -89,13 +89,10 @@ fun MealDraftRoute(
                 is MealDraftEffect.Discarded -> onNavigateBack()
                 is MealDraftEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
                 is MealDraftEffect.FeatureGated -> {
-                    val feature = when (val a = effect.access) {
+                    gatedFeature = when (val a = effect.access) {
                         is FeatureAccess.ProRequired -> a.feature
                         is FeatureAccess.QuotaExhausted -> a.feature
                         else -> null
-                    }
-                    if (feature != null) {
-                        gatedFeature = ProFeature.entries.find { it.name == feature.name }
                     }
                 }
             }
@@ -104,7 +101,7 @@ fun MealDraftRoute(
 
     gatedFeature?.let { feature ->
         FeatureGateSheet(
-            featureInfo = allProFeatures().first { it.feature == feature },
+            metadata = FeatureRegistry.get(feature),
             onDiscoverPro = {
                 showPaywall = true
                 gatedFeature = null

@@ -1,7 +1,7 @@
 package com.strakk.shared.presentation.paywall
 
 import androidx.lifecycle.viewModelScope
-import com.strakk.shared.domain.model.ProFeature
+import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.UserTier
 import com.strakk.shared.domain.model.tier
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class PaywallViewModel(
     private val observeSubscriptionState: ObserveSubscriptionStateUseCase,
-    highlightedFeature: ProFeature? = null,
+    highlightedFeature: Feature? = null,
 ) : MviViewModel<PaywallUiState, PaywallEvent, PaywallEffect>(
     PaywallUiState(highlightedFeature = highlightedFeature),
 ) {
