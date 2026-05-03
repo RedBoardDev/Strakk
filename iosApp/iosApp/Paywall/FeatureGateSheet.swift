@@ -113,7 +113,7 @@ private struct FeatureGateModifier: ViewModifier {
                 set: { if !$0 { gatedFeature = nil } }
             )) {
                 if let feature = gatedFeature {
-                    let metadata = FeatureRegistry.companion.get(feature: feature)
+                    let metadata = FeatureRegistry.shared.get(feature: feature)
                     FeatureGateSheet(
                         metadata: metadata,
                         onDiscoverPro: {
