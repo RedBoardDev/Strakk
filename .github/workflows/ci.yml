@@ -36,6 +36,8 @@ jobs:
     runs-on: [self-hosted, macos]
     steps:
       - uses: actions/checkout@v4
+      - name: Install SwiftLint
+        run: brew install swiftlint
       - run: make lint-swift
 
   test-shared:
