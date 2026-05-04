@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.strakk.shared.domain.model.CheckInQuickStats
 import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureAccess
+import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInQuickStatsUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
@@ -24,6 +25,7 @@ class CheckInListViewModel(
             CheckInListEvent.OnCreateNew -> handleCreateNew()
             is CheckInListEvent.OnOpenDetail -> emit(CheckInListEffect.NavigateToDetail(event.id))
             CheckInListEvent.OnOpenStats -> emit(CheckInListEffect.NavigateToStats)
+            CheckInListEvent.OnUnlockHistory -> handleUnlockHistory()
         }
     }
 
@@ -36,15 +38,27 @@ class CheckInListViewModel(
         }
     }
 
+    private fun handleUnlockHistory() {
+        emit(
+            CheckInListEffect.FeatureGated(
+                FeatureAccess.ProRequired(
+                    feature = Feature.UNLIMITED_HISTORY,
+                    metadata = FeatureRegistry.get(Feature.UNLIMITED_HISTORY),
+                ),
+            ),
+        )
+    }
+
     private fun observe() {
         viewModelScope.launch {
             combine(
                 observeCheckIns(),
                 observeQuickStats(),
-            ) { checkIns, quickStats ->
+            ) { page, quickStats ->
                 CheckInListUiState.Ready(
-                    checkIns = checkIns,
+                    checkIns = page.items,
                     quickStats = quickStats?.toUi(),
+                    hiddenCount = page.hiddenCount,
                 )
             }.collect { setState { it } }
         }

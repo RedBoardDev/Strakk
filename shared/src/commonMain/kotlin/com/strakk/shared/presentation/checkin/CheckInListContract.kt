@@ -8,6 +8,7 @@ sealed interface CheckInListUiState {
     data class Ready(
         val checkIns: List<CheckInListItem>,
         val quickStats: QuickStats?,
+        val hiddenCount: Int,
     ) : CheckInListUiState
 }
 
@@ -24,6 +25,7 @@ sealed interface CheckInListEvent {
     data object OnCreateNew : CheckInListEvent
     data class OnOpenDetail(val id: String) : CheckInListEvent
     data object OnOpenStats : CheckInListEvent
+    data object OnUnlockHistory : CheckInListEvent
 }
 
 sealed interface CheckInListEffect {
