@@ -16,8 +16,8 @@ struct CheckInListView: View {
                     ProgressView()
                         .tint(Color.strakkPrimary)
 
-                case .ready(let checkIns, let quickStats):
-                    mainContent(checkIns: checkIns, quickStats: quickStats)
+                case .ready(let checkIns, let quickStats, let hiddenCount):
+                    mainContent(checkIns: checkIns, quickStats: quickStats, hiddenCount: hiddenCount)
                 }
             }
             .navigationTitle("Check-ins")
@@ -49,16 +49,14 @@ struct CheckInListView: View {
     // MARK: - Main content
 
     @ViewBuilder
-    private func mainContent(checkIns: [CheckInListItemData], quickStats: QuickStatsData?) -> some View {
+    private func mainContent(checkIns: [CheckInListItemData], quickStats: QuickStatsData?, hiddenCount: Int)
+    -> some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: StrakkSpacing.xl) {
-                // Quick stats
                 if let stats = quickStats {
                     quickStatsSection(stats: stats)
                 }
-
-                // Check-in list
-                checkInsSection(checkIns: checkIns)
+                checkInsSection(checkIns: checkIns, hiddenCount: hiddenCount)
             }
             .padding(.horizontal, StrakkSpacing.lg)
             .padding(.vertical, StrakkSpacing.xl)
@@ -171,8 +169,8 @@ struct CheckInListView: View {
     // MARK: - Check-ins section
 
     @ViewBuilder
-    private func checkInsSection(checkIns: [CheckInListItemData]) -> some View {
-        if checkIns.isEmpty {
+    private func checkInsSection(checkIns: [CheckInListItemData], hiddenCount: Int) -> some View {
+        if checkIns.isEmpty && hiddenCount == 0 {
             emptyState
         } else {
             VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
@@ -183,8 +181,48 @@ struct CheckInListView: View {
                 ForEach(checkIns) { item in
                     checkInCard(item: item)
                 }
+
+                if hiddenCount > 0 {
+                    historyLimitBanner(hiddenCount: hiddenCount)
+                }
             }
         }
+    }
+
+    @ViewBuilder
+    private func historyLimitBanner(hiddenCount: Int) -> some View {
+        Button {
+            vm.onEvent(CheckInListEventOnUnlockHistory())
+        } label: {
+            HStack(spacing: StrakkSpacing.sm) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .frame(width: 30, height: 30)
+                    .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 8))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(hiddenCount) older check-ins")
+                        .font(.strakkBodyBold)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                    Text("Unlock full history with Pro")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                }
+
+                Spacer()
+
+                ProBadge()
+            }
+            .padding(StrakkSpacing.md)
+            .background(Color.strakkSurface1)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.strakkPrimary.opacity(0.25), lineWidth: 1)
+            )
+        }
+        .accessibilityLabel(String(localized: "Unlock full history with Pro"))
     }
 
     @ViewBuilder

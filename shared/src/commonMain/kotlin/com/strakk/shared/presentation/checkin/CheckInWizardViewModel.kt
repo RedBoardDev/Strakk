@@ -260,6 +260,7 @@ class CheckInWizardViewModel(
     private fun checkExistingForWeek(weekLabel: String) {
         viewModelScope.launch {
             val existing = observeCheckIns().firstOrNull()
+                ?.items
                 ?.find { it.weekLabel == weekLabel }
             setState {
                 (this as? CheckInWizardUiState.Ready)?.copy(existingCheckInId = existing?.id) ?: this

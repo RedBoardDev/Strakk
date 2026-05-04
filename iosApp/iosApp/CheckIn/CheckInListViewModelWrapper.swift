@@ -23,7 +23,7 @@ struct QuickStatsData: Equatable {
 
 enum CheckInListState {
     case loading
-    case ready(checkIns: [CheckInListItemData], quickStats: QuickStatsData?)
+    case ready(checkIns: [CheckInListItemData], quickStats: QuickStatsData?, hiddenCount: Int)
 }
 
 // MARK: - Wrapper
@@ -113,6 +113,6 @@ final class CheckInListViewModelWrapper {
             )
         }
 
-        return .ready(checkIns: items, quickStats: stats)
+        return .ready(checkIns: items, quickStats: stats, hiddenCount: Int(ready.hiddenCount))
     }
 }
