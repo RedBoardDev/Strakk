@@ -1,15 +1,6 @@
 import SwiftUI
 import shared
 
-// MARK: - Tile model
-
-private struct AddTile: Identifiable {
-    let id: String
-    let icon: String
-    let label: String
-    var isPro: Bool = false
-}
-
 // MARK: - AddPickerSheet
 
 struct AddPickerSheet: View {
@@ -20,10 +11,11 @@ struct AddPickerSheet: View {
     let logDate: String?
 
     @State private var quickAddViewModel: QuickAddViewModelWrapper
+    @State private var photoMealWrapper: PhotoMealViewModelWrapper
     @State private var showSearch = false
     @State private var showManual = false
     @State private var showText = false
-    @State private var showPhoto = false
+    @State private var showPhotoMeal = false
 
     init(
         isDraftMode: Bool,
@@ -38,65 +30,53 @@ struct AddPickerSheet: View {
         self.onFeatureGated = onFeatureGated
         self.logDate = logDate
         self._quickAddViewModel = State(initialValue: QuickAddViewModelWrapper(logDate: logDate))
+        self._photoMealWrapper = State(initialValue: PhotoMealViewModelWrapper())
     }
 
-    private var title: String {
-        isDraftMode ? "Add to meal" : "Quick add"
-    }
-
-    private let tiles: [AddTile] = [
-        AddTile(id: "search", icon: "magnifyingglass", label: "Search"),
-        AddTile(id: "manual", icon: "pencil", label: "Manual"),
-        AddTile(id: "text", icon: "text.quote", label: "Free text", isPro: true),
-        AddTile(id: "photo", icon: "camera.fill", label: "Photo", isPro: true)
-    ]
+    private var isProUser: Bool { KoinBridge.shared.isProUser() }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.strakkBackground.ignoresSafeArea()
 
-                VStack(spacing: 24) {
-                    // Grid 3 columns (5 tiles -> 3+2)
-                    let columns = [
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12)
-                    ]
-
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(tiles) { tile in
-                            tileButton(tile: tile)
+                VStack(spacing: StrakkSpacing.xs) {
+                    optionRow(icon: "magnifyingglass", label: "Search") {
+                        showSearch = true
+                    }
+                    optionRow(icon: "pencil", label: "Manual") {
+                        showManual = true
+                    }
+                    optionRow(icon: "text.quote", label: "Free text", isPro: true) {
+                        guardFeature(.aiTextAnalysis) { showText = true }
+                    }
+                    if !isDraftMode {
+                        optionRow(icon: "camera.fill", label: "Photo", isPro: true) {
+                            guardFeature(.aiPhotoAnalysis) { showPhotoMeal = true }
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
 
                     if quickAddViewModel.isProcessing {
                         HStack(spacing: 10) {
-                            ProgressView()
-                                .tint(Color.strakkPrimary)
+                            ProgressView().tint(Color.strakkPrimary)
                             Text("Analyzing…")
                                 .font(.strakkBody)
                                 .foregroundStyle(Color.strakkTextSecondary)
                         }
-                        .padding(.top, 8)
+                        .padding(.top, StrakkSpacing.sm)
                     }
 
                     Spacer()
                 }
+                .padding(.horizontal, StrakkSpacing.lg)
+                .padding(.top, StrakkSpacing.sm)
             }
-            .navigationTitle(title)
+            .navigationTitle(Text(isDraftMode ? "Add to meal" : "Quick add"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { onDismiss() }
-                        .foregroundStyle(Color.strakkTextSecondary)
-                }
-            }
+            .toolbar { StrakkCloseToolbarItem(action: onDismiss) }
         }
         .errorAlert(message: $quickAddViewModel.errorMessage)
-        .presentationDetents([.medium])
+        .presentationDetents([.fraction(0.45)])
         .presentationDragIndicator(.visible)
         .onChange(of: quickAddViewModel.didComplete) { _, didComplete in
             if didComplete {
@@ -110,10 +90,7 @@ struct AddPickerSheet: View {
                 draftViewModel: draftViewModel,
                 isDraftMode: isDraftMode,
                 logDate: logDate,
-                onDismiss: {
-                    showSearch = false
-                    onDismiss()
-                }
+                onDismiss: { showSearch = false; onDismiss() }
             )
         }
         .sheet(isPresented: $showManual) {
@@ -121,10 +98,7 @@ struct AddPickerSheet: View {
                 draftViewModel: draftViewModel,
                 isDraftMode: isDraftMode,
                 logDate: logDate,
-                onDismiss: {
-                    showManual = false
-                    onDismiss()
-                }
+                onDismiss: { showManual = false; onDismiss() }
             )
         }
         .sheet(isPresented: $showText) {
@@ -136,83 +110,83 @@ struct AddPickerSheet: View {
                         onDismiss()
                     } else {
                         showText = false
-                        quickAddFromText(description: description)
+                        quickAddViewModel.addFromText(description: description)
                     }
                 },
                 onCancel: { showText = false }
             )
         }
-        .sheet(isPresented: $showPhoto) {
-            PhotoHintView(
-                onAdd: { imageBase64, hint in
-                    if isDraftMode {
-                        draftViewModel.onEvent(
-                            MealDraftEventAddPendingPhoto(imageBase64: imageBase64, hint: hint)
-                        )
-                        showPhoto = false
-                        onDismiss()
-                    } else {
-                        showPhoto = false
-                        quickAddFromPhoto(imageBase64: imageBase64, hint: hint)
-                    }
-                },
-                onCancel: { showPhoto = false }
+        .fullScreenCover(isPresented: $showPhotoMeal) {
+            PhotoMealView(
+                viewModel: photoMealWrapper,
+                date: logDate ?? todayDateString(),
+                mealName: String(localized: "Photo meal"),
+                onDismiss: { showPhotoMeal = false }
             )
         }
-    }
-
-    private func tileButton(tile: AddTile) -> some View {
-        Button {
-            switch tile.id {
-            case "search":  showSearch = true
-            case "manual":  showManual = true
-            case "text":    guardFeature(.aiTextAnalysis) { showText = true }
-            case "photo":   guardFeature(.aiPhotoAnalysis) { showPhoto = true }
-            default: break
-            }
-        } label: {
-            VStack(spacing: 10) {
-                Image(systemName: tile.icon)
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundStyle(Color.strakkPrimary)
-                Text(tile.label)
-                    .font(.strakkCaptionBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 88)
-            .background(Color.strakkSurface1)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(alignment: .topTrailing) {
-                if tile.isPro {
-                    ProBadge()
-                        .padding(6)
-                }
+        .onChange(of: photoMealWrapper.savedMeal) { _, saved in
+            if saved != nil {
+                showPhotoMeal = false
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                onDismiss()
             }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(tile.label + (tile.isPro ? ", Pro" : ""))
+        .onChange(of: photoMealWrapper.didCancel) { _, cancelled in
+            if cancelled { showPhotoMeal = false }
+        }
     }
 
-    // MARK: - Feature guard
+    // MARK: - Row
+
+    private func optionRow(
+        icon: String,
+        label: LocalizedStringKey,
+        isPro: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: { HapticEngine.light(); action() }, label: {
+            HStack(spacing: StrakkSpacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(Color.strakkSurface2)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(Color.strakkPrimary)
+                }
+
+                Text(label)
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+
+                Spacer()
+
+                if isPro && !isProUser {
+                    ProBadge()
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+            .padding(.horizontal, StrakkSpacing.md)
+            .frame(height: 60)
+            .background(Color.strakkSurface1)
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+        })
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(label) + Text((isPro && !isProUser) ? ", Pro" : ""))
+    }
+
+    // MARK: - Helpers
 
     private func guardFeature(_ feature: Feature, onGranted: () -> Void) {
-        if KoinBridge.shared.isProUser() {
-            onGranted()
-        } else {
-            onFeatureGated(feature)
-            onDismiss()
-        }
+        if isProUser { onGranted() } else { onFeatureGated(feature); onDismiss() }
     }
 
-    // MARK: - Quick-add dispatchers
-
-    private func quickAddFromPhoto(imageBase64: String, hint: String?) {
-        quickAddViewModel.addFromPhoto(imageBase64: imageBase64, hint: hint)
-    }
-
-    private func quickAddFromText(description: String) {
-        quickAddViewModel.addFromText(description: description)
+    private func todayDateString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
     }
 }
