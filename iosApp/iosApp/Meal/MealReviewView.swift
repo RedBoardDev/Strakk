@@ -31,12 +31,11 @@ struct MealReviewView: View {
     @ViewBuilder
     private func reviewBody(draft: EditingDraftData) -> some View {
         VStack(spacing: 0) {
-            // Subtitle
             Text("\(draft.resolvedCount) items detected. Edit if needed before confirming.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
+                .padding(.horizontal, StrakkSpacing.lg)
+                .padding(.top, StrakkSpacing.sm)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             // Items list (resolved only in review)
@@ -58,22 +57,14 @@ struct MealReviewView: View {
             .scrollContentBackground(.hidden)
             .background(Color.strakkBackground)
 
-            // Validate CTA
-            Button {
-                viewModel.onEvent(MealDraftEventCommit.shared)
-            } label: {
-                Text("Confirm meal")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(draft.items.isEmpty ? Color.strakkSurface2 : Color.strakkPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .disabled(draft.items.isEmpty)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .accessibilityLabel("Confirm meal")
+            StrakkPrimaryButton(
+                title: "Confirm meal",
+                action: { viewModel.onEvent(MealDraftEventCommit.shared) },
+                isEnabled: !draft.items.isEmpty
+            )
+            .accessibilityLabel(Text("Confirm meal"))
+            .padding(.horizontal, StrakkSpacing.lg)
+            .padding(.vertical, StrakkSpacing.md)
         }
     }
 

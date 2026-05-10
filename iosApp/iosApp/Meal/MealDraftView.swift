@@ -191,7 +191,7 @@ struct MealDraftView: View { // swiftlint:disable:this type_body_length
                     .kerning(1.0)
                 Spacer()
                 if draft.pendingCount > 0 {
-                    Text("\(draft.pendingCount) en attente")
+                    Text("\(draft.pendingCount) pending")
                         .font(.strakkCaptionBold)
                         .foregroundStyle(Color.strakkWarning)
                         .padding(.horizontal, 10)
@@ -239,7 +239,7 @@ struct MealDraftView: View { // swiftlint:disable:this type_body_length
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    private func macroPill(label: String, value: Double, unit: String) -> some View {
+    private func macroPill(label: LocalizedStringKey, value: Double, unit: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(.strakkCaption)
@@ -371,70 +371,44 @@ struct MealDraftView: View { // swiftlint:disable:this type_body_length
     // MARK: - Bottom bar
 
     private func bottomBar(draft: EditingDraftData) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                onAdd()
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus")
-                    Text("Add")
-                }
-                .font(.strakkBodyBold)
-                .foregroundStyle(Color.strakkPrimary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color.strakkSurface1)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .accessibilityLabel("Add an item")
+        HStack(spacing: StrakkSpacing.sm) {
+            StrakkSecondaryButton(
+                title: "Add",
+                action: { onAdd() },
+                icon: "plus"
+            )
+            .accessibilityLabel(Text("Add an item"))
 
-            Button {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                if draft.pendingCount > 0 {
-                    showProcessConfirm = true
-                } else {
-                    viewModel.onEvent(MealDraftEventProcess.shared)
-                }
-            } label: {
-                Text("Finish meal")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(draft.items.isEmpty ? Color.strakkSurface2 : Color.strakkPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .disabled(draft.items.isEmpty)
-            .accessibilityLabel("Finish meal")
+            StrakkPrimaryButton(
+                title: "Finish meal",
+                action: {
+                    if draft.pendingCount > 0 {
+                        showProcessConfirm = true
+                    } else {
+                        viewModel.onEvent(MealDraftEventProcess.shared)
+                    }
+                },
+                isEnabled: !draft.items.isEmpty
+            )
+            .accessibilityLabel(Text("Finish meal"))
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, StrakkSpacing.lg)
+        .padding(.vertical, StrakkSpacing.md)
         .background(Color.strakkBackground)
     }
 
     // MARK: - Empty draft view
 
     private var emptyDraftView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tray")
-                .font(.system(size: 48))
-                .foregroundStyle(Color.strakkTextTertiary)
-            Text("No meal in progress")
-                .font(.strakkHeading3)
-                .foregroundStyle(Color.strakkTextSecondary)
-            Button {
+        StrakkEmptyState(
+            icon: "tray",
+            title: "No meal in progress",
+            message: nil,
+            actionTitle: "Create a meal",
+            action: {
                 viewModel.onEvent(MealDraftEventStartDraft(initialName: nil, date: nil))
-            } label: {
-                Text("Create a meal")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(.white)
-                    .frame(height: 52)
-                    .padding(.horizontal, 32)
-                    .background(Color.strakkPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-        }
+        )
     }
 
     // MARK: - Helpers

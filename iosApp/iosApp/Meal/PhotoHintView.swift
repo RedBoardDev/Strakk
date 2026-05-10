@@ -2,6 +2,11 @@ import SwiftUI
 import PhotosUI
 import UIKit
 
+// MARK: - PhotoHintView
+//
+// Headless content for the "capturing" state of `PhotoMealView`. Hosting is
+// the parent's responsibility (NavigationStack, toolbar, sheet detents).
+
 struct PhotoHintView: View {
     let onAdd: (String, String?) -> Void
     let onCancel: () -> Void
@@ -15,125 +20,82 @@ struct PhotoHintView: View {
     private var canAdd: Bool { selectedImage != nil && !isCompressing }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.strakkBackground.ignoresSafeArea()
+        ScrollView {
+            VStack(spacing: StrakkSpacing.lg) {
+                photoArea
+                    .frame(height: 240)
 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Photo preview / placeholder
-                        photoArea
-                            .frame(height: 240)
-
-                        // Camera / Gallery buttons
-                        HStack(spacing: 12) {
-                            Button {
-                                showCamera = true
-                            } label: {
-                                Label("Camera", systemImage: "camera.fill")
-                                    .font(.strakkBodyBold)
-                                    .foregroundStyle(Color.strakkTextPrimary)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 48)
-                                    .background(Color.strakkSurface1)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                            .accessibilityLabel("Prendre une photo")
-
-                            PhotosPicker(
-                                selection: $photoPickerItem,
-                                matching: .images
-                            ) {
-                                Label("Galerie", systemImage: "photo.on.rectangle")
-                                    .font(.strakkBodyBold)
-                                    .foregroundStyle(Color.strakkTextPrimary)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 48)
-                                    .background(Color.strakkSurface1)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                            .accessibilityLabel("Choisir depuis la galerie")
-                        }
-
-                        // Hint field
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Hint (optional)")
-                                .font(.strakkCaptionBold)
-                                .foregroundStyle(Color.strakkTextSecondary)
-
-                            TextField(
-                                "ex : portion pour 2, poulet riz...",
-                                text: $hintText
-                            )
-                            .font(.strakkBody)
+                HStack(spacing: StrakkSpacing.sm) {
+                    Button {
+                        showCamera = true
+                    } label: {
+                        Label("Camera", systemImage: "camera.fill")
+                            .font(.strakkBodyBold)
                             .foregroundStyle(Color.strakkTextPrimary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 12)
-                            .background(Color.strakkSurface1)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(Color.strakkDivider, lineWidth: 1)
-                            )
-                            .onChange(of: hintText) { _, v in
-                                if v.count > 150 {
-                                    hintText = String(v.prefix(150))
-                                }
-                            }
-
-                            Text("\(hintText.count)/150")
-                                .font(.strakkCaption)
-                                .foregroundStyle(Color.strakkTextTertiary)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                        }
-
-                        // CTA
-                        Button {
-                            guard let img = selectedImage else { return }
-                            isCompressing = true
-                            Task.detached(priority: .userInitiated) {
-                                let base64 = compressImage(img)
-                                await MainActor.run {
-                                    isCompressing = false
-                                    if let b64 = base64 {
-                                        onAdd(b64, hintText.trimmingCharacters(in: .whitespaces).isEmpty ? nil : hintText)
-                                    }
-                                }
-                            }
-                        } label: {
-                            HStack {
-                                if isCompressing {
-                                    ProgressView().tint(.white).scaleEffect(0.8)
-                                } else {
-                                    Text("Add to meal")
-                                        .font(.strakkBodyBold)
-                                        .foregroundStyle(.white)
-                                }
-                            }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(canAdd ? Color.strakkPrimary : Color.strakkSurface2)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .disabled(!canAdd)
-                        .accessibilityLabel("Ajouter la photo au repas")
+                            .frame(height: 48)
+                            .background(Color.strakkSurface1)
+                            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .accessibilityLabel(Text("Take a photo"))
+
+                    PhotosPicker(
+                        selection: $photoPickerItem,
+                        matching: .images
+                    ) {
+                        Label("Library", systemImage: "photo.on.rectangle")
+                            .font(.strakkBodyBold)
+                            .foregroundStyle(Color.strakkTextPrimary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(Color.strakkSurface1)
+                            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+                    }
+                    .accessibilityLabel(Text("Pick from library"))
                 }
-            }
-            .navigationTitle("Ajouter une photo")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { onCancel() }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Hint (optional)")
+                        .font(.strakkCaptionBold)
                         .foregroundStyle(Color.strakkTextSecondary)
+
+                    TextField(
+                        "Portion for two, chicken with rice…",
+                        text: $hintText
+                    )
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .padding(.horizontal, StrakkSpacing.sm)
+                    .padding(.vertical, StrakkSpacing.sm)
+                    .background(Color.strakkSurface1)
+                    .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: StrakkRadius.sm)
+                            .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
+                    )
+                    .onChange(of: hintText) { _, value in
+                        if value.count > 150 {
+                            hintText = String(value.prefix(150))
+                        }
+                    }
+
+                    Text("\(hintText.count)/150")
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextTertiary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
+
+                StrakkPrimaryButton(
+                    title: isCompressing ? "Adding…" : "Add to meal",
+                    action: handleSubmit,
+                    isEnabled: canAdd
+                )
+                .accessibilityLabel(Text("Add the photo to the meal"))
             }
+            .padding(.horizontal, StrakkSpacing.lg)
+            .padding(.top, StrakkSpacing.md)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
         .fullScreenCover(isPresented: $showCamera) {
             CameraPicker(sourceType: .camera) { image in
                 showCamera = false
@@ -153,7 +115,20 @@ struct PhotoHintView: View {
         }
     }
 
-    // MARK: - Photo area
+    private func handleSubmit() {
+        guard let image = selectedImage else { return }
+        isCompressing = true
+        Task.detached(priority: .userInitiated) {
+            let base64 = compressImage(image)
+            await MainActor.run {
+                isCompressing = false
+                if let value = base64 {
+                    let trimmed = hintText.trimmingCharacters(in: .whitespaces)
+                    onAdd(value, trimmed.isEmpty ? nil : trimmed)
+                }
+            }
+        }
+    }
 
     @ViewBuilder
     private var photoArea: some View {
@@ -162,7 +137,7 @@ struct PhotoHintView: View {
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity, maxHeight: 240)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                 .overlay(alignment: .topTrailing) {
                     Button {
                         selectedImage = nil
@@ -172,19 +147,19 @@ struct PhotoHintView: View {
                             .foregroundStyle(.white)
                             .background(Color.black.opacity(0.4), in: Circle())
                     }
-                    .padding(10)
-                    .accessibilityLabel("Supprimer la photo")
+                    .padding(StrakkSpacing.xs)
+                    .accessibilityLabel(Text("Remove photo"))
                 }
         } else {
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: StrakkRadius.sm)
                     .fill(Color.strakkSurface1)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: StrakkRadius.sm)
                             .strokeBorder(
                                 style: StrokeStyle(lineWidth: 1.5, dash: [6])
                             )
-                            .foregroundStyle(Color.strakkDivider)
+                            .foregroundStyle(Color.strakkBorderSubtle)
                     )
                 VStack(spacing: 8) {
                     Image(systemName: "camera.fill")
@@ -200,8 +175,9 @@ struct PhotoHintView: View {
 }
 
 // MARK: - Image compression
+//
+// Compresses to JPEG ≤ 300KB, max 1024px on the longest side.
 
-/// Compresses to JPEG ≤ 300KB, max 1024px on longest side.
 private func compressImage(_ image: UIImage) -> String? {
     let maxDimension: CGFloat = 1024
     let size = image.size
@@ -217,11 +193,10 @@ private func compressImage(_ image: UIImage) -> String? {
         image.draw(in: CGRect(origin: .zero, size: newSize))
     }
 
-    // Try quality 0.8 first, then lower if needed
     var quality: CGFloat = 0.8
     var data = resized.jpegData(compressionQuality: quality)
 
-    while let d = data, d.count > 300_000, quality > 0.1 {
+    while let payload = data, payload.count > 300_000, quality > 0.1 {
         quality -= 0.1
         data = resized.jpegData(compressionQuality: quality)
     }

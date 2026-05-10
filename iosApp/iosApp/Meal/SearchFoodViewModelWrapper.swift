@@ -80,6 +80,13 @@ final class SearchFoodViewModelWrapper {
         sharedVm.onEvent(event: event)
     }
 
+    /// Resolves a raw KMP `FoodCatalogItem` by id from the current state.
+    /// Used by swap sheets that need to pass the KMP object directly to an event.
+    func resolveCatalogItem(id: Int64) -> FoodCatalogItem? {
+        guard let ready = sharedVm.uiState.value as? SearchFoodUiStateReady else { return nil }
+        return ready.results.catalogItems.first(where: { $0.id == id })
+    }
+
     // MARK: - Private
 
     private func handleEffect(_ effect: SearchFoodEffect) {
