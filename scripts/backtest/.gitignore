@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+results/
+runs/
+recipes/
+variants/
+_lib/
