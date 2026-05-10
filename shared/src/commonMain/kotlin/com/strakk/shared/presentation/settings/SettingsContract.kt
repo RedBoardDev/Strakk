@@ -1,13 +1,26 @@
 package com.strakk.shared.presentation.settings
 
+import com.strakk.shared.domain.model.DevSubscriptionOverride
+import com.strakk.shared.domain.model.SubscriptionPlan
+
 // =============================================================================
 // Subscription display
 // =============================================================================
 
 sealed interface SubscriptionDisplay {
     data object Free : SubscriptionDisplay
-    data class Trial(val daysRemaining: Int) : SubscriptionDisplay
-    data class Active(val planLabel: String, val expiresLabel: String) : SubscriptionDisplay
+
+    data class Trial(
+        val daysRemaining: Int,
+        val endsAtLabel: String,
+    ) : SubscriptionDisplay
+
+    data class Active(
+        val plan: SubscriptionPlan,
+        val renewalLabel: String,
+        val canUpgradeToAnnual: Boolean,
+    ) : SubscriptionDisplay
+
     data object PaymentFailed : SubscriptionDisplay
 }
 
@@ -31,16 +44,21 @@ sealed interface SettingsUiState {
      * @param email User email from auth (read-only display). Null if unavailable.
      * @param proteinGoal Daily protein goal as editable text (empty = no goal).
      * @param calorieGoal Daily calorie goal as editable text (empty = no goal).
+     * @param fatGoal Daily fat goal as editable text (empty = no goal).
+     * @param carbGoal Daily carbohydrate goal as editable text (empty = no goal).
      * @param waterGoal Daily water goal as editable text (empty = no goal).
      */
     data class Ready(
         val email: String?,
         val proteinGoal: String,
         val calorieGoal: String,
+        val fatGoal: String,
+        val carbGoal: String,
         val waterGoal: String,
         /** Hevy API key as editable text (empty = not configured). */
         val hevyApiKey: String,
         val subscriptionDisplay: SubscriptionDisplay = SubscriptionDisplay.Free,
+        val devSubscriptionOverride: DevSubscriptionOverride = DevSubscriptionOverride.SERVER,
     ) : SettingsUiState
 }
 
@@ -56,6 +74,12 @@ sealed interface SettingsEvent {
     /** User edits the daily calorie goal text field. */
     data class OnCalorieGoalChanged(val value: String) : SettingsEvent
 
+    /** User edits the daily fat goal text field. */
+    data class OnFatGoalChanged(val value: String) : SettingsEvent
+
+    /** User edits the daily carbohydrate goal text field. */
+    data class OnCarbGoalChanged(val value: String) : SettingsEvent
+
     /** User edits the daily water goal text field. */
     data class OnWaterGoalChanged(val value: String) : SettingsEvent
 
@@ -68,6 +92,7 @@ sealed interface SettingsEvent {
     data object OnUpgradeTapped : SettingsEvent
     data object OnManageSubscription : SettingsEvent
     data object OnRestorePurchase : SettingsEvent
+    data class OnDevSubscriptionOverrideSelected(val override: DevSubscriptionOverride) : SettingsEvent
 }
 
 // =============================================================================
@@ -79,5 +104,6 @@ sealed interface SettingsEffect {
     /** Display an error message (snackbar or inline). */
     data class ShowError(val message: String) : SettingsEffect
     data object NavigateToPaywall : SettingsEffect
+    data object OpenManageSubscription : SettingsEffect
     data class ShowToast(val message: String) : SettingsEffect
 }
