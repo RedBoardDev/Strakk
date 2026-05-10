@@ -47,14 +47,7 @@ struct MealDetailSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { onDismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-                    .accessibilityLabel("Close")
-                }
+                StrakkCloseToolbarItem(action: onDismiss)
             }
         }
         .sheet(item: $selectedEntry) { entry in
@@ -97,18 +90,33 @@ struct MealDetailSheet: View {
 
     private var totalMacros: some View {
         var items: [MacroBreakdownItem] = [
-            .init(label: "Protein", value: String(format: "%.0fg", meal.totalProtein), color: .strakkProtein),
-            .init(label: "Calories", value: String(format: "%.0f kcal", meal.totalCalories), color: .strakkCalories),
+            .init(
+                label: String(localized: "Protein"),
+                value: String(format: "%.0fg", meal.totalProtein),
+                color: .strakkProtein
+            ),
+            .init(
+                label: String(localized: "Calories"),
+                value: String(format: "%.0f kcal", meal.totalCalories),
+                color: .strakkCalories
+            )
         ]
         if totalFat > 0 {
-            items.append(.init(label: "Fat", value: String(format: "%.0fg", totalFat), color: .strakkAccentYellow))
+            items.append(.init(
+                label: String(localized: "Fat"),
+                value: String(format: "%.0fg", totalFat),
+                color: .strakkAccentYellow
+            ))
         }
         if totalCarbs > 0 {
-            items.append(.init(label: "Carbs", value: String(format: "%.0fg", totalCarbs), color: .strakkAccentIndigo))
+            items.append(.init(
+                label: String(localized: "Carbs"),
+                value: String(format: "%.0fg", totalCarbs),
+                color: .strakkAccentIndigo
+            ))
         }
         return MacroBreakdown(items: items)
     }
-
 
     // MARK: - Entries list
 
@@ -187,9 +195,10 @@ struct MealDetailSheet: View {
 
     private var deleteButton: some View {
         Button(role: .destructive) {
+            HapticEngine.medium()
             onDeleteMeal()
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: StrakkSpacing.xs) {
                 Image(systemName: "trash")
                     .font(.system(size: 14, weight: .semibold))
                 Text("Delete meal")
@@ -197,11 +206,11 @@ struct MealDetailSheet: View {
             }
             .foregroundStyle(Color.strakkError)
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(height: 52)
             .background(Color.strakkSurface2)
             .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
-        .accessibilityLabel("Delete meal")
+        .accessibilityLabel(Text("Delete meal"))
     }
 
     // MARK: - Computed

@@ -37,9 +37,9 @@ struct TextEntryView: View {
                             .padding(.vertical, 10)
                             .frame(minHeight: 140)
                             .focused($isFocused)
-                            .onChange(of: text) { _, v in
-                                if v.count > 300 {
-                                    text = String(v.prefix(300))
+                            .onChange(of: text) { _, value in
+                                if value.count > 300 {
+                                    text = String(value.prefix(300))
                                 }
                             }
                             .accessibilityLabel("Meal description")
@@ -49,7 +49,9 @@ struct TextEntryView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .strokeBorder(
-                                isFocused ? Color.strakkPrimary : (text.count > 300 ? Color.strakkError : Color.strakkDivider),
+                                isFocused
+                                    ? Color.strakkPrimary
+                                    : (text.count > 300 ? Color.strakkError : Color.strakkDivider),
                                 lineWidth: 1.5
                             )
                             .animation(.easeInOut(duration: 0.15), value: isFocused)
@@ -73,32 +75,20 @@ struct TextEntryView: View {
                             )
                     }
 
-                    Button {
-                        onAdd(text.trimmingCharacters(in: .whitespacesAndNewlines))
-                    } label: {
-                        Text("Add to meal")
-                            .font(.strakkBodyBold)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(isValid ? Color.strakkPrimary : Color.strakkSurface2)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .disabled(!isValid)
-                    .accessibilityLabel("Add text to meal")
+                    StrakkPrimaryButton(
+                        title: "Add to meal",
+                        action: { onAdd(text.trimmingCharacters(in: .whitespacesAndNewlines)) },
+                        isEnabled: isValid
+                    )
+                    .accessibilityLabel(Text("Add text to meal"))
 
                     Spacer()
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, StrakkSpacing.lg)
             }
-            .navigationTitle("Add text entry")
+            .navigationTitle(Text("Add text entry"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { onCancel() }
-                        .foregroundStyle(Color.strakkTextSecondary)
-                }
-            }
+            .toolbar { StrakkCloseToolbarItem(action: onCancel) }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)

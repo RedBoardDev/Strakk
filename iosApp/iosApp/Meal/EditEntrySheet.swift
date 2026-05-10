@@ -3,7 +3,8 @@ import shared
 
 struct EditEntrySheet: View {
     let entry: MealEntryData
-    let onSave: (_ name: String, _ protein: Double, _ calories: Double, _ fat: Double?, _ carbs: Double?, _ quantity: String?) -> Void
+    let onSave: (_ name: String, _ protein: Double, _ calories: Double,
+                 _ fat: Double?, _ carbs: Double?, _ quantity: String?) -> Void
     let onCancel: () -> Void
 
     @State private var name: String
@@ -63,7 +64,8 @@ struct EditEntrySheet: View {
                                 StrakkNumericField(
                                     placeholder: "35",
                                     text: $protein,
-                                    isValid: protein.isEmpty || protein.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true,
+                                    isValid: protein.isEmpty
+                                        || protein.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true,
                                     focusState: $focusedField,
                                     focusValue: .protein
                                 )
@@ -73,7 +75,8 @@ struct EditEntrySheet: View {
                                 StrakkNumericField(
                                     placeholder: "400",
                                     text: $calories,
-                                    isValid: calories.isEmpty || calories.toDoubleOrNil().map { $0 >= 0 && $0 <= 5000 } == true,
+                                    isValid: calories.isEmpty
+                                        || calories.toDoubleOrNil().map { $0 >= 0 && $0 <= 5000 } == true,
                                     focusState: $focusedField,
                                     focusValue: .calories
                                 )
@@ -91,20 +94,21 @@ struct EditEntrySheet: View {
                                 )
                             }
 
-                            StrakkFieldGroup(label: "Glucides (g)", required: false) {
+                            StrakkFieldGroup(label: "Carbs (g)", required: false) {
                                 StrakkNumericField(
                                     placeholder: "40",
                                     text: $carbs,
-                                    isValid: carbs.isEmpty || carbs.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true,
+                                    isValid: carbs.isEmpty
+                                        || carbs.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true,
                                     focusState: $focusedField,
                                     focusValue: .carbs
                                 )
                             }
                         }
 
-                        StrakkFieldGroup(label: "Quantité", required: false) {
+                        StrakkFieldGroup(label: "Quantity", required: false) {
                             StrakkInputField(
-                                placeholder: "ex : 150g, 1 bol",
+                                placeholder: "e.g. 150g, 1 bowl",
                                 text: $quantity,
                                 isValid: quantity.count <= 50,
                                 focusState: $focusedField,
@@ -112,42 +116,29 @@ struct EditEntrySheet: View {
                             )
                         }
 
-                        Button {
-                            guard let proteinVal = protein.toDoubleOrNil(),
-                                  let caloriesVal = calories.toDoubleOrNil() else { return }
-                            let fatVal = fat.toDoubleOrNil()
-                            let carbsVal = carbs.toDoubleOrNil()
-                            let quantityVal = quantity.trimmingCharacters(in: .whitespaces).isEmpty ? nil : quantity
-                            onSave(name, proteinVal, caloriesVal, fatVal, carbsVal, quantityVal)
-                        } label: {
-                            Text("Save")
-                                .font(.strakkBodyBold)
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 52)
-                                .background(isSubmittable ? Color.strakkPrimary : Color.strakkSurface2)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .disabled(!isSubmittable)
-                        .accessibilityLabel("Enregistrer les modifications")
+                        StrakkPrimaryButton(
+                            title: "Save",
+                            action: {
+                                guard let proteinVal = protein.toDoubleOrNil(),
+                                      let caloriesVal = calories.toDoubleOrNil() else { return }
+                                let fatVal = fat.toDoubleOrNil()
+                                let carbsVal = carbs.toDoubleOrNil()
+                                let quantityVal = quantity.trimmingCharacters(in: .whitespaces).isEmpty ? nil : quantity
+                                onSave(name, proteinVal, caloriesVal, fatVal, carbsVal, quantityVal)
+                            },
+                            isEnabled: isSubmittable
+                        )
+                        .accessibilityLabel(Text("Save changes"))
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .padding(.horizontal, StrakkSpacing.lg)
+                    .padding(.top, StrakkSpacing.md)
+                    .padding(.bottom, StrakkSpacing.xxl)
                 }
             }
             .navigationTitle("Edit entry")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        onCancel()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-                    .accessibilityLabel("Annuler")
-                }
+                StrakkCloseToolbarItem(action: onCancel)
             }
             .onAppear {
                 focusedField = .name

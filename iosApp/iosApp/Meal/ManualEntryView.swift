@@ -49,8 +49,8 @@ struct ManualEntryView: View {
                                 field: .name,
                                 isValid: formViewModel.formData.name.count <= 100
                             )
-                            .onChange(of: name) { _, v in
-                                formViewModel.onEvent(ManualEntryEventNameChanged(value: v))
+                            .onChange(of: name) { _, value in
+                                formViewModel.onEvent(ManualEntryEventNameChanged(value: value))
                             }
                         }
 
@@ -60,10 +60,11 @@ struct ManualEntryView: View {
                                     placeholder: "35",
                                     text: $protein,
                                     field: .protein,
-                                    isValid: protein.isEmpty || protein.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true
+                                    isValid: protein.isEmpty
+                                        || protein.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true
                                 )
-                                .onChange(of: protein) { _, v in
-                                    formViewModel.onEvent(ManualEntryEventProteinChanged(value: v))
+                                .onChange(of: protein) { _, value in
+                                    formViewModel.onEvent(ManualEntryEventProteinChanged(value: value))
                                 }
                             }
 
@@ -72,10 +73,11 @@ struct ManualEntryView: View {
                                     placeholder: "400",
                                     text: $calories,
                                     field: .calories,
-                                    isValid: calories.isEmpty || calories.toDoubleOrNil().map { $0 >= 0 && $0 <= 5000 } == true
+                                    isValid: calories.isEmpty
+                                        || calories.toDoubleOrNil().map { $0 >= 0 && $0 <= 5000 } == true
                                 )
-                                .onChange(of: calories) { _, v in
-                                    formViewModel.onEvent(ManualEntryEventCaloriesChanged(value: v))
+                                .onChange(of: calories) { _, value in
+                                    formViewModel.onEvent(ManualEntryEventCaloriesChanged(value: value))
                                 }
                             }
                         }
@@ -88,8 +90,8 @@ struct ManualEntryView: View {
                                     field: .fat,
                                     isValid: fat.isEmpty || fat.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true
                                 )
-                                .onChange(of: fat) { _, v in
-                                    formViewModel.onEvent(ManualEntryEventFatChanged(value: v))
+                                .onChange(of: fat) { _, value in
+                                    formViewModel.onEvent(ManualEntryEventFatChanged(value: value))
                                 }
                             }
 
@@ -100,8 +102,8 @@ struct ManualEntryView: View {
                                     field: .carbs,
                                     isValid: carbs.isEmpty || carbs.toDoubleOrNil().map { $0 >= 0 && $0 <= 500 } == true
                                 )
-                                .onChange(of: carbs) { _, v in
-                                    formViewModel.onEvent(ManualEntryEventCarbsChanged(value: v))
+                                .onChange(of: carbs) { _, value in
+                                    formViewModel.onEvent(ManualEntryEventCarbsChanged(value: value))
                                 }
                             }
                         }
@@ -113,8 +115,8 @@ struct ManualEntryView: View {
                                 field: .quantity,
                                 isValid: quantity.count <= 50
                             )
-                            .onChange(of: quantity) { _, v in
-                                formViewModel.onEvent(ManualEntryEventQuantityChanged(value: v))
+                            .onChange(of: quantity) { _, value in
+                                formViewModel.onEvent(ManualEntryEventQuantityChanged(value: value))
                             }
                         }
 
@@ -124,53 +126,29 @@ struct ManualEntryView: View {
                                 .foregroundStyle(Color.strakkError)
                         }
 
-                        // Submit button
-                        Button {
-                            if isDraftMode {
-                                submitToDraft()
-                            } else {
-                                formViewModel.onEvent(ManualEntryEventSubmit(logDate: logDate))
-                            }
-                        } label: {
-                            HStack {
-                                if formViewModel.formData.isSubmitting {
-                                    ProgressView()
-                                        .tint(.white)
-                                        .scaleEffect(0.8)
+                        StrakkPrimaryButton(
+                            title: formViewModel.formData.isSubmitting ? "Adding…" : "Add",
+                            action: {
+                                if isDraftMode {
+                                    submitToDraft()
                                 } else {
-                                    Text("Add")
-                                        .font(.strakkBodyBold)
-                                        .foregroundStyle(.white)
+                                    formViewModel.onEvent(ManualEntryEventSubmit(logDate: logDate))
                                 }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(
-                                formViewModel.formData.isSubmittable
-                                    ? Color.strakkPrimary
-                                    : Color.strakkSurface2
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .disabled(!formViewModel.formData.isSubmittable || formViewModel.formData.isSubmitting)
-                        .accessibilityLabel("Add food item")
+                            },
+                            isEnabled: formViewModel.formData.isSubmittable && !formViewModel.formData.isSubmitting
+                        )
+                        .accessibilityLabel(Text("Add food item"))
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    .padding(.horizontal, StrakkSpacing.lg)
+                    .padding(.top, StrakkSpacing.md)
+                    .padding(.bottom, StrakkSpacing.xxl)
                 }
             }
-            .navigationTitle("Manual entry")
+            .navigationTitle(Text("Manual entry"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        formViewModel.onEvent(ManualEntryEventCancel.shared)
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-                    .accessibilityLabel("Cancel")
+                StrakkCloseToolbarItem {
+                    formViewModel.onEvent(ManualEntryEventCancel.shared)
                 }
             }
         }
@@ -184,15 +162,15 @@ struct ManualEntryView: View {
     // MARK: - Draft mode submit (bypasses QuickAddManualUseCase)
 
     private func submitToDraft() {
-        let d = formViewModel.formData
-        let protein = Double(d.protein.replacingOccurrences(of: ",", with: ".")) ?? 0
-        let calories = Double(d.calories.replacingOccurrences(of: ",", with: ".")) ?? 0
-        let fat = Double(d.fat.replacingOccurrences(of: ",", with: "."))
-        let carbs = Double(d.carbs.replacingOccurrences(of: ",", with: "."))
-        let qty: String? = d.quantity.isEmpty ? nil : d.quantity
+        let draftVm = formViewModel.formData
+        let protein = Double(draftVm.protein.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let calories = Double(draftVm.calories.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let fat = Double(draftVm.fat.replacingOccurrences(of: ",", with: "."))
+        let carbs = Double(draftVm.carbs.replacingOccurrences(of: ",", with: "."))
+        let qty: String? = draftVm.quantity.isEmpty ? nil : draftVm.quantity
 
         draftViewModel.onEvent(MealDraftEventAddManualItem(
-            name: d.name,
+            name: draftVm.name,
             protein: protein,
             calories: calories,
             fat: asKotlinDouble(fat),

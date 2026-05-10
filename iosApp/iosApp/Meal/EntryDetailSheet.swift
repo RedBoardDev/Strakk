@@ -31,14 +31,7 @@ struct EntryDetailSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { onDismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-                    .accessibilityLabel("Close")
-                }
+                StrakkCloseToolbarItem(action: onDismiss)
             }
         }
         .presentationDetents([.medium])
@@ -69,47 +62,57 @@ struct EntryDetailSheet: View {
 
     private var macroBreakdown: some View {
         var items: [MacroBreakdownItem] = [
-            .init(label: "Protein", value: String(format: "%.0fg", entry.protein), color: .strakkProtein),
-            .init(label: "Calories", value: String(format: "%.0f kcal", entry.calories), color: .strakkCalories),
+            .init(
+                label: String(localized: "Protein"),
+                value: String(format: "%.0fg", entry.protein),
+                color: .strakkProtein
+            ),
+            .init(
+                label: String(localized: "Calories"),
+                value: String(format: "%.0f kcal", entry.calories),
+                color: .strakkCalories
+            )
         ]
         if let fat = entry.fat {
-            items.append(.init(label: "Fat", value: String(format: "%.0fg", fat), color: .strakkAccentYellow))
+            items.append(.init(
+                label: String(localized: "Fat"),
+                value: String(format: "%.0fg", fat),
+                color: .strakkAccentYellow
+            ))
         }
         if let carbs = entry.carbs {
-            items.append(.init(label: "Carbs", value: String(format: "%.0fg", carbs), color: .strakkAccentIndigo))
+            items.append(.init(
+                label: String(localized: "Carbs"),
+                value: String(format: "%.0fg", carbs),
+                color: .strakkAccentIndigo
+            ))
         }
         if let qty = entry.quantity {
-            items.append(.init(label: "Quantity", value: qty, color: .strakkTextSecondary))
+            items.append(.init(
+                label: String(localized: "Quantity"),
+                value: qty,
+                color: .strakkTextSecondary
+            ))
         }
         return MacroBreakdown(items: items)
     }
-
 
     // MARK: - Actions
 
     private var actions: some View {
         HStack(spacing: StrakkSpacing.sm) {
-            Button {
-                onEdit()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Edit")
-                        .font(.strakkBodyBold)
-                }
-                .foregroundStyle(Color.strakkTextPrimary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.strakkSurface2)
-                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-            }
-            .accessibilityLabel("Edit entry")
+            StrakkSecondaryButton(
+                title: "Edit",
+                action: onEdit,
+                icon: "pencil"
+            )
+            .accessibilityLabel(Text("Edit entry"))
 
             Button(role: .destructive) {
+                HapticEngine.medium()
                 onDelete()
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: StrakkSpacing.xs) {
                     Image(systemName: "trash")
                         .font(.system(size: 14, weight: .semibold))
                     Text("Delete")
@@ -117,11 +120,11 @@ struct EntryDetailSheet: View {
                 }
                 .foregroundStyle(Color.strakkError)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: 52)
                 .background(Color.strakkSurface2)
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
             }
-            .accessibilityLabel("Delete entry")
+            .accessibilityLabel(Text("Delete entry"))
         }
     }
 
