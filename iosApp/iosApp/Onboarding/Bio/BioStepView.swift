@@ -33,9 +33,12 @@ struct BioStepView: View {
                 .padding(.top, StrakkSpacing.xl)
             }
 
-            continueButton
-                .padding(.horizontal, StrakkSpacing.xl)
-                .padding(.bottom, StrakkSpacing.xxl)
+            StrakkPrimaryButton(
+                title: "Continue",
+                action: { wrapper.send(OnboardingFlowEventOnContinue()) }
+            )
+            .padding(.horizontal, StrakkSpacing.xl)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
         .onAppear {
             heightCm = Int(wrapper.state.heightCm)
@@ -50,13 +53,13 @@ struct BioStepView: View {
             OnboardingProgressBar(progress: wrapper.state.progressFraction)
                 .padding(.horizontal, StrakkSpacing.xl)
 
-            Text("Quelques infos sur toi")
+            Text("A few facts about you")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
                 .padding(.top, StrakkSpacing.xl)
 
-            Text("Facultatif — pour personnaliser tes objectifs.")
+            Text("Optional — to fine-tune your goals.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -65,11 +68,11 @@ struct BioStepView: View {
 
     private var heightSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Taille")
+            Text("Height")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            Picker("Taille", selection: $heightCm) {
+            Picker("Height", selection: $heightCm) {
                 ForEach(100...230, id: \.self) { cm in
                     Text("\(cm) cm").tag(cm)
                 }
@@ -82,7 +85,7 @@ struct BioStepView: View {
 
     private var birthDateSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Date de naissance")
+            Text("Date of birth")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
@@ -107,10 +110,10 @@ struct BioStepView: View {
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                 .overlay(
                     RoundedRectangle(cornerRadius: StrakkRadius.sm)
-                        .strokeBorder(Color.strakkDivider, lineWidth: 1)
+                        .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
                 )
             }
-            .accessibilityLabel("Choisir la date de naissance")
+            .accessibilityLabel(Text("Choose your date of birth"))
 
             if showDatePicker {
                 DatePicker(
@@ -130,19 +133,19 @@ struct BioStepView: View {
 
     private var sexSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Sexe biologique")
+            Text("Biological sex")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
             HStack(spacing: StrakkSpacing.xs) {
-                sexPill(label: "Homme", value: BiologicalSex.male)
-                sexPill(label: "Femme", value: BiologicalSex.female)
-                sexPill(label: "Préfère ne pas dire", value: BiologicalSex.unspecified)
+                sexPill(label: "Male", value: BiologicalSex.male)
+                sexPill(label: "Female", value: BiologicalSex.female)
+                sexPill(label: "Prefer not to say", value: BiologicalSex.unspecified)
             }
         }
     }
 
-    private func sexPill(label: String, value: BiologicalSex) -> some View {
+    private func sexPill(label: LocalizedStringKey, value: BiologicalSex) -> some View {
         let isSelected = wrapper.state.biologicalSex == value
         return Button {
             let newValue: BiologicalSex? = isSelected ? nil : value
@@ -158,30 +161,16 @@ struct BioStepView: View {
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        .accessibilityLabel(Text(label))
         .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
     }
 
     private var formattedDate: String {
-        guard wrapper.state.birthDate != nil else { return "Sélectionner" }
+        guard wrapper.state.birthDate != nil else { return String(localized: "Select") }
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.current
         return formatter.string(from: birthDate)
-    }
-
-    private var continueButton: some View {
-        Button {
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Text("Continuer")
-                .font(.strakkBodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color.strakkPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        }
     }
 
     private func sendBirthDate(_ date: Date) {

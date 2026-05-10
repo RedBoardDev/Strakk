@@ -6,15 +6,15 @@ struct ActivityTrainingStepView: View {
 
     private struct TypeOption {
         let type: TrainingType
-        let label: String
+        let label: LocalizedStringKey
     }
 
     private let typeOptions: [TypeOption] = [
-        .init(type: .strength, label: "Muscu"),
+        .init(type: .strength, label: "Strength"),
         .init(type: .cardio, label: "Cardio"),
-        .init(type: .teamSport, label: "Sport co"),
-        .init(type: .yogaFlexibility, label: "Yoga / Flexi"),
-        .init(type: .other, label: "Autre")
+        .init(type: .teamSport, label: "Team sport"),
+        .init(type: .yogaFlexibility, label: "Yoga / Mobility"),
+        .init(type: .other, label: "Other")
     ]
 
     var body: some View {
@@ -30,9 +30,12 @@ struct ActivityTrainingStepView: View {
                 .padding(.top, StrakkSpacing.xl)
             }
 
-            continueButton
-                .padding(.horizontal, StrakkSpacing.xl)
-                .padding(.bottom, StrakkSpacing.xxl)
+            StrakkPrimaryButton(
+                title: "Continue",
+                action: { wrapper.send(OnboardingFlowEventOnContinue()) }
+            )
+            .padding(.horizontal, StrakkSpacing.xl)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
     }
 
@@ -41,7 +44,7 @@ struct ActivityTrainingStepView: View {
             OnboardingProgressBar(progress: wrapper.state.progressFraction)
                 .padding(.horizontal, StrakkSpacing.xl)
 
-            Text("Parle-moi de ton entraînement")
+            Text("Tell me about your training")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -51,7 +54,7 @@ struct ActivityTrainingStepView: View {
 
     private var frequencySection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("Séances par semaine")
+            Text("Sessions per week")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
@@ -67,7 +70,7 @@ struct ActivityTrainingStepView: View {
 
     private var typeSection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("Types d'entraînement")
+            Text("Training types")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
@@ -85,20 +88,6 @@ struct ActivityTrainingStepView: View {
                     }
                 }
             )
-        }
-    }
-
-    private var continueButton: some View {
-        Button {
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Text("Continuer")
-                .font(.strakkBodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color.strakkPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
     }
 }

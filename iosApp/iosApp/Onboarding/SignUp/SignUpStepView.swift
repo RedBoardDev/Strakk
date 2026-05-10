@@ -54,7 +54,7 @@ struct SignUpStepView: View {
             OnboardingProgressBar(progress: wrapper.state.progressFraction)
                 .padding(.horizontal, StrakkSpacing.xl)
 
-            Text("Crée ton compte")
+            Text("Create your account")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -68,7 +68,7 @@ struct SignUpStepView: View {
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            TextField("ton@email.com", text: $email)
+            TextField("you@email.com", text: $email)
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .keyboardType(.emailAddress)
@@ -81,7 +81,7 @@ struct SignUpStepView: View {
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                 .overlay(
                     RoundedRectangle(cornerRadius: StrakkRadius.sm)
-                        .strokeBorder(Color.strakkDivider, lineWidth: 1)
+                        .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
                 )
                 .focused($focusedField, equals: .email)
                 .onChange(of: email) { _, newValue in
@@ -95,16 +95,16 @@ struct SignUpStepView: View {
 
     private var passwordField: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Mot de passe")
+            Text("Password")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
             HStack {
                 Group {
                     if showPassword {
-                        TextField("Min. 6 caractères", text: $password)
+                        TextField("Min. 6 characters", text: $password)
                     } else {
-                        SecureField("Min. 6 caractères", text: $password)
+                        SecureField("Min. 6 characters", text: $password)
                     }
                 }
                 .font(.strakkBody)
@@ -127,7 +127,7 @@ struct SignUpStepView: View {
                         .foregroundStyle(Color.strakkTextSecondary)
                         .frame(width: 44, height: 44)
                 }
-                .accessibilityLabel(showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe")
+                .accessibilityLabel(Text(showPassword ? "Hide password" : "Show password"))
             }
             .padding(.horizontal, StrakkSpacing.sm)
             .padding(.vertical, StrakkSpacing.xs)
@@ -135,49 +135,37 @@ struct SignUpStepView: View {
             .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
             .overlay(
                 RoundedRectangle(cornerRadius: StrakkRadius.sm)
-                    .strokeBorder(Color.strakkDivider, lineWidth: 1)
+                    .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
             )
 
-            Text("Minimum 6 caractères")
+            Text("Minimum 6 characters")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
         }
     }
 
     private var createButton: some View {
-        Button {
-            focusedField = nil
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Group {
-                if wrapper.state.isSigningUp {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Créer mon compte")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(wrapper.state.isSigningUp ? Color.strakkPrimary.opacity(0.6) : Color.strakkPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        }
-        .disabled(wrapper.state.isSigningUp)
-        .accessibilityLabel("Créer mon compte")
+        StrakkPrimaryButton(
+            title: wrapper.state.isSigningUp ? "Creating…" : "Create my account",
+            action: {
+                focusedField = nil
+                wrapper.send(OnboardingFlowEventOnContinue())
+            },
+            isEnabled: !wrapper.state.isSigningUp
+        )
+        .accessibilityLabel(Text("Create my account"))
     }
 
     private var loginLink: some View {
         Button {
             wrapper.send(OnboardingFlowEventOnNavigateToLogin())
         } label: {
-            Text("Se connecter")
+            Text("Sign in")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .underline()
         }
         .frame(height: 44)
-        .accessibilityLabel("Aller à la connexion")
+        .accessibilityLabel(Text("Go to sign in"))
     }
 }

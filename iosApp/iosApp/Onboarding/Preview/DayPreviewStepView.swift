@@ -17,21 +17,26 @@ struct DayPreviewStepView: View {
                 .padding(.top, StrakkSpacing.xl)
             }
 
-            startButton
-                .padding(.horizontal, StrakkSpacing.xl)
-                .padding(.bottom, StrakkSpacing.xxl)
+            StrakkPrimaryButton(
+                title: wrapper.state.isSaving ? "Saving…" : "Start tracking",
+                action: { wrapper.send(OnboardingFlowEventOnContinue()) },
+                isEnabled: !wrapper.state.isSaving
+            )
+            .padding(.horizontal, StrakkSpacing.xl)
+            .padding(.bottom, StrakkSpacing.xxl)
+            .accessibilityLabel(Text("Start tracking"))
         }
     }
 
     private var stepHeader: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Voilà à quoi ressemblera ta journée")
+            Text("Here's what your day will look like")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
                 .padding(.top, StrakkSpacing.xl)
 
-            Text("Commence à tracker pour voir ta progression.")
+            Text("Start tracking to watch your progress.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -40,69 +45,16 @@ struct DayPreviewStepView: View {
 
     private var macroGrid: some View {
         let s = wrapper.state
-        let columns = [GridItem(.flexible()), GridItem(.flexible())]
-        return LazyVGrid(columns: columns, spacing: StrakkSpacing.sm) {
-            previewMacroCard(
-                label: "Protéines",
-                consumed: 0,
-                goal: Int(s.proteinGoal),
-                unit: "g",
-                color: .strakkPrimary
-            )
-            previewMacroCard(
-                label: "Calories",
-                consumed: 0,
-                goal: Int(s.calorieGoal),
-                unit: "kcal",
-                color: .strakkCalories
-            )
-            previewMacroCard(
-                label: "Lipides",
-                consumed: 0,
-                goal: Int(s.fatGoal),
-                unit: "g",
-                color: .strakkAccentYellow
-            )
-            previewMacroCard(
-                label: "Glucides",
-                consumed: 0,
-                goal: Int(s.carbGoal),
-                unit: "g",
-                color: .strakkAccentIndigo
-            )
-        }
-    }
-
-    private func previewMacroCard(label: String, consumed: Int, goal: Int, unit: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text(label)
-                .font(.strakkCaption)
-                .foregroundStyle(Color.strakkTextSecondary)
-
-            HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Text("0")
-                    .font(.strakkHeading2)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Text("/ \(goal)\(unit)")
-                    .font(.strakkCaption)
-                    .foregroundStyle(Color.strakkTextTertiary)
-            }
-
-            GeometryReader { _ in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.strakkSurface2)
-                        .frame(height: 4)
-                    Capsule()
-                        .fill(color)
-                        .frame(width: 0, height: 4)
-                }
-            }
-            .frame(height: 4)
-        }
-        .padding(StrakkSpacing.md)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+        return MacroProgressGrid(
+            totalProtein: 0,
+            totalCalories: 0,
+            totalFat: 0,
+            totalCarbs: 0,
+            proteinGoal: Int(s.proteinGoal),
+            calorieGoal: Int(s.calorieGoal),
+            fatGoal: Int(s.fatGoal),
+            carbGoal: Int(s.carbGoal)
+        )
     }
 
     private var waterBar: some View {
@@ -111,7 +63,7 @@ struct DayPreviewStepView: View {
             HStack {
                 Image(systemName: "drop.fill")
                     .foregroundStyle(Color.strakkWater)
-                Text("Eau")
+                Text("Water")
                     .font(.strakkCaption)
                     .foregroundStyle(Color.strakkTextSecondary)
                 Spacer()
@@ -135,28 +87,5 @@ struct DayPreviewStepView: View {
         .padding(StrakkSpacing.md)
         .background(Color.strakkSurface1)
         .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-    }
-
-    private var startButton: some View {
-        Button {
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Group {
-                if wrapper.state.isSaving {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Commencer à tracker")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(wrapper.state.isSaving ? Color.strakkPrimary.opacity(0.6) : Color.strakkPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        }
-        .disabled(wrapper.state.isSaving)
-        .accessibilityLabel("Commencer à tracker")
     }
 }

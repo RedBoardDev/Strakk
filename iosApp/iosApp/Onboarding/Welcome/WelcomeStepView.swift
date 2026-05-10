@@ -13,7 +13,7 @@ struct WelcomeStepView: View {
                     .font(.strakkDisplayHero)
                     .foregroundStyle(Color.strakkPrimary)
 
-                Text("Ton coach nutrition & fitness, simplifié.")
+                Text("Your nutrition & fitness coach, made simple.")
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
                     .multilineTextAlignment(.center)
@@ -23,29 +23,22 @@ struct WelcomeStepView: View {
             Spacer()
 
             VStack(spacing: StrakkSpacing.md) {
-                Button {
-                    wrapper.send(OnboardingFlowEventOnContinue())
-                } label: {
-                    Text("C'est parti")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.strakkPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-                }
-                .accessibilityLabel("Commencer l'onboarding")
+                StrakkPrimaryButton(
+                    title: "Get started",
+                    action: { wrapper.send(OnboardingFlowEventOnContinue()) }
+                )
+                .accessibilityLabel(Text("Start onboarding"))
 
                 Button {
                     wrapper.send(OnboardingFlowEventOnNavigateToLogin())
                 } label: {
-                    Text("Déjà un compte ?")
+                    Text("Already have an account?")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextSecondary)
                         .underline()
                 }
                 .frame(height: 44)
-                .accessibilityLabel("Se connecter à un compte existant")
+                .accessibilityLabel(Text("Sign in to an existing account"))
             }
             .padding(.horizontal, StrakkSpacing.xl)
             .padding(.bottom, StrakkSpacing.xxl)

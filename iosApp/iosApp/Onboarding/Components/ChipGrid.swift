@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ChipItem: Identifiable {
     let id: String
-    let label: String
+    let label: LocalizedStringKey
     let isSelected: Bool
 }
 
@@ -26,13 +26,13 @@ struct ChipGrid: View {
                         .overlay(
                             Capsule()
                                 .strokeBorder(
-                                    chip.isSelected ? Color.strakkPrimary : Color.strakkDivider,
+                                    chip.isSelected ? Color.strakkPrimary : Color.strakkBorderSubtle,
                                     lineWidth: 1
                                 )
                         )
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(chip.label)
+                .accessibilityLabel(Text(chip.label))
                 .accessibilityAddTraits(chip.isSelected ? [.isSelected, .isButton] : .isButton)
             }
         }

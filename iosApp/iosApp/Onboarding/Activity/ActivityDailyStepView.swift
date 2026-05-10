@@ -7,35 +7,35 @@ struct ActivityDailyStepView: View {
     private struct IntensityOption {
         let intensity: TrainingIntensity
         let icon: String
-        let title: String
-        let subtitle: String
+        let title: LocalizedStringKey
+        let subtitle: LocalizedStringKey
     }
 
     private struct DailyOption {
         let level: DailyActivityLevel
         let icon: String
-        let title: String
-        let subtitle: String
+        let title: LocalizedStringKey
+        let subtitle: LocalizedStringKey
     }
 
     private let intensityOptions: [IntensityOption] = [
         .init(
             intensity: .light,
             icon: "figure.walk",
-            title: "Légère",
-            subtitle: "Effort faible, transpiration modérée"
+            title: "Light",
+            subtitle: "Low effort, mild sweat"
         ),
         .init(
             intensity: .moderate,
             icon: "figure.run",
-            title: "Modérée",
-            subtitle: "Effort soutenu, essoufflement"
+            title: "Moderate",
+            subtitle: "Sustained effort, breathing harder"
         ),
         .init(
             intensity: .intense,
             icon: "bolt.fill",
             title: "Intense",
-            subtitle: "Effort maximal, épuisant"
+            subtitle: "Maximum effort, exhausting"
         )
     ]
 
@@ -43,20 +43,20 @@ struct ActivityDailyStepView: View {
         .init(
             level: .sedentary,
             icon: "chair.lounge.fill",
-            title: "Sédentaire",
-            subtitle: "Assis la plupart du temps"
+            title: "Sedentary",
+            subtitle: "Sitting most of the day"
         ),
         .init(
             level: .moderatelyActive,
             icon: "figure.walk.motion",
-            title: "Modérément actif",
-            subtitle: "Quelques déplacements par jour"
+            title: "Moderately active",
+            subtitle: "On your feet several times a day"
         ),
         .init(
             level: .veryActive,
             icon: "figure.hiking",
-            title: "Très actif",
-            subtitle: "Debout et en mouvement toute la journée"
+            title: "Very active",
+            subtitle: "On your feet and moving all day"
         )
     ]
 
@@ -73,9 +73,12 @@ struct ActivityDailyStepView: View {
                 .padding(.top, StrakkSpacing.xl)
             }
 
-            continueButton
-                .padding(.horizontal, StrakkSpacing.xl)
-                .padding(.bottom, StrakkSpacing.xxl)
+            StrakkPrimaryButton(
+                title: "Continue",
+                action: { wrapper.send(OnboardingFlowEventOnContinue()) }
+            )
+            .padding(.horizontal, StrakkSpacing.xl)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
     }
 
@@ -84,7 +87,7 @@ struct ActivityDailyStepView: View {
             OnboardingProgressBar(progress: wrapper.state.progressFraction)
                 .padding(.horizontal, StrakkSpacing.xl)
 
-            Text("Et au quotidien ?")
+            Text("And in everyday life?")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -94,11 +97,12 @@ struct ActivityDailyStepView: View {
 
     private var intensitySection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("Intensité de tes séances")
+            Text("Training intensity")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            ForEach(intensityOptions, id: \.title) { option in
+            ForEach(0..<intensityOptions.count, id: \.self) { index in
+                let option = intensityOptions[index]
                 SelectableCard(
                     icon: option.icon,
                     title: option.title,
@@ -115,11 +119,12 @@ struct ActivityDailyStepView: View {
 
     private var dailySection: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("Activité hors entraînement")
+            Text("Daily activity")
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            ForEach(dailyOptions, id: \.title) { option in
+            ForEach(0..<dailyOptions.count, id: \.self) { index in
+                let option = dailyOptions[index]
                 SelectableCard(
                     icon: option.icon,
                     title: option.title,
@@ -131,20 +136,6 @@ struct ActivityDailyStepView: View {
                     wrapper.send(OnboardingFlowEventOnDailyActivityChanged(level: newValue))
                 }
             }
-        }
-    }
-
-    private var continueButton: some View {
-        Button {
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Text("Continuer")
-                .font(.strakkBodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color.strakkPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
     }
 }

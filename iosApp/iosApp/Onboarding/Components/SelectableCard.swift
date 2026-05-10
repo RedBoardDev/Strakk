@@ -2,8 +2,8 @@ import SwiftUI
 
 struct SelectableCard: View {
     let icon: String
-    let title: String
-    var subtitle: String?
+    let title: LocalizedStringKey
+    var subtitle: LocalizedStringKey?
     let isSelected: Bool
     let action: () -> Void
 
@@ -41,13 +41,13 @@ struct SelectableCard: View {
             .overlay(
                 RoundedRectangle(cornerRadius: StrakkRadius.sm)
                     .strokeBorder(
-                        isSelected ? Color.strakkPrimary : Color.strakkDivider,
+                        isSelected ? Color.strakkPrimary : Color.strakkBorderSubtle,
                         lineWidth: isSelected ? 2 : 1
                     )
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        .accessibilityLabel(Text(title))
         .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
     }
 }

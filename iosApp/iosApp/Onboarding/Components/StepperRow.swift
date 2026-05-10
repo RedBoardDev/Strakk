@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct StepperRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: Int
-    let unit: String
+    let unit: LocalizedStringKey
     let step: Int
     let range: ClosedRange<Int>
     let onDecrement: () -> Void
@@ -70,7 +70,7 @@ struct StepperRow: View {
             },
             perform: {}
         )
-        .accessibilityLabel("Diminuer \(label)")
+        .accessibilityLabel(Text("Decrease") + Text(" ") + Text(label))
     }
 
     private var incrementButton: some View {
@@ -101,7 +101,7 @@ struct StepperRow: View {
             },
             perform: {}
         )
-        .accessibilityLabel("Augmenter \(label)")
+        .accessibilityLabel(Text("Increase") + Text(" ") + Text(label))
     }
 
     private func startLongPress(increment: Bool) {

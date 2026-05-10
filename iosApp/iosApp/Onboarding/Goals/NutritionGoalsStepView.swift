@@ -16,7 +16,7 @@ struct NutritionGoalsStepView: View {
                         .padding(.bottom, StrakkSpacing.lg)
 
                     Divider()
-                        .background(Color.strakkDivider)
+                        .background(Color.strakkDividerWeak)
                         .padding(.horizontal, StrakkSpacing.xl)
 
                     steppersList
@@ -25,21 +25,24 @@ struct NutritionGoalsStepView: View {
                 }
             }
 
-            continueButton
-                .padding(.horizontal, StrakkSpacing.xl)
-                .padding(.bottom, StrakkSpacing.xxl)
+            StrakkPrimaryButton(
+                title: "Continue",
+                action: { wrapper.send(OnboardingFlowEventOnContinue()) }
+            )
+            .padding(.horizontal, StrakkSpacing.xl)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
     }
 
     private var stepHeader: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("Tes objectifs nutritionnels")
+            Text("Your nutrition goals")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .padding(.horizontal, StrakkSpacing.xl)
                 .padding(.top, StrakkSpacing.xl)
 
-            Text("Ajuste ou laisse l'IA calculer pour toi.")
+            Text("Tweak them or let the AI compute them for you.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .padding(.horizontal, StrakkSpacing.xl)
@@ -76,7 +79,7 @@ struct NutritionGoalsStepView: View {
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextPrimary)
                     if aiState == .failed {
-                        Text("Réessaie ou ajuste manuellement")
+                        Text("Try again or adjust manually")
                             .font(.strakkCaption)
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
@@ -96,16 +99,16 @@ struct NutritionGoalsStepView: View {
             )
         }
         .disabled(aiState == .loading || aiState == .completed)
-        .accessibilityLabel(aiButtonTitle(for: aiState))
+        .accessibilityLabel(Text(aiButtonTitle(for: aiState)))
     }
 
-    private func aiButtonTitle(for state: AiCalculationState) -> String {
+    private func aiButtonTitle(for state: AiCalculationState) -> LocalizedStringKey {
         switch state {
-        case .available: return "Calculer avec l'IA"
-        case .loading: return "Calcul en cours..."
-        case .completed: return "Objectifs calculés"
-        case .failed: return "Calcul échoué"
-        default: return "Calculer avec l'IA"
+        case .available: return "Calculate with AI"
+        case .loading: return "Calculating…"
+        case .completed: return "Goals calculated"
+        case .failed: return "Calculation failed"
+        default: return "Calculate with AI"
         }
     }
 
@@ -113,7 +116,7 @@ struct NutritionGoalsStepView: View {
         let s = wrapper.state
         return VStack(spacing: 0) {
             StepperRow(
-                label: "Protéines",
+                label: "Protein",
                 value: Int(s.proteinGoal),
                 unit: "g",
                 step: 5,
@@ -137,7 +140,7 @@ struct NutritionGoalsStepView: View {
             )
             dividerLine
             StepperRow(
-                label: "Lipides",
+                label: "Fat",
                 value: Int(s.fatGoal),
                 unit: "g",
                 step: 5,
@@ -147,7 +150,7 @@ struct NutritionGoalsStepView: View {
             )
             dividerLine
             StepperRow(
-                label: "Glucides",
+                label: "Carbs",
                 value: Int(s.carbGoal),
                 unit: "g",
                 step: 5,
@@ -157,7 +160,7 @@ struct NutritionGoalsStepView: View {
             )
             dividerLine
             StepperRow(
-                label: "Eau",
+                label: "Water",
                 value: Int(s.waterGoal),
                 unit: "ml",
                 step: 100,
@@ -170,21 +173,7 @@ struct NutritionGoalsStepView: View {
 
     private var dividerLine: some View {
         Divider()
-            .background(Color.strakkDivider)
+            .background(Color.strakkDividerWeak)
             .padding(.vertical, StrakkSpacing.xxs)
-    }
-
-    private var continueButton: some View {
-        Button {
-            wrapper.send(OnboardingFlowEventOnContinue())
-        } label: {
-            Text("Continuer")
-                .font(.strakkBodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color.strakkPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        }
     }
 }

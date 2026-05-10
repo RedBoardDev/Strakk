@@ -3,10 +3,30 @@ import shared
 
 // MARK: - Top 3 Pro features for trial confirmation
 
-private let proOfferFeatures: [(symbol: String, title: String, description: String)] = [
-    ("camera.viewfinder", "Photo intelligente", "Prends une photo, l'IA calcule tes macros."),
-    ("text.bubble", "Texte intelligent", "Décris ton repas, l'IA fait le reste."),
-    ("chart.bar.xaxis", "Bilan hebdo IA", "Un résumé personnalisé chaque semaine.")
+private struct ProOfferFeature: Sendable {
+    let symbol: String
+    /// `LocalizedStringKey` is not `Sendable`; store the source string and wrap
+    /// it at the call site via `Text(LocalizedStringKey(stringLiteral:))`.
+    let titleKey: String
+    let descriptionKey: String
+}
+
+private let proOfferFeatures: [ProOfferFeature] = [
+    .init(
+        symbol: "camera.viewfinder",
+        titleKey: "Smart photo",
+        descriptionKey: "Snap a meal, AI computes your macros."
+    ),
+    .init(
+        symbol: "text.bubble",
+        titleKey: "Smart text",
+        descriptionKey: "Describe your meal, AI does the rest."
+    ),
+    .init(
+        symbol: "chart.bar.xaxis",
+        titleKey: "Weekly AI summary",
+        descriptionKey: "A personalized recap every week."
+    )
 ]
 
 // MARK: - ProOfferStepView
@@ -16,7 +36,7 @@ struct ProOfferStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Bonne nouvelle !")
+            Text("Good news!")
                 .font(.strakkHeading2)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .padding(.top, StrakkSpacing.xxl)
@@ -35,22 +55,18 @@ struct ProOfferStepView: View {
         .padding(.bottom, StrakkSpacing.xl)
     }
 
-    // MARK: - Headline with colored "7 jours"
-
     private var headlineText: some View {
-        (Text("Ton essai Pro de ")
+        (Text("Your ")
             .font(.strakkHeading1)
             .foregroundStyle(Color.strakkTextPrimary)
-        + Text("7 jours")
+        + Text("7-day")
             .font(.strakkHeading1)
             .foregroundStyle(Color.strakkPrimary)
-        + Text(" est activé !")
+        + Text(" Pro trial is live!")
             .font(.strakkHeading1)
             .foregroundStyle(Color.strakkTextPrimary))
             .fixedSize(horizontal: false, vertical: true)
     }
-
-    // MARK: - Feature card
 
     private var featureCard: some View {
         VStack(spacing: 0) {
@@ -62,10 +78,10 @@ struct ProOfferStepView: View {
                         .frame(width: 28)
 
                     VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
-                        Text(feature.title)
+                        Text(LocalizedStringKey(feature.titleKey))
                             .font(.strakkBodyBold)
                             .foregroundStyle(Color.strakkTextPrimary)
-                        Text(feature.description)
+                        Text(LocalizedStringKey(feature.descriptionKey))
                             .font(.strakkCaption)
                             .foregroundStyle(Color.strakkTextSecondary)
                     }
@@ -74,7 +90,7 @@ struct ProOfferStepView: View {
 
                 if index < proOfferFeatures.count - 1 {
                     Divider()
-                        .background(Color.strakkDivider)
+                        .background(Color.strakkDividerWeak)
                 }
             }
         }
@@ -82,23 +98,14 @@ struct ProOfferStepView: View {
         .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
     }
 
-    // MARK: - CTA section
-
     private var ctaSection: some View {
         VStack(spacing: StrakkSpacing.sm) {
-            Button {
-                HapticEngine.light()
-                wrapper.send(OnboardingFlowEventOnStartFreeTrial())
-            } label: {
-                Text("C'est parti !")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
-            }
+            StrakkPrimaryButton(
+                title: "Let's go",
+                action: { wrapper.send(OnboardingFlowEventOnStartFreeTrial()) }
+            )
 
-            Text("Profite de toutes les fonctionnalités Pro pendant 7 jours.")
+            Text("Enjoy every Pro feature for 7 days.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .multilineTextAlignment(.center)
