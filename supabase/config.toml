@@ -398,9 +398,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # Edge function configs — verify_jwt = false because we use ES256 tokens
 # which the Deno runtime cannot verify locally. Auth is still enforced via
 # supabase.auth.getUser(token) inside each function's requireUser() helper.
-[functions.analyze-meal-single]
-verify_jwt = false
-
 [functions.extract-meal-draft]
 verify_jwt = false
 
@@ -417,4 +414,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.search-off-live]
+verify_jwt = false
+
+[functions.revenuecat-webhook]
 verify_jwt = false
