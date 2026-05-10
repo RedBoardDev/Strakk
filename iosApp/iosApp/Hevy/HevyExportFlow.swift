@@ -34,10 +34,7 @@ struct HevyExportFlow: View {
             .navigationTitle("Export to Hevy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { onDismiss() }
-                        .foregroundStyle(Color.strakkTextSecondary)
-                }
+                StrakkCloseToolbarItem(action: onDismiss)
             }
             .toolbarBackground(Color.strakkBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -164,13 +161,13 @@ struct HevyExportFlow: View {
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Color.strakkTextTertiary)
                         }
-                        .padding(16)
-                        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+                        .padding(StrakkSpacing.md)
+                        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
                     }
-                    .accessibilityLabel("Export session \(session.name)")
+                    .accessibilityLabel(Text("Export session \(session.name)"))
                 }
             }
-            .padding(20)
+            .padding(StrakkSpacing.lg)
         }
     }
 
@@ -244,40 +241,28 @@ struct HevyExportFlow: View {
 
             Spacer()
 
-            VStack(spacing: 12) {
-                Button {
-                    viewModel.onEvent(HevyExportEventOnExportAnother.shared)
-                } label: {
-                    Text("Export Another")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(Color.strakkPrimary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
-                }
-                .accessibilityLabel("Export another workout program")
+            VStack(spacing: StrakkSpacing.sm) {
+                StrakkSecondaryButton(
+                    title: "Export another",
+                    action: { viewModel.onEvent(HevyExportEventOnExportAnother.shared) }
+                )
+                .accessibilityLabel(Text("Export another workout program"))
 
-                Button {
-                    onDismiss()
-                } label: {
-                    Text("Done")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: 12))
-                }
-                .accessibilityLabel("Done, close export")
+                StrakkPrimaryButton(
+                    title: "Done",
+                    action: onDismiss
+                )
+                .accessibilityLabel(Text("Done, close export"))
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 32)
+            .padding(.horizontal, StrakkSpacing.lg)
+            .padding(.bottom, StrakkSpacing.xxl)
         }
         .frame(maxWidth: .infinity)
     }
 
     // MARK: - Helpers
 
-    private func statPill(value: Int, label: String) -> some View {
+    private func statPill(value: Int, label: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
             Text("\(value)")
                 .font(.strakkCaptionBold)

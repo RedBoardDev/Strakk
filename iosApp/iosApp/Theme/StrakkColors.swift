@@ -28,7 +28,7 @@ extension Color {
     static let strakkTextTertiary = Color(hex: "#6F748C")
     static let strakkTextDisabled = Color(hex: "#50566F")
 
-    // ---- Accent — Orange (primary, protein, Rapide) ----
+    // ---- Accent — Orange (primary, protein) ----
     static let strakkPrimary = Color(hex: "#FF7A3D")
     static let strakkPrimaryLight = Color(hex: "#FF9A55")
     static let strakkAccentOrange = Color(hex: "#FF7A3D")
@@ -73,16 +73,16 @@ private extension Color {
         let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: cleaned).scanHexInt64(&int)
-        let r = Double((int >> 16) & 0xFF) / 255.0
-        let g = Double((int >> 8) & 0xFF) / 255.0
-        let b = Double(int & 0xFF) / 255.0
-        self.init(red: r, green: g, blue: b)
+        let red = Double((int >> 16) & 0xFF) / 255.0
+        let green = Double((int >> 8) & 0xFF) / 255.0
+        let blue = Double(int & 0xFF) / 255.0
+        self.init(red: red, green: green, blue: blue)
     }
 
     init(rgba: UInt32, alpha: Double) {
-        let r = Double((rgba >> 16) & 0xFF) / 255.0
-        let g = Double((rgba >> 8) & 0xFF) / 255.0
-        let b = Double(rgba & 0xFF) / 255.0
-        self.init(red: r, green: g, blue: b, opacity: alpha)
+        let red = Double((rgba >> 16) & 0xFF) / 255.0
+        let green = Double((rgba >> 8) & 0xFF) / 255.0
+        let blue = Double(rgba & 0xFF) / 255.0
+        self.init(red: red, green: green, blue: blue, opacity: alpha)
     }
 }

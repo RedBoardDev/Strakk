@@ -12,33 +12,35 @@ enum KMPMappers {
             totalWater: Int(s.totalWater),
             proteinGoal: s.proteinGoal?.intValue,
             calorieGoal: s.calorieGoal?.intValue,
+            fatGoal: s.fatGoal?.intValue,
+            carbGoal: s.carbGoal?.intValue,
             waterGoal: s.waterGoal?.intValue
         )
     }
 
-    static func mealEntry(_ m: MealEntry) -> MealEntryData {
+    static func mealEntry(_ entry: MealEntry) -> MealEntryData {
         MealEntryData(
-            id: m.id,
-            name: m.name,
-            protein: m.protein,
-            calories: m.calories,
-            fat: m.fat?.doubleValue,
-            carbs: m.carbs?.doubleValue,
-            source: m.source,
-            logDate: m.logDate,
-            createdAt: m.createdAt,
-            mealId: m.mealId,
-            quantity: m.quantity
+            id: entry.id,
+            name: entry.name,
+            protein: entry.protein,
+            calories: entry.calories,
+            fat: entry.fat?.doubleValue,
+            carbs: entry.carbs?.doubleValue,
+            source: entry.source,
+            logDate: entry.logDate,
+            createdAt: entry.createdAt,
+            mealId: entry.mealId,
+            quantity: entry.quantity
         )
     }
 
-    static func meal(_ m: Meal) -> MealData {
+    static func meal(_ meal: Meal) -> MealData {
         MealData(
-            id: m.id,
-            name: m.name,
-            date: m.date,
-            createdAt: m.createdAt.description,
-            entries: m.entries.map(mealEntry)
+            id: meal.id,
+            name: meal.name,
+            date: meal.date,
+            createdAt: meal.createdAt.description,
+            entries: meal.entries.map(mealEntry)
         )
     }
 

@@ -41,15 +41,23 @@ struct LoginView: View {
                             .transition(.opacity)
                     }
 
-                    loginButton
-                        .padding(.horizontal, StrakkSpacing.xl)
+                    StrakkPrimaryButton(
+                        title: viewModel.state.isLoading ? "Signing in…" : "Sign in",
+                        action: {
+                            focusedField = nil
+                            viewModel.send(LoginEventOnLogin())
+                        },
+                        isEnabled: !viewModel.state.isLoading
+                    )
+                    .padding(.horizontal, StrakkSpacing.xl)
+                    .accessibilityLabel(Text("Sign in"))
 
                     signUpLink
                 }
                 .padding(.bottom, StrakkSpacing.xxl)
             }
         }
-        .alert("Info", isPresented: Binding(
+        .alert(Text("Info"), isPresented: Binding(
             get: { viewModel.infoMessage != nil },
             set: { if !$0 { viewModel.infoMessage = nil } }
         )) {
@@ -70,28 +78,19 @@ struct LoginView: View {
 
     private var toolbar: some View {
         HStack {
-            Button {
-                onDismiss()
-            } label: {
-                Image(systemName: "arrow.left")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(Color.strakkTextPrimary)
-                    .frame(width: 44, height: 44)
-            }
-            .accessibilityLabel("Retour")
-
+            StrakkCloseButton(action: onDismiss)
             Spacer()
         }
-        .padding(.horizontal, StrakkSpacing.md)
+        .padding(.horizontal, StrakkSpacing.xs)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Content de te revoir")
+            Text("Welcome back")
                 .font(.strakkHeading1)
                 .foregroundStyle(Color.strakkTextPrimary)
 
-            Text("Connecte-toi pour accéder à ton espace.")
+            Text("Sign in to access your data.")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
         }
@@ -104,7 +103,7 @@ struct LoginView: View {
                 .font(.strakkCaptionBold)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            TextField("ton@email.com", text: $email)
+            TextField("you@email.com", text: $email)
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextPrimary)
                 .keyboardType(.emailAddress)
@@ -117,7 +116,7 @@ struct LoginView: View {
                 .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                 .overlay(
                     RoundedRectangle(cornerRadius: StrakkRadius.sm)
-                        .strokeBorder(Color.strakkDivider, lineWidth: 1)
+                        .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
                 )
                 .focused($focusedField, equals: .email)
                 .onChange(of: email) { _, newValue in
@@ -130,7 +129,7 @@ struct LoginView: View {
     private var passwordField: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
             HStack {
-                Text("Mot de passe")
+                Text("Password")
                     .font(.strakkCaptionBold)
                     .foregroundStyle(Color.strakkTextSecondary)
 
@@ -139,20 +138,20 @@ struct LoginView: View {
                 Button {
                     viewModel.send(LoginEventOnForgotPassword())
                 } label: {
-                    Text("Mot de passe oublié ?")
+                    Text("Forgot password?")
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkPrimary)
                 }
                 .frame(height: 32)
-                .accessibilityLabel("Réinitialiser le mot de passe")
+                .accessibilityLabel(Text("Reset your password"))
             }
 
             HStack {
                 Group {
                     if showPassword {
-                        TextField("Ton mot de passe", text: $password)
+                        TextField("Your password", text: $password)
                     } else {
-                        SecureField("Ton mot de passe", text: $password)
+                        SecureField("Your password", text: $password)
                     }
                 }
                 .font(.strakkBody)
@@ -176,7 +175,7 @@ struct LoginView: View {
                         .foregroundStyle(Color.strakkTextSecondary)
                         .frame(width: 44, height: 44)
                 }
-                .accessibilityLabel(showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe")
+                .accessibilityLabel(Text(showPassword ? "Hide password" : "Show password"))
             }
             .padding(.horizontal, StrakkSpacing.sm)
             .padding(.vertical, StrakkSpacing.xs)
@@ -184,45 +183,21 @@ struct LoginView: View {
             .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
             .overlay(
                 RoundedRectangle(cornerRadius: StrakkRadius.sm)
-                    .strokeBorder(Color.strakkDivider, lineWidth: 1)
+                    .strokeBorder(Color.strakkBorderFaint, lineWidth: 1)
             )
         }
-    }
-
-    private var loginButton: some View {
-        Button {
-            focusedField = nil
-            viewModel.send(LoginEventOnLogin())
-        } label: {
-            Group {
-                if viewModel.state.isLoading {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Se connecter")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(viewModel.state.isLoading ? Color.strakkPrimary.opacity(0.6) : Color.strakkPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
-        }
-        .disabled(viewModel.state.isLoading)
-        .accessibilityLabel("Se connecter")
     }
 
     private var signUpLink: some View {
         Button {
             onDismiss()
         } label: {
-            Text("Créer un compte")
+            Text("Create an account")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
                 .underline()
         }
         .frame(height: 44)
-        .accessibilityLabel("Créer un nouveau compte")
+        .accessibilityLabel(Text("Create a new account"))
     }
 }

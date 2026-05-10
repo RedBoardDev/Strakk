@@ -33,6 +33,8 @@
 	<string>Strakk uses your camera to scan and analyse meal photos with AI.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Strakk can read photos from your library to analyse meal contents.</string>
+	<key>RevenueCatApiKey</key>
+	<string>$(STRAKK_REVENUECAT_API_KEY)</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>

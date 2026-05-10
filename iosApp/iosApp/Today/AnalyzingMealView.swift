@@ -14,7 +14,7 @@ struct AnalyzingMealView: View {
     private let phases: [(icon: String, label: String)] = [
         ("eye", "Identifying ingredients..."),
         ("scalemass", "Estimating portions..."),
-        ("function", "Calculating macros..."),
+        ("function", "Calculating macros...")
     ]
 
     var body: some View {

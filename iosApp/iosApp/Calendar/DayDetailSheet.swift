@@ -22,56 +22,39 @@ struct DayDetailSheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        // MARK: Macros section
                         SectionHeader(title: "NUTRITION")
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
+                            .padding(.horizontal, StrakkSpacing.lg)
+                            .padding(.top, StrakkSpacing.lg)
 
-                        VStack(spacing: 8) {
-                            macroRow(
-                                label: "Protein",
-                                value: String(format: "%.0fg", detail.summary.totalProtein),
-                                color: Color.strakkProtein,
-                                current: detail.summary.totalProtein,
-                                goal: detail.summary.proteinGoal.map { Double($0) }
-                            )
-                            macroRow(
-                                label: "Calories",
-                                value: String(format: "%.0f kcal", detail.summary.totalCalories),
-                                color: Color.strakkCalories,
-                                current: detail.summary.totalCalories,
-                                goal: detail.summary.calorieGoal.map { Double($0) }
-                            )
-                            simpleRow(
-                                label: "Fat",
-                                value: String(format: "%.0fg", detail.summary.totalFat)
-                            )
-                            simpleRow(
-                                label: "Carbs",
-                                value: String(format: "%.0fg", detail.summary.totalCarbs)
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 8)
+                        MacroProgressGrid(
+                            totalProtein: detail.summary.totalProtein,
+                            totalCalories: detail.summary.totalCalories,
+                            totalFat: detail.summary.totalFat,
+                            totalCarbs: detail.summary.totalCarbs,
+                            proteinGoal: detail.summary.proteinGoal,
+                            calorieGoal: detail.summary.calorieGoal,
+                            fatGoal: detail.summary.fatGoal,
+                            carbGoal: detail.summary.carbGoal
+                        )
+                        .padding(.horizontal, StrakkSpacing.lg)
+                        .padding(.top, StrakkSpacing.xs)
 
-                        // MARK: Water section
                         SectionHeader(title: "WATER")
-                            .padding(.horizontal, 20)
-                            .padding(.top, 24)
+                            .padding(.horizontal, StrakkSpacing.lg)
+                            .padding(.top, StrakkSpacing.xl)
 
                         WaterRow(
                             summary: detail.summary,
                             onAdd: { amount in onAddWater(amount) },
                             onRemove: { amount in onRemoveWater(amount) }
                         )
-                        .padding(.horizontal, 20)
-                        .padding(.top, 8)
+                        .padding(.horizontal, StrakkSpacing.lg)
+                        .padding(.top, StrakkSpacing.xs)
 
-                        // MARK: Meals/entries section
                         if !detail.mealContainers.isEmpty || !detail.meals.isEmpty {
                             SectionHeader(title: "MEALS")
-                                .padding(.horizontal, 20)
-                                .padding(.top, 24)
+                                .padding(.horizontal, StrakkSpacing.lg)
+                                .padding(.top, StrakkSpacing.xl)
 
                             VStack(spacing: 6) {
                                 ForEach(detail.mealContainers) { meal in
@@ -82,28 +65,18 @@ struct DayDetailSheet: View {
                                     orphanEntryRow(entry: entry)
                                 }
                             }
-                            .padding(.horizontal, 20)
-                            .padding(.top, 8)
+                            .padding(.horizontal, StrakkSpacing.lg)
+                            .padding(.top, StrakkSpacing.xs)
                         }
 
-                        // MARK: Add meal button
-                        Button(action: onAddMeal) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "plus.circle")
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text("Add for this day")
-                                    .font(.strakkBodyBold)
-                            }
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(Color.strakkPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .accessibilityLabel("Add a meal for this day")
-                        .padding(.horizontal, 20)
-                        .padding(.top, 28)
-                        .padding(.bottom, 32)
+                        StrakkPrimaryButton(
+                            title: "Add for this day",
+                            action: onAddMeal,
+                            icon: "plus"
+                        )
+                        .padding(.horizontal, StrakkSpacing.lg)
+                        .padding(.top, StrakkSpacing.xl)
+                        .padding(.bottom, StrakkSpacing.xxl)
                     }
                 }
             }
@@ -150,18 +123,7 @@ struct DayDetailSheet: View {
             }
             .navigationTitle(formatDate(detail.date))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Color.strakkTextSecondary)
-                    }
-                    .accessibilityLabel("Fermer")
-                }
-            }
+            .toolbar { StrakkCloseToolbarItem(action: onDismiss) }
         }
     }
 
@@ -271,69 +233,6 @@ struct DayDetailSheet: View {
                 Label("Delete", systemImage: "trash")
             }
         }
-    }
-
-    // MARK: - Subviews
-
-    private func macroRow(
-        label: String,
-        value: String,
-        color: Color,
-        current: Double,
-        goal: Double?
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(label)
-                    .font(.strakkBody)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Spacer()
-                Text(value)
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(color)
-                    .monospacedDigit()
-                if let goal {
-                    Text("/ \(Int(goal))")
-                        .font(.strakkCaption)
-                        .foregroundStyle(Color.strakkTextTertiary)
-                }
-            }
-
-            if let goal, goal > 0 {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.strakkSurface2)
-                            .frame(height: 6)
-
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(current >= goal ? Color.strakkSuccess : color)
-                            .frame(width: min(geo.size.width * CGFloat(current / goal), geo.size.width), height: 6)
-                            .animation(.easeOut(duration: 0.3), value: current)
-                    }
-                }
-                .frame(height: 6)
-            }
-        }
-        .padding(16)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func simpleRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextPrimary)
-            Spacer()
-            Text(value)
-                .font(.strakkBodyBold)
-                .foregroundStyle(Color.strakkTextSecondary)
-                .monospacedDigit()
-        }
-        .padding(16)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Helpers

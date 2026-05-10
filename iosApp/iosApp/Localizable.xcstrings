@@ -1,23 +1,87 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    " · " : {
-
+    "" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
     },
-    " est activé !" : {
-
+    " " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
+    },
+    " · " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · "
+          }
+        }
+      }
+    },
+    " Pro trial is live!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Ton essai Pro est actif !"
+          }
+        }
+      }
     },
     "—" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "—"
+          }
+        }
+      }
     },
     "·" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
+          }
+        }
+      }
+    },
+    "(%@€/month)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@ €/mois)"
+          }
+        }
+      }
     },
     "*" : {
-
-    },
-    "/ %@" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "*"
+          }
+        }
+      }
     },
     "/ %@%@" : {
       "localizations" : {
@@ -26,23 +90,58 @@
             "state" : "new",
             "value" : "/ %1$@%2$@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/ %1$@%2$@"
+          }
         }
       }
     },
-    "/mo" : {
-
+    "/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/mois"
+          }
+        }
+      }
     },
-    "/yr" : {
-
+    "/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/an"
+          }
+        }
+      }
     },
     "%@" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
     },
     "%@ / %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%1$@ / %2$@"
           }
         }
@@ -55,11 +154,24 @@
             "state" : "new",
             "value" : "%1$@ %2$@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
         }
       }
     },
     "%@ cm" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ cm"
+          }
+        }
+      }
     },
     "%@ day%@ selected" : {
       "localizations" : {
@@ -68,11 +180,34 @@
             "state" : "new",
             "value" : "%1$@ day%2$@ selected"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ jour%2$@ sélectionné%2$@"
+          }
         }
       }
     },
-    "%@ en attente" : {
-
+    "%@ days covered" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jours couverts"
+          }
+        }
+      }
+    },
+    "%@ days left" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jours restants"
+          }
+        }
+      }
     },
     "%@ from catalog · %@ via AI" : {
       "localizations" : {
@@ -81,8 +216,20 @@
             "state" : "new",
             "value" : "%1$@ from catalog · %2$@ via AI"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ du catalogue · %2$@ via IA"
+          }
         }
       }
+    },
+    "%@ hidden" : {
+
+    },
+    "%@ item(s) hidden won't be saved" : {
+
     },
     "%@ item%@" : {
       "localizations" : {
@@ -91,27 +238,102 @@
             "state" : "new",
             "value" : "%1$@ item%2$@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ item%2$@"
+          }
         }
       }
     },
     "%@ items detected. Edit if needed before confirming." : {
-
-    },
-    "%@ jour%@ couverts" : {
       "localizations" : {
-        "en" : {
+        "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ jour%2$@ couverts"
+            "state" : "translated",
+            "value" : "%@ items détectés. Modifie si besoin avant de confirmer."
           }
         }
       }
     },
     "%@ kg" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
     },
     "%@ mL" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ mL"
+          }
+        }
+      }
+    },
+    "%@ older check-ins" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ anciens bilans"
+          }
+        }
+      }
+    },
+    "%@ pending" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ en attente"
+          }
+        }
+      }
+    },
+    "%@ plan" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre %@"
+          }
+        }
+      }
+    },
+    "%@/%@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "%@/%@ matched" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@ matched"
+          }
+        }
+      }
     },
     "%@/%@ photos" : {
       "localizations" : {
@@ -120,42 +342,122 @@
             "state" : "new",
             "value" : "%1$@/%2$@ photos"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@ photos"
+          }
         }
       }
     },
     "%@/%@ semaines" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@/%2$@ semaines"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@ semaines"
+          }
+        }
+      }
+    },
+    "%@/%@ weeks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@ semaines"
+          }
         }
       }
     },
     "%@/150" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/150"
+          }
+        }
+      }
     },
     "%@/300" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/300"
+          }
+        }
+      }
     },
     "%@/1000" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/1000"
+          }
+        }
+      }
     },
     "%@%%" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@%%"
+          }
+        }
+      }
     },
     "• CIQUAL 2020 — ANSES" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• CIQUAL 2020 — ANSES"
+          }
+        }
+      }
     },
     "• Open Food Facts (ODbL)" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Open Food Facts (ODbL)"
+          }
+        }
+      }
     },
     "↑ +%@" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↑ +%@"
+          }
+        }
+      }
     },
     "↓ %@" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↓ %@"
+          }
+        }
+      }
     },
     "+ Add" : {
       "localizations" : {
@@ -168,13 +470,24 @@
       }
     },
     "=" : {
-
-    },
-    "0" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "="
+          }
+        }
+      }
     },
     "0 / %@ ml" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0 / %@ ml"
+          }
+        }
+      }
     },
     "1 to 60 characters" : {
       "localizations" : {
@@ -186,14 +499,16 @@
         }
       }
     },
-    "1,67 €/mois" : {
-
-    },
-    "1.99 €" : {
-
-    },
     "2 MONTHS FREE" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 MOIS OFFERTS"
+          }
+        }
+      }
     },
     "4 wk" : {
       "localizations" : {
@@ -205,8 +520,15 @@
         }
       }
     },
-    "7 jours" : {
-
+    "7-day" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 jours"
+          }
+        }
+      }
     },
     "12 wk" : {
       "localizations" : {
@@ -218,18 +540,22 @@
         }
       }
     },
-    "19,99 €/an · " : {
-
-    },
-    "19.99 €" : {
-
-    },
     "A check-in already exists for this week." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un bilan existe déjà pour cette semaine."
+          }
+        }
+      }
+    },
+    "A few facts about you" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques infos sur toi"
           }
         }
       }
@@ -244,13 +570,8 @@
         }
       }
     },
-    "Actif" : {
-
-    },
-    "Activité hors entraînement" : {
-
-    },
     "Add" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -280,8 +601,17 @@
         }
       }
     },
+    "Add an item" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un item"
+          }
+        }
+      }
+    },
     "Add food item" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -292,6 +622,7 @@
       }
     },
     "Add for this day" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -312,7 +643,6 @@
       }
     },
     "Add text entry" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -323,7 +653,6 @@
       }
     },
     "Add text to meal" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -333,7 +662,18 @@
         }
       }
     },
+    "Add the photo to the meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter la photo au repas"
+          }
+        }
+      }
+    },
     "Add to meal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -364,6 +704,17 @@
         }
       }
     },
+    "AI" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IA"
+          }
+        }
+      }
+    },
     "AI not working? No problem." : {
       "localizations" : {
         "fr" : {
@@ -384,15 +735,22 @@
         }
       }
     },
-    "Ajuste ou laisse l'IA calculer pour toi." : {
-
-    },
     "All" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tout"
+          }
+        }
+      }
+    },
+    "Already have an account?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as déjà un compte ?"
           }
         }
       }
@@ -409,6 +767,7 @@
       }
     },
     "Analyze" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -419,7 +778,6 @@
       }
     },
     "Analyze described meal" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -481,8 +839,48 @@
         }
       }
     },
+    "And in everyday life?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et au quotidien ?"
+          }
+        }
+      }
+    },
     "Annual" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuel"
+          }
+        }
+      }
+    },
+    "Annual plan, %@ euros per year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre annuelle, %@ euros par an"
+          }
+        }
+      }
+    },
+    "Annual plan, %@ per year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre annuelle, %@ par an"
+          }
+        }
+      }
     },
     "API Key" : {
       "localizations" : {
@@ -501,6 +899,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pomme, poulet..."
+          }
+        }
+      }
+    },
+    "Apple, chicken…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomme, poulet…"
           }
         }
       }
@@ -525,12 +933,6 @@
           }
         }
       }
-    },
-    "Aucun ressenti renseigné" : {
-
-    },
-    "Aucune donnée nutritionnelle" : {
-
     },
     "Averages" : {
       "extractionState" : "stale",
@@ -565,6 +967,16 @@
         }
       }
     },
+    "Biological sex" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexe biologique"
+          }
+        }
+      }
+    },
     "Bloating" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -587,17 +999,15 @@
         }
       }
     },
-    "Bonne nouvelle !" : {
-
-    },
-    "C'est parti" : {
-
-    },
-    "C'est parti !" : {
-
-    },
     "Cal." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cal."
+          }
+        }
+      }
     },
     "Calculating..." : {
       "localizations" : {
@@ -665,11 +1075,23 @@
       }
     },
     "Cancel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Cancel anytime" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annule à tout moment"
           }
         }
       }
@@ -728,8 +1150,17 @@
         }
       }
     },
+    "Change food" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer l'aliment"
+          }
+        }
+      }
+    },
     "Check-in options" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -746,6 +1177,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bilans"
+          }
+        }
+      }
+    },
+    "Chest" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poitrine"
           }
         }
       }
@@ -771,16 +1213,43 @@
         }
       }
     },
-    "CHOOSE YOUR PLAN" : {
-
+    "Choose your date of birth" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir ta date de naissance"
+          }
+        }
+      }
     },
-    "Close" : {
+    "CHOOSE YOUR PLAN" : {
       "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "CHOISIS TON ABONNEMENT"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Close scanner" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer le scanner"
           }
         }
       }
@@ -794,12 +1263,6 @@
           }
         }
       }
-    },
-    "Commence à tracker pour voir ta progression." : {
-
-    },
-    "Commencer à tracker" : {
-
     },
     "Compose your meal, adjust portions, then analyze if needed." : {
       "localizations" : {
@@ -821,9 +1284,6 @@
         }
       }
     },
-    "Connecte-toi pour accéder à ton espace." : {
-
-    },
     "CONSISTENCY" : {
       "localizations" : {
         "fr" : {
@@ -834,8 +1294,16 @@
         }
       }
     },
-    "Content de te revoir" : {
-
+    "Consistency: %@%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Régularité : %@%%"
+          }
+        }
+      }
     },
     "Continue" : {
       "extractionState" : "stale",
@@ -848,9 +1316,6 @@
         }
       }
     },
-    "Continue avec Strakk Pro pour garder l'IA, la sync Santé et l'historique illimité." : {
-
-    },
     "Continue to next step" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -858,6 +1323,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passer à l'étape suivante"
+          }
+        }
+      }
+    },
+    "Continue with %@ kg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer avec %@ kg"
           }
         }
       }
@@ -873,12 +1348,6 @@
         }
       }
     },
-    "Continuer" : {
-
-    },
-    "Continuer en gratuit" : {
-
-    },
     "COVERED DAYS" : {
       "localizations" : {
         "fr" : {
@@ -890,11 +1359,22 @@
       }
     },
     "Create a meal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créer un repas"
+          }
+        }
+      }
+    },
+    "Create a new account" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un nouveau compte"
           }
         }
       }
@@ -911,12 +1391,21 @@
       }
     },
     "Create an account" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créer un compte"
+          }
+        }
+      }
+    },
+    "Create my account" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer mon compte"
           }
         }
       }
@@ -932,6 +1421,16 @@
         }
       }
     },
+    "Create your account" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée ton compte"
+          }
+        }
+      }
+    },
     "created" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -943,14 +1442,15 @@
         }
       }
     },
-    "Crée ton compte" : {
-
-    },
-    "Créer mon compte" : {
-
-    },
-    "Créer un compte" : {
-
+    "CURRENT PLAN" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABONNEMENT ACTUEL"
+          }
+        }
+      }
     },
     "Custom amount" : {
       "localizations" : {
@@ -958,6 +1458,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quantité personnalisée"
+          }
+        }
+      }
+    },
+    "Daily activity" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activité quotidienne"
           }
         }
       }
@@ -980,6 +1490,12 @@
             "state" : "new",
             "value" : "Daily avg. (%1$@ day%2$@)"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moy. journalière (%1$@ jour%2$@)"
+          }
         }
       }
     },
@@ -994,13 +1510,34 @@
       }
     },
     "DATA SOURCES" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOURCES DE DONNÉES"
+          }
+        }
+      }
     },
     "Date" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        }
+      }
     },
-    "Date de naissance" : {
-
+    "Date of birth" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date de naissance"
+          }
+        }
+      }
     },
     "day(s) selected" : {
       "extractionState" : "stale",
@@ -1013,11 +1550,15 @@
         }
       }
     },
-    "Découvrir les offres" : {
-
-    },
-    "Déjà un compte ?" : {
-
+    "Decrease" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diminuer"
+          }
+        }
+      }
     },
     "Delete" : {
       "localizations" : {
@@ -1025,6 +1566,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer"
+          }
+        }
+      }
+    },
+    "Delete entry" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer l'entrée"
           }
         }
       }
@@ -1072,7 +1623,14 @@
       }
     },
     "Describe what you ate — be as specific as possible." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décris ce que tu as mangé — sois aussi précis que possible."
+          }
+        }
+      }
     },
     "Describe your meal" : {
       "extractionState" : "stale",
@@ -1081,6 +1639,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Décrire le repas"
+          }
+        }
+      }
+    },
+    "DEV SUBSCRIPTION" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABONNEMENT DEV"
           }
         }
       }
@@ -1119,6 +1687,7 @@
       }
     },
     "Done" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1129,7 +1698,6 @@
       }
     },
     "Done, close export" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1203,13 +1771,8 @@
         }
       }
     },
-    "Eau" : {
-
-    },
-    "Eau : %@ ml/j en moy." : {
-
-    },
     "Edit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1220,7 +1783,6 @@
       }
     },
     "Edit entry" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1251,6 +1813,26 @@
         }
       }
     },
+    "Enjoy every Pro feature for 7 days." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profite de toutes les fonctionnalités Pro pendant 7 jours."
+          }
+        }
+      }
+    },
+    "Enter barcode manually" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisir le code-barres manuellement"
+          }
+        }
+      }
+    },
     "Enter manually" : {
       "localizations" : {
         "fr" : {
@@ -1272,14 +1854,16 @@
         }
       }
     },
-    "Essai gratuit" : {
-
-    },
-    "Et au quotidien ?" : {
-
-    },
     "EVERYTHING IN PRO" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOUT DANS PRO"
+          }
+        }
+      }
     },
     "exercises" : {
       "localizations" : {
@@ -1291,17 +1875,8 @@
         }
       }
     },
-    "Expire dans %@ jour%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Expire dans %1$@ jour%2$@"
-          }
-        }
-      }
-    },
     "Export Another" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1312,7 +1887,6 @@
       }
     },
     "Export another workout program" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1334,7 +1908,6 @@
       }
     },
     "Export session %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1364,9 +1937,6 @@
           }
         }
       }
-    },
-    "Facultatif — pour personnaliser tes objectifs." : {
-
     },
     "Fat" : {
       "localizations" : {
@@ -1430,6 +2000,16 @@
         }
       }
     },
+    "Fix payment" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corriger le paiement"
+          }
+        }
+      }
+    },
     "Focused" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1442,7 +2022,24 @@
       }
     },
     "Food data provided by:" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Données alimentaires fournies par :"
+          }
+        }
+      }
+    },
+    "Forgot password?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mot de passe oublié ?"
+          }
+        }
+      }
     },
     "Free text" : {
       "extractionState" : "stale",
@@ -1510,9 +2107,6 @@
         }
       }
     },
-    "Gérer l'abonnement" : {
-
-    },
     "Get started" : {
       "localizations" : {
         "fr" : {
@@ -1541,6 +2135,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aller dans Réglages"
+          }
+        }
+      }
+    },
+    "Go to sign in" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller à la connexion"
           }
         }
       }
@@ -1589,6 +2193,16 @@
         }
       }
     },
+    "Good news!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonne nouvelle !"
+          }
+        }
+      }
+    },
     "Good recovery" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1600,6 +2214,17 @@
         }
       }
     },
+    "Grounded" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ancré"
+          }
+        }
+      }
+    },
     "Heavy body" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1607,6 +2232,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Corps lourd"
+          }
+        }
+      }
+    },
+    "Height" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taille"
+          }
+        }
+      }
+    },
+    "Here's what your day will look like" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voilà à quoi ressemblera ta journée"
           }
         }
       }
@@ -1632,12 +2277,26 @@
         }
       }
     },
+    "Hidden" : {
+
+    },
     "Hint (optional)" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Indice (optionnel)"
+          }
+        }
+      }
+    },
+    "Hips" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hanches"
           }
         }
       }
@@ -1696,11 +2355,35 @@
         }
       }
     },
-    "i.e. 1.67 €/month" : {
-
+    "Identifying foods..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identification des aliments..."
+          }
+        }
+      }
     },
-    "Intensité de tes séances" : {
-
+    "Increase" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Augmenter"
+          }
+        }
+      }
+    },
+    "Info" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        }
+      }
     },
     "Irritable" : {
       "extractionState" : "stale",
@@ -1745,11 +2428,26 @@
         }
       }
     },
-    "L'IA tracke tes repas pour toi." : {
-
-    },
     "Later" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "Left arm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bras gauche"
+          }
+        }
+      }
     },
     "Left arm (cm)" : {
       "extractionState" : "stale",
@@ -1758,6 +2456,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bras gauche (cm)"
+          }
+        }
+      }
+    },
+    "Left thigh" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuisse gauche"
           }
         }
       }
@@ -1780,6 +2489,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Corps léger"
+          }
+        }
+      }
+    },
+    "Looking up nutritional data for detected items." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche des données nutritionnelles des items détectés."
           }
         }
       }
@@ -1840,7 +2559,6 @@
       }
     },
     "Manual entry" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1857,6 +2575,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "trouvés"
+          }
+        }
+      }
+    },
+    "Matching with database..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correspondance avec la base..."
           }
         }
       }
@@ -1956,9 +2684,6 @@
         }
       }
     },
-    "Mets à jour ton moyen de paiement pour conserver l'accès Pro." : {
-
-    },
     "Minimum 3 characters" : {
       "localizations" : {
         "fr" : {
@@ -1969,17 +2694,48 @@
         }
       }
     },
-    "Minimum 6 caractères" : {
-
+    "Minimum 6 characters" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum 6 caractères"
+          }
+        }
+      }
     },
-    "Monthly" : {
-
+    "Monthly access" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accès mensuel"
+          }
+        }
+      }
     },
-    "Mot de passe" : {
-
+    "Monthly plan, %@ euros per month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre mensuelle, %@ euros par mois"
+          }
+        }
+      }
     },
-    "Mot de passe oublié ?" : {
-
+    "Monthly plan, %@ per month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre mensuelle, %@ par mois"
+          }
+        }
+      }
     },
     "Motivated" : {
       "extractionState" : "stale",
@@ -2077,11 +2833,15 @@
         }
       }
     },
-    "No commitment" : {
-
-    },
-    "No commitment · Cancel anytime" : {
-
+    "No feelings logged" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun ressenti renseigné"
+          }
+        }
+      }
     },
     "No feelings recorded" : {
       "extractionState" : "stale",
@@ -2105,11 +2865,22 @@
       }
     },
     "No meal in progress" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun repas en cours"
+          }
+        }
+      }
+    },
+    "No nutrition data" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune donnée nutritionnelle"
           }
         }
       }
@@ -2157,7 +2928,14 @@
       }
     },
     "No results for \"%@\"" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat pour « %@ »"
+          }
+        }
+      }
     },
     "Not enough data to show trends." : {
       "localizations" : {
@@ -2179,12 +2957,12 @@
         }
       }
     },
-    "NUTRITION (%@ jour%@)" : {
+    "NUTRITION (%@ days)" : {
       "localizations" : {
-        "en" : {
+        "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "NUTRITION (%1$@ jour%2$@)"
+            "state" : "translated",
+            "value" : "NUTRITION (%@ jours)"
           }
         }
       }
@@ -2200,14 +2978,17 @@
         }
       }
     },
-    "Parle-moi de ton entraînement" : {
-
-    },
-    "Passer à Pro" : {
-
+    "Optional — to fine-tune your goals." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optionnel — pour affiner tes objectifs."
+          }
+        }
+      }
     },
     "Password" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2224,6 +3005,33 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coller la clé API Hevy"
+          }
+        }
+      }
+    },
+    "Payment issue" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problème de paiement"
+          }
+        }
+      }
+    },
+    "Paywall price placeholder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "—"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "—"
           }
         }
       }
@@ -2312,8 +3120,15 @@
         }
       }
     },
-    "Photo, texte, bilan hebdo." : {
-
+    "Photo and text AI analysis plus a weekly summary so you log less by hand." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse IA photo et texte, plus résumé hebdo pour moins saisir à la main."
+          }
+        }
+      }
     },
     "Photo. Long press to delete." : {
       "extractionState" : "stale",
@@ -2369,12 +3184,32 @@
         }
       }
     },
+    "Pick from library" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir dans la galerie"
+          }
+        }
+      }
+    },
     "Pick the feelings that summarize your week, then describe your mental and physical state separately." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisis les sensations qui résument ta semaine, puis détaille séparément le mental et le physique."
+          }
+        }
+      }
+    },
+    "Plan" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offre"
           }
         }
       }
@@ -2422,16 +3257,24 @@
       }
     },
     "PRO" : {
-
-    },
-    "Problème de paiement" : {
-
-    },
-    "Profite de toutes les fonctionnalités Pro pendant 7 jours." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRO"
+          }
+        }
+      }
     },
     "Prot." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prot."
+          }
+        }
+      }
     },
     "Protein" : {
       "extractionState" : "stale",
@@ -2477,15 +3320,6 @@
         }
       }
     },
-    "Quel est ton objectif ?" : {
-
-    },
-    "Quel est ton poids actuel ?" : {
-
-    },
-    "Quelques infos sur toi" : {
-
-    },
     "Quick" : {
       "localizations" : {
         "fr" : {
@@ -2527,12 +3361,6 @@
         }
       }
     },
-    "Réessaie ou ajuste manuellement" : {
-
-    },
-    "Régler le problème" : {
-
-    },
     "Remove" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2540,6 +3368,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retirer"
+          }
+        }
+      }
+    },
+    "Remove photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la photo"
           }
         }
       }
@@ -2566,11 +3404,45 @@
         }
       }
     },
-    "Restaurer un achat" : {
-
+    "Renews: %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renouvellement : %@"
+          }
+        }
+      }
     },
-    "Restore purchase" : {
-
+    "Reset your password" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser ton mot de passe"
+          }
+        }
+      }
+    },
+    "Restore" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer"
+          }
+        }
+      }
+    },
+    "Restore a purchase" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer un achat"
+          }
+        }
+      }
     },
     "Retry" : {
       "extractionState" : "stale",
@@ -2583,6 +3455,17 @@
         }
       }
     },
+    "Right arm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bras droit"
+          }
+        }
+      }
+    },
     "Right arm (cm)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2590,6 +3473,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bras droit (cm)"
+          }
+        }
+      }
+    },
+    "Right thigh" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuisse droite"
           }
         }
       }
@@ -2616,11 +3510,42 @@
       }
     },
     "Save" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Save changes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer les modifications"
+          }
+        }
+      }
+    },
+    "Save meal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer le repas"
+          }
+        }
+      }
+    },
+    "Save with annual" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Économise avec l'annuel"
           }
         }
       }
@@ -2637,6 +3562,7 @@
       }
     },
     "Scanner unavailable" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2645,15 +3571,6 @@
           }
         }
       }
-    },
-    "Se connecter" : {
-
-    },
-    "Se renouvelle le %@" : {
-
-    },
-    "Séances par semaine" : {
-
     },
     "Search" : {
       "extractionState" : "stale",
@@ -2666,6 +3583,26 @@
         }
       }
     },
+    "Search a food" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher un aliment"
+          }
+        }
+      }
+    },
+    "Search catalog…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans le catalogue…"
+          }
+        }
+      }
+    },
     "Search for a food" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2673,6 +3610,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher un aliment"
+          }
+        }
+      }
+    },
+    "Search the catalog" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans le catalogue"
+          }
+        }
+      }
+    },
+    "See the annual offer" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'offre annuelle"
           }
         }
       }
@@ -2703,6 +3660,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sélectionnez une séance à exporter"
+          }
+        }
+      }
+    },
+    "Sessions per week" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances par semaine"
           }
         }
       }
@@ -2739,15 +3706,33 @@
         }
       }
     },
-    "Sexe biologique" : {
-
-    },
     "Share check-in" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partager le bilan"
+          }
+        }
+      }
+    },
+    "Share check-in as PDF" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager le bilan en PDF"
+          }
+        }
+      }
+    },
+    "Shoulders" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épaules"
           }
         }
       }
@@ -2764,7 +3749,6 @@
       }
     },
     "Sign in" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2781,6 +3765,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Se connecter"
+          }
+        }
+      }
+    },
+    "Sign in to access your data." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecte-toi pour accéder à tes données."
+          }
+        }
+      }
+    },
+    "Sign in to an existing account" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter à un compte existant"
           }
         }
       }
@@ -2838,6 +3842,17 @@
         }
       }
     },
+    "Smarter insights, cleaner tracking, and premium tools to help you stay consistent." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des analyses plus malines, un suivi plus clair et des outils premium pour rester régulier."
+          }
+        }
+      }
+    },
     "Sore" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2867,6 +3882,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lancer l'analyse"
+          }
+        }
+      }
+    },
+    "Start onboarding" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer l'onboarding"
+          }
+        }
+      }
+    },
+    "Start tracking" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer le suivi"
+          }
+        }
+      }
+    },
+    "Start tracking to watch your progress." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence à tracker pour voir ta progression."
           }
         }
       }
@@ -2915,13 +3960,34 @@
       }
     },
     "Step %@/5" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %@/5"
+          }
+        }
+      }
     },
     "Strakk" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strakk"
+          }
+        }
+      }
     },
-    "STRAKK PRO" : {
-
+    "Strakk Pro" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strakk Pro"
+          }
+        }
+      }
     },
     "Stress" : {
       "extractionState" : "stale",
@@ -2955,8 +4021,15 @@
         }
       }
     },
-    "Taille" : {
-
+    "Take a photo" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre une photo"
+          }
+        }
+      }
     },
     "Take your photos in the same conditions for consistent tracking." : {
       "localizations" : {
@@ -2968,23 +4041,79 @@
         }
       }
     },
+    "Tell me about your training" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parle-moi de ton entraînement"
+          }
+        }
+      }
+    },
     "Tendance : %@ %@%@ %@ sur %@ sem." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Tendance : %1$@ %2$@%3$@ %4$@ sur %5$@ sem."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendance : %1$@ %2$@%3$@ %4$@ sur %5$@ sem."
+          }
         }
       }
     },
-    "Tes objectifs nutritionnels" : {
-
+    "That's only %@ per month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soit %@ par mois"
+          }
+        }
+      }
     },
-    "The AI that understands your plate." : {
-
+    "That's only %@€/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soit %@ €/mois"
+          }
+        }
+      }
+    },
+    "That's only %@€/month · ~%lld€ less than paying monthly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soit %@ €/mois · ~%lld € de moins qu'en mensuel"
+          }
+        }
+      }
+    },
+    "That's only %@€/week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soit %@ €/semaine"
+          }
+        }
+      }
     },
     "The barcode scanner is not available on this device." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3047,24 +4176,15 @@
         }
       }
     },
-    "Ton coach nutrition & fitness, simplifié." : {
-
-    },
-    "Ton essai Pro de " : {
-
-    },
-    "Ton essai Pro expire dans %@ jour%@" : {
+    "Track faster with Pro" : {
       "localizations" : {
-        "en" : {
+        "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Ton essai Pro expire dans %1$@ jour%2$@"
+            "state" : "translated",
+            "value" : "Tracke plus vite avec Pro"
           }
         }
       }
-    },
-    "Ton essai se termine aujourd'hui" : {
-
     },
     "Track your fitness journey" : {
       "extractionState" : "stale",
@@ -3073,6 +4193,37 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suivez votre parcours fitness"
+          }
+        }
+      }
+    },
+    "Training intensity" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensité d'entraînement"
+          }
+        }
+      }
+    },
+    "Training types" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Types d'entraînement"
+          }
+        }
+      }
+    },
+    "Trend: %@ %@%@ %@ over %@ wk" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendance : %1$@ %2$@%3$@ %4$@ sur %5$@ sem."
           }
         }
       }
@@ -3088,14 +4239,195 @@
         }
       }
     },
-    "Types d'entraînement" : {
+    "Trial ends: %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fin de l'essai : %@"
+          }
+        }
+      }
+    },
+    "trial_expired_body" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with Strakk Pro to keep AI, Health sync and unlimited history."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue avec Strakk Pro pour garder l'IA, la sync Santé et l'historique illimité."
+          }
+        }
+      }
+    },
+    "trial_expired_cta" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover plans"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Découvrir les offres"
+          }
+        }
+      }
+    },
+    "trial_expired_free" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue for free"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer en gratuit"
+          }
+        }
+      }
+    },
+    "trial_expired_price_line" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "trial_expired_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your trial ends today"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton essai se termine aujourd'hui"
+          }
+        }
+      }
+    },
+    "Try again or adjust manually" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessaie ou ajuste manuellement"
+          }
+        }
+      }
+    },
+    "Tweak them or let the AI compute them for you." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuste-les ou laisse l'IA les calculer pour toi."
+          }
+        }
+      }
+    },
+    "Two months free vs the monthly plan." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deux mois offerts par rapport au mensuel."
+          }
+        }
+      }
+    },
+    "Type a food name to add it to the meal." : {
 
+    },
+    "Type a food name to find a replacement." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tape le nom d’un aliment pour trouver un remplacement."
+          }
+        }
+      }
+    },
+    "Unlock full history with Pro" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Débloque tout l'historique avec Pro"
+          }
+        }
+      }
+    },
+    "Unlock full potential" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libère tout le potentiel"
+          }
+        }
+      }
+    },
+    "Unlock the full potential" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libère tout ton potentiel"
+          }
+        }
+      }
     },
     "Unlock with Pro" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Débloquer avec Pro"
+          }
+        }
+      }
     },
-    "Unlock your full\ntracking potential" : {
-
+    "Update your payment method to keep your Pro access." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mets à jour ton moyen de paiement pour garder ton accès Pro."
+          }
+        }
+      }
     },
     "UPPER BODY" : {
       "extractionState" : "stale",
@@ -3114,6 +4446,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Utilisez les boutons ci-dessous pour commencer"
+          }
+        }
+      }
+    },
+    "Value" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valeur"
           }
         }
       }
@@ -3138,8 +4481,16 @@
         }
       }
     },
-    "Voilà à quoi ressemblera ta journée" : {
-
+    "W%@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%@"
+          }
+        }
+      }
     },
     "Waist" : {
       "extractionState" : "stale",
@@ -3195,12 +4546,44 @@
         }
       }
     },
+    "Water: %@ ml/day avg" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eau : %@ ml/jour en moyenne"
+          }
+        }
+      }
+    },
+    "Week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
+          }
+        }
+      }
+    },
     "WEEK" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "SEMAINE"
+          }
+        }
+      }
+    },
+    "Week %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine %@"
           }
         }
       }
@@ -3249,6 +4632,56 @@
         }
       }
     },
+    "Welcome back" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content de te revoir"
+          }
+        }
+      }
+    },
+    "What is your current weight?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel est ton poids actuel ?"
+          }
+        }
+      }
+    },
+    "What is your goal?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel est ton objectif ?"
+          }
+        }
+      }
+    },
+    "You keep photo analysis, free text and AI summaries until then." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu gardes l'analyse photo, le texte libre et les résumés IA jusque-là."
+          }
+        }
+      }
+    },
+    "Your " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton "
+          }
+        }
+      }
+    },
     "Your current meal will be deleted." : {
       "localizations" : {
         "fr" : {
@@ -3265,6 +4698,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ton repas est vide"
+          }
+        }
+      }
+    },
+    "Your nutrition & fitness coach, made simple." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton coach nutrition & fitness, simplement."
+          }
+        }
+      }
+    },
+    "Your nutrition goals" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes objectifs nutritionnels"
+          }
+        }
+      }
+    },
+    "Your Pro trial expires in %@ days" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton essai Pro expire dans %@ jours"
+          }
+        }
+      }
+    },
+    "Your Pro trial expires in %@ days. Tap to see plans." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton essai Pro expire dans %@ jours. Touche pour voir les offres."
+          }
+        }
+      }
+    },
+    "Your Pro trial is active" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton essai Pro est actif"
           }
         }
       }
