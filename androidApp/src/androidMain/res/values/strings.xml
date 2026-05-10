@@ -6,9 +6,7 @@
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_close">Close</string>
-    <string name="common_add">Add</string>
     <string name="common_save">Save</string>
-    <string name="common_rename">Rename</string>
     <string name="common_delete">Delete</string>
 
     <!-- Pro badge -->
@@ -45,7 +43,6 @@
 
     <!-- ManualEntry -->
     <string name="manual_entry_title">Manual entry</string>
-    <string name="manual_entry_close">Close</string>
     <string name="manual_entry_add">Add</string>
     <string name="manual_entry_field_name">Name *</string>
     <string name="manual_entry_field_protein">Protein (g) *</string>
@@ -75,7 +72,6 @@
     <string name="search_food_recent_cd">Recently used</string>
 
     <!-- Onboarding — common -->
-    <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_continue">Continuer</string>
     <string name="onboarding_back">Retour</string>
     <!-- Stepper increment/decrement (format: %s = label) -->
@@ -157,7 +153,6 @@
     <!-- Onboarding — Nutrition Goals -->
     <string name="onboarding_nutrition_title">Tes objectifs nutritionnels</string>
     <string name="onboarding_nutrition_ai_available">Calculer avec l\'IA</string>
-    <string name="onboarding_nutrition_ai_loading">Calcul en cours…</string>
     <string name="onboarding_nutrition_ai_completed">Objectifs calculés</string>
     <string name="onboarding_nutrition_ai_failed">Réessayer avec l\'IA</string>
     <string name="onboarding_nutrition_protein">Protéines</string>
@@ -224,7 +219,6 @@
 
     <!-- Progress Section (macros) -->
     <string name="progress_protein_label">PROTEINS</string>
-    <string name="progress_goal_reached">✓ Goal reached</string>
     <string name="progress_calories_label">CALORIES</string>
     <string name="progress_carbs_label">CARBS</string>
     <string name="progress_fat_label">FAT</string>
@@ -258,7 +252,6 @@
     <string name="review_back_cd">Back</string>
     <string name="review_committed_snackbar">Meal saved</string>
     <string name="review_empty">No meal in progress</string>
-    <string name="review_subtitle">%d items analysed. Edit before confirming.</string>
     <string name="review_confirm_button">Confirm meal</string>
     <string name="review_items_section">ITEMS</string>
     <string name="review_add_item_cd">Add item</string>
@@ -266,7 +259,6 @@
     <string name="review_hide_item">Hide</string>
     <string name="review_restore_item">Restore</string>
     <string name="review_edit_item">Edit</string>
-    <string name="review_change_food">Change food</string>
     <string name="review_delete_item">Delete</string>
     <string name="review_totals_hidden_caption">%d hidden</string>
     <string name="review_add_search">Search food</string>
@@ -312,15 +304,10 @@
 
     <!-- Day Detail Sheet -->
     <string name="day_detail_section_nutrition">NUTRITION</string>
-    <string name="day_detail_section_macros">MACROS</string>
     <string name="day_detail_section_water">WATER</string>
     <string name="day_detail_section_meals">MEALS</string>
     <string name="day_detail_no_data">No data for this day.</string>
     <string name="day_detail_add_button">+ Add for this day</string>
-    <string name="day_detail_protein_label">Proteins</string>
-    <string name="day_detail_calories_label">Calories</string>
-    <string name="day_detail_fat_label">Fat</string>
-    <string name="day_detail_carbs_label">Carbs</string>
     <string name="day_detail_water_label">Water</string>
     <string name="day_detail_meal_fallback">Meal</string>
 
@@ -423,20 +410,14 @@
     <string name="paywall_plan_monthly">Monthly</string>
     <string name="paywall_plan_annual">Annual</string>
     <string name="paywall_plan_popular">POPULAR</string>
-    <string name="paywall_price_annual">24.99 €/year</string>
-    <string name="paywall_price_annual_monthly">i.e. 2.08 €/month · 2 months free</string>
-    <string name="paywall_price_monthly">2.99 €/month</string>
-    <string name="paywall_price_monthly_detail">No commitment</string>
     <string name="paywall_cta">Unlock the full potential</string>
     <string name="paywall_cta_choose_plan">Choose this plan</string>
     <string name="paywall_cta_current_plan">Current plan</string>
     <string name="paywall_footer_cancel">Cancel anytime · No commitment</string>
     <string name="paywall_footer_secure">Secure payment via Play Store</string>
     <string name="paywall_restore">Restore a purchase</string>
-    <string name="paywall_coming_soon">Coming soon</string>
 
     <!-- Feature Gate -->
-    <string name="feature_gate_suffix">is in Strakk Pro</string>
     <string name="feature_gate_cta">Unlock with Pro</string>
     <string name="feature_gate_later">Later</string>
 
@@ -468,7 +449,6 @@
     <string name="trial_expired_free">Continue for free</string>
 
     <!-- Settings Subscription -->
-    <string name="settings_section_pro">STRAKK PRO</string>
     <string name="settings_section_current_plan">CURRENT PLAN</string>
     <string name="settings_plan_free_badge">FREE</string>
     <string name="settings_plan_trial_badge">TRIAL ACTIVE</string>
@@ -481,7 +461,6 @@
     <string name="settings_pro_trial_ends">Trial ends: %s</string>
     <string name="settings_pro_trial_body">You keep photo analysis, free text and AI summaries until this date.</string>
     <string name="settings_pro_trial_choose_plan">Choose my plan</string>
-    <string name="settings_pro_trial_billing_note">Your subscription starts on %s. Cancel before to avoid being charged.</string>
     <string name="settings_pro_active_label">%s plan</string>
     <string name="settings_pro_active_renews">Renews on %s</string>
     <string name="settings_pro_annual_upsell_title">Save with annual</string>
@@ -507,7 +486,6 @@
     <string name="onboarding_pro_before">Great news!</string>
     <string name="onboarding_pro_headline">Your 7-day Pro trial is active!</string>
     <string name="onboarding_pro_cta">Let\'s go!</string>
-    <string name="onboarding_pro_later">Later</string>
     <string name="onboarding_pro_footer">Enjoy all Pro features for 7 days.</string>
     <string name="onboarding_pro_feature1_title">Smart photo</string>
     <string name="onboarding_pro_feature1_desc">Take a photo, the AI calculates your macros.</string>

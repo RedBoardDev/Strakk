@@ -22,7 +22,7 @@
 //   200 — successful processing or unknown event (acknowledge to avoid retry)
 //   500 — unexpected server error (RevenueCat will retry)
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -211,7 +211,7 @@ function getEventTimestampIso(event: RevenueCatEvent): string {
 }
 
 async function registerEvent(
-  supabase: any,
+  supabase: SupabaseClient,
   eventId: string,
   userId: string,
   eventType: string,
