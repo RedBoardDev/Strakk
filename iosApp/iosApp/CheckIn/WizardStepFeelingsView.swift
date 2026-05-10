@@ -4,38 +4,38 @@ import SwiftUI
 
 private struct FeelingTag: Identifiable {
     let id: String
-    let label: String
+    var label: String { FeelingTagLabels.label(for: id) }
 }
 
 private enum FeelingCategory {
     static let positive: [FeelingTag] = [
-        FeelingTag(id: "energy_stable", label: "Énergie stable"),
-        FeelingTag(id: "good_energy", label: "Bonne énergie"),
-        FeelingTag(id: "motivated", label: "Motivation"),
-        FeelingTag(id: "disciplined", label: "Régularité"),
-        FeelingTag(id: "good_sleep", label: "Bien dormi"),
-        FeelingTag(id: "good_recovery", label: "Bonne récup"),
-        FeelingTag(id: "strong_training", label: "Séances solides"),
-        FeelingTag(id: "good_mood", label: "Bonne humeur"),
-        FeelingTag(id: "focused", label: "Mental clair"),
-        FeelingTag(id: "light_body", label: "Corps léger"),
-        FeelingTag(id: "good_digestion", label: "Bonne digestion")
+        FeelingTag(id: "energy_stable"),
+        FeelingTag(id: "good_energy"),
+        FeelingTag(id: "motivated"),
+        FeelingTag(id: "disciplined"),
+        FeelingTag(id: "good_sleep"),
+        FeelingTag(id: "good_recovery"),
+        FeelingTag(id: "strong_training"),
+        FeelingTag(id: "good_mood"),
+        FeelingTag(id: "focused"),
+        FeelingTag(id: "light_body"),
+        FeelingTag(id: "good_digestion")
     ]
 
     static let negative: [FeelingTag] = [
-        FeelingTag(id: "low_energy", label: "Peu d'énergie"),
-        FeelingTag(id: "tired", label: "Fatigue"),
-        FeelingTag(id: "poor_sleep", label: "Mal dormi"),
-        FeelingTag(id: "stress", label: "Stress"),
-        FeelingTag(id: "low_motivation", label: "Motivation basse"),
-        FeelingTag(id: "heavy_body", label: "Corps lourd"),
-        FeelingTag(id: "sore", label: "Courbatures"),
-        FeelingTag(id: "joint_discomfort", label: "Gêne articulaire"),
-        FeelingTag(id: "digestion_discomfort", label: "Digestion difficile"),
-        FeelingTag(id: "bloating", label: "Ballonnements"),
-        FeelingTag(id: "hungry", label: "Faim marquée"),
-        FeelingTag(id: "irritability", label: "Irritabilité"),
-        FeelingTag(id: "low_mood", label: "Moral bas")
+        FeelingTag(id: "low_energy"),
+        FeelingTag(id: "tired"),
+        FeelingTag(id: "poor_sleep"),
+        FeelingTag(id: "stress"),
+        FeelingTag(id: "low_motivation"),
+        FeelingTag(id: "heavy_body"),
+        FeelingTag(id: "sore"),
+        FeelingTag(id: "joint_discomfort"),
+        FeelingTag(id: "digestion_discomfort"),
+        FeelingTag(id: "bloating"),
+        FeelingTag(id: "hungry"),
+        FeelingTag(id: "irritability"),
+        FeelingTag(id: "low_mood")
     ]
 }
 
@@ -84,8 +84,11 @@ struct WizardStepFeelingsView: View {
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
 
-                Text("Pick the feelings that summarize your week, then describe your mental and physical state separately.")
-                    .font(.strakkBody)
+                Text(
+                    "Pick the feelings that summarize your week, " +
+                    "then describe your mental and physical state separately."
+                )
+                .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
 
                 // Positive tags
@@ -131,11 +134,12 @@ struct WizardStepFeelingsView: View {
     // MARK: - Tag section
 
     @ViewBuilder
-    private func tagSection(title: String, tags: [FeelingTag], selectedColor: Color) -> some View {
+    private func tagSection(title: LocalizedStringKey, tags: [FeelingTag], selectedColor: Color) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
+                .textCase(.uppercase)
 
             FlowLayout(spacing: StrakkSpacing.xs) {
                 ForEach(tags) { tag in
@@ -167,8 +171,8 @@ struct WizardStepFeelingsView: View {
     // MARK: - Free text sections
 
     private func feelingTextSection(
-        title: String,
-        placeholder: String,
+        title: LocalizedStringKey,
+        placeholder: LocalizedStringKey,
         text: Binding<String>,
         focusedField field: Field,
         onChanged: @escaping (String) -> Void
@@ -222,8 +226,8 @@ struct WizardStepFeelingsView: View {
         Color.strakkBackground.ignoresSafeArea()
         WizardStepFeelingsView(
             selectedTags: ["good_energy", "good_sleep", "tired"],
-            mentalFeeling: "Bonne motivation, semaine plus stable.",
-            physicalFeeling: "Sommeil correct mais digestion moyenne.",
+            mentalFeeling: "Strong motivation, more stable week overall.",
+            physicalFeeling: "Sleep was OK, digestion average.",
             onToggleTag: { _ in },
             onMentalFeelingChanged: { _ in },
             onPhysicalFeelingChanged: { _ in }

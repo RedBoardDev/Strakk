@@ -8,7 +8,7 @@ struct CheckInNutritionSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("NUTRITION (\(nutrition.nutritionDays) jour\(nutrition.nutritionDays > 1 ? "s" : ""))")
+            Text("NUTRITION (\(nutrition.nutritionDays) days)")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
@@ -17,17 +17,25 @@ struct CheckInNutritionSection: View {
                     columns: Array(repeating: GridItem(.flexible(), spacing: StrakkSpacing.xs), count: 2),
                     spacing: StrakkSpacing.xs
                 ) {
-                    macroCell(label: "Calories", value: String(format: "%.0f kcal", nutrition.avgCalories), color: .strakkAccentOrange)
-                    macroCell(label: "Protéines", value: String(format: "%.0f g", nutrition.avgProtein), color: .strakkPrimary)
-                    macroCell(label: "Glucides", value: String(format: "%.0f g", nutrition.avgCarbs), color: .strakkAccentIndigo)
-                    macroCell(label: "Lipides", value: String(format: "%.0f g", nutrition.avgFat), color: .strakkAccentYellow)
+                    macroCell(label: "Calories",
+                              value: String(format: "%.0f kcal", nutrition.avgCalories),
+                              color: .strakkAccentOrange)
+                    macroCell(label: "Protein",
+                              value: String(format: "%.0f g", nutrition.avgProtein),
+                              color: .strakkPrimary)
+                    macroCell(label: "Carbs",
+                              value: String(format: "%.0f g", nutrition.avgCarbs),
+                              color: .strakkAccentIndigo)
+                    macroCell(label: "Fat",
+                              value: String(format: "%.0f g", nutrition.avgFat),
+                              color: .strakkAccentYellow)
                 }
 
                 HStack {
                     Image(systemName: "drop.fill")
                         .foregroundStyle(Color.strakkWater)
                         .font(.system(size: 13))
-                    Text("Eau : \(nutrition.avgWater) ml/j en moy.")
+                    Text("Water: \(nutrition.avgWater) ml/day avg")
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextSecondary)
                 }
@@ -48,7 +56,7 @@ struct CheckInNutritionSection: View {
     }
 
     @ViewBuilder
-    private func macroCell(label: String, value: String, color: Color) -> some View {
+    private func macroCell(label: LocalizedStringKey, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
             Text(label)
                 .font(.strakkCaption)
@@ -97,7 +105,7 @@ struct CheckInEmptyNutritionSection: View {
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
-            Text("Aucune donnée nutritionnelle")
+            Text("No nutrition data")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .padding(StrakkSpacing.md)
@@ -114,17 +122,17 @@ struct DailyNutritionTable: View {
     let days: [DailyNutritionData]
 
     private static let shortDateInputFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.locale = Locale(identifier: "fr_FR")
-        return f
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
     }()
 
     private static let shortDateDisplayFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "d MMM"
-        f.locale = Locale(identifier: "fr_FR")
-        return f
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM"
+        formatter.locale = Locale.current
+        return formatter
     }()
 
     private func formatShortDate(_ dateString: String) -> String {

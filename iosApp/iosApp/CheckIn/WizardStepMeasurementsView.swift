@@ -87,7 +87,6 @@ struct WizardStepMeasurementsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
-                // Poids
                 measurementSection(title: "WEIGHT") {
                     measurementRow(
                         label: "Weight (kg)",
@@ -97,7 +96,6 @@ struct WizardStepMeasurementsView: View {
                     )
                 }
 
-                // Haut du corps
                 measurementSection(title: "UPPER BODY") {
                     VStack(spacing: StrakkSpacing.sm) {
                         measurementRow(
@@ -130,7 +128,6 @@ struct WizardStepMeasurementsView: View {
                     }
                 }
 
-                // Bas du corps
                 measurementSection(title: "LOWER BODY") {
                     VStack(spacing: StrakkSpacing.sm) {
                         measurementRow(
@@ -173,7 +170,7 @@ struct WizardStepMeasurementsView: View {
     // MARK: - Section builder
 
     @ViewBuilder
-    private func measurementSection(title: String, @ViewBuilder content: () -> some View) -> some View {
+    private func measurementSection(title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
             Text(title)
                 .font(.strakkOverline)
@@ -192,7 +189,7 @@ struct WizardStepMeasurementsView: View {
 
     @ViewBuilder
     private func measurementRow(
-        label: String,
+        label: LocalizedStringKey,
         value: Binding<String>,
         deltaValue: Double?,
         onChange: @escaping (String) -> Void

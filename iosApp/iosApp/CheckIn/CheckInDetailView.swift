@@ -42,30 +42,30 @@ struct CheckInDetailView: View {
                     Button {
                         vm.onEvent(CheckInDetailEventOnEdit())
                     } label: {
-                        Label("Modifier", systemImage: "pencil")
+                        Label("Edit", systemImage: "pencil")
                     }
                     Button(role: .destructive) {
                         showDeleteAlert = true
                     } label: {
-                        Label("Supprimer", systemImage: "trash")
+                        Label("Delete", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.title3)
                         .foregroundStyle(Color.strakkTextPrimary)
                 }
-                .accessibilityLabel("Options du bilan")
+                .accessibilityLabel(Text("Check-in options"))
             }
         }
-        .alert("Supprimer ce bilan ?", isPresented: $showDeleteAlert) {
-            Button("Supprimer", role: .destructive) {
+        .alert("Delete this check-in?", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
                 vm.onEvent(CheckInDetailEventOnConfirmDelete())
             }
-            Button("Annuler", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text("This action cannot be undone.")
         }
-        .alert("Erreur", isPresented: Binding(
+        .alert("Error", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }
         )) {
@@ -133,9 +133,9 @@ struct CheckInDetailView: View {
                     Task {
                         defer { isGeneratingPdf = false }
                         guard let pdfData = await vm.generatePdf(options: exportOptions) else { return }
-                        let weekLabel = checkInForExport?.weekLabel ?? "bilan"
+                        let weekLabel = checkInForExport?.weekLabel ?? "checkin"
                         let tempUrl = FileManager.default.temporaryDirectory
-                            .appendingPathComponent("Bilan_\(weekLabel).pdf")
+                            .appendingPathComponent("CheckIn_\(weekLabel).pdf")
                         try? pdfData.write(to: tempUrl)
                         shareItems = [tempUrl]
                     }
@@ -158,7 +158,7 @@ struct CheckInDetailView: View {
 
             if !checkIn.coveredDates.isEmpty {
                 let count = checkIn.coveredDates.count
-                Text("\(count) jour\(count > 1 ? "s" : "") couverts")
+                Text("\(count) days covered")
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
             }
@@ -189,10 +189,10 @@ struct CheckInDetailView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 48)
             .background(Color.strakkSurface1)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
         .disabled(isGeneratingPdf)
-        .accessibilityLabel("Partager le bilan en PDF")
+        .accessibilityLabel(Text("Share check-in as PDF"))
     }
 
     // MARK: - Helpers
@@ -200,7 +200,7 @@ struct CheckInDetailView: View {
     private func weekDisplayLabel(from weekLabel: String) -> String {
         let parts = weekLabel.split(separator: "-W")
         if parts.count == 2, let weekNumber = parts.last {
-            return "Semaine \(weekNumber)"
+            return String(localized: "Week \(String(weekNumber))")
         }
         return weekLabel
     }

@@ -14,16 +14,16 @@ struct CheckInMeasurementsSection: View {
                 .foregroundStyle(Color.strakkTextTertiary)
 
             VStack(spacing: 0) {
-                let rows: [(String, Double?, String, Double?)] = [
-                    ("Poids", checkIn.weight, "kg", delta?.weight),
-                    ("Épaules", checkIn.shoulders, "cm", delta?.shoulders),
-                    ("Poitrine", checkIn.chest, "cm", delta?.chest),
-                    ("Bras gauche", checkIn.armLeft, "cm", delta?.armLeft),
-                    ("Bras droit", checkIn.armRight, "cm", delta?.armRight),
-                    ("Taille", checkIn.waist, "cm", delta?.waist),
-                    ("Hanches", checkIn.hips, "cm", delta?.hips),
-                    ("Cuisse gauche", checkIn.thighLeft, "cm", delta?.thighLeft),
-                    ("Cuisse droite", checkIn.thighRight, "cm", delta?.thighRight)
+                let rows: [(LocalizedStringKey, Double?, String, Double?)] = [
+                    ("Weight", checkIn.weight, "kg", delta?.weight),
+                    ("Shoulders", checkIn.shoulders, "cm", delta?.shoulders),
+                    ("Chest", checkIn.chest, "cm", delta?.chest),
+                    ("Left arm", checkIn.armLeft, "cm", delta?.armLeft),
+                    ("Right arm", checkIn.armRight, "cm", delta?.armRight),
+                    ("Waist", checkIn.waist, "cm", delta?.waist),
+                    ("Hips", checkIn.hips, "cm", delta?.hips),
+                    ("Left thigh", checkIn.thighLeft, "cm", delta?.thighLeft),
+                    ("Right thigh", checkIn.thighRight, "cm", delta?.thighRight)
                 ]
 
                 ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
@@ -40,7 +40,7 @@ struct CheckInMeasurementsSection: View {
     }
 
     @ViewBuilder
-    private func measurementRow(label: String, value: Double?, unit: String, delta: Double?) -> some View {
+    private func measurementRow(label: LocalizedStringKey, value: Double?, unit: String, delta: Double?) -> some View {
         HStack(spacing: StrakkSpacing.xs) {
             Text(label)
                 .font(.strakkBody)

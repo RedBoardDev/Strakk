@@ -14,7 +14,7 @@ struct CheckInPhotosSection: View {
                 .foregroundStyle(Color.strakkTextTertiary)
 
             if photos.isEmpty {
-                emptyValue("Aucune photo")
+                emptyValue("No photos")
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: StrakkSpacing.sm) {
@@ -61,7 +61,7 @@ struct CheckInPhotosSection: View {
         .accessibilityLabel("Photo \(photo.position + 1)")
     }
 
-    private func emptyValue(_ text: String) -> some View {
+    private func emptyValue(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.strakkBody)
             .foregroundStyle(Color.strakkTextTertiary)

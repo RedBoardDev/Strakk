@@ -47,98 +47,106 @@ struct CheckInStatsView: View {
         waistTrend: TrendInfoData?,
         regularity: RegularityInfoData
     ) -> some View {
+        let chartData = buildChartData(from: filteredSeries)
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
-                // Period picker
                 periodPicker(selectedPeriod: selectedPeriod)
-
-                // Weight chart
-                let weightPoints = filteredSeries.compactMap { s -> (String, Double)? in
-                    guard let v = s.weight else { return nil }
-                    return (s.weekLabel, v)
-                }
-                if weightPoints.count >= 2 {
-                    chartCard(
-                        title: "WEIGHT",
-                        unit: "kg",
-                        color: .strakkPrimary,
-                        points: weightPoints,
-                        trend: weightTrend
-                    )
-                }
-
-                // Waist chart
-                let waistPoints = filteredSeries.compactMap { s -> (String, Double)? in
-                    guard let v = s.waist else { return nil }
-                    return (s.weekLabel, v)
-                }
-                if waistPoints.count >= 2 {
-                    chartCard(
-                        title: "WAIST",
-                        unit: "cm",
-                        color: .strakkWarning,
-                        points: waistPoints,
-                        trend: waistTrend
-                    )
-                }
-
-                // Arms chart (avg L+R)
-                let armPoints = filteredSeries.compactMap { s -> (String, Double)? in
-                    guard let l = s.armLeft, let r = s.armRight else { return nil }
-                    return (s.weekLabel, (l + r) / 2)
-                }
-                if armPoints.count >= 2 {
-                    chartCard(
-                        title: "ARMS (AVG.)",
-                        unit: "cm",
-                        color: .strakkSuccess,
-                        points: armPoints,
-                        trend: nil
-                    )
-                }
-
-                // Thighs chart (avg L+R)
-                let thighPoints = filteredSeries.compactMap { s -> (String, Double)? in
-                    guard let l = s.thighLeft, let r = s.thighRight else { return nil }
-                    return (s.weekLabel, (l + r) / 2)
-                }
-                if thighPoints.count >= 2 {
-                    chartCard(
-                        title: "CUISSES (MOY.)",
-                        unit: "cm",
-                        color: .strakkPrimary,
-                        points: thighPoints,
-                        trend: nil
-                    )
-                }
-
-                // Hips chart
-                let hipPoints = filteredSeries.compactMap { s -> (String, Double)? in
-                    guard let v = s.hips else { return nil }
-                    return (s.weekLabel, v)
-                }
-                if hipPoints.count >= 2 {
-                    chartCard(
-                        title: "HANCHES",
-                        unit: "cm",
-                        color: .strakkAccentBlue,
-                        points: hipPoints,
-                        trend: nil
-                    )
-                }
-
-                // No data message if nothing to show
-                let hasAnyChart = weightPoints.count >= 2 || waistPoints.count >= 2
-                    || armPoints.count >= 2 || thighPoints.count >= 2 || hipPoints.count >= 2
-                if !hasAnyChart {
-                    noDataView
-                }
-
-                // Regularity section
-                regularityCard(regularity: regularity)
+                chartCards(chartData: chartData, weightTrend: weightTrend, waistTrend: waistTrend)
+                if !chartData.hasAny { StatsNoDataView() }
+                RegularityCardView(regularity: regularity)
             }
             .padding(.horizontal, StrakkSpacing.lg)
             .padding(.vertical, StrakkSpacing.xl)
+        }
+    }
+
+    private struct ChartData {
+        let weight: [(String, Double)]
+        let waist: [(String, Double)]
+        let arms: [(String, Double)]
+        let thighs: [(String, Double)]
+        let hips: [(String, Double)]
+
+        var hasAny: Bool {
+            weight.count >= 2 || waist.count >= 2 || arms.count >= 2
+                || thighs.count >= 2 || hips.count >= 2
+        }
+    }
+
+    private func buildChartData(from series: [SeriesPointData]) -> ChartData {
+        let weight = series.compactMap { s -> (String, Double)? in
+            guard let w = s.weight else { return nil }
+            return (s.weekLabel, w)
+        }
+        let waist = series.compactMap { s -> (String, Double)? in
+            guard let w = s.waist else { return nil }
+            return (s.weekLabel, w)
+        }
+        let arms = series.compactMap { s -> (String, Double)? in
+            guard let left = s.armLeft, let right = s.armRight else { return nil }
+            return (s.weekLabel, (left + right) / 2)
+        }
+        let thighs = series.compactMap { s -> (String, Double)? in
+            guard let left = s.thighLeft, let right = s.thighRight else { return nil }
+            return (s.weekLabel, (left + right) / 2)
+        }
+        let hips = series.compactMap { s -> (String, Double)? in
+            guard let h = s.hips else { return nil }
+            return (s.weekLabel, h)
+        }
+        return ChartData(weight: weight, waist: waist, arms: arms, thighs: thighs, hips: hips)
+    }
+
+    @ViewBuilder
+    private func chartCards(
+        chartData: ChartData,
+        weightTrend: TrendInfoData?,
+        waistTrend: TrendInfoData?
+    ) -> some View {
+        if chartData.weight.count >= 2 {
+            chartCard(
+                title: "WEIGHT",
+                unit: "kg",
+                color: .strakkPrimary,
+                points: chartData.weight,
+                trend: weightTrend
+            )
+        }
+        if chartData.waist.count >= 2 {
+            chartCard(
+                title: "WAIST",
+                unit: "cm",
+                color: .strakkWarning,
+                points: chartData.waist,
+                trend: waistTrend
+            )
+        }
+        if chartData.arms.count >= 2 {
+            chartCard(
+                title: "ARMS (AVG.)",
+                unit: "cm",
+                color: .strakkSuccess,
+                points: chartData.arms,
+                trend: nil
+            )
+        }
+        if chartData.thighs.count >= 2 {
+            chartCard(
+                title: "THIGHS (AVG.)",
+                unit: "cm",
+                color: .strakkPrimary,
+                points: chartData.thighs,
+                trend: nil
+            )
+        }
+        if chartData.hips.count >= 2 {
+            chartCard(
+                title: "HIPS",
+                unit: "cm",
+                color: .strakkAccentBlue,
+                points: chartData.hips,
+                trend: nil
+            )
         }
     }
 
@@ -171,7 +179,7 @@ struct CheckInStatsView: View {
 
     @ViewBuilder
     private func chartCard(
-        title: String,
+        title: LocalizedStringKey,
         unit: String,
         color: Color,
         points: [(String, Double)],
@@ -184,31 +192,31 @@ struct CheckInStatsView: View {
 
             VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
                 Chart {
-                    ForEach(Array(points.enumerated()), id: \.offset) { index, point in
+                    ForEach(Array(points.enumerated()), id: \.offset) { _, point in
                         LineMark(
-                            x: .value("Semaine", abbreviatedLabel(point.0)),
-                            y: .value("Valeur", point.1)
+                            x: .value("Week", abbreviatedLabel(point.0)),
+                            y: .value("Value", point.1)
                         )
                         .foregroundStyle(color)
                         .interpolationMethod(.catmullRom)
 
                         PointMark(
-                            x: .value("Semaine", abbreviatedLabel(point.0)),
-                            y: .value("Valeur", point.1)
+                            x: .value("Week", abbreviatedLabel(point.0)),
+                            y: .value("Value", point.1)
                         )
                         .foregroundStyle(color)
                         .symbolSize(30)
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .automatic) { value in
+                    AxisMarks(values: .automatic) { _ in
                         AxisValueLabel()
                             .font(.strakkCaption)
                             .foregroundStyle(Color.strakkTextTertiary)
                     }
                 }
                 .chartYAxis {
-                    AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
+                    AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { _ in
                         AxisGridLine()
                             .foregroundStyle(Color.strakkDivider)
                         AxisValueLabel()
@@ -219,89 +227,9 @@ struct CheckInStatsView: View {
                 .frame(height: 160)
                 .chartBackground { _ in Color.clear }
 
-                // Trend info
                 if let trend {
-                    trendLabel(trend: trend, unit: unit)
+                    TrendLabelView(trend: trend, unit: unit)
                 }
-            }
-            .padding(StrakkSpacing.md)
-            .background(Color.strakkSurface1)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
-    @ViewBuilder
-    private func trendLabel(trend: TrendInfoData, unit: String) -> some View {
-        let delta = trend.delta
-        let sign = delta >= 0 ? "+" : ""
-        let arrow = delta > 0 ? "↑" : (delta < 0 ? "↓" : "=")
-
-        HStack(spacing: StrakkSpacing.xxs) {
-            Image(systemName: "arrow.trend.up")
-                .font(.system(size: 12))
-                .foregroundStyle(Color.strakkTextTertiary)
-            Text("Tendance : \(arrow) \(sign)\(String(format: "%.1f", delta)) \(unit) sur \(trend.weeks) sem.")
-                .font(.strakkCaption)
-                .foregroundStyle(Color.strakkTextSecondary)
-        }
-    }
-
-    // MARK: - No data
-
-    private var noDataView: some View {
-        VStack(spacing: StrakkSpacing.sm) {
-            Image(systemName: "chart.xyaxis.line")
-                .font(.system(size: 36))
-                .foregroundStyle(Color.strakkTextTertiary)
-
-            Text("Not enough data to show trends.")
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(StrakkSpacing.xxl)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    // MARK: - Regularity card
-
-    @ViewBuilder
-    private func regularityCard(regularity: RegularityInfoData) -> some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("CONSISTENCY")
-                .font(.strakkOverline)
-                .foregroundStyle(Color.strakkTextTertiary)
-
-            VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-                HStack {
-                    Text("\(regularity.checkInCount)/\(regularity.totalWeeks) semaines")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(Color.strakkTextPrimary)
-                    Spacer()
-                    Text("\(regularity.percentage)%")
-                        .font(.strakkHeading3)
-                        .foregroundStyle(Color.strakkPrimary)
-                }
-
-                // Progress bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.strakkSurface2)
-                            .frame(height: 8)
-
-                        Capsule()
-                            .fill(Color.strakkPrimary)
-                            .frame(
-                                width: geo.size.width * CGFloat(regularity.percentage) / 100,
-                                height: 8
-                            )
-                    }
-                }
-                .frame(height: 8)
-                .accessibilityLabel("Consistency : \(regularity.percentage)%")
             }
             .padding(StrakkSpacing.md)
             .background(Color.strakkSurface1)
@@ -312,12 +240,121 @@ struct CheckInStatsView: View {
     // MARK: - Helpers
 
     private func abbreviatedLabel(_ weekLabel: String) -> String {
-        // "2026-W17" → "S17"
+        // "2026-W17" → "W17"
         let parts = weekLabel.split(separator: "-W")
         if parts.count == 2, let week = parts.last {
-            return "S\(week)"
+            return String(localized: "W\(week)")
         }
         return weekLabel
+    }
+}
+
+// MARK: - TrendLabelView
+
+private struct TrendLabelView: View {
+    let trend: TrendInfoData
+    let unit: String
+
+    var body: some View {
+        let delta = trend.delta
+        let sign = delta >= 0 ? "+" : ""
+        let arrow = delta > 0 ? "↑" : (delta < 0 ? "↓" : "=")
+        let value = String(format: "%.1f", delta)
+        let trendText = String.localizedStringWithFormat(
+            String(localized: "Trend: %@ %@%@ %@ over %@ wk"),
+            arrow,
+            sign,
+            value,
+            unit,
+            String(trend.weeks)
+        )
+        HStack(spacing: StrakkSpacing.xxs) {
+            Image(systemName: "arrow.trend.up")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.strakkTextTertiary)
+            Text(trendText)
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+        }
+    }
+}
+
+// MARK: - StatsNoDataView
+
+private struct StatsNoDataView: View {
+    var body: some View {
+        VStack(spacing: StrakkSpacing.sm) {
+            Image(systemName: "chart.xyaxis.line")
+                .font(.system(size: 36))
+                .foregroundStyle(Color.strakkTextTertiary)
+            Text("Not enough data to show trends.")
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(StrakkSpacing.xxl)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - RegularityCardView
+
+private struct RegularityCardView: View {
+    let regularity: RegularityInfoData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            Text("CONSISTENCY")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+
+            VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+                HStack {
+                    Text(weeksLabel)
+                        .font(.strakkBodyBold)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                    Spacer()
+                    Text("\(regularity.percentage)%")
+                        .font(.strakkHeading3)
+                        .foregroundStyle(Color.strakkPrimary)
+                }
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.strakkSurface2)
+                            .frame(height: 8)
+                        Capsule()
+                            .fill(Color.strakkPrimary)
+                            .frame(
+                                width: geo.size.width * CGFloat(regularity.percentage) / 100,
+                                height: 8
+                            )
+                    }
+                }
+                .frame(height: 8)
+                .accessibilityLabel(accessibilityLabel)
+            }
+            .padding(StrakkSpacing.md)
+            .background(Color.strakkSurface1)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private var weeksLabel: String {
+        String.localizedStringWithFormat(
+            String(localized: "%@/%@ weeks"),
+            String(regularity.checkInCount),
+            String(regularity.totalWeeks)
+        )
+    }
+
+    private var accessibilityLabel: String {
+        String.localizedStringWithFormat(
+            String(localized: "Consistency: %@%%"),
+            String(regularity.percentage)
+        )
     }
 }
 

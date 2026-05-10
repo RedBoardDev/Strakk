@@ -25,7 +25,7 @@ struct CheckInFeelingsSection: View {
 
             VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
                 if isEmpty {
-                    Text("Aucun ressenti renseigné")
+                    Text("No feelings logged")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextTertiary)
                 } else {
@@ -68,11 +68,11 @@ struct CheckInFeelingsSection: View {
                     }
 
                     if hasMental, let mentalFeeling {
-                        feelingCard(header: "RESSENTI MENTAL", text: mentalFeeling)
+                        feelingCard(header: "MENTAL", text: mentalFeeling)
                     }
 
                     if hasPhysical, let physicalFeeling {
-                        feelingCard(header: "RESSENTI PHYSIQUE", text: physicalFeeling)
+                        feelingCard(header: "PHYSICAL", text: physicalFeeling)
                     }
                 }
             }
@@ -83,7 +83,7 @@ struct CheckInFeelingsSection: View {
         }
     }
 
-    private func feelingCard(header: String, text: String) -> some View {
+    private func feelingCard(header: LocalizedStringKey, text: String) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
             Text(header)
                 .font(.strakkOverline)

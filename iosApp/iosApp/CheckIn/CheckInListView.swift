@@ -112,7 +112,7 @@ struct CheckInListView: View {
     }
 
     @ViewBuilder
-    private func quickStatCard(title: String, value: String?, unit: String, delta: Double?) -> some View {
+    private func quickStatCard(title: LocalizedStringKey, value: String?, unit: String, delta: Double?) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
             Text(title)
                 .font(.strakkOverline)
@@ -202,7 +202,7 @@ struct CheckInListView: View {
                     .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(hiddenCount) older check-ins")
+                    Text(olderCheckInsLabel(hiddenCount))
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextSecondary)
                     Text("Unlock full history with Pro")
@@ -248,7 +248,7 @@ struct CheckInListView: View {
                             .foregroundStyle(Color.strakkTextSecondary)
 
                         if item.hasAiSummary {
-                            Label("IA", systemImage: "sparkles")
+                            Label("AI", systemImage: "sparkles")
                                 .font(.strakkCaption)
                                 .foregroundStyle(Color.strakkPrimary)
                         }
@@ -307,12 +307,19 @@ struct CheckInListView: View {
     // MARK: - Helpers
 
     private func weekDisplayLabel(from weekLabel: String) -> String {
-        // "2026-W17" → "Semaine 17"
+        // "2026-W17" -> localized "Week 17"
         let parts = weekLabel.split(separator: "-W")
         if parts.count == 2, let weekNumber = parts.last {
-            return "Semaine \(weekNumber)"
+            return String(localized: "Week \(weekNumber)")
         }
         return weekLabel
+    }
+
+    private func olderCheckInsLabel(_ count: Int) -> String {
+        String.localizedStringWithFormat(
+            String(localized: "%@ older check-ins"),
+            String(count)
+        )
     }
 
     private func checkInAccessibilityLabel(for item: CheckInListItemData) -> String {

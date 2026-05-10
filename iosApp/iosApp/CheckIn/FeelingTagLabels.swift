@@ -2,8 +2,8 @@ import Foundation
 
 // MARK: - FeelingTagLabels
 //
-// Single source of truth for feeling tag ID → French label mapping.
-// Used in: CheckInDetailView, WizardStepFeelingsView, WizardStepSummaryView
+// * Single source of truth for feeling tag ID → localized label mapping.
+// * Used in: CheckInDetailView, WizardStepFeelingsView, WizardStepSummaryView
 
 enum FeelingTagLabels {
     static func label(for tag: String) -> String {
@@ -34,7 +34,7 @@ enum FeelingTagLabels {
         "bloating": String(localized: "Bloating"),
         "hungry": String(localized: "Hungry"),
         "irritability": String(localized: "Irritable"),
-        "low_mood": String(localized: "Low mood"),
+        "low_mood": String(localized: "Low mood")
     ]
 
     /// Positive tag IDs

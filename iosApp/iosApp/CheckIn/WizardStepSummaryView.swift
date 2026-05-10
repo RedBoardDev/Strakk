@@ -79,7 +79,11 @@ struct WizardStepSummaryView: View {
                 macroCell(label: "Calories", value: "\(Int(summary.avgCalories))", color: Color.strakkAccentOrangeLight)
                 macroCell(label: "Fat", value: "\(Int(summary.avgFat))g", color: Color.strakkAccentYellow)
                 macroCell(label: "Carbs", value: "\(Int(summary.avgCarbs))g", color: Color.strakkAccentIndigo)
-                macroCell(label: "Water", value: String(format: "%.1fL", Double(summary.avgWater) / 1000.0), color: Color.strakkWater)
+                macroCell(
+                    label: "Water",
+                    value: String(format: "%.1fL", Double(summary.avgWater) / 1000.0),
+                    color: Color.strakkWater
+                )
             }
 
             // AI summary
@@ -93,7 +97,7 @@ struct WizardStepSummaryView: View {
         }
     }
 
-    private func macroCell(label: String, value: String, color: Color) -> some View {
+    private func macroCell(label: LocalizedStringKey, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
                 .font(.strakkBodyBold)
@@ -151,7 +155,7 @@ struct WizardStepSummaryView: View {
 
     // MARK: - Recap helpers
 
-    private func recapRow(icon: String, label: String, value: String) -> some View {
+    private func recapRow(icon: String, label: LocalizedStringKey, value: String) -> some View {
         HStack(spacing: StrakkSpacing.xs) {
             Image(systemName: icon)
                 .font(.system(size: 13))
@@ -183,7 +187,7 @@ struct WizardStepSummaryView: View {
         return result
     }
 
-    private func feelingPreview(title: String, text: String) -> some View {
+    private func feelingPreview(title: LocalizedStringKey, text: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: StrakkSpacing.xs) {
                 Image(systemName: "text.quote")
@@ -214,7 +218,7 @@ struct WizardStepSummaryView: View {
 
             FlowLayout(spacing: StrakkSpacing.xxs + 2) {
                 ForEach(Array(selectedTags), id: \.self) { tag in
-                    Text(feelingTagLabel(tag))
+                    Text(FeelingTagLabels.label(for: tag))
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextSecondary)
                         .padding(.horizontal, StrakkSpacing.xs)
@@ -224,35 +228,6 @@ struct WizardStepSummaryView: View {
                 }
             }
         }
-    }
-
-    private func feelingTagLabel(_ slug: String) -> String {
-        [
-            "energy_stable": "Énergie stable",
-            "good_energy": "Bonne énergie",
-            "motivated": "Motivation",
-            "disciplined": "Régularité",
-            "good_sleep": "Bien dormi",
-            "good_recovery": "Bonne récup",
-            "strong_training": "Séances solides",
-            "good_mood": "Bonne humeur",
-            "focused": "Mental clair",
-            "light_body": "Corps léger",
-            "good_digestion": "Bonne digestion",
-            "low_energy": "Peu d'énergie",
-            "tired": "Fatigue",
-            "poor_sleep": "Mal dormi",
-            "stress": "Stress",
-            "low_motivation": "Motivation basse",
-            "heavy_body": "Corps lourd",
-            "sore": "Courbatures",
-            "joint_discomfort": "Gêne articulaire",
-            "digestion_discomfort": "Digestion difficile",
-            "bloating": "Ballonnements",
-            "hungry": "Faim marquée",
-            "irritability": "Irritabilité",
-            "low_mood": "Moral bas",
-        ][slug] ?? slug
     }
 }
 
@@ -269,22 +244,26 @@ struct WizardStepSummaryView: View {
                 avgCarbs: 210,
                 avgWater: 2400,
                 nutritionDays: 5,
-                aiSummary: "Bonne semaine, apports protéiques dans la cible.",
+                aiSummary: "Solid week — protein intake hit the target.",
                 dailyData: []
             ),
             nutritionLoading: false,
             weight: "78.5",
             delta: CheckInDeltaData(
                 weight: -0.5,
-                shoulders: nil, chest: nil,
-                armLeft: nil, armRight: nil,
-                waist: nil, hips: nil,
-                thighLeft: nil, thighRight: nil
+                shoulders: nil,
+                chest: nil,
+                armLeft: nil,
+                armRight: nil,
+                waist: nil,
+                hips: nil,
+                thighLeft: nil,
+                thighRight: nil
             ),
             photoCount: 2,
             selectedTags: ["good_energy", "good_sleep"],
-            mentalFeeling: "Bonne motivation dans l'ensemble.",
-            physicalFeeling: "Énergie correcte, sommeil meilleur."
+            mentalFeeling: "Strong motivation overall.",
+            physicalFeeling: "Decent energy, sleep is better."
         )
     }
 }
