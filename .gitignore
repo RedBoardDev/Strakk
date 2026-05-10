@@ -1,42 +1,169 @@
-# Secrets / env
+# ============================================================
+# Secrets — NEVER commit
+# ============================================================
 .env
-.env.local
+.env.*
+!.env.example
+!.env.sample
+local.properties
+secrets.properties
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+*.cer
+*service-account*.json
+*credentials*.json
 scripts/**/.env
 
-# Gradle
-.gradle/
+# iOS Config (xcconfig may contain env-specific keys)
+iosApp/Config/Production.xcconfig
+iosApp/Config/Staging.xcconfig
+!iosApp/Config/*.xcconfig.example
+
+# ============================================================
+# Build artifacts
+# ============================================================
 build/
-local.properties
+.gradle/
 .kotlin/
+out/
+target/
+dist/
+.cache/
 
 # Android
 *.apk
 *.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# iOS
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+xcuserdata/
+.swiftpm/
+
+# Generated Xcode project (regenerated via xcodegen)
+iosApp/Strakk.xcodeproj/
+iosApp/*.xcodeproj
+
+# Pods (only if CocoaPods is used; SPM doesn't need this)
+Pods/
+
+# Deno
+deno.lock.bak
+
+# Node (if any tooling)
+node_modules/
+.next/
+.npm
 
 # Python
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
 
-# iOS
-iosApp/Config/*.xcconfig
+# ============================================================
+# Database / backups
+# ============================================================
+*.sql.gz
+*.dump
+*.bak
+*.backup
+supabase/backup_*.sql
+supabase/.temp/
 
-# Local agent/tooling state
-.claude/settings.local.json
-.claude/agent-memory/
-.claude/agent-memory-local/
-iosApp/.claude/
-.serena/
-iosApp/*.xcodeproj
-iosApp/DerivedData/
-*.xcuserdata
-*.xcworkspace
+# ============================================================
+# OS / IDE junk
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
-# IDE
+# JetBrains
 .idea/
 *.iml
-.DS_Store
 
+# VS Code
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+
+# Fleet
+.fleet/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================================
+# Logs / temp
+# ============================================================
+*.log
+*.log.*
+logs/
+tmp/
+temp/
+
+# ============================================================
+# Claude Code agent memory (project-local)
+# ============================================================
+.claude/agent-memory/
+.claude/agent-memory-local/
+.claude/settings.local.json
+infra/nutrition-api/.claude/agent-memory/
+iosApp/.claude/
+
+# Serena
+.serena/
+
+# ============================================================
+# Internal docs (kept on disk, not tracked)
+# ============================================================
+docs/audit/
+docs/billing/
+docs/plans/
+docs/research/
+docs/reviews/
+docs/MARKETING.md
+docs/IDEA.md
+docs/PROGRESS.md
+docs/FEATURE_CONFIG.md
+docs/security-audit.md
+docs/release-readiness-report.md
+docs/release-readiness-report.PREVIOUS.md
+docs/release-readiness-decisions.md
+
+# ============================================================
 # Kotlin
+# ============================================================
 *.kotlin_module
-docs/
+
+# ============================================================
+# Test outputs / coverage
+# ============================================================
+coverage/
+.nyc_output/
+test-results/
+
+# ============================================================
+# CI / deploy local artifacts
+# ============================================================
+.terraform/
+*.tfstate
+*.tfstate.backup

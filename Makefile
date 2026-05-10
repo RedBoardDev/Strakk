@@ -1,10 +1,11 @@
-JAVA_HOME ?= /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+JAVA_HOME ?= /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export JAVA_HOME
 
-.PHONY: lint lint-kotlin lint-swift lint-deno \
+.PHONY: lint lint-kotlin lint-swift lint-deno lint-nutrition \
         test test-shared \
         build build-android build-android-release build-ios-framework \
         ios-project ios-build \
+        nutrition-dev nutrition-start \
         deploy-functions migrate seed \
         setup check
 
@@ -74,6 +75,17 @@ migrate:
 
 seed:
 	supabase db reset --linked
+
+# ── Nutrition API (infra/) ────────────────────────────────────
+
+nutrition-dev:
+	cd infra/nutrition-api && deno task dev
+
+nutrition-start:
+	cd infra/nutrition-api && deno task start
+
+lint-nutrition:
+	cd infra/nutrition-api && deno lint && deno check src/main.ts
 
 # ── Setup ─────────────────────────────────────────────────────
 

@@ -1,49 +1,99 @@
 # Strakk
 
-Personal fitness & nutrition tracking app.
+[![CI](https://github.com/RedBoardDev/Strakk/actions/workflows/ci.yml/badge.svg)](https://github.com/RedBoardDev/Strakk/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Personal nutrition tracking and weekly check-in app built with Kotlin Multiplatform. Shared business logic, native UI on both platforms.
+
+## Features
+
+- Meal logging with AI-powered photo scanning and food recognition
+- Macro tracking (calories, protein, carbs, fat) with daily summaries
+- Weekly check-ins with body measurements, mood, and progress photos
+- AI-generated nutrition goals based on user profile
+- Water intake tracking
+- Food search across local catalog and Open Food Facts
+- Workout PDF parsing and Hevy export
+- Pro subscription with RevenueCat billing
 
 ## Architecture
 
 Kotlin Multiplatform (KMP) with Clean Architecture:
-- **shared/** — Kotlin (domain, data, presentation) — compiled for iOS & Android
-- **iosApp/** — Swift/SwiftUI (native Apple UI)
-- **androidApp/** — Kotlin/Jetpack Compose (native Material 3 UI)
+
+| Module | Description |
+|--------|-------------|
+| [`shared/`](shared/) | Kotlin — domain, data, presentation (compiled for iOS and Android) |
+| [`androidApp/`](androidApp/) | Jetpack Compose, Material 3 |
+| [`iosApp/`](iosApp/) | SwiftUI, iOS 17+ |
+| [`supabase/`](supabase/) | Postgres migrations and Deno Edge Functions |
+| [`infra/nutrition-api/`](infra/nutrition-api/) | Self-hosted Deno API for meal scanning (vision + vector search) |
+| [`scripts/`](scripts/) | Dev utilities (backtest, import, seed) |
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture diagram and layer rules.
 
 ## Stack
 
-- **Backend**: Supabase (Postgres, Auth, Storage, Edge Functions)
-- **Shared**: Kotlin 2.1, Ktor, Koin, kotlinx.serialization
+- **Shared**: Kotlin 2.1, supabase-kt 3.1, Ktor, Koin, kotlinx.serialization, SKIE
 - **iOS**: Swift 6, SwiftUI, iOS 17+
 - **Android**: Jetpack Compose, Material 3, API 26+
+- **Backend**: Supabase (Postgres, Auth, Storage, Edge Functions)
+- **Infra**: Deno, Docker, Qdrant (vector search)
 
-## Build
+## Prerequisites
 
-### Prerequisites
-- JDK 17+
-- Android Studio
-- Xcode 15+
+- JDK 17+ (`brew install openjdk@17`)
+- Android Studio (Ladybug or later)
+- Xcode 15+ (macOS only, for iOS)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- Deno 2.x (`brew install deno`) — for edge function linting
+- [Lefthook](https://github.com/evilmartians/lefthook) (`brew install lefthook`) — pre-commit hooks
 
-### Android
+## Setup
+
+```bash
+# 1. Clone
+git clone https://github.com/RedBoardDev/Strakk.git
+cd Strakk
+
+# 2. Configure environment (see docs/ENVIRONMENTS.md)
+cp local.properties.example local.properties   # Android — fill in Supabase keys
+mkdir -p iosApp/Config
+# Create Production.xcconfig and Staging.xcconfig (see docs/ENVIRONMENTS.md)
+
+# 3. Install pre-commit hooks
+make setup
+
+# 4. Build
+make build          # Android debug APK
+make ios-project    # Generate Xcode project
 ```
+
+## Build and Test
+
+```bash
+# All linters
+make lint
+
+# Kotlin (Detekt)
+make lint-kotlin
+
+# Deno (edge functions)
+make lint-deno
+
+# SwiftLint (local macOS only)
+make lint-swift
+
+# Shared tests (JVM + iOS simulator)
+./gradlew :shared:allTests
+
+# Android debug APK
 ./gradlew :androidApp:assembleDebug
-```
 
-### iOS
-```
-# Generate Xcode project
-cd iosApp && xcodegen generate
-
-# Build frameworks
-./gradlew :shared:linkDebugFrameworkIosArm64
+# iOS framework
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
-# Open in Xcode
-open iosApp/Strakk.xcodeproj
-```
-
-### Both
-```
-./gradlew :shared:build :androidApp:assembleDebug
+# Full check (lint + test + build)
+make check
 ```
 
 ## Project Structure
@@ -51,11 +101,38 @@ open iosApp/Strakk.xcodeproj
 ```
 Strakk/
 ├── shared/src/commonMain/kotlin/com/strakk/shared/
-│   ├── domain/          ← Models, repository interfaces, use cases
-│   ├── data/            ← Repository implementations, DTOs, Ktor client
-│   ├── presentation/    ← ViewModels, UiState
-│   └── di/              ← Koin modules
-├── iosApp/              ← SwiftUI views, ViewModel wrappers
-├── androidApp/          ← Jetpack Compose screens
-└── docs/                ← Feature specs, architecture docs
+│   ├── domain/          # Models, repository interfaces, use cases (zero deps)
+│   ├── data/            # Repository impls, DTOs, mappers (internal)
+│   ├── presentation/    # ViewModels, UiState, Effects
+│   └── di/              # Koin modules
+├── androidApp/          # Jetpack Compose screens (Route/Screen/Content)
+├── iosApp/              # SwiftUI views, @Observable ViewModel wrappers
+├── supabase/
+│   ├── migrations/      # Postgres DDL
+│   └── functions/       # Deno Edge Functions
+├── infra/nutrition-api/ # Self-hosted meal scanning API
+├── scripts/             # Dev utilities
+├── docs/                # Architecture, environments, feature specs
+├── config/detekt/       # Detekt configuration
+└── gradle/              # Version catalog (libs.versions.toml)
 ```
+
+## Environment Configuration
+
+See [`docs/ENVIRONMENTS.md`](docs/ENVIRONMENTS.md) for:
+- `local.properties` setup (Android)
+- `iosApp/Config/*.xcconfig` setup (iOS)
+- Edge Function environment variables
+- Nutrition API `.env` configuration
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow, code style, and PR guidelines.
+
+## Security
+
+To report a vulnerability, see [`SECURITY.md`](SECURITY.md).
+
+## License
+
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
