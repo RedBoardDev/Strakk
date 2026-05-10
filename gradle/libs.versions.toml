@@ -15,6 +15,7 @@ turbine = "1.2.0"
 kotlinx-coroutines = "1.10.1"
 multiplatform-settings = "1.3.0"
 detekt = "1.23.7"
+revenuecat-kmp = "2.5.0+17.32.0"
 
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
@@ -42,6 +43,7 @@ multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-sett
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+revenuecat-purchases-kmp-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat-kmp" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

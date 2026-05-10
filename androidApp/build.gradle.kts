@@ -12,6 +12,9 @@ val localProps = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 
+val prodRevenueCatApiKey = localProps.getProperty("revenuecat.prod.androidApiKey", "")
+val stagingRevenueCatApiKey = localProps.getProperty("revenuecat.staging.androidApiKey", "")
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -55,17 +58,20 @@ android {
         create("prod") {
             dimension = "env"
             resValue("string", "app_name", "Strakk")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$prodRevenueCatApiKey\"")
         }
         create("staging") {
             dimension = "env"
             applicationIdSuffix = ".staging"
             resValue("string", "app_name", "Strakk Dev")
             versionNameSuffix = "-staging"
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$stagingRevenueCatApiKey\"")
         }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {

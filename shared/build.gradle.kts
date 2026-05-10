@@ -97,6 +97,7 @@ kotlin {
             implementation(libs.multiplatform.settings.noarg)
             implementation(libs.multiplatform.settings.serialization)
             implementation(libs.multiplatform.settings.coroutines)
+            implementation(libs.revenuecat.purchases.kmp.core)
         }
 
         androidMain.dependencies {
