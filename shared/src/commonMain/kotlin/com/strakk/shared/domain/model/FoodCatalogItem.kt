@@ -52,6 +52,23 @@ enum class FoodCatalogSource {
 
     /** USDA Branded Foods — brand-specific products (Coca-Cola, Barilla, etc.). */
     UsdaBranded,
+    ;
+
+    companion object {
+        /** Parses a DB-persisted string back to the enum. Falls back to [Ciqual] if unknown. */
+        fun fromDbString(raw: String): FoodCatalogSource = when (raw) {
+            "ciqual" -> Ciqual
+            "off_fr" -> OffFr
+            "off_live" -> OffLive
+            "manual_admin" -> ManualAdmin
+            "usda" -> Usda
+            "usda_sr" -> Usda
+            "usda_foundation" -> UsdaFoundation
+            "usda_fndds" -> UsdaFndds
+            "usda_branded" -> UsdaBranded
+            else -> Ciqual
+        }
+    }
 }
 
 /** Returns the DB-persisted string representation of this [FoodCatalogSource]. */

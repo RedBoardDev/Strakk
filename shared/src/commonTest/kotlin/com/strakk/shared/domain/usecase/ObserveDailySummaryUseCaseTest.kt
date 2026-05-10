@@ -162,6 +162,7 @@ private class FakeMealRepository(
     ): MealEntry = error("Not used")
     override suspend fun analyzeTextForQuickAdd(description: String, logDate: String): MealEntry = error("Not used")
     override suspend fun saveMealWithGroundedEntries(name: String, date: String, items: List<com.strakk.shared.domain.model.GroundedMealItem>, photoPathByPhotoIndex: Map<Int, String>): Meal = error("Not used")
+    override suspend fun scanMeal(photoStoragePaths: List<String>, hint: String?, isTextOnly: Boolean): com.strakk.shared.domain.model.ScanMealResult = error("Not used")
 }
 
 private class FakeProfileRepository : ProfileRepository {

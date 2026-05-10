@@ -205,6 +205,7 @@ private class FakeMealRepository : MealRepository {
     ): MealEntry = quickAddEntry(logDate = logDate, source = EntrySource.TextAi)
 
     override suspend fun saveMealWithGroundedEntries(name: String, date: String, items: List<com.strakk.shared.domain.model.GroundedMealItem>, photoPathByPhotoIndex: Map<Int, String>): Meal = unused()
+    override suspend fun scanMeal(photoStoragePaths: List<String>, hint: String?, isTextOnly: Boolean): com.strakk.shared.domain.model.ScanMealResult = unused()
 
     private fun quickAddEntry(logDate: String, source: EntrySource): MealEntry = MealEntry(
         id = "",

@@ -301,6 +301,12 @@ private class FakeTodayMealRepository : MealRepository {
         photoPathByPhotoIndex: Map<Int, String>,
     ): Meal = notUsed()
 
+    override suspend fun scanMeal(
+        photoStoragePaths: List<String>,
+        hint: String?,
+        isTextOnly: Boolean,
+    ): com.strakk.shared.domain.model.ScanMealResult = notUsed()
+
     private fun notUsed(): Nothing = error("Not used in TodayViewModelTest")
 }
 

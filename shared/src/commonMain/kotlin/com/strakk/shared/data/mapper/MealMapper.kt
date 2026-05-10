@@ -109,7 +109,7 @@ internal fun BreakdownItem.toDto(): BreakdownItemDto = BreakdownItemDto(
 
 internal fun FoodCatalogItemDto.toDomain(): FoodCatalogItem = FoodCatalogItem(
     id = id,
-    source = parseFoodCatalogSource(source),
+    source = FoodCatalogSource.fromDbString(source),
     name = name,
     brand = brand?.takeIf { it.isNotBlank() },
     protein = protein,
@@ -123,15 +123,6 @@ internal fun FoodCatalogItemDto.toDomain(): FoodCatalogItem = FoodCatalogItem(
     barcode = barcode?.takeIf { it.isNotBlank() },
     imageUrl = imageUrl?.takeIf { it.isNotBlank() },
 )
-
-private fun parseFoodCatalogSource(raw: String): FoodCatalogSource = when (raw) {
-    "ciqual" -> FoodCatalogSource.Ciqual
-    "off_fr" -> FoodCatalogSource.OffFr
-    "off_live" -> FoodCatalogSource.OffLive
-    "manual_admin" -> FoodCatalogSource.ManualAdmin
-    "usda" -> FoodCatalogSource.Usda
-    else -> FoodCatalogSource.Ciqual
-}
 
 // =============================================================================
 // Analyzed entries (edge function responses)

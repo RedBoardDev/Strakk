@@ -66,7 +66,7 @@ internal fun ScanGroundedItemDto.toDomain(): GroundedMealItem {
 
 private fun ScanFoodMatchDto.toCatalogItem(): FoodCatalogItem = FoodCatalogItem(
     id = id,
-    source = parseFoodMatchSource(source),
+    source = FoodCatalogSource.fromDbString(source),
     name = name,
     brand = null,
     protein = proteinPer100g,
@@ -80,16 +80,3 @@ private fun ScanFoodMatchDto.toCatalogItem(): FoodCatalogItem = FoodCatalogItem(
     barcode = null,
     imageUrl = null,
 )
-
-internal fun parseFoodMatchSource(raw: String): FoodCatalogSource = when (raw) {
-    "ciqual" -> FoodCatalogSource.Ciqual
-    "off_fr" -> FoodCatalogSource.OffFr
-    "off_live" -> FoodCatalogSource.OffLive
-    "manual_admin" -> FoodCatalogSource.ManualAdmin
-    "usda" -> FoodCatalogSource.Usda
-    "usda_sr" -> FoodCatalogSource.Usda
-    "usda_foundation" -> FoodCatalogSource.UsdaFoundation
-    "usda_fndds" -> FoodCatalogSource.UsdaFndds
-    "usda_branded" -> FoodCatalogSource.UsdaBranded
-    else -> FoodCatalogSource.Ciqual
-}

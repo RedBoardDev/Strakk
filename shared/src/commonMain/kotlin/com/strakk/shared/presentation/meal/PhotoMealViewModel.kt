@@ -10,12 +10,13 @@ import com.strakk.shared.domain.model.MacroValues
 import com.strakk.shared.domain.model.StructuredQuantity
 import com.strakk.shared.domain.model.UnitType
 import com.strakk.shared.domain.model.toDbString
-import com.strakk.shared.domain.repository.MealPhotoRepository
 import com.strakk.shared.domain.usecase.AdjustGroundedItemUseCase
 import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
+import com.strakk.shared.domain.usecase.CleanupOrphanPhotosUseCase
 import com.strakk.shared.domain.usecase.SaveGroundedMealUseCase
 import com.strakk.shared.domain.usecase.ScanMealUseCase
 import com.strakk.shared.domain.usecase.SwapFoodMatchUseCase
+import com.strakk.shared.domain.usecase.UploadMealPhotoUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -43,13 +44,14 @@ private const val SAVE_ERROR = "Could not save the meal. Please try again."
  * On failure or [PhotoMealEvent.Cancel], any uploaded photo paths are cleaned up
  * to avoid orphan storage objects.
  */
-@Suppress("TooManyFunctions", "TooGenericExceptionCaught")
+@Suppress("TooManyFunctions", "TooGenericExceptionCaught", "LongParameterList")
 class PhotoMealViewModel(
     private val scanMeal: ScanMealUseCase,
     private val saveMeal: SaveGroundedMealUseCase,
     private val adjustGroundedItem: AdjustGroundedItemUseCase,
     private val swapFoodMatch: SwapFoodMatchUseCase,
-    private val photoRepository: MealPhotoRepository,
+    private val uploadMealPhoto: UploadMealPhotoUseCase,
+    private val cleanupOrphanPhotos: CleanupOrphanPhotosUseCase,
     private val checkFeatureAccess: CheckFeatureAccessUseCase,
     private val logger: Logger,
 ) : MviViewModel<PhotoMealUiState, PhotoMealEvent, PhotoMealEffect>(PhotoMealUiState.Capturing) {
@@ -94,11 +96,11 @@ class PhotoMealViewModel(
             try {
                 // Step 1 — upload photo to Storage.
                 val itemId = Random.nextLong().toString()
-                val storagePath = photoRepository.uploadPhoto(
+                val storagePath = uploadMealPhoto(
                     draftId = event.date,
                     itemId = itemId,
                     base64 = event.imageBase64,
-                )
+                ).getOrThrow()
                 photoPathByPhotoIndex = mapOf(0 to storagePath)
 
                 // Step 2 — scan: identify + ground in one VPS call.
@@ -108,7 +110,7 @@ class PhotoMealViewModel(
                 ).getOrThrow()
 
                 if (result.items.isEmpty()) {
-                    cleanupOrphanPhotos()
+                    cleanupPhotos()
                     setState { PhotoMealUiState.Capturing }
                     emit(PhotoMealEffect.ShowError(NO_FOODS_DETECTED))
                     return@launch
@@ -121,11 +123,11 @@ class PhotoMealViewModel(
                     )
                 }
             } catch (e: CancellationException) {
-                cleanupOrphanPhotos()
+                cleanupPhotos()
                 throw e
             } catch (e: Exception) {
                 logger.e(LOG_TAG, "Photo analysis failed", e)
-                cleanupOrphanPhotos()
+                cleanupPhotos()
                 setState { PhotoMealUiState.Capturing }
                 emit(PhotoMealEffect.ShowError(e.toAnalysisMessage()))
             }
@@ -220,7 +222,7 @@ class PhotoMealViewModel(
         val remaining = state.items.filterIndexed { i, _ -> i != event.itemIndex }
         if (remaining.isEmpty()) {
             // Last item removed → clean up uploaded photos and reset to start.
-            viewModelScope.launch { cleanupOrphanPhotos() }
+            viewModelScope.launch { cleanupPhotos() }
             setState { PhotoMealUiState.Capturing }
         } else {
             setState { (this as PhotoMealUiState.Reviewing).copy(items = remaining) }
@@ -385,7 +387,7 @@ class PhotoMealViewModel(
 
     private fun handleCancel() {
         viewModelScope.launch {
-            cleanupOrphanPhotos()
+            cleanupPhotos()
             setState { PhotoMealUiState.Capturing }
             emit(PhotoMealEffect.Cancelled)
         }
@@ -399,17 +401,10 @@ class PhotoMealViewModel(
      * Best-effort cleanup of uploaded photos that have not yet been attached to
      * a saved meal. Resets [photoPathByPhotoIndex] regardless of outcome.
      */
-    private suspend fun cleanupOrphanPhotos() {
+    private suspend fun cleanupPhotos() {
         val paths = photoPathByPhotoIndex.values.toList()
         photoPathByPhotoIndex = emptyMap()
-        if (paths.isEmpty()) return
-        try {
-            photoRepository.deletePhotos(paths)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            logger.e(LOG_TAG, "Orphan photo cleanup failed", e)
-        }
+        cleanupOrphanPhotos(paths)
     }
 
     private fun Throwable.toAnalysisMessage(): String = message

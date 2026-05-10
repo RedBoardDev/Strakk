@@ -6,7 +6,6 @@ import com.strakk.shared.data.pdf.CheckInPdfBuilderImpl
 import com.strakk.shared.data.remote.CurrentUserIdProvider
 import com.strakk.shared.data.remote.SupabaseProvider
 import com.strakk.shared.data.repository.AuthRepositoryImpl
-import com.strakk.shared.data.repository.BarcodeLookupRepositoryImpl
 import com.strakk.shared.data.repository.BillingRepositoryImpl
 import com.strakk.shared.data.repository.CheckInRepositoryImpl
 import com.strakk.shared.data.repository.FeatureLimitsRepositoryImpl
@@ -25,7 +24,6 @@ import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.common.SystemClockProvider
 import com.strakk.shared.domain.common.createLogger
 import com.strakk.shared.domain.repository.AuthRepository
-import com.strakk.shared.domain.repository.BarcodeLookupRepository
 import com.strakk.shared.domain.repository.BillingRepository
 import com.strakk.shared.domain.repository.CheckInRepository
 import com.strakk.shared.domain.repository.FeatureLimitsRepository
@@ -47,6 +45,7 @@ import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
 import com.strakk.shared.domain.usecase.CalculateGoalsUseCase
 import com.strakk.shared.domain.usecase.CheckFeatureAccessUseCase
 import com.strakk.shared.domain.usecase.CheckProfileExistsUseCase
+import com.strakk.shared.domain.usecase.CleanupOrphanPhotosUseCase
 import com.strakk.shared.domain.usecase.CommitMealDraftUseCase
 import com.strakk.shared.domain.usecase.CompleteOnboardingUseCase
 import com.strakk.shared.domain.usecase.ComputeNutritionSummaryUseCase
@@ -65,7 +64,6 @@ import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
 import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
 import com.strakk.shared.domain.usecase.GetCheckInStatsUseCase
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
-import com.strakk.shared.domain.usecase.GetFeatureQuotaStatusUseCase
 import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.GetMonthlyActivityUseCase
 import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
@@ -111,6 +109,7 @@ import com.strakk.shared.domain.usecase.UpdateCheckInUseCase
 import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
 import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
 import com.strakk.shared.domain.usecase.UpdateProfileUseCase
+import com.strakk.shared.domain.usecase.UploadMealPhotoUseCase
 import com.strakk.shared.presentation.auth.LoginViewModel
 import com.strakk.shared.presentation.auth.RootViewModel
 import com.strakk.shared.presentation.calendar.CalendarViewModel
@@ -170,7 +169,6 @@ internal val dataModule = module {
     singleOf(::MealDraftRepositoryImpl) { bind<MealDraftRepository>() }
     singleOf(::OffLiveSearchDataSource)
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
-    singleOf(::BarcodeLookupRepositoryImpl) { bind<BarcodeLookupRepository>() }
     singleOf(::SubscriptionRepositoryImpl) { bind<SubscriptionRepository>() }
     singleOf(::BillingRepositoryImpl) { bind<BillingRepository>() }
     singleOf(::FeatureLimitsRepositoryImpl) { bind<FeatureLimitsRepository>() }
@@ -244,6 +242,8 @@ internal val domainModule = module {
     factoryOf(::SaveGroundedMealUseCase)
     factory { AdjustGroundedItemUseCase() }
     factoryOf(::SwapFoodMatchUseCase)
+    factoryOf(::UploadMealPhotoUseCase)
+    factoryOf(::CleanupOrphanPhotosUseCase)
 
     // Workout / Hevy
     factoryOf(::ParseWorkoutPdfUseCase)
@@ -277,7 +277,6 @@ internal val domainModule = module {
     factoryOf(::SyncBillingCustomerInfoUseCase)
     factoryOf(::ConfigureBillingUseCase)
     factoryOf(::CheckFeatureAccessUseCase)
-    factoryOf(::GetFeatureQuotaStatusUseCase)
 }
 
 internal val presentationModule = module {
