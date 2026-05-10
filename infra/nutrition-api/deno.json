@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --allow-net --allow-env src/main.ts",
+    "start": "deno run --allow-net --allow-env src/main.ts",
+    "import": "deno run --allow-net --allow-env --allow-read --allow-write --allow-run import/import-all.ts"
+  },
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4",
+    "@std/csv": "jsr:@std/csv@^1"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}
