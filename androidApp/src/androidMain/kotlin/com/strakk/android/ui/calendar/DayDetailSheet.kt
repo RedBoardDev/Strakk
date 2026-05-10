@@ -1,5 +1,6 @@
 package com.strakk.android.ui.calendar
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,29 +11,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import android.util.Log
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
+import com.strakk.android.ui.components.MacroProgressGrid
+import com.strakk.android.ui.components.StrakkPrimaryButton
+import com.strakk.android.ui.components.StrakkSheet
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.MealEntry
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 private const val TAG = "DayDetailSheet"
 
 /**
  * Bottom sheet showing the detail of a selected calendar day.
  *
+ * Uses [StrakkSheet] for chrome (drag handle, themed background, close button + date title).
  * Data is stub until CalendarContract is connected from the KMP layer.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,13 +50,13 @@ fun DayDetailSheet(
     // Future: summary: DailySummary? = null, meals: List<MealEntry> = emptyList()
     modifier: Modifier = Modifier,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    StrakkSheet(
+        onDismiss = onDismiss,
+        title = formatDayDetailDate(date),
         sheetState = sheetState,
         modifier = modifier,
     ) {
         DayDetailContent(
-            date = date,
             summary = null,
             meals = emptyList(),
             onAddMealForDay = onAddMealForDay,
@@ -59,93 +64,45 @@ fun DayDetailSheet(
     }
 }
 
+@Suppress("FunctionSignature")
 @Composable
 private fun DayDetailContent(
-    date: String,
     summary: DailySummary?,
     meals: List<MealEntry>,
     onAddMealForDay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalStrakkColors.current
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Date header
-        Text(
-            text = formatDayDetailDate(date),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        // Nutrition section (always shown; matches iOS "NUTRITION" header)
+        SectionLabel(stringResource(R.string.day_detail_section_nutrition))
 
         if (summary != null) {
-            // Macros section
-            SectionLabel("MACROS")
+            MacroProgressGrid(summary = summary)
 
-            MacroRow(
-                label = "Protéines",
-                value = summary.totalProtein.toInt(),
-                unit = "g",
-                goal = summary.proteinGoal ?: 0,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            MacroRow(
-                label = "Calories",
-                value = summary.totalCalories.toInt(),
-                unit = "kcal",
-                goal = summary.calorieGoal ?: 0,
-                color = LocalStrakkColors.current.calories,
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Lipides",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LocalStrakkColors.current.textSecondary,
-                    )
-                    Text(
-                        text = "${summary.totalFat.toInt()}g",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Glucides",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LocalStrakkColors.current.textSecondary,
-                    )
-                    Text(
-                        text = "${summary.totalCarbs.toInt()}g",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
+            SectionLabel(stringResource(R.string.day_detail_section_water))
 
-            // Water section
-            SectionLabel("EAU")
-            WaterRow(
+            DayWaterBlock(
                 totalMl = summary.totalWater,
                 goalMl = summary.waterGoal ?: 0,
             )
         } else {
-            // No data for this day yet
             Text(
-                text = "Aucune donnée pour ce jour.",
+                text = stringResource(R.string.day_detail_no_data),
                 style = MaterialTheme.typography.bodyMedium,
-                color = LocalStrakkColors.current.textSecondary,
+                color = colors.textSecondary,
             )
         }
 
-        // Meals list
+        // Meals list (conditional, same as iOS)
         if (meals.isNotEmpty()) {
-            SectionLabel("REPAS")
+            SectionLabel(stringResource(R.string.day_detail_section_meals))
             meals.forEach { meal ->
                 MealSummaryRow(meal = meal)
             }
@@ -153,24 +110,18 @@ private fun DayDetailContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Add meal for that day CTA
-        Button(
+        StrakkPrimaryButton(
+            text = stringResource(R.string.day_detail_add_button),
             onClick = onAddMealForDay,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-        ) {
-            Text("+ Ajouter pour ce jour")
-        }
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
+
+// =============================================================================
+// Section label
+// =============================================================================
 
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
@@ -182,55 +133,18 @@ private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-private fun MacroRow(
-    label: String,
-    value: Int,
-    unit: String,
-    goal: Int,
-    color: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = LocalStrakkColors.current.textSecondary,
-            )
-            Text(
-                text = "$value / $goal$unit",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        if (goal > 0) {
-            LinearProgressIndicator(
-                progress = { (value.toFloat() / goal).coerceIn(0f, 1f) },
-                color = color,
-                trackColor = LocalStrakkColors.current.surface2,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-            )
-        }
-    }
-}
+// =============================================================================
+// Read-only water block (no add/remove in calendar context)
+// =============================================================================
 
+@Suppress("FunctionSignature")
 @Composable
-private fun WaterRow(
+private fun DayWaterBlock(
     totalMl: Int,
     goalMl: Int,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalStrakkColors.current
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier.fillMaxWidth(),
@@ -241,9 +155,9 @@ private fun WaterRow(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "Eau",
+                text = stringResource(R.string.day_detail_water_label),
                 style = MaterialTheme.typography.bodyMedium,
-                color = LocalStrakkColors.current.textSecondary,
+                color = colors.textSecondary,
             )
             Text(
                 text = "$totalMl / ${goalMl}mL",
@@ -254,8 +168,8 @@ private fun WaterRow(
         if (goalMl > 0) {
             LinearProgressIndicator(
                 progress = { (totalMl.toFloat() / goalMl).coerceIn(0f, 1f) },
-                color = LocalStrakkColors.current.water,
-                trackColor = LocalStrakkColors.current.surface2,
+                color = colors.water,
+                trackColor = colors.surface2,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
@@ -265,18 +179,24 @@ private fun WaterRow(
     }
 }
 
+// =============================================================================
+// Meal row
+// =============================================================================
+
+@Suppress("FunctionSignature")
 @Composable
 private fun MealSummaryRow(
     meal: MealEntry,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalStrakkColors.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier.fillMaxWidth(),
     ) {
         Text(
-            text = meal.name ?: "Repas",
+            text = meal.name ?: stringResource(R.string.day_detail_meal_fallback),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
@@ -284,24 +204,24 @@ private fun MealSummaryRow(
         Text(
             text = "${meal.protein.toInt()}g · ${meal.calories.toInt()} kcal",
             style = MaterialTheme.typography.bodySmall,
-            color = LocalStrakkColors.current.textSecondary,
+            color = colors.textSecondary,
         )
     }
 }
 
+// =============================================================================
+// Date formatter
+// =============================================================================
+
 private fun formatDayDetailDate(date: String): String {
     return try {
-        val parts = date.split("-")
-        if (parts.size == 3) {
-            val day = parts[2].trimStart('0').ifEmpty { "0" }
-            val month = when (parts[1].toInt()) {
-                1 -> "janvier"; 2 -> "février"; 3 -> "mars"; 4 -> "avril"
-                5 -> "mai"; 6 -> "juin"; 7 -> "juillet"; 8 -> "août"
-                9 -> "septembre"; 10 -> "octobre"; 11 -> "novembre"; 12 -> "décembre"
-                else -> "?"
-            }
-            "$day $month ${parts[0]}"
-        } else date
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val parsed = sdf.parse(date)
+        if (parsed != null) {
+            SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(parsed)
+        } else {
+            date
+        }
     } catch (e: Exception) {
         Log.w(TAG, "formatDayDetailDate: failed to parse date='$date'", e)
         date

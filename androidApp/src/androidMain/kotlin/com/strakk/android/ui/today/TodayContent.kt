@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
+import com.strakk.android.ui.components.MacroProgressGrid
+import com.strakk.android.ui.components.StrakkEmptyState
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
@@ -94,10 +97,10 @@ fun TodayContent(
                 }
             }
 
-            // 4 macro cards
+            // 2×2 macro progress grid
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                ProgressSection(
+                MacroProgressGrid(
                     summary = uiState.summary,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -127,7 +130,11 @@ fun TodayContent(
             // Timeline items
             if (uiState.timeline.isEmpty()) {
                 item {
-                    EmptyTimelinePlaceholder()
+                    StrakkEmptyState(
+                        title = stringResource(R.string.today_empty_timeline),
+                        description = stringResource(R.string.today_empty_timeline_desc),
+                        icon = Icons.Outlined.Restaurant,
+                    )
                 }
             } else {
                 items(
@@ -263,6 +270,8 @@ private fun TodayContentPreview() {
                     totalWater = 1500,
                     proteinGoal = 160,
                     calorieGoal = 2200,
+                    fatGoal = null,
+                    carbGoal = null,
                     waterGoal = 2500,
                 ),
                 timeline = listOf(

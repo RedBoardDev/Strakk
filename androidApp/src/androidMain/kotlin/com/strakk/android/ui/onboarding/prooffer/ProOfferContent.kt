@@ -114,20 +114,20 @@ private fun ProOfferHeader() {
         ) {
             ProFeatureHighlightRow(
                 icon = Icons.Outlined.CameraAlt,
-                title = "Photo intelligente",
-                description = "Prends une photo, l'IA calcule tes macros.",
+                title = stringResource(R.string.onboarding_pro_feature1_title),
+                description = stringResource(R.string.onboarding_pro_feature1_desc),
             )
             Spacer(Modifier.height(16.dp))
             ProFeatureHighlightRow(
                 icon = Icons.Outlined.TextFields,
-                title = "Texte intelligent",
-                description = "Décris ton repas, l'IA fait le reste.",
+                title = stringResource(R.string.onboarding_pro_feature2_title),
+                description = stringResource(R.string.onboarding_pro_feature2_desc),
             )
             Spacer(Modifier.height(16.dp))
             ProFeatureHighlightRow(
                 icon = Icons.Outlined.BarChart,
-                title = "Bilan hebdo IA",
-                description = "Un résumé personnalisé chaque semaine.",
+                title = stringResource(R.string.onboarding_pro_feature3_title),
+                description = stringResource(R.string.onboarding_pro_feature3_desc),
             )
         }
     }

@@ -221,12 +221,12 @@ internal fun SourceBadge(
     modifier: Modifier = Modifier,
 ) {
     val (icon, description) = when (source) {
-        EntrySource.PhotoAi -> Icons.Outlined.CameraAlt to "Ajouté par photo"
-        EntrySource.Barcode -> Icons.Outlined.QrCodeScanner to "Ajouté par code-barres"
-        EntrySource.Manual -> Icons.Outlined.Edit to "Ajouté manuellement"
-        EntrySource.Search -> Icons.Outlined.Search to "Ajouté via recherche"
-        EntrySource.Frequent -> Icons.Outlined.Search to "Ajouté depuis les fréquents"
-        EntrySource.TextAi -> Icons.AutoMirrored.Outlined.TextSnippet to "Ajouté par description textuelle"
+        EntrySource.PhotoAi -> Icons.Outlined.CameraAlt to stringResource(R.string.entry_source_photo_cd)
+        EntrySource.Barcode -> Icons.Outlined.QrCodeScanner to stringResource(R.string.entry_source_barcode_cd)
+        EntrySource.Manual -> Icons.Outlined.Edit to stringResource(R.string.entry_source_manual_cd)
+        EntrySource.Search -> Icons.Outlined.Search to stringResource(R.string.entry_source_search_cd)
+        EntrySource.Frequent -> Icons.Outlined.Search to stringResource(R.string.entry_source_frequent_cd)
+        EntrySource.TextAi -> Icons.AutoMirrored.Outlined.TextSnippet to stringResource(R.string.entry_source_text_cd)
     }
     Box(
         contentAlignment = Alignment.Center,

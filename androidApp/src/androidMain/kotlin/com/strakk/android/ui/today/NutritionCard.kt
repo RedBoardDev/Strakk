@@ -39,10 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkRadius
 import com.strakk.android.ui.theme.LocalStrakkSpacing
@@ -108,7 +110,7 @@ fun NutritionCard(
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(
-                        text = "PROTÉINES",
+                        text = stringResource(R.string.progress_protein_label),
                         style = LocalStrakkTextStyles.current.overline,
                         color = colors.accentOrange,
                     )
@@ -145,7 +147,7 @@ fun NutritionCard(
                         iconTint = colors.accentOrange,
                         iconBg = colors.accentOrangeFaint,
                         iconBorder = colors.accentOrangeBorder,
-                        label = "CALORIES",
+                        label = stringResource(R.string.progress_calories_label),
                         value = summary.totalCalories.toInt(),
                         goal = summary.calorieGoal,
                         unit = "kcal",
@@ -163,7 +165,7 @@ fun NutritionCard(
                         iconTint = colors.accentIndigo,
                         iconBg = colors.accentIndigoFaint,
                         iconBorder = colors.accentIndigoBorder,
-                        label = "GLUCIDES",
+                        label = stringResource(R.string.progress_carbs_label),
                         value = summary.totalCarbs.toInt(),
                         goal = null,
                         unit = "g",
@@ -181,7 +183,7 @@ fun NutritionCard(
                         iconTint = colors.accentYellow,
                         iconBg = colors.accentYellowFaint,
                         iconBorder = colors.accentYellowBorder,
-                        label = "LIPIDES",
+                        label = stringResource(R.string.progress_fat_label),
                         value = summary.totalFat.toInt(),
                         goal = null,
                         unit = "g",
@@ -422,6 +424,8 @@ private fun NutritionCardPreview() {
                 totalWater = 1500,
                 proteinGoal = 160,
                 calorieGoal = 2200,
+                fatGoal = null,
+                carbGoal = null,
                 waterGoal = 3000,
             ),
             modifier = Modifier.padding(16.dp),
@@ -442,6 +446,8 @@ private fun NutritionCardEmptyPreview() {
                 totalWater = 0,
                 proteinGoal = 160,
                 calorieGoal = 2200,
+                fatGoal = null,
+                carbGoal = null,
                 waterGoal = 3000,
             ),
             modifier = Modifier.padding(16.dp),

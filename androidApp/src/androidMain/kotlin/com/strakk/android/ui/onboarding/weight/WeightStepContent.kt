@@ -65,7 +65,7 @@ fun WeightStepContent(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Remove,
-                    contentDescription = "Diminuer le poids",
+                    contentDescription = stringResource(R.string.weight_decrease_cd),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp),
                 )
@@ -96,7 +96,7 @@ fun WeightStepContent(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Augmenter le poids",
+                    contentDescription = stringResource(R.string.weight_increase_cd),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp),
                 )

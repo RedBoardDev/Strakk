@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 
 @Composable
@@ -50,7 +52,7 @@ fun StepperRow(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Remove,
-                    contentDescription = "Diminuer $label",
+                    contentDescription = stringResource(R.string.stepper_decrement_cd, label),
                     tint = if (value > minValue) MaterialTheme.colorScheme.primary
                     else LocalStrakkColors.current.textDisabled,
                 )
@@ -70,7 +72,7 @@ fun StepperRow(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Augmenter $label",
+                    contentDescription = stringResource(R.string.stepper_increment_cd, label),
                     tint = if (value < maxValue) MaterialTheme.colorScheme.primary
                     else LocalStrakkColors.current.textDisabled,
                 )

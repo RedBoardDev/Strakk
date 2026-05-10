@@ -29,15 +29,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import java.time.format.TextStyle
 import java.util.Locale
-
-private val DAY_LABELS = listOf("L", "M", "M", "J", "V", "S", "D")
 
 /**
  * Stateless calendar grid for a single month.
@@ -57,6 +57,13 @@ fun CalendarContent(
     onSelectDay: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Compute single-character day labels (Mon–Sun) using the device locale.
+    val dayLabels = remember(Locale.getDefault()) {
+        java.time.DayOfWeek.entries.map { day ->
+            day.getDisplayName(TextStyle.NARROW, Locale.getDefault())
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         // Month navigation header
         MonthHeader(
@@ -70,7 +77,7 @@ fun CalendarContent(
 
         // Day-of-week labels
         Row(modifier = Modifier.fillMaxWidth()) {
-            DAY_LABELS.forEach { label ->
+            dayLabels.forEach { label ->
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
@@ -125,7 +132,7 @@ private fun MonthHeader(
         IconButton(onClick = onPrevious) {
             Icon(
                 imageVector = Icons.Outlined.ChevronLeft,
-                contentDescription = "Mois précédent",
+                contentDescription = stringResource(R.string.calendar_prev_month_cd),
                 tint = LocalStrakkColors.current.textSecondary,
             )
         }
@@ -139,7 +146,7 @@ private fun MonthHeader(
         IconButton(onClick = onNext) {
             Icon(
                 imageVector = Icons.Outlined.ChevronRight,
-                contentDescription = "Mois suivant",
+                contentDescription = stringResource(R.string.calendar_next_month_cd),
                 tint = LocalStrakkColors.current.textSecondary,
             )
         }
