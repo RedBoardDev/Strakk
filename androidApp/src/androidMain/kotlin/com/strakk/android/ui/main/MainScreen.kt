@@ -2,6 +2,7 @@ package com.strakk.android.ui.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -25,8 +26,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.strakk.android.R
 import com.strakk.android.ui.calendar.CalendarRoute
+import com.strakk.android.ui.checkin.CheckInDetailRoute
+import com.strakk.android.ui.checkin.CheckInListRoute
+import com.strakk.android.ui.checkin.CheckInStatsRoute
+import com.strakk.android.ui.checkin.CheckInWizardRoute
 import com.strakk.android.ui.home.draft.MealDraftRoute
 import com.strakk.android.ui.home.manual.ManualEntryRoute
 import com.strakk.android.ui.home.photo.PhotoHintScreen
@@ -69,14 +76,28 @@ sealed interface HomeRoute {
 }
 
 private data class TabItem(
-    val label: String,
+    val labelRes: Int,
     val icon: ImageVector,
 )
 
+// =============================================================================
+// Check-in tab — in-app route definitions
+// =============================================================================
+
+sealed interface CheckInRoute {
+    data object List : CheckInRoute
+    data class Wizard(val checkInId: String? = null) : CheckInRoute
+    data class Detail(val id: String) : CheckInRoute
+    data object Stats : CheckInRoute
+}
+
+private const val TAB_SETTINGS = 3
+
 private val tabs = listOf(
-    TabItem(label = "Today", icon = Icons.Outlined.Home),
-    TabItem(label = "Calendar", icon = Icons.Outlined.CalendarMonth),
-    TabItem(label = "Settings", icon = Icons.Outlined.Settings),
+    TabItem(labelRes = R.string.tab_today, icon = Icons.Outlined.Home),
+    TabItem(labelRes = R.string.tab_calendar, icon = Icons.Outlined.CalendarMonth),
+    TabItem(labelRes = R.string.tab_checkin, icon = Icons.Outlined.Assignment),
+    TabItem(labelRes = R.string.tab_settings, icon = Icons.Outlined.Settings),
 )
 
 // =============================================================================
@@ -114,6 +135,32 @@ private fun String.toHomeRoute(): HomeRoute? = when {
     else -> null
 }
 
+private val CheckInBackStackSaver = Saver<SnapshotStateList<CheckInRoute>, List<String>>(
+    save = { list -> list.map { it.toSaveKey() } },
+    restore = { keys ->
+        mutableStateListOf<CheckInRoute>().apply {
+            addAll(keys.mapNotNull { it.toCheckInRoute() })
+            if (isEmpty()) add(CheckInRoute.List)
+        }
+    },
+)
+
+private fun CheckInRoute.toSaveKey(): String = when (this) {
+    is CheckInRoute.List -> "ci:list"
+    is CheckInRoute.Wizard -> "ci:wizard:${checkInId.orEmpty()}"
+    is CheckInRoute.Detail -> "ci:detail:$id"
+    is CheckInRoute.Stats -> "ci:stats"
+}
+
+private fun String.toCheckInRoute(): CheckInRoute? = when {
+    this == "ci:list" -> CheckInRoute.List
+    this == "ci:stats" -> CheckInRoute.Stats
+    startsWith("ci:wizard:") -> CheckInRoute.Wizard(removePrefix("ci:wizard:").ifEmpty { null })
+    startsWith("ci:detail:") -> CheckInRoute.Detail(removePrefix("ci:detail:"))
+    else -> null
+}
+
+@Suppress("LongMethod")
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -123,8 +170,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
     val currentHomeRoute = homeBackStack.lastOrNull() ?: HomeRoute.Today
 
-    // Hide the bottom bar when navigating away from Today root
-    val showBottomBar = currentHomeRoute == HomeRoute.Today
+    val checkInBackStack = rememberSaveable(saver = CheckInBackStackSaver) {
+        mutableStateListOf(CheckInRoute.List)
+    }
+    val currentCheckInRoute = checkInBackStack.lastOrNull() ?: CheckInRoute.List
+
+    // Hide the bottom bar when drilling into sub-screens on the Home or CheckIn tabs
+    val showBottomBar = when (selectedTab) {
+        0 -> currentHomeRoute == HomeRoute.Today
+        2 -> currentCheckInRoute == CheckInRoute.List
+        else -> true
+    }
 
     Scaffold(
         modifier = modifier,
@@ -137,14 +193,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             selected = selectedTab == index,
                             onClick = {
                                 selectedTab = index
-                                // Reset home back stack when switching tabs
                                 if (index == 0) {
                                     homeBackStack.clear()
                                     homeBackStack.add(HomeRoute.Today)
                                 }
+                                if (index == 2) {
+                                    checkInBackStack.clear()
+                                    checkInBackStack.add(CheckInRoute.List)
+                                }
                             },
-                            icon = { Icon(tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label) },
+                            icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                            label = { Text(stringResource(tab.labelRes)) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -166,7 +225,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 modifier = contentModifier,
             )
             1 -> CalendarRoute(modifier = contentModifier)
-            2 -> SettingsRoute(modifier = contentModifier)
+            2 -> CheckInTabContent(
+                backStack = checkInBackStack,
+                currentRoute = currentCheckInRoute,
+                modifier = contentModifier,
+            )
+            TAB_SETTINGS -> SettingsRoute(modifier = contentModifier)
         }
     }
 }
@@ -273,6 +337,8 @@ private fun HomeTabContent(
         is HomeRoute.Review -> MealReviewRoute(
             onNavigateBack = { pop() },
             onCommitted = { popToToday() },
+            onNavigateToSearch = { push(HomeRoute.Search(inDraft = true)) },
+            onNavigateToManual = { push(HomeRoute.Manual(inDraft = true)) },
             viewModel = draftViewModel,
             modifier = modifier,
         )
@@ -335,6 +401,54 @@ private fun generateDraftItemId(): String =
     "item-${System.currentTimeMillis()}-${(0..0xFFFF).random().toString(16)}"
 
 // =============================================================================
+// Check-in tab — routing based on back stack
+// =============================================================================
+
+@Composable
+private fun CheckInTabContent(
+    backStack: SnapshotStateList<CheckInRoute>,
+    currentRoute: CheckInRoute,
+    modifier: Modifier = Modifier,
+) {
+    fun push(route: CheckInRoute) { backStack.add(route) }
+    fun pop() { if (backStack.size > 1) backStack.removeLastOrNull() }
+
+    when (currentRoute) {
+        CheckInRoute.List -> CheckInListRoute(
+            onNavigateToWizard = { push(CheckInRoute.Wizard()) },
+            onNavigateToDetail = { id -> push(CheckInRoute.Detail(id)) },
+            onNavigateToStats = { push(CheckInRoute.Stats) },
+            modifier = modifier,
+        )
+
+        is CheckInRoute.Wizard -> CheckInWizardRoute(
+            checkInId = currentRoute.checkInId,
+            onNavigateBack = { pop() },
+            onNavigateToDetail = { id ->
+                // Replace wizard with detail after save
+                backStack.removeLastOrNull()
+                push(CheckInRoute.Detail(id))
+            },
+            modifier = modifier,
+        )
+
+        is CheckInRoute.Detail -> CheckInDetailRoute(
+            checkInId = currentRoute.id,
+            onNavigateBack = { pop() },
+            onNavigateToWizard = { checkInId ->
+                push(CheckInRoute.Wizard(checkInId = checkInId))
+            },
+            modifier = modifier,
+        )
+
+        CheckInRoute.Stats -> CheckInStatsRoute(
+            onNavigateBack = { pop() },
+            modifier = modifier,
+        )
+    }
+}
+
+// =============================================================================
 // Preview
 // =============================================================================
 
@@ -349,8 +463,8 @@ private fun MainScreenPreview() {
                         NavigationBarItem(
                             selected = index == 0,
                             onClick = {},
-                            icon = { Icon(tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label) },
+                            icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                            label = { Text(stringResource(tab.labelRes)) },
                         )
                     }
                 }
