@@ -10,6 +10,7 @@ import com.strakk.shared.data.dto.MealDto
 import com.strakk.shared.data.dto.MealEntryDto
 import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.BreakdownItem
+import com.strakk.shared.domain.model.CookingMethod
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.FoodCatalogItem
@@ -19,8 +20,8 @@ import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.MealStatus
 import com.strakk.shared.domain.model.toDbString
 import kotlinx.datetime.Instant
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 private val breakdownJson = Json {
     ignoreUnknownKeys = true
@@ -57,6 +58,15 @@ internal fun MealEntryDto.toDomain(): MealEntry = MealEntry(
     quantity = quantity,
     breakdown = parseBreakdownJson(breakdownJson),
     photoPath = photoPath,
+    foodCatalogId = foodCatalogId,
+    groundingSource = groundingSource,
+    quantityGrams = quantityGrams,
+    cookingMethod = CookingMethod.fromString(cookingMethod),
+    isGrounded = isGrounded,
+    aiConfidence = aiConfidence,
+    correctedFoodId = correctedFoodId,
+    correctedSource = correctedSource,
+    correctedQuantity = correctedQuantity,
 )
 
 private fun parseBreakdownJson(raw: String?): List<BreakdownItem>? {
@@ -119,6 +129,7 @@ private fun parseFoodCatalogSource(raw: String): FoodCatalogSource = when (raw) 
     "off_fr" -> FoodCatalogSource.OffFr
     "off_live" -> FoodCatalogSource.OffLive
     "manual_admin" -> FoodCatalogSource.ManualAdmin
+    "usda" -> FoodCatalogSource.Usda
     else -> FoodCatalogSource.Ciqual
 }
 
@@ -163,17 +174,15 @@ internal fun AnalyzedEntryDto.toDomain(
  * @param defaultSource Fallback source when the caller has no better signal —
  *   typically [EntrySource.PhotoAi] since batches only carry pending IA items.
  */
-internal fun ExtractedItemDto.toResolved(
-    logDate: String,
-    defaultSource: EntrySource,
-): DraftItem.Resolved = DraftItem.Resolved(
-    id = id,
-    entry = entry.toDomain(
+internal fun ExtractedItemDto.toResolved(logDate: String, defaultSource: EntrySource): DraftItem.Resolved =
+    DraftItem.Resolved(
         id = id,
-        logDate = logDate,
-        source = defaultSource,
-    ),
-)
+        entry = entry.toDomain(
+            id = id,
+            logDate = logDate,
+            source = defaultSource,
+        ),
+    )
 
 // =============================================================================
 // Active draft (local persistence)
@@ -251,4 +260,13 @@ internal fun MealEntry.toDto(): MealEntryDto = MealEntryDto(
     quantity = quantity,
     breakdownJson = breakdown?.toJsonString(),
     photoPath = null,
+    foodCatalogId = foodCatalogId,
+    groundingSource = groundingSource,
+    quantityGrams = quantityGrams,
+    cookingMethod = cookingMethod?.toDbString(),
+    isGrounded = isGrounded,
+    aiConfidence = aiConfidence,
+    correctedFoodId = correctedFoodId,
+    correctedSource = correctedSource,
+    correctedQuantity = correctedQuantity,
 )

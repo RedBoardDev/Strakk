@@ -7,16 +7,19 @@ import com.strakk.shared.data.dto.ExtractMealDraftRequestDto
 import com.strakk.shared.data.dto.ExtractMealDraftResponseDto
 import com.strakk.shared.data.dto.MealDto
 import com.strakk.shared.data.dto.MealEntryDto
+import com.strakk.shared.data.dto.ScanMealRequestDto
+import com.strakk.shared.data.dto.ScanMealResponseDto
 import com.strakk.shared.data.mapper.toDomain
 import com.strakk.shared.data.mapper.toJsonString
-import com.strakk.shared.data.mapper.toResolved
 import com.strakk.shared.data.remote.CurrentUserIdProvider
 import com.strakk.shared.domain.common.DomainError
 import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.EntrySource
+import com.strakk.shared.domain.model.GroundedMealItem
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.ScanMealResult
 import com.strakk.shared.domain.model.toDbString
 import com.strakk.shared.domain.repository.MealPhotoRepository
 import com.strakk.shared.domain.repository.MealRepository
@@ -27,7 +30,6 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import io.ktor.client.call.body
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -44,12 +46,23 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val LOG_TAG = "MealRepository"
+private const val ERROR_DETAIL_MAX_LENGTH = 200
+private const val ERROR_LOG_MAX_LENGTH = 100
+private const val HTTP_QUOTA_EXCEEDED = 429
+private const val HTTP_SERVER_ERROR_MIN = 500
+private const val HTTP_SERVER_ERROR_MAX = 599
+private const val SCAN_TEMPORARILY_UNAVAILABLE = "The AI scanner is temporarily unavailable. Please try again later."
+private const val SCAN_QUOTA_EXHAUSTED = "The AI scanner is temporarily busy. Please try again later."
+private const val SCAN_UNEXPECTED_RESPONSE = "We couldn't read the scan result. Please try again."
 private const val MEALS_EMBED_COLUMNS =
     "id,user_id,date,name,created_at," +
         "meal_entries(id,user_id,meal_id,log_date,name,protein,calories,fat,carbs," +
-        "quantity,source,breakdown_json,photo_path,created_at)"
+        "quantity,source,breakdown_json,photo_path,created_at," +
+        "food_catalog_id,grounding_source,quantity_grams,cooking_method,is_grounded," +
+        "ai_confidence,corrected_food_id,corrected_source,corrected_quantity)"
 
 /**
  * Supabase-backed implementation of [MealRepository].
@@ -278,10 +291,14 @@ internal class MealRepositoryImpl(
             mealsCache.value.mapValues { (_, meals) ->
                 meals.map { meal ->
                     if (meal.id == mealId) {
-                        meal.copy(entries = meal.entries.map { e ->
-                            if (e.id == entry.id) entry else e
-                        })
-                    } else meal
+                        meal.copy(
+                            entries = meal.entries.map { e ->
+                                if (e.id == entry.id) entry else e
+                            },
+                        )
+                    } else {
+                        meal
+                    }
                 }
             },
         )
@@ -296,6 +313,7 @@ internal class MealRepositoryImpl(
     // Edge function calls
     // -------------------------------------------------------------------------
 
+    @Suppress("LongMethod")
     override suspend fun extractMealDraftBatch(
         draftId: String,
         photoItems: List<MealRepository.ExtractPhotoItem>,
@@ -340,8 +358,11 @@ internal class MealRepositoryImpl(
 
         val successes = decoded.items.map { extracted ->
             val defaultSource =
-                if (photoIds.contains(extracted.id)) EntrySource.PhotoAi
-                else EntrySource.TextAi
+                if (photoIds.contains(extracted.id)) {
+                    EntrySource.PhotoAi
+                } else {
+                    EntrySource.TextAi
+                }
             MealRepository.ExtractItemResult(
                 id = extracted.id,
                 resolvedItem = DraftItem.Resolved(
@@ -387,10 +408,7 @@ internal class MealRepositoryImpl(
         )
     }
 
-    override suspend fun analyzeTextSingle(
-        description: String,
-        draftItemId: String,
-    ): DraftItem.Resolved {
+    override suspend fun analyzeTextSingle(description: String, draftItemId: String): DraftItem.Resolved {
         refreshSession()
         val request = AnalyzeMealSingleRequestDto.text(description)
         val dto = invokeAnalyzeSingle(request)
@@ -405,11 +423,7 @@ internal class MealRepositoryImpl(
         )
     }
 
-    override suspend fun analyzePhotoForQuickAdd(
-        imageBase64: String,
-        hint: String?,
-        logDate: String,
-    ): MealEntry {
+    override suspend fun analyzePhotoForQuickAdd(imageBase64: String, hint: String?, logDate: String): MealEntry {
         refreshSession()
         val request = AnalyzeMealSingleRequestDto.photo(imageBase64, hint)
         val dto = invokeAnalyzeSingle(request)
@@ -421,10 +435,7 @@ internal class MealRepositoryImpl(
         )
     }
 
-    override suspend fun analyzeTextForQuickAdd(
-        description: String,
-        logDate: String,
-    ): MealEntry {
+    override suspend fun analyzeTextForQuickAdd(description: String, logDate: String): MealEntry {
         refreshSession()
         val request = AnalyzeMealSingleRequestDto.text(description)
         val dto = invokeAnalyzeSingle(request)
@@ -457,6 +468,150 @@ internal class MealRepositoryImpl(
         } catch (e: Exception) {
             throw DomainError.DataError("Unexpected analyze-meal-single response", e)
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // V3 Meal Analysis
+    // -------------------------------------------------------------------------
+
+    override suspend fun scanMeal(
+        photoStoragePaths: List<String>,
+        hint: String?,
+        isTextOnly: Boolean,
+    ): ScanMealResult {
+        refreshSession()
+        val request = ScanMealRequestDto(
+            photoPaths = photoStoragePaths,
+            hint = hint,
+            isTextOnly = isTextOnly,
+        )
+        val response = try {
+            supabaseClient.functions.invoke("scan-meal", body = request)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            val detail = e.message?.take(ERROR_DETAIL_MAX_LENGTH) ?: "unknown"
+            logger.e(LOG_TAG, "scan-meal invoke failed: $detail", e)
+            throw DomainError.DataError(scanMealExceptionMessage(detail), e)
+        }
+        if (response.status.value !in 200..299) {
+            throw DomainError.DataError(scanMealErrorMessage(response.status.value))
+        }
+        return try {
+            val dto = response.body<ScanMealResponseDto>()
+            ScanMealResult(
+                predictions = dto.predictions.map { it.toDomain() },
+                items = dto.items.map { it.toDomain() },
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(LOG_TAG, "scan-meal bad response: ${e.message?.take(ERROR_LOG_MAX_LENGTH) ?: "unknown"}", e)
+            throw DomainError.DataError(SCAN_UNEXPECTED_RESPONSE, e)
+        }
+    }
+
+    private fun scanMealErrorMessage(status: Int): String = when (status) {
+        HTTP_QUOTA_EXCEEDED -> SCAN_QUOTA_EXHAUSTED
+        in HTTP_SERVER_ERROR_MIN..HTTP_SERVER_ERROR_MAX -> SCAN_TEMPORARILY_UNAVAILABLE
+        else -> SCAN_UNEXPECTED_RESPONSE
+    }
+
+    private fun scanMealExceptionMessage(detail: String): String {
+        val normalized = detail.lowercase()
+        return if ("429" in detail || "quota" in normalized) {
+            SCAN_QUOTA_EXHAUSTED
+        } else {
+            SCAN_TEMPORARILY_UNAVAILABLE
+        }
+    }
+
+    override suspend fun saveMealWithGroundedEntries(
+        name: String,
+        date: String,
+        items: List<GroundedMealItem>,
+        photoPathByPhotoIndex: Map<Int, String>,
+    ): Meal {
+        val userId = userIdProvider.currentOrThrow()
+
+        // 1) INSERT the meal row.
+        val mealPayload = buildJsonObject {
+            put("user_id", userId)
+            put("date", date)
+            put("name", name)
+        }
+        val mealBase = supabaseClient
+            .from("meals")
+            .insert(mealPayload) { select() }
+            .decodeSingle<MealDto>()
+
+        // 2) INSERT all entries with grounding metadata.
+        // Compensating transaction: if entries insert fails, delete the orphan meal.
+        val insertedEntries = try {
+            val entriesPayload = buildJsonArray {
+                items.forEach { item ->
+                    add(
+                        buildGroundedEntryPayload(
+                            userId = userId,
+                            mealId = mealBase.id,
+                            logDate = date,
+                            item = item,
+                            photoPath = photoPathByPhotoIndex[item.prediction.photoIndex],
+                        ),
+                    )
+                }
+            }
+            supabaseClient
+                .from("meal_entries")
+                .insert(entriesPayload) { select() }
+                .decodeList<MealEntryDto>()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(LOG_TAG, "Grounded entries insert failed for meal ${mealBase.id}, rolling back meal", e)
+            try {
+                supabaseClient.from("meals").delete { filter { eq("id", mealBase.id) } }
+            } catch (rollbackEx: CancellationException) {
+                throw rollbackEx
+            } catch (rollbackEx: Exception) {
+                logger.e(LOG_TAG, "Rollback of meal ${mealBase.id} also failed", rollbackEx)
+            }
+            throw DomainError.DataError("Failed to save grounded meal entries. The meal was not created.", e)
+        }
+
+        val meal = mealBase
+            .copy(mealEntries = insertedEntries.sortedBy { it.createdAt })
+            .toDomain()
+
+        val current = mealsCache.value
+        updateCaches(current + (date to ((current[date] ?: emptyList()) + meal)))
+        return meal
+    }
+
+    private fun buildGroundedEntryPayload(
+        userId: String,
+        mealId: String,
+        logDate: String,
+        item: GroundedMealItem,
+        photoPath: String?,
+    ): JsonObject = buildJsonObject {
+        put("user_id", userId)
+        put("meal_id", mealId)
+        put("log_date", logDate)
+        put("name", item.prediction.name)
+        put("protein", item.computedMacros.protein)
+        put("calories", item.computedMacros.kcal)
+        put("fat", item.computedMacros.fat)
+        put("carbs", item.computedMacros.carbs)
+        put("quantity", item.quantity.displayLabel)
+        put("quantity_grams", item.quantity.grams)
+        put("source", EntrySource.PhotoAi.toDbString())
+        put("is_grounded", item.isGrounded)
+        put("ai_confidence", item.aiConfidence)
+        item.catalogMatchId?.let { put("food_catalog_id", it) }
+        item.groundingSource?.let { put("grounding_source", it) }
+        item.cookingMethod?.let { put("cooking_method", it.toDbString()) }
+        photoPath?.let { put("photo_path", it) }
     }
 
     private suspend fun refreshSession() {

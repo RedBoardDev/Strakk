@@ -24,4 +24,14 @@ internal data class MealEntryDto(
     val quantity: String? = null,
     @SerialName("breakdown_json") val breakdownJson: String? = null,
     @SerialName("photo_path") val photoPath: String? = null,
+    // V3 grounding fields
+    @SerialName("food_catalog_id") val foodCatalogId: Long? = null,
+    @SerialName("grounding_source") val groundingSource: String? = null,
+    @SerialName("quantity_grams") val quantityGrams: Double? = null,
+    @SerialName("cooking_method") val cookingMethod: String? = null,
+    @SerialName("is_grounded") val isGrounded: Boolean = false,
+    @SerialName("ai_confidence") val aiConfidence: Double? = null,
+    @SerialName("corrected_food_id") val correctedFoodId: Long? = null,
+    @SerialName("corrected_source") val correctedSource: String? = null,
+    @SerialName("corrected_quantity") val correctedQuantity: Double? = null,
 )
