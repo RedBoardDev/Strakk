@@ -1,5 +1,6 @@
 package com.strakk.android.ui.settings
 
+import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,18 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,7 +36,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -50,19 +47,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
+import com.strakk.android.ui.components.StrakkDestructiveButton
+import com.strakk.android.ui.components.StrakkPrimaryButton
+import com.strakk.android.ui.components.StrakkSecondaryButton
+import com.strakk.android.ui.components.StrakkTextButton
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
+import com.strakk.shared.domain.model.DevSubscriptionOverride
+import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.presentation.settings.SettingsEvent
 import com.strakk.shared.presentation.settings.SettingsUiState
 import com.strakk.shared.presentation.settings.SubscriptionDisplay
+import kotlinx.datetime.LocalDate
 
 @Composable
 fun SettingsScreen(
@@ -125,30 +129,32 @@ private fun ReadyView(
             onRestore = { onEvent(SettingsEvent.OnRestorePurchase) },
         )
 
+        if (stringResource(R.string.app_name).contains("Dev")) {
+            DevSubscriptionSection(
+                selected = state.devSubscriptionOverride,
+                onSelected = { onEvent(SettingsEvent.OnDevSubscriptionOverrideSelected(it)) },
+            )
+        }
+
         GoalsSection(
             protein = state.proteinGoal,
             calorie = state.calorieGoal,
+            fat = state.fatGoal,
+            carbs = state.carbGoal,
             water = state.waterGoal,
             onProteinChanged = { onEvent(SettingsEvent.OnProteinGoalChanged(it)) },
             onCalorieChanged = { onEvent(SettingsEvent.OnCalorieGoalChanged(it)) },
+            onFatChanged = { onEvent(SettingsEvent.OnFatGoalChanged(it)) },
+            onCarbsChanged = { onEvent(SettingsEvent.OnCarbGoalChanged(it)) },
             onWaterChanged = { onEvent(SettingsEvent.OnWaterGoalChanged(it)) },
         )
 
         DataSourcesSection()
 
-        Button(
+        StrakkDestructiveButton(
+            text = stringResource(R.string.settings_sign_out),
             onClick = { onEvent(SettingsEvent.OnSignOut) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
-            ),
-        ) {
-            Text(stringResource(R.string.settings_sign_out), fontWeight = FontWeight.SemiBold)
-        }
+        )
 
         Spacer(Modifier.height(24.dp))
     }
@@ -165,13 +171,18 @@ private fun AccountSection(email: String?) {
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun GoalsSection(
     protein: String,
     calorie: String,
+    fat: String,
+    carbs: String,
     water: String,
     onProteinChanged: (String) -> Unit,
     onCalorieChanged: (String) -> Unit,
+    onFatChanged: (String) -> Unit,
+    onCarbsChanged: (String) -> Unit,
     onWaterChanged: (String) -> Unit,
 ) {
     SectionCard(title = stringResource(R.string.settings_section_daily_goals)) {
@@ -184,6 +195,16 @@ private fun GoalsSection(
             label = stringResource(R.string.settings_goal_calories),
             value = calorie,
             onValueChange = onCalorieChanged,
+        )
+        GoalField(
+            label = stringResource(R.string.settings_goal_fat),
+            value = fat,
+            onValueChange = onFatChanged,
+        )
+        GoalField(
+            label = stringResource(R.string.settings_goal_carbs),
+            value = carbs,
+            onValueChange = onCarbsChanged,
         )
         GoalField(
             label = stringResource(R.string.settings_goal_water),
@@ -229,6 +250,66 @@ private fun DataSourcesSection() {
     }
 }
 
+@Composable
+private fun DevSubscriptionSection(
+    selected: DevSubscriptionOverride,
+    onSelected: (DevSubscriptionOverride) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val colors = LocalStrakkColors.current
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(R.string.settings_dev_subscription_section),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textTertiary,
+        )
+
+        Box {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(colors.surface1)
+                    .clickable { expanded = true }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_dev_subscription_label),
+                    style = LocalStrakkTextStyles.current.bodyBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = selected.devLabel(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                DevSubscriptionOverride.entries.forEach { override ->
+                    DropdownMenuItem(
+                        text = { Text(override.devLabel()) },
+                        onClick = {
+                            expanded = false
+                            onSelected(override)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 // =============================================================================
 // PRO section
 // =============================================================================
@@ -248,7 +329,7 @@ private fun ProSection(
         modifier = modifier,
     ) {
         Text(
-            text = stringResource(R.string.settings_section_pro),
+            text = stringResource(R.string.settings_section_current_plan),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textTertiary,
         )
@@ -260,36 +341,20 @@ private fun ProSection(
             )
             is SubscriptionDisplay.Trial -> ProSectionTrial(
                 daysRemaining = subscriptionDisplay.daysRemaining,
-                onManage = onManage,
+                endsAtLabel = subscriptionDisplay.endsAtLabel,
+                onChoosePlan = onUpgrade,
             )
             is SubscriptionDisplay.Active -> ProSectionActive(
-                planLabel = subscriptionDisplay.planLabel,
-                expiresLabel = subscriptionDisplay.expiresLabel,
+                plan = subscriptionDisplay.plan,
+                renewalLabel = subscriptionDisplay.renewalLabel,
+                canUpgradeToAnnual = subscriptionDisplay.canUpgradeToAnnual,
+                onUpgrade = onUpgrade,
                 onManage = onManage,
-                onRestore = onRestore,
             )
             is SubscriptionDisplay.PaymentFailed -> ProSectionPaymentFailed(
                 onFix = onManage,
             )
         }
-    }
-}
-
-@Composable
-private fun ProBadge(modifier: Modifier = Modifier) {
-    val colors = LocalStrakkColors.current
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(colors.accentOrangeFaint)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.settings_pro_badge),
-            style = LocalStrakkTextStyles.current.overline,
-            color = colors.accentOrange,
-        )
     }
 }
 
@@ -305,6 +370,7 @@ private fun ProSectionFree(onUpgrade: () -> Unit, onRestore: () -> Unit, modifie
             .background(colors.surface1)
             .padding(16.dp),
     ) {
+        PlanStatusPill(text = stringResource(R.string.settings_plan_free_badge), color = colors.textSecondary)
         Text(
             text = stringResource(R.string.settings_pro_free_title),
             style = LocalStrakkTextStyles.current.bodyBold,
@@ -315,148 +381,198 @@ private fun ProSectionFree(onUpgrade: () -> Unit, onRestore: () -> Unit, modifie
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
         )
-        Button(
+        StrakkPrimaryButton(
+            text = stringResource(R.string.settings_pro_upgrade),
             onClick = onUpgrade,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.settings_pro_upgrade),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-        }
-        TextButton(
-            onClick = onRestore,
-            modifier = Modifier.fillMaxWidth().height(40.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.paywall_restore),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textSecondary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProSectionTrial(daysRemaining: Int, onManage: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LocalStrakkColors.current
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.surface1)
-            .padding(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ProBadge()
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.settings_pro_trial_title),
-                style = LocalStrakkTextStyles.current.bodyBold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }
-        Text(
-            text = stringResource(R.string.settings_pro_trial_expires, daysRemaining),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.warning,
         )
-        Button(
-            onClick = onManage,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.surface2,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.settings_pro_manage),
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+        StrakkTextButton(
+            text = stringResource(R.string.paywall_restore),
+            onClick = onRestore,
+            emphasized = false,
+        )
     }
 }
 
 @Composable
-private fun ProSectionActive(
-    planLabel: String,
-    expiresLabel: String,
-    onManage: () -> Unit,
-    onRestore: () -> Unit,
+private fun ProSectionTrial(
+    daysRemaining: Int,
+    endsAtLabel: String,
+    onChoosePlan: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalStrakkColors.current
+    val dateLabel = subscriptionDateLabel(endsAtLabel)
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surface1)
             .padding(16.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ProBadge()
-            Spacer(Modifier.width(8.dp))
-            // Green dot
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(colors.success),
-            )
-            Spacer(Modifier.width(6.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            PlanStatusPill(text = stringResource(R.string.settings_plan_trial_badge), color = colors.success)
+            Spacer(Modifier.weight(1f))
             Text(
-                text = stringResource(R.string.settings_pro_active_label, planLabel),
-                style = LocalStrakkTextStyles.current.bodyBold,
+                text = stringResource(R.string.settings_pro_trial_remaining, daysRemaining),
+                style = LocalStrakkTextStyles.current.caption,
                 color = MaterialTheme.colorScheme.onBackground,
             )
         }
         Text(
-            text = stringResource(R.string.settings_pro_active_renews, expiresLabel),
+            text = stringResource(R.string.settings_pro_trial_title),
+            style = LocalStrakkTextStyles.current.bodyBold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = stringResource(R.string.settings_pro_trial_ends, dateLabel),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.warning,
+        )
+        Text(
+            text = stringResource(R.string.settings_pro_trial_body),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
         )
-        Button(
-            onClick = onManage,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.surface2,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.settings_pro_manage),
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-        TextButton(
-            onClick = onRestore,
-            modifier = Modifier.fillMaxWidth().height(40.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.paywall_restore),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textSecondary,
-            )
-        }
+        StrakkPrimaryButton(
+            text = stringResource(R.string.settings_pro_trial_choose_plan),
+            onClick = onChoosePlan,
+        )
     }
 }
+
+@Suppress("LongParameterList")
+@Composable
+private fun ProSectionActive(
+    plan: SubscriptionPlan,
+    renewalLabel: String,
+    canUpgradeToAnnual: Boolean,
+    onUpgrade: () -> Unit,
+    onManage: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalStrakkColors.current
+    val dateLabel = subscriptionDateLabel(renewalLabel)
+    val planLabel = when (plan) {
+        SubscriptionPlan.MONTHLY -> stringResource(R.string.paywall_plan_monthly)
+        SubscriptionPlan.ANNUAL -> stringResource(R.string.paywall_plan_annual)
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.surface1)
+            .padding(16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            PlanStatusPill(text = stringResource(R.string.settings_plan_active_badge), color = colors.success)
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = stringResource(R.string.settings_pro_badge),
+                style = LocalStrakkTextStyles.current.caption,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Text(
+            text = stringResource(R.string.settings_pro_active_label, planLabel.lowercase()),
+            style = LocalStrakkTextStyles.current.bodyBold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = stringResource(R.string.settings_pro_active_renews, dateLabel),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+        )
+
+        if (canUpgradeToAnnual && plan == SubscriptionPlan.MONTHLY) {
+            AnnualUpsellCard(onUpgrade = onUpgrade)
+        }
+
+        StrakkSecondaryButton(
+            text = stringResource(R.string.settings_pro_manage),
+            onClick = onManage,
+        )
+    }
+}
+
+@Composable
+private fun PlanStatusPill(text: String, color: Color, modifier: Modifier = Modifier) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Text(
+            text = text,
+            style = LocalStrakkTextStyles.current.overline,
+            color = color,
+        )
+    }
+}
+
+@Composable
+private fun AnnualUpsellCard(onUpgrade: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = LocalStrakkColors.current
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(colors.surface2)
+            .padding(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.settings_pro_annual_upsell_title),
+            style = LocalStrakkTextStyles.current.captionBold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = stringResource(R.string.settings_pro_annual_upsell_body),
+            style = LocalStrakkTextStyles.current.caption,
+            color = colors.textSecondary,
+        )
+        StrakkTextButton(
+            text = stringResource(R.string.settings_pro_annual_upsell_cta),
+            onClick = onUpgrade,
+            emphasized = false,
+            modifier = Modifier.padding(start = 0.dp),
+        )
+    }
+}
+
+@Composable
+private fun subscriptionDateLabel(isoDate: String): String {
+    val context = LocalContext.current
+    return remember(isoDate) {
+        runCatching {
+            val date = LocalDate.parse(isoDate)
+            val cal = java.util.Calendar.getInstance().apply {
+                set(date.year, date.monthNumber - 1, date.dayOfMonth)
+            }
+            DateFormat.getMediumDateFormat(context).format(cal.time)
+        }.getOrDefault(isoDate)
+    }
+}
+
+@Composable
+private fun DevSubscriptionOverride.devLabel(): String = stringResource(
+    when (this) {
+        DevSubscriptionOverride.SERVER -> R.string.settings_dev_subscription_server
+        DevSubscriptionOverride.FREE -> R.string.settings_dev_subscription_free
+        DevSubscriptionOverride.TRIAL_7_DAYS -> R.string.settings_dev_subscription_trial_7
+        DevSubscriptionOverride.TRIAL_1_DAY -> R.string.settings_dev_subscription_trial_1
+        DevSubscriptionOverride.EXPIRED -> R.string.settings_dev_subscription_expired
+        DevSubscriptionOverride.PRO_MONTHLY -> R.string.settings_dev_subscription_pro_monthly
+        DevSubscriptionOverride.PRO_ANNUAL -> R.string.settings_dev_subscription_pro_annual
+        DevSubscriptionOverride.PAYMENT_FAILED -> R.string.settings_dev_subscription_payment_failed
+    },
+)
 
 @Composable
 private fun ProSectionPaymentFailed(onFix: () -> Unit, modifier: Modifier = Modifier) {
@@ -488,22 +604,10 @@ private fun ProSectionPaymentFailed(onFix: () -> Unit, modifier: Modifier = Modi
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary,
             )
-            Button(
+            StrakkDestructiveButton(
+                text = stringResource(R.string.settings_pro_payment_failed_cta),
                 onClick = onFix,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.error,
-                    contentColor = Color.White,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_pro_payment_failed_cta),
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+            )
         }
     }
 }
@@ -543,6 +647,8 @@ private fun SettingsScreenPreview() {
                 email = "preview@strakk.app",
                 proteinGoal = "150",
                 calorieGoal = "2400",
+                fatGoal = "70",
+                carbGoal = "250",
                 waterGoal = "2500",
                 hevyApiKey = "",
             ),

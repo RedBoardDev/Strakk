@@ -1,5 +1,7 @@
 package com.strakk.android.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.strakk.android.ui.paywall.PaywallRoute
 import com.strakk.shared.presentation.settings.SettingsEffect
@@ -25,6 +28,7 @@ fun SettingsRoute(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
+    val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var showPaywall by remember { mutableStateOf(false) }
@@ -35,6 +39,13 @@ fun SettingsRoute(
                 is SettingsEffect.ShowError -> snackbar.showSnackbar(effect.message)
                 is SettingsEffect.NavigateToPaywall -> showPaywall = true
                 is SettingsEffect.ShowToast -> snackbar.showSnackbar(effect.message)
+                is SettingsEffect.OpenManageSubscription -> {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://play.google.com/store/account/subscriptions")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                }
             }
         }
     }
