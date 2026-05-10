@@ -55,10 +55,10 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture dia
 git clone https://github.com/RedBoardDev/Strakk.git
 cd Strakk
 
-# 2. Configure environment (see docs/ENVIRONMENTS.md)
+# 2. Configure environment
 cp local.properties.example local.properties   # Android — fill in Supabase keys
 mkdir -p iosApp/Config
-# Create Production.xcconfig and Staging.xcconfig (see docs/ENVIRONMENTS.md)
+# Create Production.xcconfig and Staging.xcconfig from the .example files
 
 # 3. Install pre-commit hooks
 make setup
@@ -112,26 +112,18 @@ Strakk/
 │   └── functions/       # Deno Edge Functions
 ├── infra/nutrition-api/ # Self-hosted meal scanning API
 ├── scripts/             # Dev utilities
-├── docs/                # Architecture, environments, feature specs
+├── docs/                # Architecture, contributing, security
 ├── config/detekt/       # Detekt configuration
 └── gradle/              # Version catalog (libs.versions.toml)
 ```
 
-## Environment Configuration
-
-See [`docs/ENVIRONMENTS.md`](docs/ENVIRONMENTS.md) for:
-- `local.properties` setup (Android)
-- `iosApp/Config/*.xcconfig` setup (iOS)
-- Edge Function environment variables
-- Nutrition API `.env` configuration
-
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow, code style, and PR guidelines.
+See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) for development workflow, code style, and PR guidelines.
 
 ## Security
 
-To report a vulnerability, see [`SECURITY.md`](SECURITY.md).
+To report a vulnerability, see [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## License
 
