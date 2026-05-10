@@ -9,16 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,12 +23,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
 import com.strakk.android.ui.components.ProBadge
+import com.strakk.android.ui.components.StrakkPrimaryButton
+import com.strakk.android.ui.components.StrakkTextButton
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkSemanticColors
 import com.strakk.android.ui.theme.StrakkTheme
@@ -90,34 +87,19 @@ private fun FeatureGateSheetContent(metadata: FeatureMetadata, onDiscoverPro: ()
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(28.dp))
-        Button(
+        StrakkPrimaryButton(
+            text = stringResource(R.string.feature_gate_cta),
             onClick = {
                 onDismiss()
                 onDiscoverPro()
             },
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-            ),
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.feature_gate_cta),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-        }
+        )
         Spacer(Modifier.height(4.dp))
-        TextButton(
+        StrakkTextButton(
+            text = stringResource(R.string.feature_gate_later),
             onClick = onDismiss,
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.feature_gate_later),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textTertiary,
-            )
-        }
+            emphasized = false,
+        )
     }
 }
 

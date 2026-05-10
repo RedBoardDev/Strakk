@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.strakk.android.R
+import com.strakk.android.ui.components.StrakkPrimaryButton
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkTextStyles
+import com.strakk.shared.domain.model.PaywallOfferPrices
+import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
+import org.koin.compose.koinInject
 
 @Composable
 fun TrialExpiredDialog(onDiscoverPlans: () -> Unit, onContinueFree: () -> Unit, modifier: Modifier = Modifier) {
@@ -64,6 +71,11 @@ fun TrialExpiredDialog(onDiscoverPlans: () -> Unit, onContinueFree: () -> Unit, 
 @Composable
 private fun TrialExpiredCard(onDiscoverPlans: () -> Unit, onContinueFree: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalStrakkColors.current
+    val loadPrices: LoadPaywallOfferPricesUseCase = koinInject()
+    var offerPrices by remember { mutableStateOf(PaywallOfferPrices()) }
+    LaunchedEffect(Unit) {
+        offerPrices = loadPrices()
+    }
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -85,22 +97,12 @@ private fun TrialExpiredCard(onDiscoverPlans: () -> Unit, onContinueFree: () -> 
             color = colors.textSecondary,
         )
         Spacer(Modifier.height(12.dp))
-        TrialPriceText()
+        TrialPriceText(offerPrices = offerPrices)
         Spacer(Modifier.height(24.dp))
-        Button(
+        StrakkPrimaryButton(
+            text = stringResource(R.string.trial_expired_cta),
             onClick = onDiscoverPlans,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-            ),
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.trial_expired_cta),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-        }
+        )
         Spacer(Modifier.height(4.dp))
         TextButton(
             onClick = onContinueFree,
@@ -116,10 +118,17 @@ private fun TrialExpiredCard(onDiscoverPlans: () -> Unit, onContinueFree: () -> 
 }
 
 @Composable
-private fun TrialPriceText() {
+private fun TrialPriceText(offerPrices: PaywallOfferPrices) {
     val colors = LocalStrakkColors.current
     val textStyles = LocalStrakkTextStyles.current
-    val priceRaw = stringResource(R.string.trial_expired_price)
+    val annual = offerPrices.annualFormatted?.trim().orEmpty()
+    val perMonth = offerPrices.annualPricePerMonthFormatted?.trim().orEmpty()
+    val priceRaw = when {
+        annual.isNotEmpty() && perMonth.isNotEmpty() ->
+            stringResource(R.string.trial_expired_price_line, annual, perMonth)
+        annual.isNotEmpty() -> annual
+        else -> stringResource(R.string.paywall_price_placeholder)
+    }
     val separatorIndex = priceRaw.indexOf('·')
     val priceAnnotated = buildAnnotatedString {
         if (separatorIndex >= 0) {

@@ -20,23 +20,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Compare
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Upload
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,16 +39,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
+import com.strakk.android.ui.components.StrakkCloseButton
+import com.strakk.android.ui.components.StrakkPrimaryButton
+import com.strakk.android.ui.components.StrakkTextButton
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureMetadata
 import com.strakk.shared.domain.model.FeatureRegistry
+import com.strakk.shared.domain.model.PaywallOfferPrices
 import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.presentation.paywall.PaywallEvent
 import com.strakk.shared.presentation.paywall.PaywallUiState
@@ -76,27 +74,15 @@ fun PaywallScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            PaywallCloseButton(onDismiss = { onEvent(PaywallEvent.OnDismiss) })
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 8.dp, top = 4.dp),
+                contentAlignment = Alignment.TopEnd,
+            ) {
+                StrakkCloseButton(onClick = { onEvent(PaywallEvent.OnDismiss) })
+            }
             PaywallBody(uiState = uiState, onEvent = onEvent)
-        }
-    }
-}
-
-@Composable
-private fun PaywallCloseButton(onDismiss: () -> Unit) {
-    val colors = LocalStrakkColors.current
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        contentAlignment = Alignment.TopEnd,
-    ) {
-        IconButton(onClick = onDismiss) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = null,
-                tint = colors.textSecondary,
-            )
         }
     }
 }
@@ -141,7 +127,10 @@ private fun PaywallBody(uiState: PaywallUiState, onEvent: (PaywallEvent) -> Unit
             onPlanSelected = { onEvent(PaywallEvent.OnPlanSelected(it)) },
         )
         Spacer(Modifier.height(12.dp))
-        PriceCard(selectedPlan = uiState.selectedPlan)
+        PriceCard(
+            selectedPlan = uiState.selectedPlan,
+            offerPrices = uiState.offerPrices,
+        )
         Spacer(Modifier.height(24.dp))
         PaywallCtaSection(uiState = uiState, onEvent = onEvent)
     }
@@ -150,24 +139,18 @@ private fun PaywallBody(uiState: PaywallUiState, onEvent: (PaywallEvent) -> Unit
 @Composable
 private fun PaywallCtaSection(uiState: PaywallUiState, onEvent: (PaywallEvent) -> Unit) {
     val colors = LocalStrakkColors.current
+    val ctaText = when {
+        uiState.selectedPlanIsCurrent -> stringResource(R.string.paywall_cta_current_plan)
+        uiState.isTrial -> stringResource(R.string.paywall_cta_choose_plan)
+        else -> stringResource(R.string.paywall_cta)
+    }
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Button(
+        StrakkPrimaryButton(
+            text = ctaText,
             onClick = { onEvent(PaywallEvent.OnSubscribeTapped) },
-            enabled = !uiState.isProcessing,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                disabledContentColor = Color.White.copy(alpha = 0.7f),
-            ),
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.paywall_cta),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-        }
+            enabled = !uiState.selectedPlanIsCurrent,
+            loading = uiState.isProcessing,
+        )
         Spacer(Modifier.height(12.dp))
         Text(
             text = stringResource(R.string.paywall_footer_cancel),
@@ -181,19 +164,22 @@ private fun PaywallCtaSection(uiState: PaywallUiState, onEvent: (PaywallEvent) -
             color = colors.textTertiary,
         )
         Spacer(Modifier.height(16.dp))
-        TextButton(onClick = { onEvent(PaywallEvent.OnRestoreTapped) }) {
-            Text(
-                text = stringResource(R.string.paywall_restore),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textSecondary,
-            )
-        }
+        StrakkTextButton(
+            text = stringResource(R.string.paywall_restore),
+            onClick = { onEvent(PaywallEvent.OnRestoreTapped) },
+            emphasized = false,
+        )
         Spacer(Modifier.height(24.dp))
     }
 }
 
+@Suppress("FunctionSignature")
 @Composable
-private fun FeatureRow(featureInfo: FeatureMetadata, isHighlighted: Boolean, modifier: Modifier = Modifier) {
+private fun FeatureRow(
+    featureInfo: FeatureMetadata,
+    isHighlighted: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalStrakkColors.current
     val icon = iconForAndroid(featureInfo.iconAndroid)
 
@@ -288,9 +274,15 @@ private fun PlanToggle(
     }
 }
 
+@Suppress("FunctionSignature")
 @Composable
-private fun PriceCard(selectedPlan: SubscriptionPlan, modifier: Modifier = Modifier) {
+private fun PriceCard(
+    selectedPlan: SubscriptionPlan,
+    offerPrices: PaywallOfferPrices,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalStrakkColors.current
+    val placeholder = stringResource(R.string.paywall_price_placeholder)
 
     Box(
         modifier = modifier
@@ -303,30 +295,27 @@ private fun PriceCard(selectedPlan: SubscriptionPlan, modifier: Modifier = Modif
             SubscriptionPlan.ANNUAL -> {
                 Column {
                     Text(
-                        text = stringResource(R.string.paywall_price_annual),
+                        text = offerPrices.annualFormatted ?: placeholder,
                         style = LocalStrakkTextStyles.current.bodyBold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.paywall_price_annual_monthly),
-                        style = LocalStrakkTextStyles.current.caption,
-                        color = colors.textSecondary,
-                    )
+                    val perMo = offerPrices.annualPricePerMonthFormatted
+                    if (!perMo.isNullOrBlank()) {
+                        Text(
+                            text = stringResource(R.string.paywall_annual_per_month_line, perMo),
+                            style = LocalStrakkTextStyles.current.caption,
+                            color = colors.textSecondary,
+                        )
+                    }
                 }
             }
             SubscriptionPlan.MONTHLY -> {
                 Column {
                     Text(
-                        text = stringResource(R.string.paywall_price_monthly),
+                        text = offerPrices.monthlyFormatted ?: placeholder,
                         style = LocalStrakkTextStyles.current.bodyBold,
                         color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.paywall_price_monthly_detail),
-                        style = LocalStrakkTextStyles.current.caption,
-                        color = colors.textSecondary,
                     )
                 }
             }
@@ -382,6 +371,7 @@ internal fun PaywallScreenPreview() {
                 features = FeatureRegistry.all(),
                 highlightedFeature = Feature.AI_PHOTO_ANALYSIS,
                 selectedPlan = SubscriptionPlan.ANNUAL,
+                offerPrices = PaywallOfferPrices(),
             ),
             snackbarHostState = SnackbarHostState(),
             onEvent = {},
