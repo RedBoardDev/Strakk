@@ -1,14 +1,11 @@
 package com.strakk.android.ui.home.search
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,9 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -50,6 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.strakk.android.R
+import com.strakk.android.ui.components.StrakkEmptyState
+import com.strakk.android.ui.components.StrakkLoadingState
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.FoodCatalogItem
@@ -183,34 +178,16 @@ private fun SearchFoodScreen(
         ) {
             when (val state = uiState) {
                 is SearchFoodUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+                    StrakkLoadingState(modifier = Modifier.fillMaxSize())
                 }
                 is SearchFoodUiState.Error -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp),
-                    ) {
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalStrakkColors.current.error,
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(
-                            onClick = { onEvent(SearchFoodEvent.Retry) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            Text(stringResource(R.string.search_food_retry))
-                        }
-                    }
+                    StrakkEmptyState(
+                        title = stringResource(R.string.search_food_error_title),
+                        description = state.message,
+                        actionLabel = stringResource(R.string.search_food_retry),
+                        onAction = { onEvent(SearchFoodEvent.Retry) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
                 is SearchFoodUiState.Ready -> {
                     SearchFoodContent(
@@ -273,17 +250,10 @@ private fun SearchFoodContent(
                 }
             } else {
                 item {
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.search_food_empty_hint),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalStrakkColors.current.textSecondary,
-                        )
-                    }
+                    StrakkEmptyState(
+                        title = stringResource(R.string.search_food_empty_hint),
+                        description = stringResource(R.string.search_food_empty_hint_desc),
+                    )
                 }
             }
         } else {
@@ -326,33 +296,14 @@ private fun SearchFoodContent(
 
             if (state.isSearching) {
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp,
-                        )
-                    }
+                    StrakkLoadingState()
                 }
             } else if (state.results.catalogItems.isEmpty() && state.results.userItems.isEmpty()) {
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.search_food_no_results, state.query),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalStrakkColors.current.textSecondary,
-                        )
-                    }
+                    StrakkEmptyState(
+                        title = stringResource(R.string.search_food_no_results, state.query),
+                        description = stringResource(R.string.search_food_no_results_desc),
+                    )
                 }
             } else {
                 items(

@@ -18,29 +18,33 @@ import androidx.compose.material.icons.outlined.TextSnippet
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.components.ProBadge
+import com.strakk.android.ui.components.StrakkSheet
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 
 /**
  * Bottom sheet picker for adding items to a Draft or doing a quick-add.
+ * Wrapped in [StrakkSheet] for consistent drag handle, corners, and dismiss semantics.
  *
  * @param draftName Non-null when opened in Draft context; null for quick-add.
  */
+@Suppress("LongParameterList")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPickerSheet(
     draftName: String?,
+    showProBadges: Boolean,
     onSearch: () -> Unit,
     onManual: () -> Unit,
     onText: () -> Unit,
@@ -48,17 +52,14 @@ fun AddPickerSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = LocalStrakkColors.current.surface2,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+    StrakkSheet(
+        onDismiss = onDismiss,
+        showCloseButton = false,
         modifier = modifier,
     ) {
         AddPickerContent(
             draftName = draftName,
+            showProBadges = showProBadges,
             onSearch = onSearch,
             onManual = onManual,
             onText = onText,
@@ -67,9 +68,11 @@ fun AddPickerSheet(
     }
 }
 
+@Suppress("LongMethod", "LongParameterList")
 @Composable
 private fun AddPickerContent(
     draftName: String?,
+    showProBadges: Boolean,
     onSearch: () -> Unit,
     onManual: () -> Unit,
     onText: () -> Unit,
@@ -84,13 +87,17 @@ private fun AddPickerContent(
     ) {
         // Header
         Text(
-            text = if (draftName != null) "Ajouter à $draftName" else "Ajout rapide",
+            text = if (draftName != null) {
+                stringResource(R.string.add_picker_title_draft, draftName)
+            } else {
+                stringResource(R.string.add_picker_title_quick)
+            },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Choisissez une source",
+            text = stringResource(R.string.add_picker_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = LocalStrakkColors.current.textSecondary,
         )
@@ -103,15 +110,15 @@ private fun AddPickerContent(
         ) {
             PickerTile(
                 icon = Icons.Outlined.Search,
-                label = "Rechercher",
-                description = "Historique + catalogue",
+                label = stringResource(R.string.add_picker_search_label),
+                description = stringResource(R.string.add_picker_search_desc),
                 onClick = onSearch,
                 modifier = Modifier.weight(1f),
             )
             PickerTile(
                 icon = Icons.Outlined.Create,
-                label = "Manuel",
-                description = "Saisir les macros",
+                label = stringResource(R.string.add_picker_manual_label),
+                description = stringResource(R.string.add_picker_manual_desc),
                 onClick = onManual,
                 modifier = Modifier.weight(1f),
             )
@@ -128,32 +135,36 @@ private fun AddPickerContent(
             Box(modifier = Modifier.weight(1f)) {
                 PickerTile(
                     icon = Icons.Outlined.TextSnippet,
-                    label = "Texte libre",
-                    description = "Décris ton repas",
+                    label = stringResource(R.string.add_picker_text_label),
+                    description = stringResource(R.string.add_picker_text_desc),
                     onClick = onText,
                     enabled = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                ProBadge(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp),
-                )
+                if (showProBadges) {
+                    ProBadge(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp),
+                    )
+                }
             }
             Box(modifier = Modifier.weight(1f)) {
                 PickerTile(
                     icon = Icons.Outlined.CameraAlt,
-                    label = "Photo + hint",
-                    description = "Analyse IA",
+                    label = stringResource(R.string.add_picker_photo_label),
+                    description = stringResource(R.string.add_picker_photo_desc),
                     onClick = onPhoto,
                     enabled = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                ProBadge(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp),
-                )
+                if (showProBadges) {
+                    ProBadge(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp),
+                    )
+                }
             }
             // Spacer to balance the 3+2 layout
             Spacer(modifier = Modifier.weight(1f))
@@ -187,14 +198,14 @@ private fun PickerTile(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = contentAlpha),
+                tint = colors.accentOrange.copy(alpha = contentAlpha),
                 modifier = Modifier.size(28.dp),
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
+                color = colors.textPrimary.copy(alpha = contentAlpha),
             )
             Text(
                 text = description,
@@ -214,7 +225,8 @@ private fun PickerTile(
 private fun AddPickerContentPreview() {
     StrakkTheme {
         AddPickerContent(
-            draftName = "Déjeuner",
+            draftName = "Lunch",
+            showProBadges = true,
             onSearch = {},
             onManual = {},
             onText = {},
@@ -229,6 +241,7 @@ private fun AddPickerContentQuickAddPreview() {
     StrakkTheme {
         AddPickerContent(
             draftName = null,
+            showProBadges = true,
             onSearch = {},
             onManual = {},
             onText = {},
