@@ -1,35 +1,41 @@
 package com.strakk.shared.presentation.settings
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
+import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.CheckIn
 import com.strakk.shared.domain.model.CheckInInput
 import com.strakk.shared.domain.model.CheckInListItem
 import com.strakk.shared.domain.model.CheckInMeasurements
 import com.strakk.shared.domain.model.CheckInPhoto
 import com.strakk.shared.domain.model.CheckInSeriesPoint
-import com.strakk.shared.domain.model.NutritionAverages
-import com.strakk.shared.domain.model.NutritionGoals
-import com.strakk.shared.domain.model.SubscriptionPlan
-import com.strakk.shared.domain.model.SubscriptionState
-import com.strakk.shared.domain.model.ActiveMealDraft
+import com.strakk.shared.domain.model.DevSubscriptionOverride
 import com.strakk.shared.domain.model.DraftItem
 import com.strakk.shared.domain.model.FrequentItem
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.NutritionAverages
+import com.strakk.shared.domain.model.NutritionGoals
+import com.strakk.shared.domain.model.SubscriptionPlan
+import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.model.WaterEntry
 import com.strakk.shared.domain.repository.CheckInRepository
 import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealRepository
 import com.strakk.shared.domain.repository.NutritionRepository
-import app.cash.turbine.ReceiveTurbine
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
 import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
+import com.strakk.shared.domain.usecase.ObserveDevSubscriptionOverrideUseCase
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RestoreSubscriptionUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
+import com.strakk.shared.domain.usecase.SetDevSubscriptionOverrideUseCase
 import com.strakk.shared.domain.usecase.SignOutUseCase
 import com.strakk.shared.domain.usecase.UpdateProfileUseCase
 import com.strakk.shared.fixtures.FakeAuthRepository
+import com.strakk.shared.fixtures.FakeBillingRepository
 import com.strakk.shared.fixtures.FakeProfileRepository
 import com.strakk.shared.fixtures.FakeSubscriptionRepository
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +43,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -52,6 +59,7 @@ class SettingsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var subscriptionRepository: FakeSubscriptionRepository
+    private lateinit var billingRepository: FakeBillingRepository
     private lateinit var profileRepository: FakeProfileRepository
     private lateinit var authRepository: FakeAuthRepository
 
@@ -59,6 +67,7 @@ class SettingsViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         subscriptionRepository = FakeSubscriptionRepository()
+        billingRepository = FakeBillingRepository()
         profileRepository = FakeProfileRepository()
         authRepository = FakeAuthRepository()
     }
@@ -83,6 +92,10 @@ class SettingsViewModelTest {
         saveHevyApiKey = SaveHevyApiKeyUseCase(profileRepository),
         getHevyApiKey = GetHevyApiKeyUseCase(profileRepository),
         observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
+        observeDevSubscriptionOverride = ObserveDevSubscriptionOverrideUseCase(subscriptionRepository),
+        setDevSubscriptionOverride = SetDevSubscriptionOverrideUseCase(subscriptionRepository),
+        restoreSubscription = RestoreSubscriptionUseCase(billingRepository),
+        refreshSubscriptionState = RefreshSubscriptionStateUseCase(subscriptionRepository),
     )
 
     // -------------------------------------------------------------------------
@@ -125,6 +138,7 @@ class SettingsViewModelTest {
             val ready = awaitReady()
             val display = assertIs<SubscriptionDisplay.Trial>(ready.subscriptionDisplay)
             assertEquals(7, display.daysRemaining)
+            assertEquals(endsAt.toString().take(10), display.endsAtLabel)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -139,6 +153,7 @@ class SettingsViewModelTest {
             val ready = awaitReady()
             val display = assertIs<SubscriptionDisplay.Trial>(ready.subscriptionDisplay)
             assertEquals(0, display.daysRemaining)
+            assertEquals("2020-01-01", display.endsAtLabel)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -156,8 +171,9 @@ class SettingsViewModelTest {
         viewModel.uiState.test {
             val ready = awaitReady()
             val display = assertIs<SubscriptionDisplay.Active>(ready.subscriptionDisplay)
-            assertEquals("Mensuel", display.planLabel)
-            assertEquals("2026-06-03", display.expiresLabel)
+            assertEquals(SubscriptionPlan.MONTHLY, display.plan)
+            assertEquals("2026-06-03", display.renewalLabel)
+            assertEquals(true, display.canUpgradeToAnnual)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -175,8 +191,9 @@ class SettingsViewModelTest {
         viewModel.uiState.test {
             val ready = awaitReady()
             val display = assertIs<SubscriptionDisplay.Active>(ready.subscriptionDisplay)
-            assertEquals("Annuel", display.planLabel)
-            assertEquals("2027-05-03", display.expiresLabel)
+            assertEquals(SubscriptionPlan.ANNUAL, display.plan)
+            assertEquals("2027-05-03", display.renewalLabel)
+            assertEquals(false, display.canUpgradeToAnnual)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -198,6 +215,34 @@ class SettingsViewModelTest {
     // -------------------------------------------------------------------------
 
     @Test
+    fun `loads and saves all daily nutrition goals`() = runTest {
+        profileRepository.profileFlow.value = TestFixtures.defaultUserProfile.copy(
+            proteinGoal = 155,
+            calorieGoal = 2300,
+            fatGoal = 65,
+            carbGoal = 260,
+            waterGoal = 2750,
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            val ready = awaitReady()
+            assertEquals("155", ready.proteinGoal)
+            assertEquals("2300", ready.calorieGoal)
+            assertEquals("65", ready.fatGoal)
+            assertEquals("260", ready.carbGoal)
+            assertEquals("2750", ready.waterGoal)
+
+            viewModel.onEvent(SettingsEvent.OnFatGoalChanged("70"))
+            viewModel.onEvent(SettingsEvent.OnCarbGoalChanged("280"))
+            advanceTimeBy(501)
+
+            assertEquals(listOf(155, 2300, 70, 280, 2750), profileRepository.updateProfileCalls.last())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `OnUpgradeTapped emits NavigateToPaywall`() = runTest {
         val viewModel = createViewModel()
 
@@ -210,13 +255,13 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `OnManageSubscription emits ShowToast`() = runTest {
+    fun `OnManageSubscription emits OpenManageSubscription`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.effects.test {
             viewModel.onEvent(SettingsEvent.OnManageSubscription)
 
-            assertIs<SettingsEffect.ShowToast>(awaitItem())
+            assertIs<SettingsEffect.OpenManageSubscription>(awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -231,6 +276,27 @@ class SettingsViewModelTest {
             assertIs<SettingsEffect.ShowToast>(awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `dev subscription override is exposed in ready state`() = runTest {
+        subscriptionRepository.setDevOverride(DevSubscriptionOverride.PRO_MONTHLY)
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            val ready = awaitReady()
+            assertEquals(DevSubscriptionOverride.PRO_MONTHLY, ready.devSubscriptionOverride)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `OnDevSubscriptionOverrideSelected updates repository override`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onEvent(SettingsEvent.OnDevSubscriptionOverrideSelected(DevSubscriptionOverride.PRO_ANNUAL))
+
+        assertEquals(DevSubscriptionOverride.PRO_ANNUAL, subscriptionRepository.devOverride)
     }
 }
 
@@ -307,6 +373,7 @@ private class FakeSettingsMealRepository : MealRepository {
     override suspend fun analyzeTextSingle(description: String, draftItemId: String): DraftItem.Resolved = error("Not used")
     override suspend fun analyzePhotoForQuickAdd(imageBase64: String, hint: String?, logDate: String): MealEntry = error("Not used")
     override suspend fun analyzeTextForQuickAdd(description: String, logDate: String): MealEntry = error("Not used")
+    override suspend fun saveMealWithGroundedEntries(name: String, date: String, items: List<com.strakk.shared.domain.model.GroundedMealItem>, photoPathByPhotoIndex: Map<Int, String>): Meal = error("Not used")
 }
 
 private class FakeSettingsDraftRepository : MealDraftRepository {

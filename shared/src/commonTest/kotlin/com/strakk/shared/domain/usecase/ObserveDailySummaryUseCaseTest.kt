@@ -60,6 +60,8 @@ class ObserveDailySummaryUseCaseTest {
                 totalWater = 500,
                 proteinGoal = 150,
                 calorieGoal = 2200,
+                fatGoal = null,
+                carbGoal = null,
                 waterGoal = 2500,
             ),
             summary,
@@ -159,6 +161,7 @@ private class FakeMealRepository(
         logDate: String,
     ): MealEntry = error("Not used")
     override suspend fun analyzeTextForQuickAdd(description: String, logDate: String): MealEntry = error("Not used")
+    override suspend fun saveMealWithGroundedEntries(name: String, date: String, items: List<com.strakk.shared.domain.model.GroundedMealItem>, photoPathByPhotoIndex: Map<Int, String>): Meal = error("Not used")
 }
 
 private class FakeProfileRepository : ProfileRepository {
@@ -189,6 +192,8 @@ private class FakeProfileRepository : ProfileRepository {
     override suspend fun updateProfile(
         proteinGoal: Int?,
         calorieGoal: Int?,
+        fatGoal: Int?,
+        carbGoal: Int?,
         waterGoal: Int?,
     ): UserProfile = profile.value
     override suspend fun getHevyApiKey(): String? = null

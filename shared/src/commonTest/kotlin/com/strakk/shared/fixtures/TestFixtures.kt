@@ -1,11 +1,16 @@
 package com.strakk.shared.fixtures
 
 import com.strakk.shared.domain.model.AuthStatus
+import com.strakk.shared.domain.model.BillingResult
+import com.strakk.shared.domain.model.PaywallOfferPrices
+import com.strakk.shared.domain.model.DevSubscriptionOverride
 import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.OnboardingData
+import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.repository.AuthRepository
+import com.strakk.shared.domain.repository.BillingRepository
 import com.strakk.shared.domain.repository.ProfileRepository
 import com.strakk.shared.domain.repository.SubscriptionRepository
 import kotlinx.coroutines.flow.Flow
@@ -131,11 +136,13 @@ class FakeProfileRepository : ProfileRepository {
     override suspend fun updateProfile(
         proteinGoal: Int?,
         calorieGoal: Int?,
+        fatGoal: Int?,
+        carbGoal: Int?,
         waterGoal: Int?,
     ): UserProfile {
         shouldThrow?.let { throw it }
         updateProfileCalls.add(
-            listOf(proteinGoal, calorieGoal, waterGoal)
+            listOf(proteinGoal, calorieGoal, fatGoal, carbGoal, waterGoal),
         )
         return updateProfileResult
     }
@@ -169,12 +176,45 @@ class FakeProfileRepository : ProfileRepository {
  */
 class FakeSubscriptionRepository : SubscriptionRepository {
     private val stateFlow = MutableStateFlow<SubscriptionState>(SubscriptionState.Free)
+    private val devOverrideFlow = MutableStateFlow(DevSubscriptionOverride.SERVER)
+    val devOverride: DevSubscriptionOverride get() = devOverrideFlow.value
 
     fun emit(state: SubscriptionState) {
         stateFlow.value = state
     }
 
+    override suspend fun setDevOverride(override: DevSubscriptionOverride) {
+        devOverrideFlow.value = override
+    }
+
     override fun observeState(): Flow<SubscriptionState> = stateFlow
+    override fun observeDevOverride(): Flow<DevSubscriptionOverride> = devOverrideFlow
     override suspend fun getState(): SubscriptionState = stateFlow.value
     override suspend fun refreshState() = Unit
+    override val cachedState: SubscriptionState get() = stateFlow.value
+}
+
+class FakeBillingRepository : BillingRepository {
+    var configuredApiKey: String? = null
+    var purchaseResult: BillingResult = BillingResult.Success
+    var restoreResult: BillingResult = BillingResult.Success
+    var purchasedPlan: SubscriptionPlan? = null
+    var syncCalls: Int = 0
+
+    override fun configure(apiKey: String) {
+        configuredApiKey = apiKey
+    }
+
+    override suspend fun purchase(plan: SubscriptionPlan): BillingResult {
+        purchasedPlan = plan
+        return purchaseResult
+    }
+
+    override suspend fun restore(): BillingResult = restoreResult
+
+    override suspend fun syncCustomerInfo() {
+        syncCalls += 1
+    }
+
+    override suspend fun loadPaywallOfferPrices(): PaywallOfferPrices = PaywallOfferPrices()
 }

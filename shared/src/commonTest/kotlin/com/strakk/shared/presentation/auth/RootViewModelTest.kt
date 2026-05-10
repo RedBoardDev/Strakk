@@ -7,7 +7,10 @@ import com.strakk.shared.domain.model.UserProfile
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.SyncBillingCustomerInfoUseCase
 import com.strakk.shared.fixtures.FakeAuthRepository
+import com.strakk.shared.fixtures.FakeBillingRepository
 import com.strakk.shared.fixtures.FakeProfileRepository
 import com.strakk.shared.fixtures.FakeSubscriptionRepository
 import com.strakk.shared.fixtures.TestFixtures
@@ -34,6 +37,7 @@ class RootViewModelTest {
     private lateinit var authRepository: FakeAuthRepository
     private lateinit var profileRepository: FakeProfileRepository
     private lateinit var subscriptionRepository: FakeSubscriptionRepository
+    private lateinit var billingRepository: FakeBillingRepository
 
     @BeforeTest
     fun setUp() {
@@ -41,6 +45,7 @@ class RootViewModelTest {
         authRepository = FakeAuthRepository()
         profileRepository = FakeProfileRepository()
         subscriptionRepository = FakeSubscriptionRepository()
+        billingRepository = FakeBillingRepository()
     }
 
     @AfterTest
@@ -52,6 +57,8 @@ class RootViewModelTest {
         observeAuthStatus = ObserveAuthStatusUseCase(authRepository),
         observeProfile = ObserveProfileUseCase(profileRepository),
         observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
+        refreshSubscriptionState = RefreshSubscriptionStateUseCase(subscriptionRepository),
+        syncBillingCustomerInfo = SyncBillingCustomerInfoUseCase(billingRepository),
     )
 
     @Test

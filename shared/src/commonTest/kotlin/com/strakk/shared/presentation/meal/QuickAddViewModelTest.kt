@@ -118,7 +118,16 @@ class QuickAddViewModelTest {
                 mealRepository = mealRepository,
                 nutritionRepository = nutritionRepository,
             ),
-            checkFeatureAccess = CheckFeatureAccessUseCase(subRepo),
+            checkFeatureAccess = CheckFeatureAccessUseCase(
+                subscriptionRepository = subRepo,
+                featureLimitsRepository = object : com.strakk.shared.domain.repository.FeatureLimitsRepository {
+                    override suspend fun getLimits(featureKey: String) = null
+                    override suspend fun getAllLimits() = emptyList<com.strakk.shared.domain.model.FeatureLimits>()
+                },
+                featureUsageRepository = object : com.strakk.shared.domain.repository.FeatureUsageRepository {
+                    override suspend fun countUsage(featureKey: String, since: kotlinx.datetime.Instant) = 0
+                },
+            ),
             logger = object : Logger {
                 override fun d(tag: String, message: String) {}
                 override fun e(tag: String, message: String, throwable: Throwable?) {}
@@ -194,6 +203,8 @@ private class FakeMealRepository : MealRepository {
         description: String,
         logDate: String,
     ): MealEntry = quickAddEntry(logDate = logDate, source = EntrySource.TextAi)
+
+    override suspend fun saveMealWithGroundedEntries(name: String, date: String, items: List<com.strakk.shared.domain.model.GroundedMealItem>, photoPathByPhotoIndex: Map<Int, String>): Meal = unused()
 
     private fun quickAddEntry(logDate: String, source: EntrySource): MealEntry = MealEntry(
         id = "",

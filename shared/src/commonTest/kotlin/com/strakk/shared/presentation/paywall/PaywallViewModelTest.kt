@@ -2,10 +2,16 @@ package com.strakk.shared.presentation.paywall
 
 import app.cash.turbine.test
 import com.strakk.shared.domain.model.Feature
+import com.strakk.shared.domain.model.BillingResult
 import com.strakk.shared.domain.model.FeatureRegistry
 import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.domain.model.SubscriptionState
+import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.PurchaseSubscriptionUseCase
+import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RestoreSubscriptionUseCase
+import com.strakk.shared.fixtures.FakeBillingRepository
 import com.strakk.shared.fixtures.FakeSubscriptionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,11 +32,13 @@ class PaywallViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var subscriptionRepository: FakeSubscriptionRepository
+    private lateinit var billingRepository: FakeBillingRepository
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         subscriptionRepository = FakeSubscriptionRepository()
+        billingRepository = FakeBillingRepository()
     }
 
     @AfterTest
@@ -41,6 +49,10 @@ class PaywallViewModelTest {
     private fun createViewModel(highlightedFeature: Feature? = null): PaywallViewModel =
         PaywallViewModel(
             observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
+            purchaseSubscription = PurchaseSubscriptionUseCase(billingRepository),
+            restoreSubscription = RestoreSubscriptionUseCase(billingRepository),
+            refreshSubscriptionState = RefreshSubscriptionStateUseCase(subscriptionRepository),
+            loadPaywallOfferPrices = LoadPaywallOfferPricesUseCase(billingRepository),
             highlightedFeature = highlightedFeature,
         )
 
@@ -56,12 +68,14 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `initial state has isAlreadyPro false`() = runTest {
+    fun `initial state has no current plan`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(false, state.isAlreadyPro)
+            assertNull(state.currentPlan)
+            assertEquals(false, state.isTrial)
+            assertEquals(false, state.selectedPlanIsCurrent)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -128,37 +142,51 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `OnRestoreTapped emits ShowToast effect`() = runTest {
+    fun `OnRestoreTapped emits success toast`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.effects.test {
             viewModel.onEvent(PaywallEvent.OnRestoreTapped)
 
             val effect = assertIs<PaywallEffect.ShowToast>(awaitItem())
-            assertEquals("Bientôt disponible", effect.message)
+            assertEquals("Purchases restored", effect.message)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `OnSubscribeTapped emits ShowToast effect`() = runTest {
+    fun `OnSubscribeTapped emits success and dismiss`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.effects.test {
             viewModel.onEvent(PaywallEvent.OnSubscribeTapped)
 
             val effect = assertIs<PaywallEffect.ShowToast>(awaitItem())
-            assertEquals("Bientôt disponible", effect.message)
+            assertEquals("Subscription activated", effect.message)
+            assertIs<PaywallEffect.Dismiss>(awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `observing PRO subscription state sets isAlreadyPro to true`() = runTest {
+    fun `OnSubscribeTapped with billing error emits error toast`() = runTest {
+        billingRepository.purchaseResult = BillingResult.Error("Billing unavailable")
+        val viewModel = createViewModel()
+
+        viewModel.effects.test {
+            viewModel.onEvent(PaywallEvent.OnSubscribeTapped)
+            val effect = assertIs<PaywallEffect.ShowToast>(awaitItem())
+            assertEquals("Billing unavailable", effect.message)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `observing annual subscription marks selected annual as current`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            awaitItem() // initial Free → isAlreadyPro = false
+            awaitItem()
 
             subscriptionRepository.emit(
                 SubscriptionState.Active(
@@ -168,13 +196,36 @@ class PaywallViewModelTest {
             )
 
             val updated = awaitItem()
-            assertEquals(true, updated.isAlreadyPro)
+            assertEquals(SubscriptionPlan.ANNUAL, updated.currentPlan)
+            assertEquals(false, updated.isTrial)
+            assertEquals(true, updated.selectedPlanIsCurrent)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `observing Trial subscription state sets isAlreadyPro to true`() = runTest {
+    fun `observing monthly subscription allows annual selection as upgrade`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            awaitItem()
+
+            subscriptionRepository.emit(
+                SubscriptionState.Active(
+                    plan = SubscriptionPlan.MONTHLY,
+                    expiresAt = Instant.parse("2026-06-01T00:00:00Z"),
+                ),
+            )
+
+            val updated = awaitItem()
+            assertEquals(SubscriptionPlan.MONTHLY, updated.currentPlan)
+            assertEquals(false, updated.selectedPlanIsCurrent)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `observing trial subscription keeps plans selectable`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
@@ -185,31 +236,35 @@ class PaywallViewModelTest {
             )
 
             val updated = awaitItem()
-            assertEquals(true, updated.isAlreadyPro)
+            assertNull(updated.currentPlan)
+            assertEquals(true, updated.isTrial)
+            assertEquals(false, updated.selectedPlanIsCurrent)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `observing Free subscription state keeps isAlreadyPro false`() = runTest {
+    fun `observing Free subscription state keeps no current plan`() = runTest {
         subscriptionRepository.emit(SubscriptionState.Free)
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(false, state.isAlreadyPro)
+            assertNull(state.currentPlan)
+            assertEquals(false, state.isTrial)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `observing Expired subscription state keeps isAlreadyPro false`() = runTest {
+    fun `observing Expired subscription state keeps no current plan`() = runTest {
         subscriptionRepository.emit(SubscriptionState.Expired)
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(false, state.isAlreadyPro)
+            assertNull(state.currentPlan)
+            assertEquals(false, state.isTrial)
             cancelAndIgnoreRemainingEvents()
         }
     }

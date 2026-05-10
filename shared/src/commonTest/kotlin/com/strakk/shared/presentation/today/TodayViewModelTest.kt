@@ -5,6 +5,7 @@ import com.strakk.shared.domain.common.ClockProvider
 import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.DailySummary
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.GroundedMealItem
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.SubscriptionPlan
@@ -292,6 +293,13 @@ private class FakeTodayMealRepository : MealRepository {
         description: String,
         logDate: String,
     ): MealEntry = notUsed()
+
+    override suspend fun saveMealWithGroundedEntries(
+        name: String,
+        date: String,
+        items: List<GroundedMealItem>,
+        photoPathByPhotoIndex: Map<Int, String>,
+    ): Meal = notUsed()
 
     private fun notUsed(): Nothing = error("Not used in TodayViewModelTest")
 }
