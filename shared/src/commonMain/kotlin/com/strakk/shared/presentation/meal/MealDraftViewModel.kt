@@ -19,6 +19,8 @@ import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RenameMealDraftUseCase
 import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
 import com.strakk.shared.presentation.common.MviViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -48,18 +50,22 @@ class MealDraftViewModel(
     private val clock: ClockProvider,
 ) : MviViewModel<MealDraftUiState, MealDraftEvent, MealDraftEffect>(MealDraftUiState.Loading) {
 
+    private val _hiddenIds = MutableStateFlow<Set<String>>(emptySet())
+
     init {
-        observeActiveDraft()
-            .onEach { draft ->
-                setState {
-                    when {
-                        draft == null -> MealDraftUiState.Empty
-                        this is MealDraftUiState.Editing -> copy(draft = draft)
-                        else -> MealDraftUiState.Editing(draft = draft)
-                    }
-                }
+        combine(
+            observeActiveDraft(),
+            _hiddenIds,
+        ) { draft, hidden ->
+            when {
+                draft == null -> MealDraftUiState.Empty
+                uiState.value is MealDraftUiState.Editing ->
+                    (uiState.value as MealDraftUiState.Editing).copy(draft = draft, hiddenItemIds = hidden)
+                else -> MealDraftUiState.Editing(draft = draft, hiddenItemIds = hidden)
             }
-            .launchIn(viewModelScope)
+        }.onEach { newState ->
+            setState { newState }
+        }.launchIn(viewModelScope)
     }
 
     override fun onEvent(event: MealDraftEvent) = when (event) {
@@ -75,6 +81,8 @@ class MealDraftViewModel(
         }
         is MealDraftEvent.AddManualItem -> handleAddKnownItem(event)
         is MealDraftEvent.UpdateResolvedItem -> handleUpdateResolvedItem(event)
+        is MealDraftEvent.HideItem -> _hiddenIds.value = _hiddenIds.value + event.itemId
+        is MealDraftEvent.RestoreItem -> _hiddenIds.value = _hiddenIds.value - event.itemId
         MealDraftEvent.Discard -> handleDiscard()
         MealDraftEvent.Process -> handleProcess()
         MealDraftEvent.Commit -> handleCommit()
@@ -180,7 +188,11 @@ class MealDraftViewModel(
     }
 
     private fun handleCommit() {
+        val hiddenIds = _hiddenIds.value.toList()
         viewModelScope.launch {
+            // Remove hidden items from the draft before committing.
+            hiddenIds.forEach { id -> removeItem(id) }
+            _hiddenIds.value = emptySet()
             commitDraft()
                 .onSuccess { meal -> emit(MealDraftEffect.Committed(meal)) }
                 .onFailure { emitError(it) }

@@ -22,11 +22,15 @@ sealed interface MealDraftUiState {
     data class Editing(
         val draft: ActiveMealDraft,
         val isProcessing: Boolean = false,
+        val hiddenItemIds: Set<String> = emptySet(),
     ) : MealDraftUiState {
-        val resolvedCount: Int get() = draft.items.count { it is DraftItem.Resolved }
-        val pendingCount: Int get() = draft.items.size - resolvedCount
+        val resolvedCount: Int get() = draft.items.count {
+            it is DraftItem.Resolved && it.id !in hiddenItemIds
+        }
+        val pendingCount: Int get() = draft.items.size - resolvedCount -
+            draft.items.count { it is DraftItem.Resolved && it.id in hiddenItemIds }
 
-        /** Macro totals from the Resolved items only (pending items are excluded). */
+        /** Macro totals from the Resolved visible items only (pending + hidden items excluded). */
         val totals: MealDraftTotals
             get() {
                 var protein = 0.0
@@ -35,6 +39,7 @@ sealed interface MealDraftUiState {
                 var carbs = 0.0
                 draft.items
                     .filterIsInstance<DraftItem.Resolved>()
+                    .filter { it.id !in hiddenItemIds }
                     .forEach { resolved ->
                         protein += resolved.entry.protein
                         calories += resolved.entry.calories
@@ -43,6 +48,10 @@ sealed interface MealDraftUiState {
                     }
                 return MealDraftTotals(protein, calories, fat, carbs)
             }
+        val hiddenCount: Int get() = hiddenItemIds.size
+        val hasVisibleItems: Boolean get() = draft.items
+            .filterIsInstance<DraftItem.Resolved>()
+            .any { it.id !in hiddenItemIds }
     }
 }
 
@@ -88,6 +97,13 @@ sealed interface MealDraftEvent {
         val source: EntrySource = EntrySource.Manual,
         val createdAt: String,
     ) : MealDraftEvent
+
+    /** Review: soft-hides a scan item (only tracked in-memory, not persisted). */
+    data class HideItem(val itemId: String) : MealDraftEvent
+
+    /** Review: restores a previously hidden item. */
+    data class RestoreItem(val itemId: String) : MealDraftEvent
+
     data object Discard : MealDraftEvent
     /** Runs AI extraction on pending items and opens the Review screen on success. */
     data object Process : MealDraftEvent
