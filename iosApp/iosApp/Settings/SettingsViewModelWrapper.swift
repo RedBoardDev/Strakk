@@ -5,9 +5,52 @@ import shared
 
 enum SubscriptionDisplayData: Equatable {
     case free
-    case trial(daysRemaining: Int)
-    case active(planLabel: String, expiresLabel: String)
+    case trial(daysRemaining: Int, endsAtLabel: String)
+    case active(
+        plan: SwiftSubscriptionPlan,
+        renewalLabel: String,
+        canUpgradeToAnnual: Bool
+    )
     case paymentFailed
+}
+
+enum DevSubscriptionOverrideData: String, CaseIterable, Identifiable {
+    case server
+    case free
+    case trialSevenDays
+    case trialOneDay
+    case expired
+    case proMonthly
+    case proAnnual
+    case paymentFailed
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .server: return "Backend"
+        case .free: return "Free"
+        case .trialSevenDays: return "Trial - 7 days"
+        case .trialOneDay: return "Trial - 1 day"
+        case .expired: return "Expired"
+        case .proMonthly: return "Pro monthly"
+        case .proAnnual: return "Pro annual"
+        case .paymentFailed: return "Payment failed"
+        }
+    }
+
+    var kmpValue: DevSubscriptionOverride {
+        switch self {
+        case .server: return .server
+        case .free: return .free
+        case .trialSevenDays: return .trial7Days
+        case .trialOneDay: return .trial1Day
+        case .expired: return .expired
+        case .proMonthly: return .proMonthly
+        case .proAnnual: return .proAnnual
+        case .paymentFailed: return .paymentFailed
+        }
+    }
 }
 
 // MARK: - Swift-side data types
@@ -16,9 +59,12 @@ struct SettingsData: Equatable {
     let email: String?
     let proteinGoal: String
     let calorieGoal: String
+    let fatGoal: String
+    let carbGoal: String
     let waterGoal: String
     let hevyApiKey: String
     let subscriptionDisplay: SubscriptionDisplayData
+    let devSubscriptionOverride: DevSubscriptionOverrideData
 }
 
 enum SettingsState: Equatable {
@@ -37,6 +83,7 @@ final class SettingsViewModelWrapper {
     var errorMessage: String?
     var toastMessage: String?
     var showPaywall: Bool = false
+    var openManageSubscription: Bool = false
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -69,11 +116,17 @@ final class SettingsViewModelWrapper {
         sharedVm.onEvent(event: event)
     }
 
+    func setDevSubscriptionOverride(_ override: DevSubscriptionOverrideData) {
+        sharedVm.onEvent(event: SettingsEventOnDevSubscriptionOverrideSelected(override: override.kmpValue))
+    }
+
     private func handleEffect(_ effect: SettingsEffect) {
         if let showError = effect as? SettingsEffectShowError {
             errorMessage = showError.message
         } else if effect is SettingsEffectNavigateToPaywall {
             showPaywall = true
+        } else if effect is SettingsEffectOpenManageSubscription {
+            openManageSubscription = true
         } else if let toast = effect as? SettingsEffectShowToast {
             toastMessage = toast.message
         }
@@ -92,9 +145,17 @@ final class SettingsViewModelWrapper {
                 if sub is SubscriptionDisplayFree {
                     return .free
                 } else if let trial = sub as? SubscriptionDisplayTrial {
-                    return .trial(daysRemaining: Int(trial.daysRemaining))
+                    return .trial(
+                        daysRemaining: Int(trial.daysRemaining),
+                        endsAtLabel: trial.endsAtLabel
+                    )
                 } else if let active = sub as? SubscriptionDisplayActive {
-                    return .active(planLabel: active.planLabel, expiresLabel: active.expiresLabel)
+                    let plan: SwiftSubscriptionPlan = active.plan == .annual ? .annual : .monthly
+                    return .active(
+                        plan: plan,
+                        renewalLabel: active.renewalLabel,
+                        canUpgradeToAnnual: active.canUpgradeToAnnual
+                    )
                 } else if sub is SubscriptionDisplayPaymentFailed {
                     return .paymentFailed
                 }
@@ -105,11 +166,28 @@ final class SettingsViewModelWrapper {
                 email: ready.email,
                 proteinGoal: ready.proteinGoal,
                 calorieGoal: ready.calorieGoal,
+                fatGoal: ready.fatGoal,
+                carbGoal: ready.carbGoal,
                 waterGoal: ready.waterGoal,
                 hevyApiKey: ready.hevyApiKey,
-                subscriptionDisplay: subDisplay
+                subscriptionDisplay: subDisplay,
+                devSubscriptionOverride: mapDevOverride(ready.devSubscriptionOverride)
             ))
         }
         return .loading
+    }
+
+    private static func mapDevOverride(_ override: DevSubscriptionOverride) -> DevSubscriptionOverrideData {
+        switch override {
+        case .server: return .server
+        case .free: return .free
+        case .trial7Days: return .trialSevenDays
+        case .trial1Day: return .trialOneDay
+        case .expired: return .expired
+        case .proMonthly: return .proMonthly
+        case .proAnnual: return .proAnnual
+        case .paymentFailed: return .paymentFailed
+        default: return .server
+        }
     }
 }

@@ -5,22 +5,27 @@ import shared
 // MARK: - Focus field enum
 
 private enum SettingsField: Hashable {
-    case protein, calories, water
+    case protein, calories, fat, carbs, water
 }
 
 // MARK: - SettingsView
 
 struct SettingsView: View {
+    @Environment(\.openURL) private var openURL
     @State private var viewModel = SettingsViewModelWrapper()
 
     // Local goal text state
     @State private var proteinText: String = ""
     @State private var caloriesText: String = ""
+    @State private var fatText: String = ""
+    @State private var carbsText: String = ""
     @State private var waterText: String = ""
 
     // Last values received from server — used to ignore saves triggered by initial load
     @State private var serverProtein: String = ""
     @State private var serverCalories: String = ""
+    @State private var serverFat: String = ""
+    @State private var serverCarbs: String = ""
     @State private var serverWater: String = ""
     @State private var serverHevyKey: String = ""
 
@@ -63,6 +68,13 @@ struct SettingsView: View {
             }
             .fullScreenCover(isPresented: $viewModel.showPaywall) {
                 PaywallView(onDismiss: { viewModel.showPaywall = false })
+            }
+            .onChange(of: viewModel.openManageSubscription) { _, shouldOpen in
+                guard shouldOpen else { return }
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    openURL(url)
+                }
+                viewModel.openManageSubscription = false
             }
     }
 
@@ -122,6 +134,11 @@ struct SettingsView: View {
 
                 proSection(display: data.subscriptionDisplay)
 
+                if isDevBuild {
+                    Spacer().frame(height: 24)
+                    devSubscriptionSection(selected: data.devSubscriptionOverride)
+                }
+
                 Spacer().frame(height: 24)
 
                 goalsSection
@@ -152,6 +169,16 @@ struct SettingsView: View {
             guard didInitialize, newValue != serverCalories else { return }
             serverCalories = newValue
             viewModel.onEvent(SettingsEventOnCalorieGoalChanged(value: newValue))
+        }
+        .onChange(of: fatText) { _, newValue in
+            guard didInitialize, newValue != serverFat else { return }
+            serverFat = newValue
+            viewModel.onEvent(SettingsEventOnFatGoalChanged(value: newValue))
+        }
+        .onChange(of: carbsText) { _, newValue in
+            guard didInitialize, newValue != serverCarbs else { return }
+            serverCarbs = newValue
+            viewModel.onEvent(SettingsEventOnCarbGoalChanged(value: newValue))
         }
         .onChange(of: waterText) { _, newValue in
             guard didInitialize, newValue != serverWater else { return }
@@ -239,6 +266,32 @@ struct SettingsView: View {
                     .padding(.leading, 16)
 
                 goalRow(
+                    color: .strakkAccentYellow,
+                    label: "Fat",
+                    placeholder: "70",
+                    unit: "g",
+                    text: $fatText,
+                    field: .fat
+                )
+
+                Divider()
+                    .background(Color.strakkDivider)
+                    .padding(.leading, 16)
+
+                goalRow(
+                    color: .strakkAccentIndigo,
+                    label: "Carbs",
+                    placeholder: "250",
+                    unit: "g",
+                    text: $carbsText,
+                    field: .carbs
+                )
+
+                Divider()
+                    .background(Color.strakkDivider)
+                    .padding(.leading, 16)
+
+                goalRow(
                     color: .strakkWater,
                     label: "Water",
                     placeholder: "2000",
@@ -295,37 +348,28 @@ struct SettingsView: View {
         .padding(.vertical, 14)
     }
 
-    // MARK: - Strakk Pro section
+    // MARK: - Current plan section
 
     @ViewBuilder
     private func proSection(display: SubscriptionDisplayData) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("STRAKK PRO")
-                    .font(.strakkOverline)
-                    .foregroundStyle(Color.strakkTextTertiary)
-                    .kerning(1.0)
-
-                Spacer()
-
-                if display != .free {
-                    Text("PRO")
-                        .font(.strakkCaptionBold)
-                        .foregroundStyle(Color.strakkPrimary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.strakkPrimary.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
-                }
-            }
-            .padding(.horizontal, 20)
+            Text("CURRENT PLAN")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .kerning(1.0)
+            .padding(.horizontal, StrakkSpacing.lg)
 
             switch display {
             case .free:
                 proFreeCard
-            case .trial(let daysRemaining):
-                proTrialCard(daysRemaining: daysRemaining)
-            case .active(let planLabel, let expiresLabel):
-                proActiveCard(planLabel: planLabel, expiresLabel: expiresLabel)
+            case .trial(let daysRemaining, let endsAtLabel):
+                proTrialCard(daysRemaining: daysRemaining, endsAtLabel: endsAtLabel)
+            case .active(let plan, let renewalLabel, let canUpgradeToAnnual):
+                proActiveCard(
+                    plan: plan,
+                    renewalLabel: renewalLabel,
+                    canUpgradeToAnnual: canUpgradeToAnnual
+                )
             case .paymentFailed:
                 proPaymentFailedCard
             }
@@ -333,121 +377,108 @@ struct SettingsView: View {
     }
 
     private var proFreeCard: some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text("L'IA tracke tes repas pour toi.")
+        planCard {
+            statusPill("FREE", color: Color.strakkTextSecondary)
+
+            Text("Track faster with Pro")
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkTextPrimary)
-            Text("Photo, texte, bilan hebdo.")
+
+            Text("Photo and text AI analysis plus a weekly summary so you log less by hand.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            Button {
-                HapticEngine.light()
-                viewModel.onEvent(SettingsEventOnUpgradeTapped())
-            } label: {
-                Text("Passer à Pro")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: 12))
-            }
+            StrakkPrimaryButton(
+                title: "Upgrade to Pro",
+                action: { viewModel.onEvent(SettingsEventOnUpgradeTapped()) }
+            )
 
             Button {
                 viewModel.onEvent(SettingsEventOnRestorePurchase())
             } label: {
-                Text("Restaurer un achat")
+                Text("Restore a purchase")
                     .font(.strakkCaption)
                     .foregroundStyle(Color.strakkPrimary)
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(16)
-        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 20)
     }
 
-    private func proTrialCard(daysRemaining: Int) -> some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Essai gratuit")
+    private func proTrialCard(daysRemaining: Int, endsAtLabel: String) -> some View {
+        planCard {
+            HStack {
+                statusPill("TRIAL", color: Color.strakkSuccess)
+                Spacer()
+                Text("\(daysRemaining) days left")
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+            }
+
+            Text("Your Pro trial is active")
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkTextPrimary)
-            Text("Expire dans \(daysRemaining) jour\(daysRemaining > 1 ? "s" : "")")
+
+            Text("Trial ends: \(subscriptionDateLabel(endsAtLabel))")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkWarning)
 
-            Button {
-                viewModel.onEvent(SettingsEventOnManageSubscription())
-            } label: {
-                Text("Gérer l'abonnement")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 12))
-            }
-        }
-        .padding(16)
-        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 20)
-    }
-
-    private func proActiveCard(planLabel: String, expiresLabel: String) -> some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            HStack(spacing: StrakkSpacing.xs) {
-                Text(planLabel)
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                Circle()
-                    .fill(Color.strakkSuccess)
-                    .frame(width: 8, height: 8)
-                Text("Actif")
-                    .font(.strakkCaptionBold)
-                    .foregroundStyle(Color.strakkSuccess)
-            }
-
-            Text("Se renouvelle le \(expiresLabel)")
+            Text("You keep photo analysis, free text and AI summaries until then.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextSecondary)
 
-            Button {
-                viewModel.onEvent(SettingsEventOnManageSubscription())
-            } label: {
-                Text("Gérer l'abonnement")
-                    .font(.strakkBodyBold)
-                    .foregroundStyle(Color.strakkTextPrimary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 12))
-            }
+            StrakkPrimaryButton(
+                title: "Pick my plan",
+                action: { viewModel.onEvent(SettingsEventOnUpgradeTapped()) }
+            )
+        }
+    }
 
-            Button {
-                viewModel.onEvent(SettingsEventOnRestorePurchase())
-            } label: {
-                Text("Restaurer un achat")
-                    .font(.strakkCaption)
+    private func proActiveCard(
+        plan: SwiftSubscriptionPlan,
+        renewalLabel: String,
+        canUpgradeToAnnual: Bool
+    ) -> some View {
+        planCard {
+            HStack {
+                statusPill("ACTIVE", color: Color.strakkSuccess)
+                Spacer()
+                Text("Strakk Pro")
+                    .font(.strakkCaptionBold)
                     .foregroundStyle(Color.strakkPrimary)
             }
-            .frame(maxWidth: .infinity)
+
+            Text("\(planDisplayLabel(plan)) plan")
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+
+            Text("Renews: \(subscriptionDateLabel(renewalLabel))")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+
+            if canUpgradeToAnnual {
+                annualUpsellCard
+            }
+
+            StrakkSecondaryButton(
+                title: "Manage subscription",
+                action: { viewModel.onEvent(SettingsEventOnManageSubscription()) }
+            )
         }
-        .padding(16)
-        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 20)
     }
 
     private var proPaymentFailedCard: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("Problème de paiement")
+            Text("Payment issue")
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkError)
-            Text("Mets à jour ton moyen de paiement pour conserver l'accès Pro.")
+            Text("Update your payment method to keep your Pro access.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextSecondary)
 
             Button {
                 viewModel.onEvent(SettingsEventOnManageSubscription())
             } label: {
-                Text("Régler le problème")
+                Text("Fix payment")
                     .font(.strakkBodyBold)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -465,6 +496,85 @@ struct SettingsView: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 20)
+    }
+
+    @ViewBuilder
+    private func planCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            content()
+        }
+        .padding(16)
+        .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+    }
+
+    private func statusPill(_ label: LocalizedStringKey, color: Color) -> some View {
+        Text(label)
+            .font(.strakkOverline)
+            .foregroundStyle(color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private var annualUpsellCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Save with annual")
+                .font(.strakkCaptionBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+            Text("Two months free vs the monthly plan.")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+            Button {
+                HapticEngine.light()
+                viewModel.onEvent(SettingsEventOnUpgradeTapped())
+            } label: {
+                Text("See the annual offer")
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(Color.strakkPrimary)
+            }
+        }
+        .padding(StrakkSpacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.strakkSurface2, in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - Dev subscription override
+
+    private func devSubscriptionSection(selected: DevSubscriptionOverrideData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("DEV SUBSCRIPTION")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .kerning(1.0)
+                .padding(.horizontal, 20)
+
+            HStack {
+                Text("Plan")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+
+                Spacer()
+
+                Picker(
+                    "Plan",
+                    selection: Binding(
+                        get: { selected },
+                        set: { viewModel.setDevSubscriptionOverride($0) }
+                    )
+                ) {
+                    ForEach(DevSubscriptionOverrideData.allCases) { option in
+                        Text(option.label).tag(option)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(Color.strakkPrimary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 20)
+        }
     }
 
     // MARK: - Hevy section
@@ -581,21 +691,53 @@ struct SettingsView: View {
         guard case .ready(let data) = newState else { return }
         serverProtein = data.proteinGoal
         serverCalories = data.calorieGoal
+        serverFat = data.fatGoal
+        serverCarbs = data.carbGoal
         serverWater = data.waterGoal
         serverHevyKey = data.hevyApiKey
         proteinText = data.proteinGoal
         caloriesText = data.calorieGoal
+        fatText = data.fatGoal
+        carbsText = data.carbGoal
         waterText = data.waterGoal
         hevyApiKeyText = data.hevyApiKey
         didInitialize = true
     }
 
     private func navigateFocus(direction: FocusDirection) {
-        let order: [SettingsField] = [.protein, .calories, .water]
+        let order: [SettingsField] = [.protein, .calories, .fat, .carbs, .water]
         guard let current = focusedField,
               let idx = order.firstIndex(of: current) else { return }
         if direction == .previous, idx > 0 { focusedField = order[idx - 1] }
         if direction == .next, idx < order.count - 1 { focusedField = order[idx + 1] }
+    }
+
+    private func subscriptionDateLabel(_ isoDate: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+
+        guard let date = inputFormatter.date(from: isoDate) else {
+            return isoDate
+        }
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.locale = Locale.current
+        outputFormatter.dateStyle = .medium
+        return outputFormatter.string(from: date)
+    }
+
+    private func planDisplayLabel(_ plan: SwiftSubscriptionPlan) -> String {
+        switch plan {
+        case .monthly:
+            return String(localized: "Monthly")
+        case .annual:
+            return String(localized: "Annual")
+        }
+    }
+
+    private var isDevBuild: Bool {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String == "Strakk Dev"
     }
 }
 
