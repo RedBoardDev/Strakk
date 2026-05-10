@@ -28,8 +28,6 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.strakk.android.R
+import com.strakk.android.ui.components.StrakkPrimaryButton
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.android.ui.theme.StrakkTheme
 import kotlinx.coroutines.Dispatchers
@@ -124,14 +123,17 @@ fun PhotoHintScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Photo + indication",
+                        text = stringResource(R.string.photo_hint_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Retour")
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.photo_hint_back_cd),
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -145,25 +147,16 @@ fun PhotoHintScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp),
             ) {
-                Button(
+                StrakkPrimaryButton(
+                    text = stringResource(R.string.photo_hint_add_to_meal),
                     onClick = {
-                        val base64 = capturedBase64 ?: return@Button
-                        onSubmit(base64, hint.trim().ifBlank { null })
+                        capturedBase64?.let { base64 ->
+                            onSubmit(base64, hint.trim().ifBlank { null })
+                        }
                     },
                     enabled = capturedBase64 != null && !isCompressing,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = LocalStrakkColors.current.surface2,
-                        disabledContentColor = LocalStrakkColors.current.textTertiary,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                ) {
-                    Text("Ajouter au repas")
-                }
+                    loading = isCompressing,
+                )
             }
         },
     ) { innerPadding ->
@@ -187,7 +180,7 @@ fun PhotoHintScreen(
                 if (capturedBitmap != null) {
                     Image(
                         bitmap = capturedBitmap!!.asImageBitmap(),
-                        contentDescription = "Photo capturée",
+                        contentDescription = stringResource(R.string.photo_hint_captured_cd),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -203,7 +196,7 @@ fun PhotoHintScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
-                            contentDescription = "Recommencer",
+                            contentDescription = stringResource(R.string.photo_hint_retake_cd),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp),
                         )
@@ -220,7 +213,7 @@ fun PhotoHintScreen(
                             modifier = Modifier.size(56.dp),
                         )
                         Text(
-                            text = "Prenez ou choisissez une photo",
+                            text = stringResource(R.string.photo_hint_empty_label),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalStrakkColors.current.textTertiary,
                         )
@@ -233,8 +226,16 @@ fun PhotoHintScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                val buttonLabel = if (capturedBitmap != null) "Reprendre" else "Caméra"
-                val galleryLabel = if (capturedBitmap != null) "Remplacer" else "Galerie"
+                val buttonLabel = if (capturedBitmap != null) {
+                    stringResource(R.string.photo_hint_camera_retake)
+                } else {
+                    stringResource(R.string.photo_hint_camera_open)
+                }
+                val galleryLabel = if (capturedBitmap != null) {
+                    stringResource(R.string.photo_hint_gallery_replace)
+                } else {
+                    stringResource(R.string.photo_hint_gallery_open)
+                }
 
                 Surface(
                     onClick = { cameraLauncher.launch(null) },
@@ -302,8 +303,13 @@ fun PhotoHintScreen(
             OutlinedTextField(
                 value = hint,
                 onValueChange = { if (it.length <= maxHint) hint = it },
-                label = { Text("Précision (optionnel)") },
-                placeholder = { Text("ex : portion pour 2", color = LocalStrakkColors.current.textTertiary) },
+                label = { Text(stringResource(R.string.photo_hint_hint_label)) },
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.photo_hint_hint_placeholder),
+                        color = LocalStrakkColors.current.textTertiary,
+                    )
+                },
                 supportingText = {
                     Text(
                         text = "${hint.length}/$maxHint",

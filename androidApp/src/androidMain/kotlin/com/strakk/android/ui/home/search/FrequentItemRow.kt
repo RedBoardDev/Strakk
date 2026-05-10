@@ -23,10 +23,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.strakk.android.R
 import com.strakk.android.ui.theme.LocalStrakkColors
 import com.strakk.shared.domain.model.EntrySource
 import com.strakk.shared.domain.model.FrequentItem
@@ -85,7 +87,7 @@ internal fun FrequentItemRow(
                 }
                 Icon(
                     imageVector = Icons.Outlined.Schedule,
-                    contentDescription = "Utilisé récemment",
+                    contentDescription = stringResource(R.string.search_food_recent_cd),
                     tint = LocalStrakkColors.current.textTertiary,
                     modifier = Modifier.size(16.dp),
                 )

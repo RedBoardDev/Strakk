@@ -49,10 +49,14 @@ import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureAccess
 import com.strakk.shared.domain.model.FeatureRegistry
+import com.strakk.shared.domain.model.UserTier
+import com.strakk.shared.domain.model.tier
+import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.presentation.meal.MealDraftEffect
 import com.strakk.shared.presentation.meal.MealDraftEvent
 import com.strakk.shared.presentation.meal.MealDraftUiState
 import com.strakk.shared.presentation.meal.MealDraftViewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 // =============================================================================
@@ -72,6 +76,7 @@ fun MealDraftRoute(
     viewModel: MealDraftViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val subscriptionRepo: SubscriptionRepository = koinInject()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     var gatedFeature by remember { mutableStateOf<Feature?>(null) }
@@ -126,6 +131,7 @@ fun MealDraftRoute(
         onNavigateToManual = { onNavigateToManual(true) },
         onNavigateToPhoto = { onNavigateToPhoto(true) },
         onNavigateToText = { onNavigateToText(true) },
+        showProBadges = subscriptionRepo.cachedState.tier != UserTier.PRO,
         modifier = modifier,
     )
 }
@@ -134,6 +140,7 @@ fun MealDraftRoute(
 // Screen
 // =============================================================================
 
+@Suppress("LongMethod", "LongParameterList")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MealDraftScreen(
@@ -145,6 +152,7 @@ private fun MealDraftScreen(
     onNavigateToManual: () -> Unit,
     onNavigateToPhoto: () -> Unit,
     onNavigateToText: () -> Unit,
+    showProBadges: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var showAddPicker by remember { mutableStateOf(false) }
@@ -264,6 +272,7 @@ private fun MealDraftScreen(
     if (showAddPicker) {
         AddPickerSheet(
             draftName = editingState?.draft?.name,
+            showProBadges = showProBadges,
             onSearch = {
                 showAddPicker = false
                 onNavigateToSearch()
@@ -323,6 +332,7 @@ private fun MealDraftScreenEmptyPreview() {
             onNavigateToManual = {},
             onNavigateToPhoto = {},
             onNavigateToText = {},
+            showProBadges = true,
         )
     }
 }
