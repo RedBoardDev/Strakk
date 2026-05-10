@@ -15,7 +15,13 @@ struct PaywallData: Equatable {
     let highlightedFeature: Feature?
     let selectedPlan: SwiftSubscriptionPlan
     let isProcessing: Bool
-    let isAlreadyPro: Bool
+    let currentPlan: SwiftSubscriptionPlan?
+    let isTrial: Bool
+    let selectedPlanIsCurrent: Bool
+    /// Store-localized formatted prices from RevenueCat (same locale/currency as checkout).
+    let monthlyPriceFormatted: String?
+    let annualPriceFormatted: String?
+    let annualPricePerMonthFormatted: String?
 }
 
 // MARK: - Wrapper
@@ -77,12 +83,18 @@ final class PaywallViewModelWrapper {
     private static func mapState(_ kmpState: PaywallUiState) -> PaywallData {
         let plan: SwiftSubscriptionPlan = kmpState.selectedPlan == .annual ? .annual : .monthly
         let features: [FeatureMetadata] = kmpState.features.compactMap { $0 as? FeatureMetadata }
+        let op = kmpState.offerPrices
         return PaywallData(
             features: features,
             highlightedFeature: kmpState.highlightedFeature,
             selectedPlan: plan,
             isProcessing: kmpState.isProcessing,
-            isAlreadyPro: kmpState.isAlreadyPro
+            currentPlan: kmpState.currentPlan.map { $0 == .annual ? .annual : .monthly },
+            isTrial: kmpState.isTrial,
+            selectedPlanIsCurrent: kmpState.selectedPlanIsCurrent,
+            monthlyPriceFormatted: op.monthlyFormatted,
+            annualPriceFormatted: op.annualFormatted,
+            annualPricePerMonthFormatted: op.annualPricePerMonthFormatted
         )
     }
 }

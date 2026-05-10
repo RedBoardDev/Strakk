@@ -1,8 +1,15 @@
 import SwiftUI
+import shared
 
 struct TrialExpiredModal: View {
     var onDiscoverOffers: () -> Void
     var onContinueFree: () -> Void
+
+    /// Default while store prices are unavailable.
+    private static let priceDash = "\u{2014}"
+
+    @State private var annualSegment: String = Self.priceDash
+    @State private var perMonthSegment: String?
 
     var body: some View {
         ZStack {
@@ -10,13 +17,13 @@ struct TrialExpiredModal: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-                Text("Ton essai se termine aujourd'hui")
+                Text(String(localized: "trial_expired_title"))
                     .font(.strakkHeading2)
                     .foregroundStyle(Color.strakkTextPrimary)
 
                 Spacer().frame(height: StrakkSpacing.md)
 
-                Text("Continue avec Strakk Pro pour garder l'IA, la sync Santé et l'historique illimité.")
+                Text(String(localized: "trial_expired_body"))
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -27,24 +34,17 @@ struct TrialExpiredModal: View {
 
                 Spacer().frame(height: StrakkSpacing.xl)
 
-                Button {
-                    HapticEngine.light()
-                    onDiscoverOffers()
-                } label: {
-                    Text("Découvrir les offres")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.strakkPrimary, in: RoundedRectangle(cornerRadius: StrakkRadius.md))
-                }
+                StrakkPrimaryButton(
+                    title: "trial_expired_cta",
+                    action: onDiscoverOffers
+                )
 
                 Spacer().frame(height: StrakkSpacing.md)
 
                 Button {
                     onContinueFree()
                 } label: {
-                    Text("Continuer en gratuit")
+                    Text(String(localized: "trial_expired_free"))
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextSecondary)
                         .frame(maxWidth: .infinity)
@@ -56,16 +56,47 @@ struct TrialExpiredModal: View {
             .padding(.horizontal, 32)
         }
         .transition(.opacity)
+        .task {
+            await loadPricesFromStore()
+        }
     }
 
+    @ViewBuilder
     private var priceRow: some View {
-        HStack(spacing: StrakkSpacing.xxs) {
-            Text("19,99 €/an · ")
+        if let perMonth = perMonthSegment {
+            HStack(spacing: 0) {
+                Text(annualSegment)
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                Text(" · ")
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                Text(perMonth)
+                    .font(.strakkBodyBold)
+                    .foregroundStyle(Color.strakkPrimary)
+            }
+        } else {
+            Text(annualSegment)
                 .font(.strakkBodyBold)
                 .foregroundStyle(Color.strakkTextPrimary)
-            + Text("1,67 €/mois")
-                .font(.strakkBodyBold)
-                .foregroundStyle(Color.strakkPrimary)
+        }
+    }
+
+    private func loadPricesFromStore() async {
+        let prices: PaywallOfferPrices
+        do {
+            prices = try await KoinBridge.shared.getLoadPaywallOfferPricesUseCase().invoke()
+        } catch {
+            return
+        }
+        let annual = prices.annualFormatted?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let perMo = prices.annualPricePerMonthFormatted?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !annual.isEmpty, !perMo.isEmpty {
+            annualSegment = annual
+            perMonthSegment = perMo
+        } else if !annual.isEmpty {
+            annualSegment = annual
+            perMonthSegment = nil
         }
     }
 }
