@@ -49,6 +49,8 @@ interface ProfileRepository {
      *
      * @param proteinGoal Daily protein goal in grams, or null to clear.
      * @param calorieGoal Daily calorie goal in kcal, or null to clear.
+     * @param fatGoal Daily fat goal in grams, or null to clear.
+     * @param carbGoal Daily carbohydrate goal in grams, or null to clear.
      * @param waterGoal Daily water goal in mL, or null to clear.
      * @return The updated [UserProfile].
      * @throws Exception on network or database errors.
@@ -56,6 +58,8 @@ interface ProfileRepository {
     suspend fun updateProfile(
         proteinGoal: Int?,
         calorieGoal: Int?,
+        fatGoal: Int?,
+        carbGoal: Int?,
         waterGoal: Int?,
     ): UserProfile
 

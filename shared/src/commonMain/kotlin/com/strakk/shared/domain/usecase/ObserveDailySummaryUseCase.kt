@@ -40,6 +40,8 @@ class ObserveDailySummaryUseCase(
                 totalWater = waterEntries.sumOf { it.amount },
                 proteinGoal = profile?.proteinGoal,
                 calorieGoal = profile?.calorieGoal,
+                fatGoal = profile?.fatGoal,
+                carbGoal = profile?.carbGoal,
                 waterGoal = profile?.waterGoal,
             )
         }

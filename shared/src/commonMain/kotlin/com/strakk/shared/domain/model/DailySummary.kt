@@ -12,5 +12,7 @@ data class DailySummary(
     val totalWater: Int,
     val proteinGoal: Int?,
     val calorieGoal: Int?,
+    val fatGoal: Int?,
+    val carbGoal: Int?,
     val waterGoal: Int?,
 )

@@ -151,6 +151,8 @@ internal class ProfileRepositoryImpl(
     override suspend fun updateProfile(
         proteinGoal: Int?,
         calorieGoal: Int?,
+        fatGoal: Int?,
+        carbGoal: Int?,
         waterGoal: Int?,
     ): UserProfile {
         val userId = userIdProvider.currentOrThrow()
@@ -158,6 +160,8 @@ internal class ProfileRepositoryImpl(
         val json = buildJsonObject {
             if (proteinGoal != null) put("protein_goal", proteinGoal) else put("protein_goal", JsonNull)
             if (calorieGoal != null) put("calorie_goal", calorieGoal) else put("calorie_goal", JsonNull)
+            if (fatGoal != null) put("fat_goal", fatGoal) else put("fat_goal", JsonNull)
+            if (carbGoal != null) put("carb_goal", carbGoal) else put("carb_goal", JsonNull)
             if (waterGoal != null) put("water_goal", waterGoal) else put("water_goal", JsonNull)
             put("updated_at", Clock.System.now().toString())
         }

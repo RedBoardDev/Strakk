@@ -4,7 +4,9 @@ import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.UserTier
 import com.strakk.shared.domain.model.tier
 import com.strakk.shared.domain.repository.SubscriptionRepository
+import com.strakk.shared.domain.usecase.ConfigureBillingUseCase
 import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
+import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
 import com.strakk.shared.presentation.auth.LoginViewModel
 import com.strakk.shared.presentation.checkin.CheckInDetailViewModel
 import com.strakk.shared.presentation.checkin.CheckInListViewModel
@@ -16,6 +18,7 @@ import com.strakk.shared.presentation.calendar.CalendarViewModel
 import com.strakk.shared.presentation.hevy.HevyExportViewModel
 import com.strakk.shared.presentation.meal.ManualEntryViewModel
 import com.strakk.shared.presentation.meal.MealDraftViewModel
+import com.strakk.shared.presentation.meal.PhotoMealViewModel
 import com.strakk.shared.presentation.meal.QuickAddViewModel
 import com.strakk.shared.presentation.meal.SearchFoodViewModel
 import com.strakk.shared.presentation.onboarding.OnboardingFlowViewModel
@@ -41,6 +44,7 @@ class KoinHelper : KoinComponent {
     fun getSettingsViewModel(): SettingsViewModel = get()
     fun getHevyExportViewModel(): HevyExportViewModel = get()
     fun getMealDraftViewModel(): MealDraftViewModel = get()
+    fun getPhotoMealViewModel(): PhotoMealViewModel = get()
     fun getSearchFoodViewModel(): SearchFoodViewModel = get()
     fun getManualEntryViewModel(): ManualEntryViewModel = get()
     fun getQuickAddViewModel(): QuickAddViewModel = get()
@@ -50,5 +54,7 @@ class KoinHelper : KoinComponent {
     fun getCheckInStatsViewModel(): CheckInStatsViewModel = get()
     fun getPaywallViewModel(highlightedFeature: Feature? = null): PaywallViewModel = get { parametersOf(highlightedFeature) }
     fun getGenerateCheckInPdfUseCase(): GenerateCheckInPdfUseCase = get()
+    fun getLoadPaywallOfferPricesUseCase(): LoadPaywallOfferPricesUseCase = get()
     fun isProUser(): Boolean = get<SubscriptionRepository>().cachedState.tier == UserTier.PRO
+    fun configureBilling(apiKey: String) = get<ConfigureBillingUseCase>().invoke(apiKey)
 }

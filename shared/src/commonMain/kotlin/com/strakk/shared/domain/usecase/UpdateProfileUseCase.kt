@@ -19,11 +19,15 @@ class UpdateProfileUseCase(
     suspend operator fun invoke(
         proteinGoal: Int?,
         calorieGoal: Int?,
+        fatGoal: Int?,
+        carbGoal: Int?,
         waterGoal: Int?,
     ): Result<UserProfile> = runSuspendCatching {
         profileRepository.updateProfile(
             proteinGoal = proteinGoal,
             calorieGoal = calorieGoal,
+            fatGoal = fatGoal,
+            carbGoal = carbGoal,
             waterGoal = waterGoal,
         )
     }
