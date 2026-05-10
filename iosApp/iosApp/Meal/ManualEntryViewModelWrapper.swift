@@ -23,8 +23,15 @@ final class ManualEntryViewModelWrapper {
     private let sharedVm: ManualEntryViewModel
 
     var formData: ManualEntryFormData = ManualEntryFormData(
-        name: "", protein: "", calories: "", fat: "", carbs: "", quantity: "",
-        isSubmitting: false, errorMessage: nil, isSubmittable: false
+        name: "",
+        protein: "",
+        calories: "",
+        fat: "",
+        carbs: "",
+        quantity: "",
+        isSubmitting: false,
+        errorMessage: nil,
+        isSubmittable: false
     )
     var submittedEntry: MealEntryData?
     var shouldDismiss: Bool = false
@@ -79,8 +86,15 @@ final class ManualEntryViewModelWrapper {
     private static func mapState(_ kmpState: ManualEntryUiState?) -> ManualEntryFormData {
         guard let s = kmpState else {
             return ManualEntryFormData(
-                name: "", protein: "", calories: "", fat: "", carbs: "", quantity: "",
-                isSubmitting: false, errorMessage: nil, isSubmittable: false
+                name: "",
+                protein: "",
+                calories: "",
+                fat: "",
+                carbs: "",
+                quantity: "",
+                isSubmitting: false,
+                errorMessage: nil,
+                isSubmittable: false
             )
         }
         return ManualEntryFormData(

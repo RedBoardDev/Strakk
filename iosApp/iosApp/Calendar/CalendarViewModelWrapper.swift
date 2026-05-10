@@ -77,13 +77,13 @@ final class CalendarViewModelWrapper {
         if s is CalendarUiStateLoading {
             return .loading
         } else if let ready = s as? CalendarUiStateReady {
-            let detail: CalendarDayDetailData? = ready.dayDetail.map { d in
+            let detail: CalendarDayDetailData? = ready.dayDetail.map { dayDetail in
                 CalendarDayDetailData(
-                    date: d.date,
-                    summary: KMPMappers.dailySummary(d.summary),
-                    meals: d.meals.map(KMPMappers.mealEntry),
-                    mealContainers: d.mealContainers.map(KMPMappers.meal),
-                    waterEntries: d.waterEntries.map(KMPMappers.waterEntry)
+                    date: dayDetail.date,
+                    summary: KMPMappers.dailySummary(dayDetail.summary),
+                    meals: dayDetail.meals.map(KMPMappers.mealEntry),
+                    mealContainers: dayDetail.mealContainers.map(KMPMappers.meal),
+                    waterEntries: dayDetail.waterEntries.map(KMPMappers.waterEntry)
                 )
             }
             let activeDaysSet: Set<String> = ready.activeDays

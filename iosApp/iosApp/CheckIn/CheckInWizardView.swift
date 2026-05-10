@@ -1,6 +1,33 @@
 import SwiftUI
 import shared
 
+// MARK: - StepData
+
+private struct StepData {
+    let weekLabel: String
+    let availableWeeks: [WeekOptionData]
+    let coveredDates: Set<String>
+    let weekDays: [DayOptionData]
+    let existingCheckInId: String?
+    let isEditMode: Bool
+    let weight: String
+    let shoulders: String
+    let chest: String
+    let armLeft: String
+    let armRight: String
+    let waist: String
+    let hips: String
+    let thighLeft: String
+    let thighRight: String
+    let delta: CheckInDeltaData?
+    let selectedTags: Set<String>
+    let mentalFeeling: String
+    let physicalFeeling: String
+    let photos: [WizardPhotoData]
+    let nutritionSummary: NutritionSummaryData?
+    let nutritionLoading: Bool
+}
+
 // MARK: - CheckInWizardView
 
 struct CheckInWizardView: View {
@@ -52,28 +79,30 @@ struct CheckInWizardView: View {
 
                     stepContent(
                         currentStep: currentStep,
-                        weekLabel: weekLabel,
-                        availableWeeks: availableWeeks,
-                        coveredDates: coveredDates,
-                        weekDays: weekDays,
-                        existingCheckInId: existingCheckInId,
-                        isEditMode: isEditMode,
-                        weight: weight,
-                        shoulders: shoulders,
-                        chest: chest,
-                        armLeft: armLeft,
-                        armRight: armRight,
-                        waist: waist,
-                        hips: hips,
-                        thighLeft: thighLeft,
-                        thighRight: thighRight,
-                        delta: delta,
-                        selectedTags: selectedTags,
-                        mentalFeeling: mentalFeeling,
-                        physicalFeeling: physicalFeeling,
-                        photos: photos,
-                        nutritionSummary: nutritionSummary,
-                        nutritionLoading: nutritionLoading
+                        data: StepData(
+                            weekLabel: weekLabel,
+                            availableWeeks: availableWeeks,
+                            coveredDates: coveredDates,
+                            weekDays: weekDays,
+                            existingCheckInId: existingCheckInId,
+                            isEditMode: isEditMode,
+                            weight: weight,
+                            shoulders: shoulders,
+                            chest: chest,
+                            armLeft: armLeft,
+                            armRight: armRight,
+                            waist: waist,
+                            hips: hips,
+                            thighLeft: thighLeft,
+                            thighRight: thighRight,
+                            delta: delta,
+                            selectedTags: selectedTags,
+                            mentalFeeling: mentalFeeling,
+                            physicalFeeling: physicalFeeling,
+                            photos: photos,
+                            nutritionSummary: nutritionSummary,
+                            nutritionLoading: nutritionLoading
+                        )
                     )
 
                     bottomBar(
@@ -140,99 +169,96 @@ struct CheckInWizardView: View {
     // MARK: - Step content
 
     @ViewBuilder
-    private func stepContent(
-        currentStep: CheckInWizardStep,
-        weekLabel: String,
-        availableWeeks: [WeekOptionData],
-        coveredDates: Set<String>,
-        weekDays: [DayOptionData],
-        existingCheckInId: String?,
-        isEditMode: Bool,
-        weight: String,
-        shoulders: String,
-        chest: String,
-        armLeft: String,
-        armRight: String,
-        waist: String,
-        hips: String,
-        thighLeft: String,
-        thighRight: String,
-        delta: CheckInDeltaData?,
-        selectedTags: Set<String>,
-        mentalFeeling: String,
-        physicalFeeling: String,
-        photos: [WizardPhotoData],
-        nutritionSummary: NutritionSummaryData?,
-        nutritionLoading: Bool
-    ) -> some View {
+    private func stepContent(currentStep: CheckInWizardStep, data: StepData) -> some View {
         Group {
             switch currentStep {
             case .dates:
-                WizardStepDatesView(
-                    weekLabel: weekLabel,
-                    availableWeeks: availableWeeks,
-                    weekDays: weekDays,
-                    coveredDates: coveredDates,
-                    existingCheckInId: existingCheckInId,
-                    isEditMode: isEditMode,
-                    onSelectWeek: { vm.onEvent(CheckInWizardEventOnSelectWeek(weekLabel: $0)) },
-                    onToggleDate: { vm.onEvent(CheckInWizardEventOnToggleDate(date: $0)) }
-                )
-
+                stepDates(data: data)
             case .measurements:
-                WizardStepMeasurementsView(
-                    weight: weight,
-                    shoulders: shoulders,
-                    chest: chest,
-                    armLeft: armLeft,
-                    armRight: armRight,
-                    waist: waist,
-                    hips: hips,
-                    thighLeft: thighLeft,
-                    thighRight: thighRight,
-                    delta: delta,
-                    onWeightChanged: { vm.onEvent(CheckInWizardEventOnWeightChanged(value: $0)) },
-                    onShouldersChanged: { vm.onEvent(CheckInWizardEventOnShouldersChanged(value: $0)) },
-                    onChestChanged: { vm.onEvent(CheckInWizardEventOnChestChanged(value: $0)) },
-                    onArmLeftChanged: { vm.onEvent(CheckInWizardEventOnArmLeftChanged(value: $0)) },
-                    onArmRightChanged: { vm.onEvent(CheckInWizardEventOnArmRightChanged(value: $0)) },
-                    onWaistChanged: { vm.onEvent(CheckInWizardEventOnWaistChanged(value: $0)) },
-                    onHipsChanged: { vm.onEvent(CheckInWizardEventOnHipsChanged(value: $0)) },
-                    onThighLeftChanged: { vm.onEvent(CheckInWizardEventOnThighLeftChanged(value: $0)) },
-                    onThighRightChanged: { vm.onEvent(CheckInWizardEventOnThighRightChanged(value: $0)) }
-                )
-
+                stepMeasurements(data: data)
             case .feelings:
-                WizardStepFeelingsView(
-                    selectedTags: selectedTags,
-                    mentalFeeling: mentalFeeling,
-                    physicalFeeling: physicalFeeling,
-                    onToggleTag: { vm.onEvent(CheckInWizardEventOnToggleTag(slug: $0)) },
-                    onMentalFeelingChanged: { vm.onEvent(CheckInWizardEventOnMentalFeelingChanged(text: $0)) },
-                    onPhysicalFeelingChanged: { vm.onEvent(CheckInWizardEventOnPhysicalFeelingChanged(text: $0)) }
-                )
-
+                stepFeelings(data: data)
             case .photos:
-                WizardStepPhotosView(
-                    photos: photos,
-                    onAddPhoto: { data in vm.addPhoto(imageData: data) },
-                    onRemovePhoto: { vm.onEvent(CheckInWizardEventOnRemovePhoto(photoId: $0)) }
-                )
-
+                stepPhotos(data: data)
             case .summary:
-                WizardStepSummaryView(
-                    nutritionSummary: nutritionSummary,
-                    nutritionLoading: nutritionLoading,
-                    weight: weight,
-                    delta: delta,
-                    photoCount: photos.count,
-                    selectedTags: selectedTags,
-                    mentalFeeling: mentalFeeling,
-                    physicalFeeling: physicalFeeling
-                )
+                stepSummary(data: data)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private func stepDates(data: StepData) -> some View {
+        WizardStepDatesView(
+            weekLabel: data.weekLabel,
+            availableWeeks: data.availableWeeks,
+            weekDays: data.weekDays,
+            coveredDates: data.coveredDates,
+            existingCheckInId: data.existingCheckInId,
+            isEditMode: data.isEditMode,
+            onSelectWeek: { vm.onEvent(CheckInWizardEventOnSelectWeek(weekLabel: $0)) },
+            onToggleDate: { vm.onEvent(CheckInWizardEventOnToggleDate(date: $0)) }
+        )
+    }
+
+    @ViewBuilder
+    private func stepMeasurements(data: StepData) -> some View {
+        WizardStepMeasurementsView(
+            weight: data.weight,
+            shoulders: data.shoulders,
+            chest: data.chest,
+            armLeft: data.armLeft,
+            armRight: data.armRight,
+            waist: data.waist,
+            hips: data.hips,
+            thighLeft: data.thighLeft,
+            thighRight: data.thighRight,
+            delta: data.delta,
+            onWeightChanged: { vm.onEvent(CheckInWizardEventOnWeightChanged(value: $0)) },
+            onShouldersChanged: { vm.onEvent(CheckInWizardEventOnShouldersChanged(value: $0)) },
+            onChestChanged: { vm.onEvent(CheckInWizardEventOnChestChanged(value: $0)) },
+            onArmLeftChanged: { vm.onEvent(CheckInWizardEventOnArmLeftChanged(value: $0)) },
+            onArmRightChanged: { vm.onEvent(CheckInWizardEventOnArmRightChanged(value: $0)) },
+            onWaistChanged: { vm.onEvent(CheckInWizardEventOnWaistChanged(value: $0)) },
+            onHipsChanged: { vm.onEvent(CheckInWizardEventOnHipsChanged(value: $0)) },
+            onThighLeftChanged: { vm.onEvent(CheckInWizardEventOnThighLeftChanged(value: $0)) },
+            onThighRightChanged: { vm.onEvent(CheckInWizardEventOnThighRightChanged(value: $0)) }
+        )
+    }
+
+    @ViewBuilder
+    private func stepFeelings(data: StepData) -> some View {
+        WizardStepFeelingsView(
+            selectedTags: data.selectedTags,
+            mentalFeeling: data.mentalFeeling,
+            physicalFeeling: data.physicalFeeling,
+            onToggleTag: { vm.onEvent(CheckInWizardEventOnToggleTag(slug: $0)) },
+            onMentalFeelingChanged: { vm.onEvent(CheckInWizardEventOnMentalFeelingChanged(text: $0)) },
+            onPhysicalFeelingChanged: { vm.onEvent(CheckInWizardEventOnPhysicalFeelingChanged(text: $0)) }
+        )
+    }
+
+    @ViewBuilder
+    private func stepPhotos(data: StepData) -> some View {
+        WizardStepPhotosView(
+            photos: data.photos,
+            onAddPhoto: { photoData in vm.addPhoto(imageData: photoData) },
+            onRemovePhoto: { vm.onEvent(CheckInWizardEventOnRemovePhoto(photoId: $0)) }
+        )
+    }
+
+    @ViewBuilder
+    private func stepSummary(data: StepData) -> some View {
+        WizardStepSummaryView(
+            nutritionSummary: data.nutritionSummary,
+            nutritionLoading: data.nutritionLoading,
+            weight: data.weight,
+            delta: data.delta,
+            photoCount: data.photos.count,
+            selectedTags: data.selectedTags,
+            mentalFeeling: data.mentalFeeling,
+            physicalFeeling: data.physicalFeeling
+        )
     }
 
     // MARK: - Bottom bar

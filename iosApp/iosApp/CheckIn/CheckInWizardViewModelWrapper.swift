@@ -129,7 +129,7 @@ final class CheckInWizardViewModelWrapper {
     }
 
     /// Converts Swift `Data` to `KotlinByteArray` — pure conversion, no actor state needed.
-    private nonisolated static func makeKotlinByteArray(from data: Data) -> KotlinByteArray {
+    nonisolated private static func makeKotlinByteArray(from data: Data) -> KotlinByteArray {
         let kotlinBytes = KotlinByteArray(size: Int32(data.count))
         data.withUnsafeBytes { buffer in
             for (index, byte) in buffer.enumerated() {
@@ -171,59 +171,13 @@ final class CheckInWizardViewModelWrapper {
     }
 
     private static func mapState(_ ready: CheckInWizardUiStateReady, localData: [String: Data]) -> CheckInWizardState {
-        let step = mapStep(ready.currentStep)
-
-        let availableWeeks = ready.availableWeeks.map { w in
-            WeekOptionData(
-                weekLabel: w.weekLabel,
-                displayLabel: w.displayLabel,
-                startDate: w.startDate,
-                endDate: w.endDate
-            )
-        }
-
-        let weekDays = ready.weekDays.map { d in
-            DayOptionData(date: d.date, displayLabel: d.displayLabel, selected: d.selected)
-        }
-
-        let coveredDates = Set(ready.coveredDates)
-
-        let photos = ready.photos.map { mapPhoto($0, localData: localData) }
-
-        let delta = ready.delta.map { d in
-            CheckInDeltaData(
-                weight: d.weight?.doubleValue,
-                shoulders: d.shoulders?.doubleValue,
-                chest: d.chest?.doubleValue,
-                armLeft: d.armLeft?.doubleValue,
-                armRight: d.armRight?.doubleValue,
-                waist: d.waist?.doubleValue,
-                hips: d.hips?.doubleValue,
-                thighLeft: d.thighLeft?.doubleValue,
-                thighRight: d.thighRight?.doubleValue
-            )
-        }
-
-        let nutrition = ready.nutritionSummary.map { n in
-            NutritionSummaryData(
-                avgProtein: n.avgProtein,
-                avgCalories: n.avgCalories,
-                avgFat: n.avgFat,
-                avgCarbs: n.avgCarbs,
-                avgWater: Int(n.avgWater),
-                nutritionDays: Int(n.nutritionDays),
-                aiSummary: n.aiSummary,
-                dailyData: []
-            )
-        }
-
-        return .ready(
+        .ready(
             isEditMode: ready.isEditMode,
-            currentStep: step,
+            currentStep: mapStep(ready.currentStep),
             weekLabel: ready.weekLabel,
-            availableWeeks: availableWeeks,
-            coveredDates: coveredDates,
-            weekDays: weekDays,
+            availableWeeks: mapAvailableWeeks(ready.availableWeeks),
+            coveredDates: Set(ready.coveredDates),
+            weekDays: mapWeekDays(ready.weekDays),
             existingCheckInId: ready.existingCheckInId,
             weight: ready.weight,
             shoulders: ready.shoulders,
@@ -234,15 +188,59 @@ final class CheckInWizardViewModelWrapper {
             hips: ready.hips,
             thighLeft: ready.thighLeft,
             thighRight: ready.thighRight,
-            delta: delta,
+            delta: ready.delta.map(mapDelta),
             selectedTags: Set(ready.selectedTags),
             mentalFeeling: ready.mentalFeeling,
             physicalFeeling: ready.physicalFeeling,
-            photos: photos,
-            nutritionSummary: nutrition,
+            photos: ready.photos.map { mapPhoto($0, localData: localData) },
+            nutritionSummary: ready.nutritionSummary.map(mapNutritionSummary),
             nutritionLoading: ready.nutritionLoading,
             saving: ready.saving,
             canGoNext: ready.canGoNext
+        )
+    }
+
+    private static func mapAvailableWeeks(_ weeks: [WeekOption]) -> [WeekOptionData] {
+        weeks.map { week in
+            WeekOptionData(
+                weekLabel: week.weekLabel,
+                displayLabel: week.displayLabel,
+                startDate: week.startDate,
+                endDate: week.endDate
+            )
+        }
+    }
+
+    private static func mapWeekDays(_ days: [DayOption]) -> [DayOptionData] {
+        days.map { dayOption in
+            DayOptionData(date: dayOption.date, displayLabel: dayOption.displayLabel, selected: dayOption.selected)
+        }
+    }
+
+    private static func mapDelta(_ deltaKmp: CheckInDelta) -> CheckInDeltaData {
+        CheckInDeltaData(
+            weight: deltaKmp.weight?.doubleValue,
+            shoulders: deltaKmp.shoulders?.doubleValue,
+            chest: deltaKmp.chest?.doubleValue,
+            armLeft: deltaKmp.armLeft?.doubleValue,
+            armRight: deltaKmp.armRight?.doubleValue,
+            waist: deltaKmp.waist?.doubleValue,
+            hips: deltaKmp.hips?.doubleValue,
+            thighLeft: deltaKmp.thighLeft?.doubleValue,
+            thighRight: deltaKmp.thighRight?.doubleValue
+        )
+    }
+
+    private static func mapNutritionSummary(_ nutrition: NutritionSummary) -> NutritionSummaryData {
+        NutritionSummaryData(
+            avgProtein: nutrition.avgProtein,
+            avgCalories: nutrition.avgCalories,
+            avgFat: nutrition.avgFat,
+            avgCarbs: nutrition.avgCarbs,
+            avgWater: Int(nutrition.avgWater),
+            nutritionDays: Int(nutrition.nutritionDays),
+            aiSummary: nutrition.aiSummary,
+            dailyData: []
         )
     }
 

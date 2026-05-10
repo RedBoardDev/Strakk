@@ -85,8 +85,8 @@ final class CheckInStatsViewModelWrapper {
         let period = mapPeriod(ready.selectedPeriod)
         let series = ready.series.map(mapPoint)
         let filteredSeries = ready.filteredSeries.map(mapPoint)
-        let weightTrend = ready.weightTrend.map { t in TrendInfoData(delta: t.delta, weeks: Int(t.weeks)) }
-        let waistTrend = ready.waistTrend.map { t in TrendInfoData(delta: t.delta, weeks: Int(t.weeks)) }
+        let weightTrend = ready.weightTrend.map { trend in TrendInfoData(delta: trend.delta, weeks: Int(trend.weeks)) }
+        let waistTrend = ready.waistTrend.map { trend in TrendInfoData(delta: trend.delta, weeks: Int(trend.weeks)) }
         let regularity = RegularityInfoData(
             checkInCount: Int(ready.regularity.checkInCount),
             totalWeeks: Int(ready.regularity.totalWeeks),
@@ -112,18 +112,18 @@ final class CheckInStatsViewModelWrapper {
         }
     }
 
-    private static func mapPoint(_ p: CheckInSeriesPoint) -> SeriesPointData {
+    private static func mapPoint(_ point: CheckInSeriesPoint) -> SeriesPointData {
         SeriesPointData(
-            weekLabel: p.weekLabel,
-            weight: p.weight?.doubleValue,
-            shoulders: p.shoulders?.doubleValue,
-            chest: p.chest?.doubleValue,
-            armLeft: p.armLeft?.doubleValue,
-            armRight: p.armRight?.doubleValue,
-            waist: p.waist?.doubleValue,
-            hips: p.hips?.doubleValue,
-            thighLeft: p.thighLeft?.doubleValue,
-            thighRight: p.thighRight?.doubleValue
+            weekLabel: point.weekLabel,
+            weight: point.weight?.doubleValue,
+            shoulders: point.shoulders?.doubleValue,
+            chest: point.chest?.doubleValue,
+            armLeft: point.armLeft?.doubleValue,
+            armRight: point.armRight?.doubleValue,
+            waist: point.waist?.doubleValue,
+            hips: point.hips?.doubleValue,
+            thighLeft: point.thighLeft?.doubleValue,
+            thighRight: point.thighRight?.doubleValue
         )
     }
 }

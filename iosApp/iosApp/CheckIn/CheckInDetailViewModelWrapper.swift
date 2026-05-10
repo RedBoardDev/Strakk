@@ -139,43 +139,43 @@ final class CheckInDetailViewModelWrapper {
         )
     }
 
-    private static func mapCheckIn(_ c: CheckIn) -> CheckInData {
+    private static func mapCheckIn(_ checkIn: CheckIn) -> CheckInData {
         CheckInData(
-            id: c.id,
-            weekLabel: c.weekLabel,
-            coveredDates: c.coveredDates,
-            weight: c.weight?.doubleValue,
-            shoulders: c.shoulders?.doubleValue,
-            chest: c.chest?.doubleValue,
-            armLeft: c.armLeft?.doubleValue,
-            armRight: c.armRight?.doubleValue,
-            waist: c.waist?.doubleValue,
-            hips: c.hips?.doubleValue,
-            thighLeft: c.thighLeft?.doubleValue,
-            thighRight: c.thighRight?.doubleValue,
-            feelingTags: c.feelingTags,
-            mentalFeeling: c.mentalFeeling,
-            physicalFeeling: c.physicalFeeling,
-            nutritionSummary: c.nutritionSummary.map(mapNutrition),
-            photos: c.photos.map { p in
-                CheckInPhotoData(id: p.id, storagePath: p.storagePath, position: Int(p.position))
+            id: checkIn.id,
+            weekLabel: checkIn.weekLabel,
+            coveredDates: checkIn.coveredDates,
+            weight: checkIn.weight?.doubleValue,
+            shoulders: checkIn.shoulders?.doubleValue,
+            chest: checkIn.chest?.doubleValue,
+            armLeft: checkIn.armLeft?.doubleValue,
+            armRight: checkIn.armRight?.doubleValue,
+            waist: checkIn.waist?.doubleValue,
+            hips: checkIn.hips?.doubleValue,
+            thighLeft: checkIn.thighLeft?.doubleValue,
+            thighRight: checkIn.thighRight?.doubleValue,
+            feelingTags: checkIn.feelingTags,
+            mentalFeeling: checkIn.mentalFeeling,
+            physicalFeeling: checkIn.physicalFeeling,
+            nutritionSummary: checkIn.nutritionSummary.map(mapNutrition),
+            photos: checkIn.photos.map { photo in
+                CheckInPhotoData(id: photo.id, storagePath: photo.storagePath, position: Int(photo.position))
             },
-            createdAt: c.createdAt,
-            updatedAt: c.updatedAt
+            createdAt: checkIn.createdAt,
+            updatedAt: checkIn.updatedAt
         )
     }
 
-    private static func mapDelta(_ d: CheckInDelta) -> CheckInDeltaData {
+    private static func mapDelta(_ delta: CheckInDelta) -> CheckInDeltaData {
         CheckInDeltaData(
-            weight: d.weight?.doubleValue,
-            shoulders: d.shoulders?.doubleValue,
-            chest: d.chest?.doubleValue,
-            armLeft: d.armLeft?.doubleValue,
-            armRight: d.armRight?.doubleValue,
-            waist: d.waist?.doubleValue,
-            hips: d.hips?.doubleValue,
-            thighLeft: d.thighLeft?.doubleValue,
-            thighRight: d.thighRight?.doubleValue
+            weight: delta.weight?.doubleValue,
+            shoulders: delta.shoulders?.doubleValue,
+            chest: delta.chest?.doubleValue,
+            armLeft: delta.armLeft?.doubleValue,
+            armRight: delta.armRight?.doubleValue,
+            waist: delta.waist?.doubleValue,
+            hips: delta.hips?.doubleValue,
+            thighLeft: delta.thighLeft?.doubleValue,
+            thighRight: delta.thighRight?.doubleValue
         )
     }
 
@@ -188,14 +188,14 @@ final class CheckInDetailViewModelWrapper {
             avgWater: Int(n.avgWater),
             nutritionDays: Int(n.nutritionDays),
             aiSummary: n.aiSummary,
-            dailyData: n.dailyData.map { d in
+            dailyData: n.dailyData.map { daily in
                 DailyNutritionData(
-                    date: d.date,
-                    calories: d.calories,
-                    protein: d.protein,
-                    fat: d.fat,
-                    carbs: d.carbs,
-                    waterMl: Int(d.waterMl)
+                    date: daily.date,
+                    calories: daily.calories,
+                    protein: daily.protein,
+                    fat: daily.fat,
+                    carbs: daily.carbs,
+                    waterMl: Int(daily.waterMl)
                 )
             }
         )

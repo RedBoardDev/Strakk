@@ -159,8 +159,18 @@ struct WizardStepDatesView: View {
         WizardStepDatesView(
             weekLabel: "2024-W04",
             availableWeeks: [
-                WeekOptionData(weekLabel: "2024-W04", displayLabel: "Sem. 4 (22–28 jan)", startDate: "2024-01-22", endDate: "2024-01-28"),
-                WeekOptionData(weekLabel: "2024-W03", displayLabel: "Sem. 3 (15–21 jan)", startDate: "2024-01-15", endDate: "2024-01-21")
+                WeekOptionData(
+                    weekLabel: "2024-W04",
+                    displayLabel: "Sem. 4 (22–28 jan)",
+                    startDate: "2024-01-22",
+                    endDate: "2024-01-28"
+                ),
+                WeekOptionData(
+                    weekLabel: "2024-W03",
+                    displayLabel: "Sem. 3 (15–21 jan)",
+                    startDate: "2024-01-15",
+                    endDate: "2024-01-21"
+                )
             ],
             weekDays: [
                 DayOptionData(date: "2024-01-22", displayLabel: "Lun", selected: true),
