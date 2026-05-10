@@ -5,9 +5,14 @@
     <!-- Common -->
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
     <string name="common_add">Add</string>
+    <string name="common_save">Save</string>
     <string name="common_rename">Rename</string>
     <string name="common_delete">Delete</string>
+
+    <!-- Pro badge -->
+    <string name="pro_badge_label">PRO</string>
 
     <!-- MealDraft -->
     <string name="meal_draft_new_meal">New meal</string>
@@ -61,14 +66,21 @@
     <string name="search_food_section_my_foods">MY FOODS</string>
     <string name="search_food_section_catalog">CATALOG</string>
     <string name="search_food_empty_hint">Start typing to search</string>
+    <string name="search_food_empty_hint_desc">Your frequent foods will appear here.</string>
     <string name="search_food_no_results">No results for \"%s\"</string>
+    <string name="search_food_no_results_desc">Try a different spelling or add it manually.</string>
+    <string name="search_food_error_title">Something went wrong</string>
     <string name="search_food_add">Add</string>
     <string name="search_food_per_100g">⚖︎ values per 100 g</string>
+    <string name="search_food_recent_cd">Recently used</string>
 
     <!-- Onboarding — common -->
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_continue">Continuer</string>
     <string name="onboarding_back">Retour</string>
+    <!-- Stepper increment/decrement (format: %s = label) -->
+    <string name="stepper_decrement_cd">Decrease %s</string>
+    <string name="stepper_increment_cd">Increase %s</string>
 
     <!-- Onboarding — Welcome -->
     <string name="onboarding_welcome_title">Strakk</string>
@@ -79,6 +91,8 @@
     <!-- Onboarding — Weight -->
     <string name="onboarding_weight_title">Quel est ton poids actuel ?</string>
     <string name="onboarding_weight_unit">kg</string>
+    <string name="weight_decrease_cd">Decrease weight</string>
+    <string name="weight_increase_cd">Increase weight</string>
 
     <!-- Onboarding — Bio -->
     <string name="onboarding_bio_title">Quelques infos sur toi</string>
@@ -183,6 +197,8 @@
     <string name="settings_loading">Loading…</string>
     <string name="settings_goal_protein">Protein (g)</string>
     <string name="settings_goal_calories">Calories (kcal)</string>
+    <string name="settings_goal_fat">Fat (g)</string>
+    <string name="settings_goal_carbs">Carbs (g)</string>
     <string name="settings_goal_water">Water (mL)</string>
 
     <!-- Data Sources -->
@@ -193,6 +209,18 @@
     <string name="today_title">Today</string>
     <string name="today_timeline_header">TIMELINE</string>
     <string name="today_empty_timeline">Nothing logged today</string>
+    <string name="today_empty_timeline_desc">Tap + below to log your first meal.</string>
+    <!-- Today — action bar -->
+    <string name="today_action_new_meal">Meal</string>
+    <string name="today_action_quick_add">Quick add</string>
+    <!-- Today — draft floating bar -->
+    <string name="today_draft_no_items">No items · tap + to start</string>
+    <string name="today_draft_items_count">%d items</string>
+    <string name="today_draft_pending_count">+ %d pending</string>
+    <string name="today_draft_kcal">· %d kcal</string>
+    <string name="today_draft_add">+ Add</string>
+    <string name="today_draft_cancel">Cancel</string>
+    <string name="today_draft_finish">Finish</string>
 
     <!-- Progress Section (macros) -->
     <string name="progress_protein_label">PROTEINS</string>
@@ -217,6 +245,14 @@
     <string name="meal_card_expand_cd">Expand</string>
     <string name="meal_card_add_item">Add an item</string>
 
+    <!-- Entry Source badges (contentDescription) -->
+    <string name="entry_source_photo_cd">Added by photo</string>
+    <string name="entry_source_barcode_cd">Added by barcode</string>
+    <string name="entry_source_manual_cd">Added manually</string>
+    <string name="entry_source_search_cd">Added via search</string>
+    <string name="entry_source_frequent_cd">Added from frequents</string>
+    <string name="entry_source_text_cd">Added by text description</string>
+
     <!-- Meal Review -->
     <string name="review_title">Meal review</string>
     <string name="review_back_cd">Back</string>
@@ -224,6 +260,18 @@
     <string name="review_empty">No meal in progress</string>
     <string name="review_subtitle">%d items analysed. Edit before confirming.</string>
     <string name="review_confirm_button">Confirm meal</string>
+    <string name="review_items_section">ITEMS</string>
+    <string name="review_add_item_cd">Add item</string>
+    <string name="review_hidden_warning">%d item(s) hidden won\'t be saved</string>
+    <string name="review_hide_item">Hide</string>
+    <string name="review_restore_item">Restore</string>
+    <string name="review_edit_item">Edit</string>
+    <string name="review_change_food">Change food</string>
+    <string name="review_delete_item">Delete</string>
+    <string name="review_totals_hidden_caption">%d hidden</string>
+    <string name="review_add_search">Search food</string>
+    <string name="review_add_manual">Manual entry</string>
+    <string name="review_all_hidden_disabled">Restore at least one item to save</string>
 
     <!-- Text Entry -->
     <string name="text_entry_title">Free description</string>
@@ -263,6 +311,7 @@
     <string name="calendar_next_month_cd">Next month</string>
 
     <!-- Day Detail Sheet -->
+    <string name="day_detail_section_nutrition">NUTRITION</string>
     <string name="day_detail_section_macros">MACROS</string>
     <string name="day_detail_section_water">WATER</string>
     <string name="day_detail_section_meals">MEALS</string>
@@ -278,20 +327,109 @@
     <!-- Main / Tab labels -->
     <string name="tab_today">Today</string>
     <string name="tab_calendar">Calendar</string>
+    <string name="tab_checkin">Check-ins</string>
     <string name="tab_settings">Settings</string>
 
+    <!-- Check-in — list -->
+    <string name="checkin_list_title">Weekly Check-ins</string>
+    <string name="checkin_list_new">New check-in</string>
+    <string name="checkin_list_stats_btn">See stats</string>
+    <string name="checkin_list_empty_title">No check-ins yet</string>
+    <string name="checkin_list_empty_desc">Tap + to start your first weekly check-in.</string>
+    <string name="checkin_list_hidden">%d more hidden — unlock history</string>
+    <string name="checkin_list_item_weight">%s kg</string>
+    <string name="checkin_list_item_photos">%d photo(s)</string>
+
+    <!-- Check-in — quick stats -->
+    <string name="checkin_quick_stat_arm">Avg arm</string>
+
+    <!-- Check-in — stats screen -->
+    <string name="checkin_stats_title">Progress</string>
+    <string name="checkin_stats_period_4w">4 weeks</string>
+    <string name="checkin_stats_period_12w">12 weeks</string>
+    <string name="checkin_stats_period_all">All</string>
+    <string name="checkin_stats_weight_trend">Weight</string>
+    <string name="checkin_stats_waist_trend">Waist</string>
+    <string name="checkin_stats_regularity">Regularity</string>
+    <string name="checkin_stats_regularity_value">%1$d / %2$d weeks</string>
+    <string name="checkin_stats_over_n_weeks">over %d weeks</string>
+    <string name="checkin_stats_empty">Not enough data yet</string>
+
+    <!-- Check-in — wizard -->
+    <string name="checkin_wizard_title_new">New check-in</string>
+    <string name="checkin_wizard_title_edit">Edit check-in</string>
+    <string name="checkin_wizard_step_dates">Period</string>
+    <string name="checkin_wizard_step_measurements">Measurements</string>
+    <string name="checkin_wizard_step_feelings">Feelings</string>
+    <string name="checkin_wizard_step_photos">Photos</string>
+    <string name="checkin_wizard_step_summary">Summary</string>
+    <string name="checkin_wizard_next">Next</string>
+    <string name="checkin_wizard_back">Back</string>
+    <string name="checkin_wizard_save">Save</string>
+    <string name="checkin_wizard_week_selector">Select a week</string>
+    <string name="checkin_wizard_days_selected">Days included</string>
+    <string name="checkin_wizard_existing_warning">A check-in already exists for this week.</string>
+    <string name="checkin_wizard_weight">Weight (kg)</string>
+    <string name="checkin_wizard_shoulders">Shoulders (cm)</string>
+    <string name="checkin_wizard_chest">Chest (cm)</string>
+    <string name="checkin_wizard_arm_left">Left arm (cm)</string>
+    <string name="checkin_wizard_arm_right">Right arm (cm)</string>
+    <string name="checkin_wizard_waist">Waist (cm)</string>
+    <string name="checkin_wizard_hips">Hips (cm)</string>
+    <string name="checkin_wizard_thigh_left">Left thigh (cm)</string>
+    <string name="checkin_wizard_thigh_right">Right thigh (cm)</string>
+    <string name="checkin_wizard_mental_feeling">Mental feeling</string>
+    <string name="checkin_wizard_physical_feeling">Physical feeling</string>
+    <string name="checkin_wizard_feeling_tags">Feeling tags</string>
+    <string name="checkin_wizard_feeling_placeholder">Describe your feeling…</string>
+    <string name="checkin_wizard_photos_info">Photos (max 3)</string>
+    <string name="checkin_wizard_photos_count">%1$d / %2$d added</string>
+    <string name="checkin_wizard_nutrition_loading">Loading nutrition summary…</string>
+    <string name="checkin_wizard_nutrition_over_n_days">Avg over %d days</string>
+    <string name="checkin_wizard_avg_protein">Protein</string>
+    <string name="checkin_wizard_avg_calories">Calories</string>
+    <string name="checkin_wizard_avg_fat">Fat</string>
+    <string name="checkin_wizard_avg_carbs">Carbs</string>
+    <string name="checkin_wizard_avg_water">Water</string>
+    <string name="checkin_wizard_no_nutrition">No nutrition data for this period.</string>
+
+    <!-- Check-in — feeling tags -->
+    <string name="checkin_tag_energy">High energy</string>
+    <string name="checkin_tag_fatigue">Fatigue</string>
+    <string name="checkin_tag_stress">Stress</string>
+    <string name="checkin_tag_sleep">Good sleep</string>
+    <string name="checkin_tag_motivation">Motivated</string>
+    <string name="checkin_tag_soreness">Soreness</string>
+    <string name="checkin_tag_digestion">Good digestion</string>
+    <string name="checkin_tag_mood">Good mood</string>
+
+    <!-- Check-in — detail -->
+    <string name="checkin_detail_measurements">Measurements</string>
+    <string name="checkin_detail_feelings">Feelings</string>
+    <string name="checkin_detail_nutrition">Nutrition</string>
+    <string name="checkin_detail_edit">Edit</string>
+    <string name="checkin_detail_delete">Delete</string>
+    <string name="checkin_detail_delete_confirm_title">Delete check-in?</string>
+    <string name="checkin_detail_delete_confirm_body">This action cannot be undone.</string>
+    <string name="checkin_detail_delete_confirm">Delete</string>
+    <string name="checkin_detail_no_measurements">No measurements recorded.</string>
+
     <!-- Paywall -->
+    <string name="paywall_price_placeholder">—</string>
+    <string name="paywall_annual_per_month_line">That\'s only %1$s per month</string>
     <string name="paywall_label">STRAKK PRO</string>
     <string name="paywall_headline">AI tracks your meals for you.</string>
     <string name="paywall_subheadline">Take a photo or describe your meal in a sentence. Strakk Pro does the rest.</string>
     <string name="paywall_plan_monthly">Monthly</string>
     <string name="paywall_plan_annual">Annual</string>
     <string name="paywall_plan_popular">POPULAR</string>
-    <string name="paywall_price_annual">19.99 €/year</string>
-    <string name="paywall_price_annual_monthly">i.e. 1.67 €/month · 2 months free</string>
-    <string name="paywall_price_monthly">1.99 €/month</string>
+    <string name="paywall_price_annual">24.99 €/year</string>
+    <string name="paywall_price_annual_monthly">i.e. 2.08 €/month · 2 months free</string>
+    <string name="paywall_price_monthly">2.99 €/month</string>
     <string name="paywall_price_monthly_detail">No commitment</string>
-    <string name="paywall_cta">Try 7 days free</string>
+    <string name="paywall_cta">Unlock the full potential</string>
+    <string name="paywall_cta_choose_plan">Choose this plan</string>
+    <string name="paywall_cta_current_plan">Current plan</string>
     <string name="paywall_footer_cancel">Cancel anytime · No commitment</string>
     <string name="paywall_footer_secure">Secure payment via Play Store</string>
     <string name="paywall_restore">Restore a purchase</string>
@@ -325,25 +463,45 @@
     <!-- Trial Expired Modal -->
     <string name="trial_expired_title">Your trial ends today</string>
     <string name="trial_expired_body">Continue with Strakk Pro to keep AI, Health sync and unlimited history.</string>
-    <string name="trial_expired_price">19.99 €/year · 1.67 €/month</string>
+    <string name="trial_expired_price_line">%1$s · %2$s</string>
     <string name="trial_expired_cta">Discover plans</string>
     <string name="trial_expired_free">Continue for free</string>
 
     <!-- Settings Subscription -->
     <string name="settings_section_pro">STRAKK PRO</string>
-    <string name="settings_pro_free_title">AI tracks your meals for you.</string>
-    <string name="settings_pro_free_subtitle">Photo, text, weekly summary.</string>
+    <string name="settings_section_current_plan">CURRENT PLAN</string>
+    <string name="settings_plan_free_badge">FREE</string>
+    <string name="settings_plan_trial_badge">TRIAL ACTIVE</string>
+    <string name="settings_plan_active_badge">ACTIVE</string>
+    <string name="settings_pro_free_title">Track faster with Pro</string>
+    <string name="settings_pro_free_subtitle">AI photo analysis, free text and weekly summaries so you log less by hand.</string>
     <string name="settings_pro_upgrade">Upgrade to Pro</string>
-    <string name="settings_pro_trial_title">Free trial</string>
-    <string name="settings_pro_trial_expires">Expires in %d day(s)</string>
+    <string name="settings_pro_trial_title">Your Pro trial is active</string>
+    <string name="settings_pro_trial_remaining">%d day(s) left</string>
+    <string name="settings_pro_trial_ends">Trial ends: %s</string>
+    <string name="settings_pro_trial_body">You keep photo analysis, free text and AI summaries until this date.</string>
+    <string name="settings_pro_trial_choose_plan">Choose my plan</string>
     <string name="settings_pro_trial_billing_note">Your subscription starts on %s. Cancel before to avoid being charged.</string>
-    <string name="settings_pro_active_label">%s · Active</string>
+    <string name="settings_pro_active_label">%s plan</string>
     <string name="settings_pro_active_renews">Renews on %s</string>
+    <string name="settings_pro_annual_upsell_title">Save with annual</string>
+    <string name="settings_pro_annual_upsell_body">Get 2 months free compared with monthly.</string>
+    <string name="settings_pro_annual_upsell_cta">See annual offer</string>
     <string name="settings_pro_manage">Manage subscription</string>
     <string name="settings_pro_payment_failed_title">Payment issue</string>
     <string name="settings_pro_payment_failed_body">Update your payment method to keep Pro access.</string>
     <string name="settings_pro_payment_failed_cta">Fix the issue</string>
     <string name="settings_pro_badge">PRO</string>
+    <string name="settings_dev_subscription_section">DEV SUBSCRIPTION</string>
+    <string name="settings_dev_subscription_label">Plan</string>
+    <string name="settings_dev_subscription_server">Backend</string>
+    <string name="settings_dev_subscription_free">Free</string>
+    <string name="settings_dev_subscription_trial_7">Trial - 7 days</string>
+    <string name="settings_dev_subscription_trial_1">Trial - 1 day</string>
+    <string name="settings_dev_subscription_expired">Expired</string>
+    <string name="settings_dev_subscription_pro_monthly">Pro monthly</string>
+    <string name="settings_dev_subscription_pro_annual">Pro annual</string>
+    <string name="settings_dev_subscription_payment_failed">Payment failed</string>
 
     <!-- Onboarding Pro Offer -->
     <string name="onboarding_pro_before">Great news!</string>
@@ -351,4 +509,10 @@
     <string name="onboarding_pro_cta">Let\'s go!</string>
     <string name="onboarding_pro_later">Later</string>
     <string name="onboarding_pro_footer">Enjoy all Pro features for 7 days.</string>
+    <string name="onboarding_pro_feature1_title">Smart photo</string>
+    <string name="onboarding_pro_feature1_desc">Take a photo, the AI calculates your macros.</string>
+    <string name="onboarding_pro_feature2_title">Smart text</string>
+    <string name="onboarding_pro_feature2_desc">Describe your meal, the AI does the rest.</string>
+    <string name="onboarding_pro_feature3_title">AI weekly summary</string>
+    <string name="onboarding_pro_feature3_desc">A personalised summary every week.</string>
 </resources>

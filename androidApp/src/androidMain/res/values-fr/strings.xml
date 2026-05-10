@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Strakk</string>
+
+    <!-- Login -->
+    <string name="login_title">Content de te revoir</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Mot de passe</string>
+    <string name="login_forgot_password">Mot de passe oublié ?</string>
+    <string name="login_cta">Se connecter</string>
+    <string name="login_create_account">Créer un compte</string>
+    <string name="login_password_show">Afficher le mot de passe</string>
+    <string name="login_password_hide">Masquer le mot de passe</string>
+
     <!-- Common -->
     <string name="common_back">Retour</string>
     <string name="common_cancel">Annuler</string>
+    <string name="common_close">Fermer</string>
     <string name="common_add">Ajouter</string>
+    <string name="common_save">Enregistrer</string>
     <string name="common_rename">Renommer</string>
     <string name="common_delete">Supprimer</string>
+
+    <!-- Pro badge -->
+    <string name="pro_badge_label">PRO</string>
 
     <!-- MealDraft -->
     <string name="meal_draft_new_meal">Nouveau repas</string>
@@ -55,6 +72,9 @@
     <string name="search_food_clear">Effacer</string>
     <string name="search_food_back">Retour</string>
     <string name="search_food_retry">Réessayer</string>
+    <string name="search_food_empty_hint_desc">Tes aliments fréquents apparaîtront ici.</string>
+    <string name="search_food_no_results_desc">Essaie une orthographe différente ou ajoute-le manuellement.</string>
+    <string name="search_food_error_title">Une erreur est survenue</string>
     <string name="search_food_section_frequent">FRÉQUENTS</string>
     <string name="search_food_section_my_foods">MES ALIMENTS</string>
     <string name="search_food_section_catalog">CATALOGUE</string>
@@ -62,11 +82,112 @@
     <string name="search_food_no_results">Aucun résultat pour « %s »</string>
     <string name="search_food_add">Ajouter</string>
     <string name="search_food_per_100g">⚖︎ valeurs pour 100 g</string>
+    <string name="search_food_recent_cd">Utilisé récemment</string>
 
     <!-- Onboarding -->
     <string name="onboarding_get_started">Commencer</string>
     <string name="onboarding_continue">Continuer</string>
     <string name="onboarding_back">Retour</string>
+    <!-- Stepper increment/decrement (format: %s = label) -->
+    <string name="stepper_decrement_cd">Diminuer %s</string>
+    <string name="stepper_increment_cd">Augmenter %s</string>
+
+    <!-- Onboarding — Welcome -->
+    <string name="onboarding_welcome_title">Strakk</string>
+    <string name="onboarding_welcome_subtitle">Ton coach nutrition &amp; fitness, simplifié.</string>
+    <string name="onboarding_welcome_cta">C\'est parti</string>
+    <string name="onboarding_welcome_already_account">Déjà un compte ?</string>
+
+    <!-- Onboarding — Weight -->
+    <string name="onboarding_weight_title">Quel est ton poids actuel ?</string>
+    <string name="onboarding_weight_unit">kg</string>
+    <string name="weight_decrease_cd">Diminuer le poids</string>
+    <string name="weight_increase_cd">Augmenter le poids</string>
+
+    <!-- Onboarding — Bio -->
+    <string name="onboarding_bio_title">Quelques infos sur toi</string>
+    <string name="onboarding_bio_height_label">Taille</string>
+    <string name="onboarding_bio_height_unit">cm</string>
+    <string name="onboarding_bio_birth_date_label">Date de naissance</string>
+    <string name="onboarding_bio_birth_date_placeholder">Sélectionner une date</string>
+    <string name="onboarding_bio_sex_label">Sexe biologique</string>
+    <string name="onboarding_bio_sex_male">Homme</string>
+    <string name="onboarding_bio_sex_female">Femme</string>
+    <string name="onboarding_bio_sex_unspecified">Préfère ne pas dire</string>
+    <string name="onboarding_bio_optional">Optionnel — utilisé pour personnaliser tes objectifs</string>
+
+    <!-- Onboarding — Goal -->
+    <string name="onboarding_goal_title">Quel est ton objectif ?</string>
+    <string name="onboarding_goal_lose_fat">Perdre du gras</string>
+    <string name="onboarding_goal_lose_fat_desc">Déficit calorique ciblé</string>
+    <string name="onboarding_goal_gain_muscle">Prendre du muscle</string>
+    <string name="onboarding_goal_gain_muscle_desc">Surplus et protéines adaptés</string>
+    <string name="onboarding_goal_maintain">Maintenir</string>
+    <string name="onboarding_goal_maintain_desc">Équilibre et stabilité</string>
+    <string name="onboarding_goal_just_track">Juste tracker</string>
+    <string name="onboarding_goal_just_track_desc">Suivi sans objectif spécifique</string>
+
+    <!-- Onboarding — Activity Training -->
+    <string name="onboarding_training_title">Parle-moi de ton entraînement</string>
+    <string name="onboarding_training_frequency_label">Séances par semaine</string>
+    <string name="onboarding_training_types_label">Types d\'entraînement</string>
+    <string name="onboarding_training_type_strength">Muscu</string>
+    <string name="onboarding_training_type_cardio">Cardio</string>
+    <string name="onboarding_training_type_team">Sport co</string>
+    <string name="onboarding_training_type_yoga">Yoga / Flexi</string>
+    <string name="onboarding_training_type_other">Autre</string>
+
+    <!-- Onboarding — Activity Daily -->
+    <string name="onboarding_daily_title">Et au quotidien ?</string>
+    <string name="onboarding_daily_intensity_label">Intensité de tes entraînements</string>
+    <string name="onboarding_daily_intensity_light">Légère</string>
+    <string name="onboarding_daily_intensity_light_desc">Effort modéré, récupération facile</string>
+    <string name="onboarding_daily_intensity_moderate">Modérée</string>
+    <string name="onboarding_daily_intensity_moderate_desc">Transpiration, effort soutenu</string>
+    <string name="onboarding_daily_intensity_intense">Intense</string>
+    <string name="onboarding_daily_intensity_intense_desc">Effort maximal, épuisant</string>
+    <string name="onboarding_daily_activity_label">Activité au quotidien</string>
+    <string name="onboarding_daily_activity_sedentary">Sédentaire</string>
+    <string name="onboarding_daily_activity_sedentary_desc">Principalement assis (bureau, voiture)</string>
+    <string name="onboarding_daily_activity_moderate">Modérément actif</string>
+    <string name="onboarding_daily_activity_moderate_desc">Marche régulière, debout souvent</string>
+    <string name="onboarding_daily_activity_very">Très actif</string>
+    <string name="onboarding_daily_activity_very_desc">Travail physique, beaucoup de déplacements</string>
+
+    <!-- Onboarding — Sign Up -->
+    <string name="onboarding_signup_title">Crée ton compte</string>
+    <string name="onboarding_signup_email_label">Email</string>
+    <string name="onboarding_signup_password_label">Mot de passe</string>
+    <string name="onboarding_signup_password_caption">Minimum 6 caractères</string>
+    <string name="onboarding_signup_cta">Créer mon compte</string>
+    <string name="onboarding_signup_login_link">Se connecter</string>
+    <string name="onboarding_signup_password_show">Afficher le mot de passe</string>
+    <string name="onboarding_signup_password_hide">Masquer le mot de passe</string>
+
+    <!-- Onboarding — Nutrition Goals -->
+    <string name="onboarding_nutrition_title">Tes objectifs nutritionnels</string>
+    <string name="onboarding_nutrition_ai_available">Calculer avec l\'IA</string>
+    <string name="onboarding_nutrition_ai_loading">Calcul en cours…</string>
+    <string name="onboarding_nutrition_ai_completed">Objectifs calculés</string>
+    <string name="onboarding_nutrition_ai_failed">Réessayer avec l\'IA</string>
+    <string name="onboarding_nutrition_protein">Protéines</string>
+    <string name="onboarding_nutrition_calories">Calories</string>
+    <string name="onboarding_nutrition_fat">Lipides</string>
+    <string name="onboarding_nutrition_carbs">Glucides</string>
+    <string name="onboarding_nutrition_water">Eau</string>
+    <string name="onboarding_nutrition_unit_g">g</string>
+    <string name="onboarding_nutrition_unit_kcal">kcal</string>
+    <string name="onboarding_nutrition_unit_ml">mL</string>
+
+    <!-- Onboarding — Day Preview -->
+    <string name="onboarding_preview_title">Voilà à quoi ressemblera ta journée</string>
+    <string name="onboarding_preview_cta">Commencer à tracker</string>
+    <string name="onboarding_preview_protein">Protéines</string>
+    <string name="onboarding_preview_calories">Calories</string>
+    <string name="onboarding_preview_fat">Lipides</string>
+    <string name="onboarding_preview_carbs">Glucides</string>
+    <string name="onboarding_preview_water">Eau</string>
+    <string name="onboarding_preview_water_goal">/ %d mL</string>
 
     <!-- Settings -->
     <string name="settings_title">Réglages</string>
@@ -76,6 +197,8 @@
     <string name="settings_loading">Chargement…</string>
     <string name="settings_goal_protein">Protéines (g)</string>
     <string name="settings_goal_calories">Calories (kcal)</string>
+    <string name="settings_goal_fat">Lipides (g)</string>
+    <string name="settings_goal_carbs">Glucides (g)</string>
     <string name="settings_goal_water">Eau (mL)</string>
 
     <!-- Data Sources -->
@@ -86,6 +209,18 @@
     <string name="today_title">Aujourd\'hui</string>
     <string name="today_timeline_header">CHRONOLOGIE</string>
     <string name="today_empty_timeline">Rien enregistré aujourd\'hui</string>
+    <string name="today_empty_timeline_desc">Appuie sur + en bas pour ajouter ton premier repas.</string>
+    <!-- Today — action bar -->
+    <string name="today_action_new_meal">Repas</string>
+    <string name="today_action_quick_add">Rapide</string>
+    <!-- Today — draft floating bar -->
+    <string name="today_draft_no_items">Aucun item · ajoute pour commencer</string>
+    <string name="today_draft_items_count">%d items</string>
+    <string name="today_draft_pending_count">+ %d en attente</string>
+    <string name="today_draft_kcal">· %d kcal</string>
+    <string name="today_draft_add">+ Ajouter</string>
+    <string name="today_draft_cancel">Annuler</string>
+    <string name="today_draft_finish">Terminer</string>
 
     <!-- Progress Section (macros) -->
     <string name="progress_protein_label">PROTÉINES</string>
@@ -110,6 +245,14 @@
     <string name="meal_card_expand_cd">Développer</string>
     <string name="meal_card_add_item">Ajouter un item</string>
 
+    <!-- Entry Source badges (contentDescription) -->
+    <string name="entry_source_photo_cd">Ajouté par photo</string>
+    <string name="entry_source_barcode_cd">Ajouté par code-barres</string>
+    <string name="entry_source_manual_cd">Ajouté manuellement</string>
+    <string name="entry_source_search_cd">Ajouté via recherche</string>
+    <string name="entry_source_frequent_cd">Ajouté depuis les fréquents</string>
+    <string name="entry_source_text_cd">Ajouté par description textuelle</string>
+
     <!-- Meal Review -->
     <string name="review_title">Revue du repas</string>
     <string name="review_back_cd">Retour</string>
@@ -117,6 +260,18 @@
     <string name="review_empty">Aucun repas en cours</string>
     <string name="review_subtitle">%d items analysés. Modifiez avant de valider.</string>
     <string name="review_confirm_button">Valider le repas</string>
+    <string name="review_items_section">ALIMENTS</string>
+    <string name="review_add_item_cd">Ajouter un aliment</string>
+    <string name="review_hidden_warning">%d aliment(s) caché(s) ne sera pas sauvegardé</string>
+    <string name="review_hide_item">Cacher</string>
+    <string name="review_restore_item">Restaurer</string>
+    <string name="review_edit_item">Modifier</string>
+    <string name="review_change_food">Changer l\'aliment</string>
+    <string name="review_delete_item">Supprimer</string>
+    <string name="review_totals_hidden_caption">%d caché(s)</string>
+    <string name="review_add_search">Rechercher</string>
+    <string name="review_add_manual">Saisie manuelle</string>
+    <string name="review_all_hidden_disabled">Restaurez au moins un aliment</string>
 
     <!-- Text Entry -->
     <string name="text_entry_title">Description libre</string>
@@ -156,6 +311,7 @@
     <string name="calendar_next_month_cd">Mois suivant</string>
 
     <!-- Day Detail Sheet -->
+    <string name="day_detail_section_nutrition">NUTRITION</string>
     <string name="day_detail_section_macros">MACROS</string>
     <string name="day_detail_section_water">EAU</string>
     <string name="day_detail_section_meals">REPAS</string>
@@ -174,17 +330,21 @@
     <string name="tab_settings">Réglages</string>
 
     <!-- Paywall -->
+    <string name="paywall_price_placeholder">—</string>
+    <string name="paywall_annual_per_month_line">Soit %1$s par mois</string>
     <string name="paywall_label">STRAKK PRO</string>
     <string name="paywall_headline">L\'IA tracke tes repas pour toi.</string>
     <string name="paywall_subheadline">Photographie ton assiette ou décris ton repas en une phrase. Strakk Pro fait le reste.</string>
     <string name="paywall_plan_monthly">Mensuel</string>
     <string name="paywall_plan_annual">Annuel</string>
     <string name="paywall_plan_popular">POPULAIRE</string>
-    <string name="paywall_price_annual">19,99 €/an</string>
-    <string name="paywall_price_annual_monthly">soit 1,67 €/mois · 2 mois offerts</string>
-    <string name="paywall_price_monthly">1,99 €/mois</string>
+    <string name="paywall_price_annual">24,99 €/an</string>
+    <string name="paywall_price_annual_monthly">soit 2,08 €/mois · 2 mois offerts</string>
+    <string name="paywall_price_monthly">2,99 €/mois</string>
     <string name="paywall_price_monthly_detail">Sans engagement</string>
-    <string name="paywall_cta">Essayer 7 jours gratuit</string>
+    <string name="paywall_cta">Débloquer Strakk Pro</string>
+    <string name="paywall_cta_choose_plan">Choisir ce plan</string>
+    <string name="paywall_cta_current_plan">Plan actuel</string>
     <string name="paywall_footer_cancel">Annule à tout moment · Aucun engagement</string>
     <string name="paywall_footer_secure">Paiement sécurisé via Play Store</string>
     <string name="paywall_restore">Restaurer un achat</string>
@@ -218,25 +378,45 @@
     <!-- Trial Expired Modal -->
     <string name="trial_expired_title">Ton essai se termine aujourd\'hui</string>
     <string name="trial_expired_body">Continue avec Strakk Pro pour garder l\'IA, la sync Santé et l\'historique illimité.</string>
-    <string name="trial_expired_price">19,99 €/an · 1,67 €/mois</string>
+    <string name="trial_expired_price_line">%1$s · %2$s</string>
     <string name="trial_expired_cta">Découvrir les offres</string>
     <string name="trial_expired_free">Continuer en gratuit</string>
 
     <!-- Settings Subscription -->
     <string name="settings_section_pro">STRAKK PRO</string>
-    <string name="settings_pro_free_title">L\'IA tracke tes repas pour toi.</string>
-    <string name="settings_pro_free_subtitle">Photo, texte, bilan hebdo.</string>
+    <string name="settings_section_current_plan">PLAN ACTUEL</string>
+    <string name="settings_plan_free_badge">GRATUIT</string>
+    <string name="settings_plan_trial_badge">ESSAI ACTIF</string>
+    <string name="settings_plan_active_badge">ACTIF</string>
+    <string name="settings_pro_free_title">Tracke plus vite avec Pro</string>
+    <string name="settings_pro_free_subtitle">Analyse photo, texte libre et bilans hebdo IA pour moins saisir à la main.</string>
     <string name="settings_pro_upgrade">Passer à Pro</string>
-    <string name="settings_pro_trial_title">Essai gratuit</string>
-    <string name="settings_pro_trial_expires">Expire dans %d jour(s)</string>
+    <string name="settings_pro_trial_title">Ton essai Pro est actif</string>
+    <string name="settings_pro_trial_remaining">%d jour(s) restant(s)</string>
+    <string name="settings_pro_trial_ends">Fin de l\'essai : %s</string>
+    <string name="settings_pro_trial_body">Tu gardes l\'analyse photo, le texte libre et les bilans IA jusqu\'à cette date.</string>
+    <string name="settings_pro_trial_choose_plan">Choisir mon plan</string>
     <string name="settings_pro_trial_billing_note">Ton abonnement débute le %s. Annule avant pour ne pas être facturé.</string>
-    <string name="settings_pro_active_label">%s · Actif</string>
+    <string name="settings_pro_active_label">Plan %s</string>
     <string name="settings_pro_active_renews">Se renouvelle le %s</string>
+    <string name="settings_pro_annual_upsell_title">Économise avec l\'annuel</string>
+    <string name="settings_pro_annual_upsell_body">2 mois offerts par rapport au mensuel.</string>
+    <string name="settings_pro_annual_upsell_cta">Voir l\'offre annuelle</string>
     <string name="settings_pro_manage">Gérer l\'abonnement</string>
     <string name="settings_pro_payment_failed_title">Problème de paiement</string>
     <string name="settings_pro_payment_failed_body">Mets à jour ton moyen de paiement pour conserver l\'accès Pro.</string>
     <string name="settings_pro_payment_failed_cta">Régler le problème</string>
     <string name="settings_pro_badge">PRO</string>
+    <string name="settings_dev_subscription_section">DEV ABONNEMENT</string>
+    <string name="settings_dev_subscription_label">Plan</string>
+    <string name="settings_dev_subscription_server">Backend</string>
+    <string name="settings_dev_subscription_free">Gratuit</string>
+    <string name="settings_dev_subscription_trial_7">Essai - 7 jours</string>
+    <string name="settings_dev_subscription_trial_1">Essai - 1 jour</string>
+    <string name="settings_dev_subscription_expired">Expiré</string>
+    <string name="settings_dev_subscription_pro_monthly">Pro mensuel</string>
+    <string name="settings_dev_subscription_pro_annual">Pro annuel</string>
+    <string name="settings_dev_subscription_payment_failed">Paiement échoué</string>
 
     <!-- Onboarding Pro Offer -->
     <string name="onboarding_pro_before">Bonne nouvelle !</string>
@@ -244,4 +424,97 @@
     <string name="onboarding_pro_cta">C\'est parti !</string>
     <string name="onboarding_pro_later">Plus tard</string>
     <string name="onboarding_pro_footer">Profite de toutes les fonctionnalités Pro pendant 7 jours.</string>
+    <string name="onboarding_pro_feature1_title">Photo intelligente</string>
+    <string name="onboarding_pro_feature1_desc">Prends une photo, l\'IA calcule tes macros.</string>
+    <string name="onboarding_pro_feature2_title">Texte intelligent</string>
+    <string name="onboarding_pro_feature2_desc">Décris ton repas, l\'IA fait le reste.</string>
+    <string name="onboarding_pro_feature3_title">Bilan hebdo IA</string>
+    <string name="onboarding_pro_feature3_desc">Un résumé personnalisé chaque semaine.</string>
+
+    <!-- Main / Tab labels -->
+    <string name="tab_checkin">Bilans</string>
+
+    <!-- Check-in — liste -->
+    <string name="checkin_list_title">Bilans hebdomadaires</string>
+    <string name="checkin_list_new">Nouveau bilan</string>
+    <string name="checkin_list_stats_btn">Voir les stats</string>
+    <string name="checkin_list_empty_title">Aucun bilan pour l\'instant</string>
+    <string name="checkin_list_empty_desc">Appuyez sur + pour commencer votre premier bilan hebdomadaire.</string>
+    <string name="checkin_list_hidden">%d bilan(s) masqué(s) — débloquez l\'historique</string>
+    <string name="checkin_list_item_weight">%s kg</string>
+    <string name="checkin_list_item_photos">%d photo(s)</string>
+
+    <!-- Check-in — stats rapides -->
+    <string name="checkin_quick_stat_arm">Bras moy.</string>
+
+    <!-- Check-in — écran stats -->
+    <string name="checkin_stats_title">Progression</string>
+    <string name="checkin_stats_period_4w">4 semaines</string>
+    <string name="checkin_stats_period_12w">12 semaines</string>
+    <string name="checkin_stats_period_all">Tout</string>
+    <string name="checkin_stats_weight_trend">Poids</string>
+    <string name="checkin_stats_waist_trend">Tour de taille</string>
+    <string name="checkin_stats_regularity">Régularité</string>
+    <string name="checkin_stats_regularity_value">%1$d / %2$d semaines</string>
+    <string name="checkin_stats_over_n_weeks">sur %d semaines</string>
+    <string name="checkin_stats_empty">Pas encore assez de données</string>
+
+    <!-- Check-in — assistant -->
+    <string name="checkin_wizard_title_new">Nouveau bilan</string>
+    <string name="checkin_wizard_title_edit">Modifier le bilan</string>
+    <string name="checkin_wizard_step_dates">Période</string>
+    <string name="checkin_wizard_step_measurements">Mesures</string>
+    <string name="checkin_wizard_step_feelings">Ressenti</string>
+    <string name="checkin_wizard_step_photos">Photos</string>
+    <string name="checkin_wizard_step_summary">Résumé</string>
+    <string name="checkin_wizard_next">Suivant</string>
+    <string name="checkin_wizard_back">Retour</string>
+    <string name="checkin_wizard_save">Enregistrer</string>
+    <string name="checkin_wizard_week_selector">Sélectionner une semaine</string>
+    <string name="checkin_wizard_days_selected">Jours inclus</string>
+    <string name="checkin_wizard_existing_warning">Un bilan existe déjà pour cette semaine.</string>
+    <string name="checkin_wizard_weight">Poids (kg)</string>
+    <string name="checkin_wizard_shoulders">Épaules (cm)</string>
+    <string name="checkin_wizard_chest">Poitrine (cm)</string>
+    <string name="checkin_wizard_arm_left">Bras gauche (cm)</string>
+    <string name="checkin_wizard_arm_right">Bras droit (cm)</string>
+    <string name="checkin_wizard_waist">Tour de taille (cm)</string>
+    <string name="checkin_wizard_hips">Hanches (cm)</string>
+    <string name="checkin_wizard_thigh_left">Cuisse gauche (cm)</string>
+    <string name="checkin_wizard_thigh_right">Cuisse droite (cm)</string>
+    <string name="checkin_wizard_mental_feeling">Ressenti mental</string>
+    <string name="checkin_wizard_physical_feeling">Ressenti physique</string>
+    <string name="checkin_wizard_feeling_tags">Mots-clés</string>
+    <string name="checkin_wizard_feeling_placeholder">Décrivez votre ressenti…</string>
+    <string name="checkin_wizard_photos_info">Photos (max 3)</string>
+    <string name="checkin_wizard_photos_count">%1$d / %2$d ajoutée(s)</string>
+    <string name="checkin_wizard_nutrition_loading">Chargement du résumé nutritionnel…</string>
+    <string name="checkin_wizard_nutrition_over_n_days">Moy. sur %d jours</string>
+    <string name="checkin_wizard_avg_protein">Protéines</string>
+    <string name="checkin_wizard_avg_calories">Calories</string>
+    <string name="checkin_wizard_avg_fat">Lipides</string>
+    <string name="checkin_wizard_avg_carbs">Glucides</string>
+    <string name="checkin_wizard_avg_water">Eau</string>
+    <string name="checkin_wizard_no_nutrition">Aucune donnée nutritionnelle pour cette période.</string>
+
+    <!-- Check-in — mots-clés ressenti -->
+    <string name="checkin_tag_energy">Énergie élevée</string>
+    <string name="checkin_tag_fatigue">Fatigue</string>
+    <string name="checkin_tag_stress">Stress</string>
+    <string name="checkin_tag_sleep">Bon sommeil</string>
+    <string name="checkin_tag_motivation">Motivé(e)</string>
+    <string name="checkin_tag_soreness">Courbatures</string>
+    <string name="checkin_tag_digestion">Bonne digestion</string>
+    <string name="checkin_tag_mood">Bonne humeur</string>
+
+    <!-- Check-in — détail -->
+    <string name="checkin_detail_measurements">Mesures</string>
+    <string name="checkin_detail_feelings">Ressenti</string>
+    <string name="checkin_detail_nutrition">Nutrition</string>
+    <string name="checkin_detail_edit">Modifier</string>
+    <string name="checkin_detail_delete">Supprimer</string>
+    <string name="checkin_detail_delete_confirm_title">Supprimer le bilan ?</string>
+    <string name="checkin_detail_delete_confirm_body">Cette action est irréversible.</string>
+    <string name="checkin_detail_delete_confirm">Supprimer</string>
+    <string name="checkin_detail_no_measurements">Aucune mesure enregistrée.</string>
 </resources>
