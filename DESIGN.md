@@ -1,60 +1,89 @@
 # Strakk — Design System
 
-> Warm dark, friendly, clean. Revolut-level quality, Duolingo-level approachability.
-> This file is the single source of truth for all UI decisions across iOS (SwiftUI) and Android (Jetpack Compose).
+> Deep navy, warm orange accent. Premium nutrition coach, not a gym timer.
+> This file is the single source of truth for every UI decision across iOS (SwiftUI) and Android (Jetpack Compose).
+> The shipped iOS implementation is canonical. Any future iOS or Android change must align here first.
 
 ---
 
 ## 1. Visual Theme
 
-**Personality:** A supportive coach, not a drill sergeant. The app motivates without guilt-tripping.
-**Aesthetic:** Warm, grounded, confident. High-end sportswear brand, not a gaming app.
-**Mode:** Dark primary (gym context — low light, reduces eye strain).
-**Feel:** Premium but approachable. Data-rich without being overwhelming. You open it with pleasure.
+**Personality:** A supportive coach. Calm, grounded, confident. Motivates without guilt.
+**Aesthetic:** Premium nutrition / lifestyle product. Deep midnight surfaces with a single warm orange accent for action and progress.
+**Mode:** Dark only. Optimized for one-handed use, low-light gym/kitchen contexts, and quick glances.
+**Feel:** Data-rich without clutter. The user opens it daily because the data is legible and the interactions feel native.
 
-**Key references:**
-- Revolut: information density done right, clean data presentation, subtle depth
-- Duolingo dark mode: warm dark background, friendly feel, makes you want to come back
-- NOT: neon gym bro aesthetic, cold tech blue, cluttered dashboards
+**Reference benchmarks:**
+- Revolut: information density done right, calm hierarchy.
+- Whoop / Oura: dark calm, restraint with color, focus on numbers.
+- Apple Fitness: native iOS controls, generous touch targets, soft haptics.
+
+**Anti-references:**
+- Neon gym-bro aesthetic.
+- Generic AI-looking dashboards with stacked centered icon cards.
+- Glassy gradients and purple-violet color floods.
 
 ---
 
 ## 2. Colors
 
-### Core Palette
+All colors live in `iosApp/iosApp/Theme/StrakkColors.swift` and the equivalent Android tokens. Never use hex literals in views.
+
+### Core palette
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `background` | `#151720` | App background, base layer |
-| `surface-1` | `#1C1D2B` | Cards, input fields, bottom sheets |
-| `surface-2` | `#242536` | Elevated cards, dropdown menus, popovers |
-| `surface-3` | `#2C2D40` | Modals, overlays, floating elements |
-| `primary` | `#E07C4F` | CTAs, active states, progress indicators, selected tabs |
-| `primary-light` | `#F0A868` | Badges, highlights, secondary buttons, hover/press states |
-| `text-primary` | `#F0F0F5` | Headings, body text, primary labels |
-| `text-secondary` | `#9898AC` | Captions, placeholders, inactive labels |
-| `text-tertiary` | `#6B6B80` | Disabled text, hints |
-| `divider` | `#2C2D40` | Separators, borders (subtle, not prominent) |
+| `background` | `#050918` | App background, base layer behind every screen |
+| `background-elevated` | `#080D1F` | Tab bar background, top nav background, persistent chrome |
+| `background-edge` | `#0B1028` | Edge gradients and subtle separation |
+| `surface-1` | `#10162F` | Cards, list rows, input fields, default elevated content |
+| `surface-1-gradient-top` / `bottom` | `#121833` / `#0C1127` | Optional vertical gradient inside `surface-1` for hero cards |
+| `surface-2` | `#151B38` | Hover/press, secondary buttons, button-track for progress |
+| `surface-3` | `#1A2142` | Modals, dialogs, floating menus |
 
-### Semantic Colors
+### Text
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `success` | `#4DAE6A` | Goals reached, session completed, PRs |
+| `text-primary` | `#F4F6FF` | Headings, body, primary numbers |
+| `text-secondary` | `#9CA1B8` | Captions, supporting text, inactive labels |
+| `text-tertiary` | `#6F748C` | Hints, placeholders, time stamps |
+| `text-disabled` | `#50566F` | Disabled controls, very low-emphasis text |
+
+### Accents
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `primary` / `accent-orange` | `#FF7A3D` | CTAs, active progress, brand accent, protein |
+| `primary-light` | `#FF9A55` | Hover/secondary highlight, calorie color |
+| `accent-orange-glow` | `rgba(#FF7A3D, 0.35)` | Soft glow under primary CTAs (use sparingly) |
+| `accent-orange-faint` | `rgba(#FF7A3D, 0.08)` | Tinted backgrounds for primary chips/badges |
+| `accent-orange-border` | `rgba(#FF7A3D, 0.18)` | Outlines on tinted primary backgrounds |
+| `water` / `accent-blue` | `#4B8DFF` | Hydration only |
+| `accent-blue-light` | `#67B7FF` | Hover/highlight on water controls |
+| `accent-yellow` | `#FFC84D` | Fat (lipids) — used inside macro cards/charts only |
+| `accent-indigo` | `#637CFF` | Carbs (glucides) — used inside macro cards/charts only |
+| `success` | `#4DAE6A` | Goal reached, positive deltas |
 | `error` | `#E05252` | Destructive actions, validation errors |
 | `warning` | `#E0A84D` | Approaching limits, attention needed |
-| `water` | `#5B9BD5` | Water tracking (the only blue — contextually meaningful) |
-| `protein` | `#E07C4F` | Protein tracking (uses primary — the hero metric) |
-| `calories` | `#F0A868` | Calorie tracking (uses primary-light) |
 
-### Color Rules
+### Borders & dividers
 
-- The primary accent (`#E07C4F`) is used **sparingly** — CTAs, active states, key progress indicators. NOT on every element.
-- Most of the UI is neutral (surfaces + text). The accent is a warm pop, not a flood.
-- Depth is created through **surface layers** (surface-1 → 2 → 3), not heavy shadows.
-- Borders are rare and subtle (`divider` color). Prefer spacing and surface contrast to separate elements.
-- iOS: adapt to system semantic colors where possible, use these tokens for custom components.
-- Android: define a Material 3 `ColorScheme` from these tokens. Support dynamic color as an option but default to this palette.
+| Token | Hex (rgba) | Usage |
+|-------|------------|-------|
+| `border-subtle` | `rgba(#7D89BE, 0.25)` | Default outlines on tinted/translucent surfaces |
+| `border-faint` | `rgba(#858FBE, 0.18)` | Hairline borders on input fields |
+| `divider-strong` | `rgba(#969DC8, 0.22)` | Section separators inside dense surfaces |
+| `divider-weak` | `rgba(#FFFFFF, 0.12)` | Minimal separators (rare) |
+
+### Color rules
+
+- The accent (`primary`) is used **sparingly** — CTAs, active state, key progress indicators. Never floods the screen.
+- Most surfaces are neutral. Color comes from data, not chrome.
+- Depth is communicated by **surface stepping** (`background → surface-1 → surface-2 → surface-3`), not drop shadows.
+- `accent-yellow` and `accent-indigo` are **macro-only**. They never appear on toolbars, primary buttons, headers, badges, or general UI.
+- `accent-blue` is **water-only**. No other surface uses blue as a primary visual cue.
+- **Maximum 2 accent colors per screen** outside of the macro grid. The macro grid is the documented exception.
 
 ---
 
@@ -62,76 +91,89 @@
 
 ### Font
 
-- **iOS:** SF Pro (system default) — do NOT use custom fonts
-- **Android:** System default (Roboto / Google Sans) — do NOT use custom fonts
-- Consistency comes from **weight and size hierarchy**, not typeface variety.
+- **iOS:** SF Pro (system default) via SwiftUI `Font.system(...)`. Always with a semantic `TextStyle` to honor Dynamic Type.
+- **Android:** System default (Roboto / Google Sans).
+- Consistency comes from the weight/size hierarchy, not typeface variety.
 
 ### Scale
 
-| Token | Size | Weight | Usage |
-|-------|------|--------|-------|
-| `display` | 32pt | Bold (700) | Hero numbers (daily protein total, timer) |
-| `heading-1` | 24pt | Semibold (600) | Screen titles |
-| `heading-2` | 20pt | Semibold (600) | Section headers |
-| `heading-3` | 17pt | Medium (500) | Card titles, list item titles |
-| `body` | 15pt | Regular (400) | Body text, descriptions |
-| `body-bold` | 15pt | Semibold (600) | Emphasized body text |
-| `caption` | 13pt | Regular (400) | Secondary info, timestamps |
-| `caption-bold` | 13pt | Medium (500) | Labels, badges |
-| `overline` | 11pt | Semibold (600) | Section labels, categories (uppercase tracking) |
+The Swift implementation lives in `iosApp/iosApp/Theme/StrakkTypography.swift` and uses semantic text styles so all text scales with Dynamic Type.
 
-### Typography Rules
+| Token | Swift mapping | Approx weight | Usage |
+|-------|---------------|---------------|-------|
+| `display-hero` | `.largeTitle` heavy | 800 | Hero counter (e.g. daily kcal total at top of Today) |
+| `display` | `.largeTitle` bold | 700 | Hero numbers, big stats |
+| `heading-1` | `.title` bold | 700 | Screen titles |
+| `heading-2` | `.title2` bold | 700 | Section headers, large card titles |
+| `heading-3` | `.headline` semibold | 600 | List item titles, card titles |
+| `body-large` | `.body` medium | 500 | Emphasized body |
+| `body` | `.subheadline` regular | 400 | Default body |
+| `body-bold` | `.subheadline` semibold | 600 | Inline emphasis (totals, values) |
+| `caption` | `.caption` regular | 400 | Secondary info, timestamps |
+| `caption-bold` | `.caption` semibold | 600 | Labels, badge content, field labels |
+| `overline` | `.caption2` bold + 1pt kerning | 700 | Section overlines (uppercase labels like "NUTRITION") |
 
-- **Numbers and data** use `display` or `heading-1` with tabular figures (monospaced numbers for alignment).
-- Headlines are **left-aligned** (no center alignment except empty states).
-- Line height: 1.4× for body text, 1.2× for headings.
-- Max line width: ~65 characters for readability.
+### Typography rules
+
+- Numbers use `display` / `display-hero` / `heading-2` with `.monospacedDigit()` to keep figures aligned.
+- Use `.contentTransition(.numericText())` on changing numbers (totals, counters).
+- Headings are left-aligned. Center alignment is only allowed in empty/loading/error states.
+- Body line height: 1.4×. Heading line height: 1.2×.
+- Max line width for body copy: ~65 characters.
 
 ---
 
 ## 4. Spacing & Layout
 
-### Spacing Scale (base unit: 4pt)
+### Spacing scale (base unit: 4pt)
+
+The Swift enum is `iosApp/iosApp/Theme/StrakkSpacing.swift`. **The Swift token names override the prior 4-step naming.**
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `space-xs` | 4pt | Tight gaps (icon to label) |
-| `space-sm` | 8pt | Inside compact components |
-| `space-md` | 12pt | Default inner padding |
-| `space-lg` | 16pt | Card inner padding, between related items |
-| `space-xl` | 24pt | Between sections |
-| `space-2xl` | 32pt | Screen top/bottom padding, major separations |
+| `xxs` | 4pt | Icon-to-label, micro gaps |
+| `xs` | 8pt | Inside compact components |
+| `sm` | 12pt | Default inner padding for tight cards/badges |
+| `md` | 16pt | Default card inner padding, between related items |
+| `lg` | 20pt | **Screen horizontal margin**, between sub-sections |
+| `xl` | 24pt | Between sections |
+| `xxl` | 32pt | Screen top/bottom padding, major separations |
+| `xxxl` | 40pt | Empty-state vertical breathing room |
 
-### Layout Rules
+### Layout rules
 
-- **Screen margins:** 20pt horizontal
-- **Card padding:** 16pt all sides
-- **Section spacing:** 24pt between sections
-- **Generous whitespace** — the app should breathe. When in doubt, add more space.
-- **Single column** layout — no side-by-side cards except summary stats (protein / calories / water).
-- Summary stat cards: 3 across, equal width, same height.
+- **Screen margins:** `lg` (20pt) horizontal.
+- **Card padding:** `md` (16pt) default; `sm` (12pt) for compact rows.
+- **Section spacing:** `xl` (24pt) between sections.
+- **Single-column layout** as a rule. Side-by-side only for the macro summary grid.
+- **Macro summary grid:** 2×2, equal width, equal height.
 
-### Corner Radius
+### Corner radius
+
+The Swift enum is `iosApp/iosApp/Theme/StrakkRadius.swift`. The implementation runs on a deeper radius scale than the prior reference.
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `radius-sm` | 8pt | Small elements (badges, chips, tags) |
-| `radius-md` | 12pt | Cards, input fields, buttons |
-| `radius-lg` | 16pt | Bottom sheets, modals |
-| `radius-full` | 9999pt | Circular elements (avatars, FABs, progress rings) |
+| `sm` | 12pt | Cards, inputs, default buttons |
+| `md` | 18pt | Modal/sheet inner cards, primary CTAs in marketing surfaces |
+| `lg` | 24pt | Bottom sheet outer corners |
+| `xl` | 32pt | Hero/feature surfaces |
+| `xxl` | 36pt | Welcome / paywall hero containers |
+| `xxxl` | 56pt | Decorative/hero badges only |
+| `full` | `.capsule` | Pills, chips, FABs, progress bars |
 
-### Elevation (via surface layers, not shadows)
+### Elevation through surface stepping
 
-Depth is communicated through **background color stepping**, not drop shadows:
+Depth is communicated by background color stepping, not drop shadows:
 
 | Level | Surface | Usage |
 |-------|---------|-------|
-| Base | `background` (#151720) | Screen background |
-| Level 1 | `surface-1` (#1C1D2B) | Cards, main content containers |
-| Level 2 | `surface-2` (#242536) | Menus, dropdowns, elevated cards |
-| Level 3 | `surface-3` (#2C2D40) | Modals, dialog overlays |
+| Base | `background` | Screen background |
+| L1 | `surface-1` | Cards, list rows |
+| L2 | `surface-2` | Pressed state, secondary buttons, progress track |
+| L3 | `surface-3` | Modals, popovers |
 
-Shadows: **minimal to none**. If used, very subtle (2pt blur, 10% opacity black). The surface color IS the elevation.
+Drop shadows are minimal to none. If used, only on Liquid Glass / floating bars.
 
 ---
 
@@ -139,76 +181,115 @@ Shadows: **minimal to none**. If used, very subtle (2pt blur, 10% opacity black)
 
 ### Buttons
 
-**Primary (CTA):**
-- Background: `primary` (#E07C4F)
-- Text: `#FFFFFF` bold
-- Radius: `radius-md` (12pt)
-- Height: 52pt (large touch target — gym context, sweaty hands)
-- Full width on forms, fitted on toolbars
-- Press state: darken 10%
+The Swift implementations live in `iosApp/iosApp/Theme/StrakkButton.swift`.
 
-**Secondary:**
-- Background: `surface-2` (#242536)
-- Text: `text-primary` (#F0F0F5)
-- Border: none (surface contrast is enough)
-- Same radius and height as primary
+**Primary (CTA) — `StrakkPrimaryButton`:**
+- Background: `primary`.
+- Text: `#FFFFFF`, `body-bold`.
+- Radius: `sm` (12pt).
+- Height: 52pt (large touch target).
+- Disabled background: `surface-2`.
+- Disabled text: `text-tertiary`.
+- Press: scale 0.97 + slight darken, ~100ms.
+- Full width on forms; fitted on toolbars.
 
-**Text/Link:**
-- No background
-- Text: `primary` (#E07C4F)
-- Used for "Cancel", "Skip", "See all"
+**Secondary — `StrakkSecondaryButton`:**
+- Background: `surface-2`.
+- Text: `text-primary`, `body-bold`.
+- Same radius and height as primary.
+- Press: scale 0.97 + lift to `surface-3`.
 
-**Destructive:**
-- Background: `error` (#E05252)
-- Text: `#FFFFFF` bold
-- Used only for delete confirmations
+**Destructive — `StrakkDestructiveButton`:**
+- Background: `error`.
+- Text: `#FFFFFF`, `body-bold`.
+- Used only for destructive confirmations.
+
+**Text/link — `StrakkTextButton`:**
+- No background.
+- Text: `primary`, `body-bold` for emphasis or `body` for de-emphasis.
+- Used for "Skip", "See all", inline links inside text blocks.
+
+**Close — `StrakkCloseButton`:**
+- SF Symbol `xmark` (plain, not filled).
+- Tint: `text-secondary`.
+- Tap target: 44pt minimum (iOS HIG).
+- Accessibility label localized as `"Close"`.
+
+**Pro badge — `ProBadge`:**
+- Pill, `accent-orange-faint` background, `primary` text.
+- Used to mark gated capabilities.
 
 ### Cards
 
-- Background: `surface-1`
-- Radius: `radius-md` (12pt)
-- Padding: `space-lg` (16pt)
-- No border, no shadow — the surface contrast separates from background
-- Content: left-aligned, consistent internal spacing
+- Background: `surface-1`.
+- Radius: `sm` (12pt).
+- Padding: `md` (16pt).
+- No border, no shadow — the surface contrast separates from the background.
+- Content: left-aligned.
 
-### Input Fields
+### Input fields
 
-- Background: `surface-1`
-- Text: `text-primary`
-- Placeholder: `text-tertiary`
-- Border: 1pt `divider` color, changes to `primary` on focus
-- Radius: `radius-md`
-- Height: 48pt
-- Label above (not floating)
+- Background: `surface-1`.
+- Text: `text-primary`. Placeholder: `text-tertiary`.
+- Border: 1pt `border-faint`. On error: `error`. On focus: `primary`.
+- Radius: `sm` (12pt).
+- Height: 48pt.
+- Label above the field, `caption-bold` `text-secondary`.
 
-### Bottom Sheets
+### Sheets
 
-- Background: `surface-2`
-- Radius: `radius-lg` (16pt) top corners only
-- Drag indicator: `text-tertiary`, 36pt wide, 4pt tall, centered
-- Content padding: `space-lg`
+The Swift sheet pattern lives in `iosApp/iosApp/Theme/StrakkSheet.swift`.
 
-### Tab Bar
+- **Default close pattern:** leading `StrakkCloseButton` (plain `xmark`) with localized accessibility label.
+- **Title:** centered inline `navigationTitle`.
+- **Background:** `background`.
+- **Drag indicator:** visible.
+- **Detents:**
+  - Quick choice / picker: `[.medium]`.
+  - Focused form: `[.large]`.
+  - Detail view (read-only): `[.medium, .large]`.
 
-- Background: `surface-1`
-- Active icon + label: `primary`
-- Inactive icon + label: `text-secondary`
-- 5 tabs: Today, Sessions, Calendar, Check-ins, Settings
-- iOS: respect Liquid Glass when running iOS 26+
-- Android: Material 3 NavigationBar component
+**Allowed exceptions** (must be deliberate):
+- Camera/scanner overlays use a custom floating close inside the camera UI.
+- Paywall/marketing full-screen surfaces may use a circular `xmark` floating top-right because the layout is brochure-like.
 
-### Progress Indicators
+### Tab bar
 
-- **Progress bar:** height 8pt, radius full, track = `surface-2`, fill = `primary`
-- **Progress ring:** stroke 6pt, track = `surface-2`, fill = `primary`, animated fill
-- **Goal achieved:** fill changes to `success`, subtle pulse animation
+- Liquid Glass on iOS 26+. Standard `TabView` otherwise.
+- Active tint: `primary`. Inactive tint: `text-secondary`.
+- Background: `background-elevated`.
+
+### Progress indicators
+
+- **Linear progress bar:** height 6pt, `Capsule` shape, track `surface-2`, fill macro/accent color.
+- **Goal reached/exceeded:** fill switches to `success`. Subtle 250ms ease-out transition.
+- **Progress ring:** stroke 6pt, track `surface-2`, fill `primary`. `success` on goal reached.
+
+### Macro card
+
+The Swift implementation lives in `iosApp/iosApp/Theme/MacroCard.swift`.
+
+- Layout: icon-tile (28×28, tinted background) + label + big value + progress bar.
+- Used in **both** Today and Calendar Day to keep nutrition language consistent.
+- Always shows the bar. When no goal exists, the bar fills to 0 and the unit appears without `/ goal`.
+- Goal reached → bar fill is `success`.
+- Macro accent palette inside the card:
+  - Protein → `primary`.
+  - Calories → `primary-light`.
+  - Fat → `accent-yellow`.
+  - Carbs → `accent-indigo`.
 
 ### Lists
 
-- Item height: min 56pt (touch target)
-- Divider: `divider` color, inset (not full-width)
-- Swipe actions: background colored (error for delete, surface-2 for archive)
-- Reorderable items: drag handle icon in `text-tertiary`
+- Item height: minimum 56pt (touch target).
+- Divider: `divider-weak`, inset.
+- Swipe actions: destructive uses `error` background.
+
+### Empty / loading / error states
+
+- Empty state component centered, with a calm illustration or SF Symbol, `heading-3` title, `caption` description, optional CTA.
+- Loading is either a centered `ProgressView` tinted `primary`, or a skeleton no longer than 2 seconds.
+- Errors surface user-safe messages only. **No raw HTTP statuses, stack traces, or developer details** in UI text.
 
 ---
 
@@ -216,56 +297,46 @@ Shadows: **minimal to none**. If used, very subtle (2pt blur, 10% opacity black)
 
 ### Principles
 
-- **Purposeful, not decorative.** Every animation communicates something (state change, feedback, progress).
-- **Quick and responsive.** Durations: 150-300ms max. No slow fades.
-- **Subtle.** The user should feel the polish, not notice the animations.
+- **Purposeful, not decorative.**
+- **Quick.** 100–300ms typical. Never above 400ms.
+- **Subtle.** The user feels polish; they shouldn't notice individual animations.
 
-### Specific Animations
+### Specific animations
 
 | Interaction | Animation | Duration |
 |-------------|-----------|----------|
-| Button press | Scale down to 0.97 + darken | 100ms |
-| Card tap | Brief highlight (surface-2 flash) | 150ms |
-| Progress update | Smooth fill with ease-out | 300ms |
-| Goal reached | Progress ring completes + color shift to success + haptic | 400ms |
-| Screen transition | iOS native push/pop, Android shared element | Platform default |
-| Pull to refresh | Custom indicator in `primary` color | Platform default |
-| Swipe to delete | Slide reveal + red background | 200ms |
-| Water quick-add | Ripple from button + counter increment | 200ms |
+| Button press | Scale 0.97 + slight darken | 100ms |
+| Card tap | Brief `surface-2` flash | 150ms |
+| Number change | `.contentTransition(.numericText())` | system default |
+| Progress fill | Ease-out smooth fill | 250ms |
+| Goal reached | Fill color shift to `success` + light haptic | 300ms |
+| Sheet present/dismiss | Native iOS modal | system default |
+| Pull to refresh | `primary`-tinted indicator | system default |
 
-### Haptic Feedback
+### Haptics
 
-- Button press: light impact
-- Goal reached: success notification
-- Swipe action: medium impact
-- Timer complete: heavy impact + sound
+- Button press: `.light` impact.
+- Goal reached: `.success` notification.
+- Destructive confirm: `.medium` impact.
+- Errors: `.error` notification.
 
-### Anti-Patterns (Motion)
+### Anti-patterns
 
-- NO confetti, fireworks, particle effects
-- NO bouncing/spring animations on data elements
-- NO loading skeleton shimmer that lasts more than 2 seconds
-- NO auto-playing animations that loop (except active timer)
-- NO transitions slower than 400ms
+- No confetti, fireworks, particle effects.
+- No bouncing/spring on data values.
+- No skeleton shimmer over 2s.
+- No transitions over 400ms.
 
 ---
 
-## 7. Gym Context UX
+## 7. Localization & Copy
 
-### Physical Constraints
-
-- **Large touch targets:** minimum 48pt (sweaty fingers, gloves, one-handed use)
-- **One-handed operation:** key actions reachable with thumb (bottom half of screen)
-- **Glanceable data:** during a set, the user glances at their phone for 1-2 seconds. Key info (next set, rest timer, weight) must be instantly readable.
-- **Minimal text input:** prefer taps, steppers, pickers over keyboards
-- **Dark mode:** reduces eye strain in dim gym lighting
-
-### Screen Priorities
-
-- **Today screen:** quick-start workout + daily stats. Not a dashboard — a launchpad.
-- **Workout mode:** full-screen focus. One exercise at a time. Big numbers. Timer always visible.
-- **Nutrition log:** quick add is key. Scan photo = 1 tap. Add water = 1 tap. Manual entry = minimal fields.
-- **Check-in:** weekly ritual, not daily. Low friction, photo-first.
+- **Source language: English.** All Swift `Text(...)`, `navigationTitle(...)`, `accessibilityLabel(...)`, alert titles, and button labels are written in English.
+- French translations live in `iosApp/iosApp/Localizable.xcstrings` under the `fr` locale.
+- Programmatic strings use `String(localized: "key")`.
+- Android equivalent: `androidApp/src/androidMain/res/values/strings.xml` with `values-fr/strings.xml` mirroring keys.
+- Never embed French (or any non-English) string literals directly in Swift or Kotlin source.
+- User-facing error copy is friendly, never technical. The repository layer is responsible for mapping infra errors to safe domain messages before they reach the UI.
 
 ---
 
@@ -273,49 +344,49 @@ Shadows: **minimal to none**. If used, very subtle (2pt blur, 10% opacity black)
 
 ### iOS (SwiftUI)
 
-- Use SF Symbols for all icons
-- Respect system font scaling (Dynamic Type)
-- iOS 26+: use Liquid Glass (`glassEffect`) on tab bar and floating toolbars
-- Native navigation transitions (push/pop)
-- `.sheet()` for bottom sheets (data-driven)
-- System haptics via UIFeedbackGenerator
+- SF Symbols for every icon. No bundled icon assets when an SF Symbol exists.
+- Honor Dynamic Type.
+- Use `NavigationStack`, never `NavigationView`.
+- Use `.sheet(item:)` over `.sheet(isPresented:)` whenever data drives the presentation.
+- Use `.task { ... }` for async work, not `.onAppear { Task { ... } }`.
+- iOS 26+: use Liquid Glass (`.glassEffect`) on the tab bar and floating overlays only. Gate behind `if #available(iOS 26, *)`.
+- Native haptics via `UIImpactFeedbackGenerator` / `UINotificationFeedbackGenerator`.
 
 ### Android (Jetpack Compose)
 
-- Use Material Icons (outlined variant)
-- Respect system font scaling
-- Material 3 `NavigationBar` for tabs
-- Edge-to-edge with `enableEdgeToEdge()`
-- Material 3 color tokens mapped from this palette
-- `HapticFeedbackType` for haptics
+- Material Icons (outlined variant).
+- Material 3 `ColorScheme` mapped from this palette.
+- Edge-to-edge with `enableEdgeToEdge()`.
+- `HapticFeedbackType` for haptics.
 
-### Shared Rules (Both Platforms)
+### Shared rules
 
-- Same information architecture (same screens, same data, same flow)
-- Different visual language (Apple feel vs Material feel)
-- Platform-native navigation patterns (don't force iOS patterns on Android or vice versa)
-- Same spacing and sizing tokens (adapted to platform density if needed)
+- Same information architecture and copy across platforms.
+- Different visual language inside the same design system.
+- Platform-native navigation patterns. Don't force iOS patterns on Android or vice versa.
 
 ---
 
-## 9. Do's and Don'ts
+## 9. Do's & Don'ts
 
 ### Do
 
-- Use surface layers for depth (not shadows)
-- Keep the accent (`primary`) for key actions and data
-- Leave generous whitespace
-- Make data the hero (big numbers, clear labels)
-- Design for thumb reach (actions at bottom)
-- Test in actual gym lighting conditions (dim)
-- Use platform-native components when possible
+- Use surface stepping for depth, not shadows.
+- Use the accent sparingly: CTAs, active state, key progress.
+- Leave generous whitespace.
+- Make data the hero — big numbers, clear labels.
+- Localize every user-facing string.
+- Reuse the shared button, close, and macro-card primitives.
+- Map infra errors to user-safe copy in the repository/use case layer.
 
 ### Don't
 
-- Don't use more than 2 accent colors on one screen
-- Don't put text on `primary` background unless it's a button
-- Don't use thin fonts (below weight 400) — hard to read in gym lighting
-- Don't center-align body text or lists
-- Don't add decorative elements that don't communicate information
-- Don't use colored backgrounds for cards (always `surface-1/2/3`)
-- Don't make the app feel like a generic LLM-generated UI — every detail should feel intentional
+- Don't write hex literals in views. Use `Color.strakk*` tokens.
+- Don't use more than 2 accent colors on one screen outside the macro grid.
+- Don't put text on `primary` background unless it's a button.
+- Don't use thin font weights (below 400) — gym lighting friendly.
+- Don't center-align body text or lists outside empty/loading/error states.
+- Don't add decorative chrome that doesn't communicate information.
+- Don't expose backend/HTTP details in UI strings.
+- Don't write French (or any non-English) literals in Swift / Kotlin source.
+- Don't reinvent close/cancel/CTA chrome per screen — use the shared primitives.
