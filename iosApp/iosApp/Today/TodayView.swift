@@ -275,13 +275,14 @@ struct TodayView: View {
         }()
 
         Button {
+            HapticEngine.light()
             viewModel.onEvent(TodayEventOnTrialBannerTapped())
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: StrakkSpacing.sm) {
                 Image(systemName: "clock.fill")
                     .font(.system(size: 15))
                     .foregroundStyle(Color.strakkWarning)
-                Text("Ton essai Pro expire dans \(days) jour\(days > 1 ? "s" : "")")
+                Text("Your Pro trial expires in \(days) days")
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextPrimary)
                 Spacer()
@@ -289,12 +290,12 @@ struct TodayView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Color.strakkTextSecondary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, StrakkSpacing.md)
+            .padding(.vertical, StrakkSpacing.sm)
             .background(Color.strakkSurface1, in: RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Ton essai Pro expire dans \(days) jours. Appuie pour découvrir les offres.")
+        .accessibilityLabel(Text("Your Pro trial expires in \(days) days. Tap to see plans."))
     }
 
     // timeline rows, action bars, empty state — TodayView+Timeline.swift / TodayView+ActionBars.swift

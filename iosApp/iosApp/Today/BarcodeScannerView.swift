@@ -82,33 +82,28 @@ struct BarcodeScannerView: View {
             DataScannerViewControllerRepresentable(onScan: onScan)
                 .ignoresSafeArea()
 
-            // Overlay controls
             VStack {
-                // Top bar
                 HStack {
-                    Button(action: onCancel) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Cancel")
-                                .font(.strakkBody)
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(.ultraThinMaterial, in: Capsule())
-                    }
-                    .accessibilityLabel("Cancel scan")
+                    Button(action: {
+                        HapticEngine.light()
+                        onCancel()
+                    }, label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(.ultraThinMaterial, in: Circle())
+                    })
+                    .accessibilityLabel(Text("Close scanner"))
 
                     Spacer()
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 60)
+                .padding(.horizontal, StrakkSpacing.lg)
+                .padding(.top, StrakkSpacing.xxxl + StrakkSpacing.lg)
 
                 Spacer()
 
-                // Bottom action
-                VStack(spacing: 12) {
+                VStack(spacing: StrakkSpacing.sm) {
                     Text("Point the camera at a barcode")
                         .font(.strakkCaption)
                         .foregroundStyle(.white.opacity(0.8))
@@ -118,13 +113,13 @@ struct BarcodeScannerView: View {
                         Text("Enter manually")
                             .font(.strakkBodyBold)
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 14)
+                            .padding(.horizontal, StrakkSpacing.xl)
+                            .padding(.vertical, StrakkSpacing.md)
                             .background(.ultraThinMaterial, in: Capsule())
                     }
-                    .accessibilityLabel("Enter barcode manually")
+                    .accessibilityLabel(Text("Enter barcode manually"))
                 }
-                .padding(.bottom, 60)
+                .padding(.bottom, StrakkSpacing.xxxl + StrakkSpacing.lg)
             }
         }
     }
@@ -133,44 +128,20 @@ struct BarcodeScannerView: View {
         ZStack {
             Color.strakkBackground.ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.system(size: 60))
-                    .foregroundStyle(Color.strakkTextTertiary)
-
-                Text("Scanner unavailable")
-                    .font(.strakkHeading2)
-                    .foregroundStyle(Color.strakkTextPrimary)
-
-                Text("The barcode scanner is not available on this device.")
-                    .font(.strakkBody)
-                    .foregroundStyle(Color.strakkTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-
-                Button(action: onManual) {
-                    Text("Enter manually")
-                        .font(.strakkBodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.strakkPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .padding(.horizontal, 40)
-                .accessibilityLabel("Enter meal manually")
+            VStack(spacing: StrakkSpacing.lg) {
+                StrakkEmptyState(
+                    icon: "barcode.viewfinder",
+                    title: "Scanner unavailable",
+                    message: "The barcode scanner is not available on this device.",
+                    actionTitle: "Enter manually",
+                    action: onManual
+                )
             }
         }
         .overlay(alignment: .topLeading) {
-            Button(action: onCancel) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color.strakkTextSecondary)
-                    .frame(width: 48, height: 48)
-            }
-            .accessibilityLabel("Close")
-            .padding(.top, 60)
-            .padding(.leading, 12)
+            StrakkCloseButton(action: onCancel)
+                .padding(.top, StrakkSpacing.xxxl + StrakkSpacing.lg)
+                .padding(.leading, StrakkSpacing.sm)
         }
     }
 }

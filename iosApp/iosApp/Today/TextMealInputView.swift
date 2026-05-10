@@ -23,9 +23,9 @@ struct TextMealInputView: View {
                     Text("Describe what you ate — be as specific as possible.")
                         .font(.strakkBody)
                         .foregroundStyle(Color.strakkTextSecondary)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        .padding(.bottom, 16)
+                        .padding(.horizontal, StrakkSpacing.lg)
+                        .padding(.top, StrakkSpacing.md)
+                        .padding(.bottom, StrakkSpacing.md)
 
                     // Text editor card
                     VStack(alignment: .trailing, spacing: 6) {
@@ -55,9 +55,9 @@ struct TextMealInputView: View {
                                 }
                         }
                         .background(Color.strakkSurface1)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: StrakkRadius.sm)
                                 .strokeBorder(
                                     isFocused ? Color.strakkPrimary : Color.strakkDivider,
                                     lineWidth: 1.5
@@ -75,41 +75,28 @@ struct TextMealInputView: View {
                             )
                             .monospacedDigit()
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, StrakkSpacing.lg)
 
                     Spacer()
 
-                    // Analyser button
-                    Button {
-                        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !trimmed.isEmpty else { return }
-                        onSubmit(trimmed)
-                    } label: {
-                        Text("Analyze")
-                            .font(.strakkBodyBold)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(
-                                canSubmit ? Color.strakkPrimary : Color.strakkSurface2
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .disabled(!canSubmit)
-                    .accessibilityLabel("Analyze described meal")
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 32)
+                    StrakkPrimaryButton(
+                        title: "Analyze",
+                        action: {
+                            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !trimmed.isEmpty else { return }
+                            onSubmit(trimmed)
+                        },
+                        isEnabled: canSubmit
+                    )
+                    .accessibilityLabel(Text("Analyze described meal"))
+                    .padding(.horizontal, StrakkSpacing.lg)
+                    .padding(.bottom, StrakkSpacing.xxl)
                 }
             }
             .navigationTitle("Describe your meal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler", action: onCancel)
-                        .font(.strakkBody)
-                        .foregroundStyle(Color.strakkPrimary)
-                        .accessibilityLabel("Annuler et fermer")
-                }
+                StrakkCloseToolbarItem(action: onCancel)
             }
         }
         .onAppear {

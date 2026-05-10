@@ -11,8 +11,8 @@ private let kMaxAmountML: Int = 2000
 //
 // 💧  1.5 L / 5 L                              [−]  [+]  [⚙]
 //
-// Tap court : ajoute / retire la quantité par défaut (250 mL).
-// Bouton ⚙ : ouvre une sheet compacte pour choisir une quantité custom.
+// * Short tap: add / remove the default amount (250 mL).
+// * Gear button: opens a compact sheet to pick a custom amount.
 
 struct WaterRow: View {
     let summary: DailySummaryData
@@ -188,8 +188,8 @@ struct WaterRow: View {
 
     private var headerText: String {
         let total = String(format: "%.1f L", totalL)
-        if let g = goalL {
-            return "\(total) / \(String(format: "%.1f L", g))"
+        if let goal = goalL {
+            return "\(total) / \(String(format: "%.1f L", goal))"
         }
         return total
     }

@@ -17,6 +17,8 @@ struct DailySummaryData: Equatable {
     let totalWater: Int
     let proteinGoal: Int?
     let calorieGoal: Int?
+    let fatGoal: Int?
+    let carbGoal: Int?
     let waterGoal: Int?
 }
 
