@@ -31,10 +31,37 @@ data class FoodCatalogItem(
 enum class FoodCatalogSource {
     /** ANSES CIQUAL — generic French foods, scientific reference, no brand. */
     Ciqual,
+
     /** Open Food Facts — pre-seeded subset of French branded products. */
     OffFr,
+
     /** Open Food Facts — fetched live and cached on demand. */
     OffLive,
+
     /** Manually curated by an admin. */
     ManualAdmin,
+
+    /** USDA FoodData Central — US reference database (SR Legacy). */
+    Usda,
+
+    /** USDA Foundation Foods — curated subset with more precise nutrient data. */
+    UsdaFoundation,
+
+    /** USDA Survey (FNDDS) — composite dishes (pizza, stews, fried rice, etc.). */
+    UsdaFndds,
+
+    /** USDA Branded Foods — brand-specific products (Coca-Cola, Barilla, etc.). */
+    UsdaBranded,
+}
+
+/** Returns the DB-persisted string representation of this [FoodCatalogSource]. */
+fun FoodCatalogSource.toDbString(): String = when (this) {
+    FoodCatalogSource.Ciqual -> "ciqual"
+    FoodCatalogSource.OffFr -> "off_fr"
+    FoodCatalogSource.OffLive -> "off_live"
+    FoodCatalogSource.ManualAdmin -> "manual_admin"
+    FoodCatalogSource.Usda -> "usda"
+    FoodCatalogSource.UsdaFoundation -> "usda_foundation"
+    FoodCatalogSource.UsdaFndds -> "usda_fndds"
+    FoodCatalogSource.UsdaBranded -> "usda_branded"
 }

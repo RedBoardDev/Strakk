@@ -1,9 +1,10 @@
 package com.strakk.shared.domain.repository
 
-import com.strakk.shared.domain.model.ActiveMealDraft
 import com.strakk.shared.domain.model.DraftItem
+import com.strakk.shared.domain.model.GroundedMealItem
 import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
+import com.strakk.shared.domain.model.ScanMealResult
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -129,20 +130,13 @@ interface MealRepository {
      * @param hint Optional user hint.
      * @param draftItemId Draft item ID; becomes the [MealEntry.id] of the result.
      */
-    suspend fun analyzePhotoSingle(
-        imageBase64: String,
-        hint: String?,
-        draftItemId: String,
-    ): DraftItem.Resolved
+    suspend fun analyzePhotoSingle(imageBase64: String, hint: String?, draftItemId: String): DraftItem.Resolved
 
     /**
      * Analyzes a single text description via `analyze-meal-single`.
      * Used as the per-item fallback when a batch call fails.
      */
-    suspend fun analyzeTextSingle(
-        description: String,
-        draftItemId: String,
-    ): DraftItem.Resolved
+    suspend fun analyzeTextSingle(description: String, draftItemId: String): DraftItem.Resolved
 
     /**
      * Analyzes a photo for a quick-add flow (outside of a Draft).
@@ -151,19 +145,45 @@ interface MealRepository {
      *   ready to be persisted via [NutritionRepository.addMeal].
      *   The [MealEntry.id] is empty — the DB generates one on insert.
      */
-    suspend fun analyzePhotoForQuickAdd(
-        imageBase64: String,
-        hint: String?,
-        logDate: String,
-    ): MealEntry
+    suspend fun analyzePhotoForQuickAdd(imageBase64: String, hint: String?, logDate: String): MealEntry
 
     /**
      * Analyzes a text description for a quick-add flow.
      *
      * @return A fresh [MealEntry] with [MealEntry.source] = [EntrySource.TextAi].
      */
-    suspend fun analyzeTextForQuickAdd(
-        description: String,
-        logDate: String,
-    ): MealEntry
+    suspend fun analyzeTextForQuickAdd(description: String, logDate: String): MealEntry
+
+    // --- V3 Meal Analysis ---
+
+    /**
+     * Calls the `scan-meal` edge function, which combines identification and
+     * grounding into a single VPS call. Returns AI predictions alongside
+     * fully grounded items.
+     *
+     * @param photoStoragePaths Supabase Storage paths already uploaded.
+     * @param hint Optional user hint to guide the AI.
+     * @param isTextOnly When true the edge function runs in text-only mode.
+     */
+    suspend fun scanMeal(
+        photoStoragePaths: List<String>,
+        hint: String? = null,
+        isTextOnly: Boolean = false,
+    ): ScanMealResult
+
+    /**
+     * Persists a fully grounded meal: inserts a `meals` row and all
+     * `meal_entries` with grounding metadata in a single logical transaction.
+     *
+     * [photoPathByPhotoIndex] maps prediction photo indices to their Supabase
+     * Storage paths so each entry gets the correct `photo_path`.
+     *
+     * @return The committed [Meal] with all entries populated.
+     */
+    suspend fun saveMealWithGroundedEntries(
+        name: String,
+        date: String,
+        items: List<GroundedMealItem>,
+        photoPathByPhotoIndex: Map<Int, String>,
+    ): Meal
 }

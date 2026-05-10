@@ -36,4 +36,25 @@ data class MealEntry(
      * to clean up orphan objects and by the UI to build signed URLs.
      */
     val photoPath: String? = null,
+
+    // --- V3 Grounding fields (all nullable for backward compatibility) ---
+
+    /** `food_catalog.id` of the matched catalogue entry. Null when ungrounded. */
+    val foodCatalogId: Long? = null,
+    /** Grounding source string: "ciqual", "usda", "off_fr", "off_live". */
+    val groundingSource: String? = null,
+    /** Gram-equivalent quantity used for macro computations. */
+    val quantityGrams: Double? = null,
+    /** Cooking method applied, if known. */
+    val cookingMethod: CookingMethod? = null,
+    /** True when a catalogue match was found and macros were computed from it. */
+    val isGrounded: Boolean = false,
+    /** AI confidence score in [0, 1]. */
+    val aiConfidence: Double? = null,
+    /** Catalogue ID of a user-corrected food match. */
+    val correctedFoodId: Long? = null,
+    /** Source string of a user-corrected food match. */
+    val correctedSource: String? = null,
+    /** User-corrected quantity in grams. */
+    val correctedQuantity: Double? = null,
 )
