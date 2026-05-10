@@ -9,6 +9,7 @@ sealed interface CheckInDetailUiState {
         val checkIn: CheckIn,
         val delta: CheckInDelta?,
         val photoUrls: Map<String, String>,
+        val isRefreshingNutrition: Boolean = false,
     ) : CheckInDetailUiState
 }
 
@@ -16,6 +17,7 @@ sealed interface CheckInDetailEvent {
     data object OnEdit : CheckInDetailEvent
     data object OnDelete : CheckInDetailEvent
     data object OnConfirmDelete : CheckInDetailEvent
+    data object OnRefreshNutrition : CheckInDetailEvent
 }
 
 sealed interface CheckInDetailEffect {

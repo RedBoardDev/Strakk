@@ -304,6 +304,8 @@ internal val presentationModule = module {
             getCheckInDelta = get(),
             getCheckInPhotoUrl = get(),
             deleteCheckIn = get(),
+            computeNutritionSummary = get(),
+            updateCheckIn = get(),
         )
     }
     viewModel { params ->

@@ -56,6 +56,7 @@ final class CheckInDetailViewModelWrapper {
     private let checkInId: String
 
     var state: CheckInDetailState = .loading
+    var isRefreshingNutrition: Bool = false
     var navigateToWizardCheckInId: String?
     var navigateBack = false
     var errorMessage: String?
@@ -72,6 +73,7 @@ final class CheckInDetailViewModelWrapper {
             let stream: AsyncStream<CheckInDetailUiState> = observeFlow(sharedVm.uiState)
             for await newState in stream {
                 self?.state = Self.mapState(newState)
+                self?.isRefreshingNutrition = (newState as? CheckInDetailUiStateReady)?.isRefreshingNutrition == true
             }
         }
 

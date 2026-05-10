@@ -103,7 +103,11 @@ struct CheckInDetailView: View {
                 )
 
                 if let nutrition = checkIn.nutritionSummary {
-                    CheckInNutritionSection(nutrition: nutrition)
+                    CheckInNutritionSection(
+                        nutrition: nutrition,
+                        isRefreshing: vm.isRefreshingNutrition,
+                        onRefresh: { vm.onEvent(CheckInDetailEventOnRefreshNutrition()) }
+                    )
                 } else {
                     CheckInEmptyNutritionSection()
                 }

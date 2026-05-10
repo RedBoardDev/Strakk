@@ -5,12 +5,33 @@ import shared
 
 struct CheckInNutritionSection: View {
     let nutrition: NutritionSummaryData
+    var isRefreshing: Bool = false
+    var onRefresh: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
-            Text("NUTRITION (\(nutrition.nutritionDays) days)")
-                .font(.strakkOverline)
-                .foregroundStyle(Color.strakkTextTertiary)
+            HStack(alignment: .center) {
+                Text("NUTRITION (\(nutrition.nutritionDays) days)")
+                    .font(.strakkOverline)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                Spacer()
+                if let onRefresh {
+                    Button(action: onRefresh) {
+                        if isRefreshing {
+                            ProgressView()
+                                .tint(Color.strakkTextTertiary)
+                                .scaleEffect(0.75)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Color.strakkTextTertiary)
+                        }
+                    }
+                    .disabled(isRefreshing)
+                    .frame(width: 22, height: 22)
+                    .accessibilityLabel(Text("Refresh nutrition"))
+                }
+            }
 
             VStack(spacing: StrakkSpacing.sm) {
                 LazyVGrid(

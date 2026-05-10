@@ -132,6 +132,7 @@
       }
     },
     "%@ / %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -716,6 +717,7 @@
       }
     },
     "AI not working? No problem." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -778,6 +780,7 @@
       }
     },
     "Analyze described meal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1255,6 +1258,7 @@
       }
     },
     "Coming soon" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1623,6 +1627,7 @@
       }
     },
     "Describe what you ate — be as specific as possible." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1719,6 +1724,7 @@
       }
     },
     "E.g. 200g grilled chicken, basmati rice, olive oil" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3195,6 +3201,7 @@
       }
     },
     "Pick the feelings that summarize your week, then describe your mental and physical state separately." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3360,6 +3367,9 @@
           }
         }
       }
+    },
+    "Refresh nutrition" : {
+
     },
     "Remove" : {
       "extractionState" : "stale",
@@ -3811,6 +3821,7 @@
       }
     },
     "Skip & add manually" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
