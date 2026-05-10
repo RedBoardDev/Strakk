@@ -1,12 +1,16 @@
 package com.strakk.shared.presentation.onboarding
 
 import androidx.lifecycle.viewModelScope
+import com.strakk.shared.domain.model.BillingResult
 import com.strakk.shared.domain.model.CalculateGoalsRequest
 import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.OnboardingData
+import com.strakk.shared.domain.model.SubscriptionPlan
 import com.strakk.shared.domain.usecase.CalculateGoalsUseCase
 import com.strakk.shared.domain.usecase.CompleteOnboardingUseCase
 import com.strakk.shared.domain.usecase.CreateProfileUseCase
+import com.strakk.shared.domain.usecase.PurchaseSubscriptionUseCase
+import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
 import com.strakk.shared.domain.usecase.SignUpUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import kotlinx.coroutines.launch
@@ -23,6 +27,8 @@ class OnboardingFlowViewModel(
     private val createProfile: CreateProfileUseCase,
     private val calculateGoals: CalculateGoalsUseCase,
     private val completeOnboarding: CompleteOnboardingUseCase,
+    private val purchaseSubscription: PurchaseSubscriptionUseCase,
+    private val refreshSubscriptionState: RefreshSubscriptionStateUseCase,
 ) : MviViewModel<OnboardingFlowUiState, OnboardingFlowEvent, OnboardingFlowEffect>(
     OnboardingFlowUiState(),
 ) {
@@ -54,10 +60,7 @@ class OnboardingFlowViewModel(
             is OnboardingFlowEvent.OnPasswordChanged -> setState { copy(password = event.password, signUpError = null) }
 
             is OnboardingFlowEvent.OnSkipProOffer -> emit(OnboardingFlowEffect.NavigateToHome)
-            is OnboardingFlowEvent.OnStartFreeTrial -> {
-                // TODO: Integrate RevenueCat trial start
-                emit(OnboardingFlowEffect.NavigateToHome)
-            }
+            is OnboardingFlowEvent.OnStartFreeTrial -> handleStartFreeTrial()
 
             is OnboardingFlowEvent.OnCalculateWithAi -> handleCalculateWithAi()
             is OnboardingFlowEvent.OnProteinGoalChanged -> setState { copy(proteinGoal = event.value) }
@@ -65,6 +68,19 @@ class OnboardingFlowViewModel(
             is OnboardingFlowEvent.OnFatGoalChanged -> setState { copy(fatGoal = event.value) }
             is OnboardingFlowEvent.OnCarbGoalChanged -> setState { copy(carbGoal = event.value) }
             is OnboardingFlowEvent.OnWaterGoalChanged -> setState { copy(waterGoal = event.value) }
+        }
+    }
+
+    private fun handleStartFreeTrial() {
+        viewModelScope.launch {
+            when (val result = purchaseSubscription(SubscriptionPlan.MONTHLY)) {
+                BillingResult.Success -> {
+                    refreshSubscriptionState()
+                    emit(OnboardingFlowEffect.NavigateToHome)
+                }
+                BillingResult.Cancelled -> emit(OnboardingFlowEffect.ShowError("Purchase cancelled"))
+                is BillingResult.Error -> emit(OnboardingFlowEffect.ShowError(result.message))
+            }
         }
     }
 

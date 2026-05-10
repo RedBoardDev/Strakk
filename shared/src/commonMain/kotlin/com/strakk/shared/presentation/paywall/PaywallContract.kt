@@ -3,6 +3,7 @@ package com.strakk.shared.presentation.paywall
 import com.strakk.shared.domain.model.Feature
 import com.strakk.shared.domain.model.FeatureMetadata
 import com.strakk.shared.domain.model.FeatureRegistry
+import com.strakk.shared.domain.model.PaywallOfferPrices
 import com.strakk.shared.domain.model.SubscriptionPlan
 
 data class PaywallUiState(
@@ -10,7 +11,11 @@ data class PaywallUiState(
     val highlightedFeature: Feature? = null,
     val selectedPlan: SubscriptionPlan = SubscriptionPlan.ANNUAL,
     val isProcessing: Boolean = false,
-    val isAlreadyPro: Boolean = false,
+    val currentPlan: SubscriptionPlan? = null,
+    val isTrial: Boolean = false,
+    val selectedPlanIsCurrent: Boolean = false,
+    val errorMessage: String? = null,
+    val offerPrices: PaywallOfferPrices = PaywallOfferPrices(),
 )
 
 sealed interface PaywallEvent {

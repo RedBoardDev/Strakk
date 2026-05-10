@@ -7,6 +7,8 @@ import com.strakk.shared.domain.model.SubscriptionState
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
 import com.strakk.shared.domain.usecase.ObserveProfileUseCase
 import com.strakk.shared.domain.usecase.ObserveSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.SyncBillingCustomerInfoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,8 @@ class RootViewModel(
     private val observeAuthStatus: ObserveAuthStatusUseCase,
     private val observeProfile: ObserveProfileUseCase,
     private val observeSubscriptionState: ObserveSubscriptionStateUseCase,
+    private val refreshSubscriptionState: RefreshSubscriptionStateUseCase,
+    private val syncBillingCustomerInfo: SyncBillingCustomerInfoUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<RootUiState>(RootUiState.Loading)
@@ -42,7 +46,11 @@ class RootViewModel(
                 _uiState.value = when (status) {
                     is AuthStatus.Loading -> RootUiState.Loading
                     is AuthStatus.Unauthenticated -> RootUiState.Unauthenticated
-                    is AuthStatus.Authenticated -> resolveAuthenticated()
+                    is AuthStatus.Authenticated -> {
+                        syncBillingCustomerInfo()
+                        refreshSubscriptionState()
+                        resolveAuthenticated()
+                    }
                 }
             }
         }
