@@ -1,6 +1,5 @@
 export interface EnvConfig {
   openaiApiKey: string;
-  anthropicApiKey: string;
   geminiApiKey?: string;
   qdrantUrl: string;
   qdrantApiKey?: string;
@@ -17,9 +16,6 @@ export function loadEnv(): EnvConfig {
 
   const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
   if (!openaiApiKey) missing.push("OPENAI_API_KEY");
-
-  const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!anthropicApiKey) missing.push("ANTHROPIC_API_KEY");
 
   const apiKey = Deno.env.get("API_KEY");
   if (!apiKey) missing.push("API_KEY");
@@ -39,7 +35,6 @@ export function loadEnv(): EnvConfig {
 
   return {
     openaiApiKey: openaiApiKey!,
-    anthropicApiKey: anthropicApiKey!,
     geminiApiKey,
     qdrantUrl,
     qdrantApiKey,
