@@ -30,8 +30,15 @@ struct CheckInDetailView: View {
                 ProgressView()
                     .tint(Color.strakkPrimary)
 
-            case .ready(let checkIn, let delta, let photoUrls):
-                mainContent(checkIn: checkIn, delta: delta, photoUrls: photoUrls)
+            case let .ready(checkIn, delta, photoUrls, trainingStats, isLoadingTraining, pdfOptions):
+                mainContent(
+                    checkIn: checkIn,
+                    delta: delta,
+                    photoUrls: photoUrls,
+                    trainingStats: trainingStats,
+                    isLoadingTraining: isLoadingTraining,
+                    pdfOptions: pdfOptions
+                )
             }
         }
         .navigationTitle("")
@@ -87,7 +94,14 @@ struct CheckInDetailView: View {
     // MARK: - Main content
 
     @ViewBuilder
-    private func mainContent(checkIn: CheckInData, delta: CheckInDeltaData?, photoUrls: [String: String]) -> some View {
+    private func mainContent(
+        checkIn: CheckInData,
+        delta: CheckInDeltaData?,
+        photoUrls: [String: String],
+        trainingStats: WeeklyTrainingStatsData?,
+        isLoadingTraining: Bool,
+        pdfOptions: PdfExportConfig
+    ) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
                 headerSection(checkIn: checkIn)
@@ -112,6 +126,12 @@ struct CheckInDetailView: View {
                     CheckInEmptyNutritionSection()
                 }
 
+                CheckInTrainingSection(
+                    stats: trainingStats,
+                    isLoading: isLoadingTraining,
+                    onRefresh: { vm.onEvent(CheckInDetailEventOnRefreshTraining()) }
+                )
+
                 actionButtons(checkIn: checkIn)
             }
             .padding(.horizontal, StrakkSpacing.lg)
@@ -125,30 +145,7 @@ struct CheckInDetailView: View {
                 ShareSheet(activityItems: items)
             }
         }
-        .sheet(isPresented: $showExportOptions) {
-            PdfExportOptionsSheet(
-                options: $exportOptions,
-                isGenerating: isGeneratingPdf,
-                onExport: {
-                    guard !isGeneratingPdf else { return }
-                    showExportOptions = false
-                    isGeneratingPdf = true
-                    let checkInForExport = pendingCheckIn
-                    Task {
-                        defer { isGeneratingPdf = false }
-                        guard let pdfData = await vm.generatePdf(options: exportOptions) else { return }
-                        let weekLabel = checkInForExport?.weekLabel ?? "checkin"
-                        let tempUrl = FileManager.default.temporaryDirectory
-                            .appendingPathComponent("CheckIn_\(weekLabel).pdf")
-                        try? pdfData.write(to: tempUrl)
-                        shareItems = [tempUrl]
-                    }
-                },
-                onCancel: { showExportOptions = false }
-            )
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-        }
+        .sheet(isPresented: $showExportOptions) { exportSheet }
     }
 
     // MARK: - Header
@@ -175,6 +172,7 @@ struct CheckInDetailView: View {
     private func actionButtons(checkIn: CheckInData) -> some View {
         Button {
             pendingCheckIn = checkIn
+            loadPersistedOptions()
             showExportOptions = true
         } label: {
             HStack(spacing: StrakkSpacing.xs) {
@@ -197,6 +195,63 @@ struct CheckInDetailView: View {
         }
         .disabled(isGeneratingPdf)
         .accessibilityLabel(Text("Share check-in as PDF"))
+    }
+
+    private var exportSheet: some View {
+        PdfExportOptionsSheet(
+            options: $exportOptions,
+            hasTrainingData: hasTrainingData,
+            isGenerating: isGeneratingPdf,
+            onExport: {
+                guard !isGeneratingPdf else { return }
+                saveExportOptions()
+                showExportOptions = false
+                isGeneratingPdf = true
+                let checkInForExport = pendingCheckIn
+                Task {
+                    defer { isGeneratingPdf = false }
+                    guard let pdfData = await vm.generatePdf(options: exportOptions) else { return }
+                    let weekLabel = checkInForExport?.weekLabel ?? "checkin"
+                    let tempUrl = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("CheckIn_\(weekLabel).pdf")
+                    try? pdfData.write(to: tempUrl)
+                    shareItems = [tempUrl]
+                }
+            },
+            onCancel: { showExportOptions = false }
+        )
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func loadPersistedOptions() {
+        if case .ready(_, _, _, _, _, let pdfOptions) = vm.state {
+            exportOptions = pdfOptions
+        }
+    }
+
+    private func saveExportOptions() {
+        let kmpOptions = PdfExportOptions(
+            includePhotos: exportOptions.includePhotos,
+            includeMeasurements: exportOptions.includeMeasurements,
+            includeFeelings: exportOptions.includeFeelings,
+            includeProtein: exportOptions.includeProtein,
+            includeCalories: exportOptions.includeCalories,
+            includeCarbs: exportOptions.includeCarbs,
+            includeFat: exportOptions.includeFat,
+            includeWater: exportOptions.includeWater,
+            includeAverages: exportOptions.includeAverages,
+            includeDailyData: exportOptions.includeDailyData,
+            includeTraining: exportOptions.includeTraining
+        )
+        vm.onEvent(CheckInDetailEventOnUpdatePdfOptions(options: kmpOptions))
+    }
+
+    private var hasTrainingData: Bool {
+        if case .ready(_, _, _, let training, _, _) = vm.state {
+            return training != nil
+        }
+        return false
     }
 
     // MARK: - Helpers

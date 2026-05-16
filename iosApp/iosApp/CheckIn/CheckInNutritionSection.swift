@@ -40,16 +40,20 @@ struct CheckInNutritionSection: View {
                 ) {
                     macroCell(label: "Calories",
                               value: String(format: "%.0f kcal", nutrition.avgCalories),
-                              color: .strakkAccentOrange)
+                              color: .strakkAccentOrange,
+                              progress: calorieScale)
                     macroCell(label: "Protein",
                               value: String(format: "%.0f g", nutrition.avgProtein),
-                              color: .strakkPrimary)
+                              color: .strakkPrimary,
+                              progress: proteinScale)
                     macroCell(label: "Carbs",
                               value: String(format: "%.0f g", nutrition.avgCarbs),
-                              color: .strakkAccentIndigo)
+                              color: .strakkAccentIndigo,
+                              progress: carbsScale)
                     macroCell(label: "Fat",
                               value: String(format: "%.0f g", nutrition.avgFat),
-                              color: .strakkAccentYellow)
+                              color: .strakkAccentYellow,
+                              progress: fatScale)
                 }
 
                 HStack {
@@ -66,9 +70,6 @@ struct CheckInNutritionSection: View {
                     DailyNutritionTable(days: nutrition.dailyData)
                 }
 
-                if let summary = nutrition.aiSummary, !summary.isEmpty {
-                    aiSummaryCard(summary)
-                }
             }
             .padding(StrakkSpacing.md)
             .background(Color.strakkSurface1)
@@ -77,7 +78,7 @@ struct CheckInNutritionSection: View {
     }
 
     @ViewBuilder
-    private func macroCell(label: LocalizedStringKey, value: String, color: Color) -> some View {
+    private func macroCell(label: LocalizedStringKey, value: String, color: Color, progress: Double) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
             Text(label)
                 .font(.strakkCaption)
@@ -85,6 +86,17 @@ struct CheckInNutritionSection: View {
             Text(value)
                 .font(.strakkBodyBold)
                 .foregroundStyle(color)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.strakkSurface1)
+                        .frame(height: 4)
+                    Capsule()
+                        .fill(color)
+                        .frame(width: geo.size.width * min(progress, 1.0), height: 4)
+                }
+            }
+            .frame(height: 4)
         }
         .padding(StrakkSpacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,29 +104,13 @@ struct CheckInNutritionSection: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
-    private func aiSummaryCard(_ summary: String) -> some View {
-        VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
-            HStack(spacing: StrakkSpacing.xxs) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.strakkPrimary)
-                Text("AI Summary")
-                    .font(.strakkOverline)
-                    .foregroundStyle(Color.strakkPrimary)
-            }
-            Text(summary)
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextSecondary)
-        }
-        .padding(StrakkSpacing.sm)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.strakkAccentOrangeFaint)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .strokeBorder(Color.strakkAccentOrangeBorder, lineWidth: 1)
-        )
-    }
+    /// Relative progress of each macro compared to the highest value.
+    private var maxCalories: Double { max(nutrition.avgCalories, 1) }
+    private var calorieScale: Double { 1.0 }
+    private var proteinScale: Double { (nutrition.avgProtein * 4) / maxCalories }
+    private var carbsScale: Double { (nutrition.avgCarbs * 4) / maxCalories }
+    private var fatScale: Double { (nutrition.avgFat * 9) / maxCalories }
+
 }
 
 // MARK: - CheckInEmptyNutritionSection

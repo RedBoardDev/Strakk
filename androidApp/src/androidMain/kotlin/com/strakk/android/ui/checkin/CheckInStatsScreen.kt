@@ -41,6 +41,7 @@ import com.strakk.android.ui.theme.LocalStrakkTextStyles
 import com.strakk.android.ui.theme.StrakkTheme
 import com.strakk.shared.presentation.checkin.CheckInStatsEvent
 import com.strakk.shared.presentation.checkin.CheckInStatsUiState
+import com.strakk.shared.presentation.checkin.OverviewCards
 import com.strakk.shared.presentation.checkin.RegularityInfo
 import com.strakk.shared.presentation.checkin.StatsPeriod
 import com.strakk.shared.presentation.checkin.TrendInfo
@@ -120,21 +121,14 @@ private fun StatsContent(
             onSelect = { onEvent(CheckInStatsEvent.OnPeriodSelected(it)) },
         )
 
-        if (state.filteredSeries.isEmpty()) {
+        if (state.weightSeries.isEmpty()) {
             StrakkEmptyState(title = stringResource(R.string.checkin_stats_empty))
         } else {
-            state.weightTrend?.let { trend ->
+            state.overview.weightTrend?.let { trend ->
                 TrendCard(
                     title = stringResource(R.string.checkin_stats_weight_trend),
                     trend = trend,
                     unit = "kg",
-                )
-            }
-            state.waistTrend?.let { trend ->
-                TrendCard(
-                    title = stringResource(R.string.checkin_stats_waist_trend),
-                    trend = trend,
-                    unit = "cm",
                 )
             }
             RegularityCard(info = state.regularity)
@@ -293,10 +287,18 @@ private fun CheckInStatsScreenPreview() {
         CheckInStatsScreen(
             state = CheckInStatsUiState.Ready(
                 selectedPeriod = StatsPeriod.TwelveWeeks,
-                series = emptyList(),
-                filteredSeries = emptyList(),
-                weightTrend = TrendInfo(delta = -2.5, weeks = 12),
-                waistTrend = TrendInfo(delta = -3.0, weeks = 12),
+                allSeries = emptyList(),
+                overview = OverviewCards(
+                    weightKg = 78.5,
+                    weightTrend = TrendInfo(delta = -2.5, weeks = 12),
+                    avgWeeklyVolumeKg = null,
+                    avgSessionsPerWeek = null,
+                    nutritionCompliancePct = null,
+                ),
+                weightSeries = emptyList(),
+                bodySnapshot = null,
+                training = null,
+                nutrition = null,
                 regularity = RegularityInfo(checkInCount = 8, totalWeeks = 12, percentage = 66),
             ),
             onEvent = {},

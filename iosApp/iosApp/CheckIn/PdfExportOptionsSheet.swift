@@ -13,13 +13,14 @@ struct PdfExportConfig {
     var includeWater: Bool = true
     var includeAverages: Bool = true
     var includeDailyData: Bool = true
-    var includeAiSummary: Bool = true
+    var includeTraining: Bool = true
 }
 
 // MARK: - Sheet
 
 struct PdfExportOptionsSheet: View {
     @Binding var options: PdfExportConfig
+    let hasTrainingData: Bool
     let isGenerating: Bool
     let onExport: () -> Void
     let onCancel: () -> Void
@@ -38,6 +39,12 @@ struct PdfExportOptionsSheet: View {
                             toggleRow("Feelings", isOn: $options.includeFeelings)
                         }
 
+                        if hasTrainingData {
+                            optionSection("TRAINING") {
+                                toggleRow("Workout stats", isOn: $options.includeTraining)
+                            }
+                        }
+
                         optionSection("NUTRITION") {
                             toggleRow("Calories", isOn: $options.includeCalories)
                             sectionDivider
@@ -52,8 +59,6 @@ struct PdfExportOptionsSheet: View {
                             toggleRow("Averages", isOn: $options.includeAverages)
                             sectionDivider
                             toggleRow("Per day", isOn: $options.includeDailyData)
-                            sectionDivider
-                            toggleRow("AI Summary", isOn: $options.includeAiSummary)
                         }
 
                         StrakkPrimaryButton(

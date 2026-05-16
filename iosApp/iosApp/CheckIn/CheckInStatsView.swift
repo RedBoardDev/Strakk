@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 import SwiftUI
 import Charts
 import shared
@@ -19,16 +20,19 @@ struct CheckInStatsView: View {
             case .ready(
                 let selectedPeriod,
                 _,
-                let filteredSeries,
-                let weightTrend,
-                let waistTrend,
+                let overview,
+                let weightSeries,
+                _,
+                let training,
+                let nutrition,
                 let regularity
             ):
                 mainContent(
                     selectedPeriod: selectedPeriod,
-                    filteredSeries: filteredSeries,
-                    weightTrend: weightTrend,
-                    waistTrend: waistTrend,
+                    overview: overview,
+                    weightSeries: weightSeries,
+                    training: training,
+                    nutrition: nutrition,
                     regularity: regularity
                 )
             }
@@ -42,111 +46,29 @@ struct CheckInStatsView: View {
     @ViewBuilder
     private func mainContent(
         selectedPeriod: CheckInStatsPeriod,
-        filteredSeries: [SeriesPointData],
-        weightTrend: TrendInfoData?,
-        waistTrend: TrendInfoData?,
+        overview: OverviewCardsData,
+        weightSeries: [WeightPointData],
+        training: TrainingStatsData?,
+        nutrition: NutritionStatsData?,
         regularity: RegularityInfoData
     ) -> some View {
-        let chartData = buildChartData(from: filteredSeries)
         ScrollView {
             VStack(alignment: .leading, spacing: StrakkSpacing.xl) {
                 periodPicker(selectedPeriod: selectedPeriod)
-                chartCards(chartData: chartData, weightTrend: weightTrend, waistTrend: waistTrend)
-                if !chartData.hasAny { StatsNoDataView() }
-                RegularityCardView(regularity: regularity)
+                overviewGrid(overview: overview)
+                if weightSeries.count >= 2 {
+                    weightChartSection(points: weightSeries)
+                }
+                if let training {
+                    trainingSection(training: training)
+                }
+                if let nutrition {
+                    nutritionSection(nutrition: nutrition)
+                }
+                consistencyCard(regularity: regularity)
             }
             .padding(.horizontal, StrakkSpacing.lg)
             .padding(.vertical, StrakkSpacing.xl)
-        }
-    }
-
-    private struct ChartData {
-        let weight: [(String, Double)]
-        let waist: [(String, Double)]
-        let arms: [(String, Double)]
-        let thighs: [(String, Double)]
-        let hips: [(String, Double)]
-
-        var hasAny: Bool {
-            weight.count >= 2 || waist.count >= 2 || arms.count >= 2
-                || thighs.count >= 2 || hips.count >= 2
-        }
-    }
-
-    private func buildChartData(from series: [SeriesPointData]) -> ChartData {
-        let weight = series.compactMap { s -> (String, Double)? in
-            guard let w = s.weight else { return nil }
-            return (s.weekLabel, w)
-        }
-        let waist = series.compactMap { s -> (String, Double)? in
-            guard let w = s.waist else { return nil }
-            return (s.weekLabel, w)
-        }
-        let arms = series.compactMap { s -> (String, Double)? in
-            guard let left = s.armLeft, let right = s.armRight else { return nil }
-            return (s.weekLabel, (left + right) / 2)
-        }
-        let thighs = series.compactMap { s -> (String, Double)? in
-            guard let left = s.thighLeft, let right = s.thighRight else { return nil }
-            return (s.weekLabel, (left + right) / 2)
-        }
-        let hips = series.compactMap { s -> (String, Double)? in
-            guard let h = s.hips else { return nil }
-            return (s.weekLabel, h)
-        }
-        return ChartData(weight: weight, waist: waist, arms: arms, thighs: thighs, hips: hips)
-    }
-
-    @ViewBuilder
-    private func chartCards(
-        chartData: ChartData,
-        weightTrend: TrendInfoData?,
-        waistTrend: TrendInfoData?
-    ) -> some View {
-        if chartData.weight.count >= 2 {
-            chartCard(
-                title: "WEIGHT",
-                unit: "kg",
-                color: .strakkPrimary,
-                points: chartData.weight,
-                trend: weightTrend
-            )
-        }
-        if chartData.waist.count >= 2 {
-            chartCard(
-                title: "WAIST",
-                unit: "cm",
-                color: .strakkWarning,
-                points: chartData.waist,
-                trend: waistTrend
-            )
-        }
-        if chartData.arms.count >= 2 {
-            chartCard(
-                title: "ARMS (AVG.)",
-                unit: "cm",
-                color: .strakkSuccess,
-                points: chartData.arms,
-                trend: nil
-            )
-        }
-        if chartData.thighs.count >= 2 {
-            chartCard(
-                title: "THIGHS (AVG.)",
-                unit: "cm",
-                color: .strakkPrimary,
-                points: chartData.thighs,
-                trend: nil
-            )
-        }
-        if chartData.hips.count >= 2 {
-            chartCard(
-                title: "HIPS",
-                unit: "cm",
-                color: .strakkAccentBlue,
-                points: chartData.hips,
-                trend: nil
-            )
         }
     }
 
@@ -175,37 +97,159 @@ struct CheckInStatsView: View {
         .accessibilityLabel("Display period")
     }
 
-    // MARK: - Chart card
+    // MARK: - Overview 2×2 grid
 
     @ViewBuilder
-    private func chartCard(
-        title: LocalizedStringKey,
-        unit: String,
-        color: Color,
-        points: [(String, Double)],
-        trend: TrendInfoData?
-    ) -> some View {
+    private func overviewGrid(overview: OverviewCardsData) -> some View {
+        let columns = [
+            GridItem(.flexible(), spacing: StrakkSpacing.sm),
+            GridItem(.flexible(), spacing: StrakkSpacing.sm)
+        ]
+        LazyVGrid(columns: columns, spacing: StrakkSpacing.sm) {
+            overviewWeightCard(overview: overview)
+            overviewVolumeCard(overview: overview)
+            overviewFrequencyCard(overview: overview)
+            overviewNutritionCard(overview: overview)
+        }
+    }
+
+    @ViewBuilder
+    private func overviewWeightCard(overview: OverviewCardsData) -> some View {
+        OverviewCard(
+            icon: "scalemass.fill",
+            iconColor: .strakkPrimary,
+            label: "Weight"
+        ) {
+            if let kg = overview.weightKg {
+                VStack(alignment: .leading, spacing: StrakkSpacing.xxs) {
+                    Text(String(format: "%.1f kg", kg))
+                        .font(.strakkHeading2)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .monospacedDigit()
+                    if let trend = overview.weightTrend {
+                        weightTrendLabel(trend: trend)
+                    }
+                }
+            } else {
+                Text("—")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func overviewVolumeCard(overview: OverviewCardsData) -> some View {
+        OverviewCard(
+            icon: "dumbbell.fill",
+            iconColor: .strakkAccentIndigo,
+            label: "Avg volume / wk"
+        ) {
+            if let vol = overview.avgWeeklyVolumeKg {
+                Text(formatVolume(vol))
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .monospacedDigit()
+            } else {
+                Text("—")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func overviewFrequencyCard(overview: OverviewCardsData) -> some View {
+        OverviewCard(
+            icon: "figure.strengthtraining.traditional",
+            iconColor: .strakkSuccess,
+            label: "Sessions / wk"
+        ) {
+            if let sessions = overview.avgSessionsPerWeek {
+                Text(String(format: "%.1f", sessions))
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .monospacedDigit()
+            } else {
+                Text("—")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func overviewNutritionCard(overview: OverviewCardsData) -> some View {
+        OverviewCard(
+            icon: "fork.knife",
+            iconColor: .strakkWarning,
+            label: "Nutrition"
+        ) {
+            if let compliance = overview.nutritionCompliancePct {
+                HStack(alignment: .center, spacing: StrakkSpacing.xs) {
+                    Text("\(compliance)%")
+                        .font(.strakkHeading2)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .monospacedDigit()
+                    ComplianceGauge(percentage: compliance)
+                }
+            } else {
+                Text("—")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func weightTrendLabel(trend: TrendInfoData) -> some View {
+        let isGain = trend.delta > 0
+        let isNeutral = trend.delta == 0
+        let color: Color = isNeutral ? .strakkTextTertiary : (isGain ? .strakkError : .strakkSuccess)
+        let arrow = isNeutral ? "" : (isGain ? "↑" : "↓")
+        let sign = trend.delta > 0 ? "+" : ""
+        HStack(spacing: 2) {
+            Text(arrow)
+                .font(.strakkCaption)
+                .foregroundStyle(color)
+            Text(String(format: "%@%.1f kg", sign, trend.delta))
+                .font(.strakkCaption)
+                .foregroundStyle(color)
+                .monospacedDigit()
+        }
+    }
+
+    // MARK: - Weight chart
+
+    @ViewBuilder
+    private func weightChartSection(points: [WeightPointData]) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
-            Text(title)
+            Text("WEIGHT")
                 .font(.strakkOverline)
                 .foregroundStyle(Color.strakkTextTertiary)
 
-            VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            VStack(alignment: .leading, spacing: 0) {
                 Chart {
-                    ForEach(Array(points.enumerated()), id: \.offset) { _, point in
-                        LineMark(
-                            x: .value("Week", abbreviatedLabel(point.0)),
-                            y: .value("Value", point.1)
+                    ForEach(points) { point in
+                        AreaMark(
+                            x: .value("Week", abbreviatedLabel(point.weekLabel)),
+                            y: .value("kg", point.weightKg)
                         )
-                        .foregroundStyle(color)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.strakkAccentOrange.opacity(0.25), Color.clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                         .interpolationMethod(.catmullRom)
 
-                        PointMark(
-                            x: .value("Week", abbreviatedLabel(point.0)),
-                            y: .value("Value", point.1)
+                        LineMark(
+                            x: .value("Week", abbreviatedLabel(point.weekLabel)),
+                            y: .value("kg", point.weightKg)
                         )
-                        .foregroundStyle(color)
-                        .symbolSize(30)
+                        .foregroundStyle(Color.strakkAccentOrange)
+                        .interpolationMethod(.catmullRom)
                     }
                 }
                 .chartXAxis {
@@ -226,85 +270,164 @@ struct CheckInStatsView: View {
                 }
                 .frame(height: 160)
                 .chartBackground { _ in Color.clear }
+            }
+            .padding(StrakkSpacing.md)
+            .background(Color.strakkSurface1)
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+        }
+    }
 
-                if let trend {
-                    TrendLabelView(trend: trend, unit: unit)
+    // MARK: - Training section
+
+    @ViewBuilder
+    private func trainingSection(training: TrainingStatsData) -> some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            Text("TRAINING")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+
+            VStack(alignment: .leading, spacing: StrakkSpacing.md) {
+                if training.volumeSeries.count >= 2 {
+                    trainingVolumeChart(series: training.volumeSeries)
+                }
+                trainingSummaryRow(training: training)
+            }
+            .padding(StrakkSpacing.md)
+            .background(Color.strakkSurface1)
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+        }
+    }
+
+    @ViewBuilder
+    private func trainingVolumeChart(series: [(weekLabel: String, volumeKg: Double)]) -> some View {
+        Chart {
+            ForEach(Array(series.enumerated()), id: \.offset) { _, point in
+                AreaMark(
+                    x: .value("Week", abbreviatedLabel(point.weekLabel)),
+                    y: .value("Volume", point.volumeKg)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.strakkAccentIndigo.opacity(0.25), Color.clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .interpolationMethod(.catmullRom)
+
+                LineMark(
+                    x: .value("Week", abbreviatedLabel(point.weekLabel)),
+                    y: .value("Volume", point.volumeKg)
+                )
+                .foregroundStyle(Color.strakkAccentIndigo)
+                .interpolationMethod(.catmullRom)
+            }
+        }
+        .chartXAxis {
+            AxisMarks(values: .automatic) { _ in
+                AxisValueLabel()
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) { _ in
+                AxisGridLine()
+                    .foregroundStyle(Color.strakkDivider)
+                AxisValueLabel()
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
+            }
+        }
+        .frame(height: 120)
+        .chartBackground { _ in Color.clear }
+    }
+
+    @ViewBuilder
+    private func trainingSummaryRow(training: TrainingStatsData) -> some View {
+        HStack(spacing: 0) {
+            StatInlineItem(
+                value: "\(training.totalSessions)",
+                label: "Sessions"
+            )
+            Divider()
+                .frame(height: 32)
+                .background(Color.strakkDivider)
+            StatInlineItem(
+                value: formatDuration(training.totalDurationMin),
+                label: "Duration"
+            )
+            Divider()
+                .frame(height: 32)
+                .background(Color.strakkDivider)
+            StatInlineItem(
+                value: formatVolume(training.totalVolumeKg),
+                label: "Volume"
+            )
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Nutrition section
+
+    @ViewBuilder
+    private func nutritionSection(nutrition: NutritionStatsData) -> some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            Text("NUTRITION")
+                .font(.strakkOverline)
+                .foregroundStyle(Color.strakkTextTertiary)
+
+            VStack(alignment: .leading, spacing: StrakkSpacing.md) {
+                ForEach(nutrition.macros) { macro in
+                    MacroComplianceRow(macro: macro)
+                }
+                if let avgWater = nutrition.avgWater, let waterGoal = nutrition.waterGoal, waterGoal > 0 {
+                    waterRow(avg: avgWater, goal: waterGoal)
                 }
             }
             .padding(StrakkSpacing.md)
             .background(Color.strakkSurface1)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
     }
 
-    // MARK: - Helpers
-
-    private func abbreviatedLabel(_ weekLabel: String) -> String {
-        // "2026-W17" → "W17"
-        let parts = weekLabel.split(separator: "-W")
-        if parts.count == 2, let week = parts.last {
-            return String(localized: "W\(week)")
-        }
-        return weekLabel
-    }
-}
-
-// MARK: - TrendLabelView
-
-private struct TrendLabelView: View {
-    let trend: TrendInfoData
-    let unit: String
-
-    var body: some View {
-        let delta = trend.delta
-        let sign = delta >= 0 ? "+" : ""
-        let arrow = delta > 0 ? "↑" : (delta < 0 ? "↓" : "=")
-        let value = String(format: "%.1f", delta)
-        let trendText = String.localizedStringWithFormat(
-            String(localized: "Trend: %@ %@%@ %@ over %@ wk"),
-            arrow,
-            sign,
-            value,
-            unit,
-            String(trend.weeks)
-        )
-        HStack(spacing: StrakkSpacing.xxs) {
-            Image(systemName: "arrow.trend.up")
-                .font(.system(size: 12))
-                .foregroundStyle(Color.strakkTextTertiary)
-            Text(trendText)
-                .font(.strakkCaption)
-                .foregroundStyle(Color.strakkTextSecondary)
+    @ViewBuilder
+    private func waterRow(avg: Int, goal: Int) -> some View {
+        let fraction = min(Double(avg) / Double(goal), 1.0)
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            HStack {
+                HStack(spacing: StrakkSpacing.xxs) {
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.strakkWater)
+                    Text("Water")
+                        .font(.strakkBody)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                }
+                Spacer()
+                Text(String(format: "%d / %d ml", avg, goal))
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .monospacedDigit()
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.strakkSurface2)
+                        .frame(height: 6)
+                    Capsule()
+                        .fill(Color.strakkWater)
+                        .frame(width: geo.size.width * fraction, height: 6)
+                }
+            }
+            .frame(height: 6)
         }
     }
-}
 
-// MARK: - StatsNoDataView
+    // MARK: - Consistency card
 
-private struct StatsNoDataView: View {
-    var body: some View {
-        VStack(spacing: StrakkSpacing.sm) {
-            Image(systemName: "chart.xyaxis.line")
-                .font(.system(size: 36))
-                .foregroundStyle(Color.strakkTextTertiary)
-            Text("Not enough data to show trends.")
-                .font(.strakkBody)
-                .foregroundStyle(Color.strakkTextSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(StrakkSpacing.xxl)
-        .background(Color.strakkSurface1)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-// MARK: - RegularityCardView
-
-private struct RegularityCardView: View {
-    let regularity: RegularityInfoData
-
-    var body: some View {
+    @ViewBuilder
+    private func consistencyCard(regularity: RegularityInfoData) -> some View {
         VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
             Text("CONSISTENCY")
                 .font(.strakkOverline)
@@ -312,13 +435,14 @@ private struct RegularityCardView: View {
 
             VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
                 HStack {
-                    Text(weeksLabel)
+                    Text(weeksLabel(regularity: regularity))
                         .font(.strakkBodyBold)
                         .foregroundStyle(Color.strakkTextPrimary)
                     Spacer()
                     Text("\(regularity.percentage)%")
                         .font(.strakkHeading3)
                         .foregroundStyle(Color.strakkPrimary)
+                        .monospacedDigit()
                 }
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
@@ -334,15 +458,41 @@ private struct RegularityCardView: View {
                     }
                 }
                 .frame(height: 8)
-                .accessibilityLabel(accessibilityLabel)
+                .accessibilityLabel(consistencyAccessibilityLabel(regularity: regularity))
             }
             .padding(StrakkSpacing.md)
             .background(Color.strakkSurface1)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
         }
     }
 
-    private var weeksLabel: String {
+    // MARK: - Helpers
+
+    private func abbreviatedLabel(_ weekLabel: String) -> String {
+        let parts = weekLabel.split(separator: "-W")
+        if parts.count == 2, let week = parts.last {
+            return "W\(week)"
+        }
+        return weekLabel
+    }
+
+    private func formatVolume(_ kg: Double) -> String {
+        if kg >= 1000 {
+            return String(format: "%.1ft", kg / 1000)
+        }
+        return String(format: "%.0f kg", kg)
+    }
+
+    private func formatDuration(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let mins = minutes % 60
+        if hours > 0 {
+            return String(format: "%dh%02d", hours, mins)
+        }
+        return "\(minutes)m"
+    }
+
+    private func weeksLabel(regularity: RegularityInfoData) -> String {
         String.localizedStringWithFormat(
             String(localized: "%@/%@ weeks"),
             String(regularity.checkInCount),
@@ -350,11 +500,129 @@ private struct RegularityCardView: View {
         )
     }
 
-    private var accessibilityLabel: String {
+    private func consistencyAccessibilityLabel(regularity: RegularityInfoData) -> String {
         String.localizedStringWithFormat(
             String(localized: "Consistency: %@%%"),
             String(regularity.percentage)
         )
+    }
+}
+
+// MARK: - OverviewCard
+
+private struct OverviewCard<Content: View>: View {
+    let icon: String
+    let iconColor: Color
+    let label: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.sm) {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(iconColor.opacity(0.12))
+                .frame(width: 36, height: 36)
+                .overlay {
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(iconColor)
+                }
+
+            content
+
+            Text(label)
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(StrakkSpacing.md)
+        .background(Color.strakkSurface1)
+        .clipShape(RoundedRectangle(cornerRadius: StrakkRadius.sm))
+    }
+}
+
+// MARK: - ComplianceGauge
+
+private struct ComplianceGauge: View {
+    let percentage: Int
+
+    private var fraction: Double { min(Double(percentage) / 100.0, 1.0) }
+    private var color: Color { percentage >= 80 ? .strakkSuccess : (percentage >= 50 ? .strakkWarning : .strakkError) }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.strakkSurface2, lineWidth: 4)
+            Circle()
+                .trim(from: 0, to: fraction)
+                .stroke(color, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: 28, height: 28)
+        .animation(.easeOut(duration: 0.25), value: fraction)
+    }
+}
+
+// MARK: - MacroComplianceRow
+
+private struct MacroComplianceRow: View {
+    let macro: MacroComplianceData
+
+    private var accentColor: Color {
+        switch macro.name.lowercased() {
+        case "calories": return .strakkPrimaryLight
+        case "protein": return .strakkPrimary
+        case "carbs": return .strakkAccentIndigo
+        case "fat": return .strakkAccentYellow
+        default: return .strakkPrimary
+        }
+    }
+
+    private var fraction: Double { min(Double(macro.percentage) / 100.0, 1.0) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: StrakkSpacing.xs) {
+            HStack {
+                Text(macro.name)
+                    .font(.strakkBody)
+                    .foregroundStyle(Color.strakkTextSecondary)
+                Spacer()
+                Text("\(macro.percentage)%")
+                    .font(.strakkCaption)
+                    .foregroundStyle(Color.strakkTextTertiary)
+                    .monospacedDigit()
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.strakkSurface2)
+                        .frame(height: 6)
+                    Capsule()
+                        .fill(macro.percentage >= 100 ? Color.strakkSuccess : accentColor)
+                        .frame(width: geo.size.width * fraction, height: 6)
+                }
+            }
+            .frame(height: 6)
+        }
+    }
+}
+
+// MARK: - StatInlineItem
+
+private struct StatInlineItem: View {
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: StrakkSpacing.xxs) {
+            Text(value)
+                .font(.strakkBodyBold)
+                .foregroundStyle(Color.strakkTextPrimary)
+                .monospacedDigit()
+            Text(label)
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextTertiary)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

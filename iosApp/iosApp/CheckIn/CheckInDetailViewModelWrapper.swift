@@ -41,9 +41,50 @@ struct CheckInData: Identifiable, Equatable {
     let updatedAt: String
 }
 
+// MARK: - Training data types
+
+struct HevyWorkoutSetData {
+    let type: String
+    let weightKg: Double?
+    let reps: Int?
+    let durationSeconds: Int?
+    let rpe: Double?
+}
+
+struct HevyWorkoutExerciseData {
+    let name: String
+    let muscleGroup: String
+    let sets: [HevyWorkoutSetData]
+}
+
+struct HevyWorkoutData: Identifiable {
+    let id: String
+    let title: String
+    let date: String
+    let durationMinutes: Int
+    let totalVolumeKg: Double
+    let exercises: [HevyWorkoutExerciseData]
+}
+
+struct WeeklyTrainingStatsData {
+    let totalSessions: Int
+    let totalDurationMinutes: Int
+    let totalVolumeKg: Double
+    let avgRpe: Double?
+    let muscleGroupVolume: [String: Double]
+    let workouts: [HevyWorkoutData]
+}
+
 enum CheckInDetailState {
     case loading
-    case ready(checkIn: CheckInData, delta: CheckInDeltaData?, photoUrls: [String: String])
+    case ready(
+        checkIn: CheckInData,
+        delta: CheckInDeltaData?,
+        photoUrls: [String: String],
+        trainingStats: WeeklyTrainingStatsData?,
+        isLoadingTraining: Bool,
+        pdfExportOptions: PdfExportConfig
+    )
 }
 
 // MARK: - Wrapper
@@ -110,7 +151,7 @@ final class CheckInDetailViewModelWrapper {
                 includeWater: options.includeWater,
                 includeAverages: options.includeAverages,
                 includeDailyData: options.includeDailyData,
-                includeAiSummary: options.includeAiSummary
+                includeTraining: options.includeTraining
             )
             let bytes = try await pdfUseCase.invoke(checkInId: checkInId, options: kmpOptions)
             return Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
@@ -137,7 +178,10 @@ final class CheckInDetailViewModelWrapper {
         return .ready(
             checkIn: mapCheckIn(ready.checkIn),
             delta: ready.delta.map(mapDelta),
-            photoUrls: ready.photoUrls
+            photoUrls: ready.photoUrls,
+            trainingStats: ready.trainingStats.map(mapTrainingStats),
+            isLoadingTraining: ready.isLoadingTraining,
+            pdfExportOptions: mapPdfOptions(ready.pdfExportOptions)
         )
     }
 
@@ -178,6 +222,58 @@ final class CheckInDetailViewModelWrapper {
             hips: delta.hips?.doubleValue,
             thighLeft: delta.thighLeft?.doubleValue,
             thighRight: delta.thighRight?.doubleValue
+        )
+    }
+
+    private static func mapTrainingStats(_ stats: WeeklyTrainingStats) -> WeeklyTrainingStatsData {
+        WeeklyTrainingStatsData(
+            totalSessions: Int(stats.totalSessions),
+            totalDurationMinutes: Int(stats.totalDurationMinutes),
+            totalVolumeKg: stats.totalVolumeKg,
+            avgRpe: stats.avgRpe?.doubleValue,
+            muscleGroupVolume: Dictionary(
+                uniqueKeysWithValues: stats.muscleGroupVolume.map { ($0.key, $0.value.doubleValue) }
+            ),
+            workouts: stats.workouts.map { w in
+                HevyWorkoutData(
+                    id: w.id,
+                    title: w.title,
+                    date: w.date,
+                    durationMinutes: Int(w.durationMinutes),
+                    totalVolumeKg: w.totalVolumeKg,
+                    exercises: w.exercises.map { ex in
+                        HevyWorkoutExerciseData(
+                            name: ex.name,
+                            muscleGroup: ex.muscleGroup,
+                            sets: ex.sets.map { s in
+                                HevyWorkoutSetData(
+                                    type: s.type,
+                                    weightKg: s.weightKg?.doubleValue,
+                                    reps: s.reps.map { Int($0.int32Value) },
+                                    durationSeconds: s.durationSeconds.map { Int($0.int32Value) },
+                                    rpe: s.rpe?.doubleValue
+                                )
+                            }
+                        )
+                    }
+                )
+            }
+        )
+    }
+
+    private static func mapPdfOptions(_ options: PdfExportOptions) -> PdfExportConfig {
+        PdfExportConfig(
+            includePhotos: options.includePhotos,
+            includeMeasurements: options.includeMeasurements,
+            includeFeelings: options.includeFeelings,
+            includeProtein: options.includeProtein,
+            includeCalories: options.includeCalories,
+            includeCarbs: options.includeCarbs,
+            includeFat: options.includeFat,
+            includeWater: options.includeWater,
+            includeAverages: options.includeAverages,
+            includeDailyData: options.includeDailyData,
+            includeTraining: options.includeTraining
         )
     }
 
