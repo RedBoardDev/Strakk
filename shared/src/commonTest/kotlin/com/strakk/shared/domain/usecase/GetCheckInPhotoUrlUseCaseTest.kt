@@ -57,6 +57,7 @@ class GetCheckInPhotoUrlUseCaseTest {
 
         override suspend fun getPreviousMeasurements(weekLabel: String): CheckInMeasurements? = error("Unused")
         override suspend fun checkExistingForWeek(weekLabel: String): String? = error("Unused")
+        override suspend fun saveTrainingStats(checkInId: String, stats: com.strakk.shared.domain.model.WeeklyTrainingStats) = Unit
         override suspend fun clearCache() = Unit
     }
 }
