@@ -728,6 +728,7 @@
       }
     },
     "AI Summary" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2754,6 +2755,9 @@
         }
       }
     },
+    "MUSCLE GROUPS" : {
+
+    },
     "MY ITEMS" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2944,6 +2948,7 @@
       }
     },
     "Not enough data to show trends." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3674,6 +3679,9 @@
         }
       }
     },
+    "SESSIONS" : {
+
+    },
     "Sessions per week" : {
       "localizations" : {
         "fr" : {
@@ -4052,6 +4060,9 @@
         }
       }
     },
+    "Tap to load training data from Hevy" : {
+
+    },
     "Tell me about your training" : {
       "localizations" : {
         "fr" : {
@@ -4207,6 +4218,9 @@
           }
         }
       }
+    },
+    "TRAINING" : {
+
     },
     "Training intensity" : {
       "localizations" : {
@@ -4622,7 +4636,6 @@
       }
     },
     "WEIGHT" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

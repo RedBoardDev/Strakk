@@ -50,7 +50,7 @@ exceptions:
       - 'Exception'
       - 'RuntimeException'
       - 'Throwable'
-    allowedExceptionNameRegex: '_|(ignore|expected).*'
+    allowedExceptionNameRegex: '_|(ignore|expected|e).*'
   TooGenericExceptionThrown:
     active: true
   SwallowedException:
