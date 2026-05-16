@@ -1,8 +1,8 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/auth.ts";
 import { checkPayloadSize } from "../_shared/rate-limit.ts";
 import { requireFeatureAccess, recordFeatureUsage } from "../_shared/feature-guard.ts";
+import { getHevyApiKey, hevyFetch } from "../_shared/hevy.ts";
 
 // =============================================================================
 // Types — Input
@@ -81,44 +81,8 @@ interface ExportResponse {
 }
 
 // =============================================================================
-// API key retrieval (server-side, via Vault RPC)
+// Hevy API helpers (specific to export)
 // =============================================================================
-
-async function getHevyApiKey(userJwt: string): Promise<string> {
-  // Call get_hevy_api_key() as the authenticated user so auth.uid() resolves correctly.
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: `Bearer ${userJwt}` } } },
-  );
-  const { data, error } = await supabase.rpc("get_hevy_api_key");
-  if (error || !data) {
-    throw new Error("Hevy API key not configured. Add it in Settings.");
-  }
-  return data as string;
-}
-
-// =============================================================================
-// Hevy API helpers
-// =============================================================================
-
-const HEVY_BASE = "https://api.hevyapp.com/v1";
-
-async function hevyFetch(
-  path: string,
-  apiKey: string,
-  options: RequestInit = {},
-): Promise<Response> {
-  const res = await fetch(`${HEVY_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": apiKey,
-      ...(options.headers ?? {}),
-    },
-  });
-  return res;
-}
 
 async function fetchAllExerciseTemplates(
   apiKey: string,
