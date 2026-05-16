@@ -11,4 +11,13 @@ data class CheckInSeriesPoint(
     val hips: Double?,
     val thighLeft: Double?,
     val thighRight: Double?,
+    val trainingSessions: Int? = null,
+    val trainingVolumeKg: Double? = null,
+    val trainingDurationMin: Int? = null,
+    val avgCalories: Double? = null,
+    val avgProtein: Double? = null,
+    val avgCarbs: Double? = null,
+    val avgFat: Double? = null,
+    val avgWater: Int? = null,
+    val nutritionDays: Int? = null,
 )

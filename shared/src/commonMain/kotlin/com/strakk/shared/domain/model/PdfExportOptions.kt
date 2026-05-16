@@ -11,9 +11,9 @@ data class PdfExportOptions(
     val includeWater: Boolean = true,
     val includeAverages: Boolean = true,
     val includeDailyData: Boolean = true,
-    val includeAiSummary: Boolean = true,
+    val includeTraining: Boolean = true,
 ) {
     /** True if at least one nutrition field is included. */
     val includeNutrition: Boolean
-        get() = includeProtein || includeCalories || includeCarbs || includeFat || includeWater || includeAiSummary
+        get() = includeProtein || includeCalories || includeCarbs || includeFat || includeWater
 }

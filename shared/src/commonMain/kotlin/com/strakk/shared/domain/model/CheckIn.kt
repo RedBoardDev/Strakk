@@ -17,6 +17,7 @@ data class CheckIn(
     val mentalFeeling: String?,
     val physicalFeeling: String?,
     val nutritionSummary: NutritionSummary?,
+    val trainingStats: WeeklyTrainingStats? = null,
     val photos: List<CheckInPhoto>,
     val createdAt: String,
     val updatedAt: String,

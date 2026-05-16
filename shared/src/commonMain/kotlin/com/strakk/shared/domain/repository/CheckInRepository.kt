@@ -8,6 +8,7 @@ import com.strakk.shared.domain.model.CheckInPhoto
 import com.strakk.shared.domain.model.CheckInSeriesPoint
 import com.strakk.shared.domain.model.NutritionAverages
 import com.strakk.shared.domain.model.NutritionGoals
+import com.strakk.shared.domain.model.WeeklyTrainingStats
 import kotlinx.coroutines.flow.Flow
 
 interface CheckInRepository {
@@ -31,5 +32,7 @@ interface CheckInRepository {
     ): String
     suspend fun getPreviousMeasurements(weekLabel: String): CheckInMeasurements?
     suspend fun checkExistingForWeek(weekLabel: String): String?
+    suspend fun saveTrainingStats(checkInId: String, stats: WeeklyTrainingStats)
+
     suspend fun clearCache()
 }
