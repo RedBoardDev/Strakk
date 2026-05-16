@@ -9,12 +9,16 @@ import com.strakk.shared.domain.usecase.ComputeNutritionSummaryUseCase
 import com.strakk.shared.domain.usecase.DeleteCheckInUseCase
 import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
 import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
+import com.strakk.shared.domain.usecase.GetPdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInUseCase
+import com.strakk.shared.domain.usecase.RefreshTrainingStatsUseCase
+import com.strakk.shared.domain.usecase.SavePdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.UpdateCheckInUseCase
 import com.strakk.shared.presentation.common.MviViewModel
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
+@Suppress("LongParameterList")
 class CheckInDetailViewModel(
     private val checkInId: String,
     private val observeCheckIn: ObserveCheckInUseCase,
@@ -23,6 +27,9 @@ class CheckInDetailViewModel(
     private val deleteCheckIn: DeleteCheckInUseCase,
     private val computeNutritionSummary: ComputeNutritionSummaryUseCase,
     private val updateCheckIn: UpdateCheckInUseCase,
+    private val refreshTrainingStats: RefreshTrainingStatsUseCase,
+    private val getPdfExportPreferences: GetPdfExportPreferencesUseCase,
+    private val savePdfExportPreferences: SavePdfExportPreferencesUseCase,
 ) : MviViewModel<CheckInDetailUiState, CheckInDetailEvent, CheckInDetailEffect>(CheckInDetailUiState.Loading) {
 
     init { observe() }
@@ -33,6 +40,11 @@ class CheckInDetailViewModel(
             CheckInDetailEvent.OnDelete -> { /* UI shows confirmation dialog */ }
             CheckInDetailEvent.OnConfirmDelete -> launchDelete()
             CheckInDetailEvent.OnRefreshNutrition -> launchRefreshNutrition()
+            CheckInDetailEvent.OnRefreshTraining -> launchRefreshTraining()
+            is CheckInDetailEvent.OnUpdatePdfOptions -> {
+                savePdfExportPreferences(event.options)
+                setState { (this as? CheckInDetailUiState.Ready)?.copy(pdfExportOptions = event.options) ?: this }
+            }
         }
     }
 
@@ -43,11 +55,14 @@ class CheckInDetailViewModel(
                 .collect { checkIn ->
                     val delta = loadDelta(checkIn)
                     val photoUrls = loadPhotoUrls(checkIn)
+                    val savedOptions = getPdfExportPreferences()
                     setState {
                         CheckInDetailUiState.Ready(
                             checkIn = checkIn,
                             delta = delta,
                             photoUrls = photoUrls,
+                            trainingStats = checkIn.trainingStats,
+                            pdfExportOptions = savedOptions,
                         )
                     }
                 }
@@ -76,6 +91,31 @@ class CheckInDetailViewModel(
                 .onSuccess { urls[photo.id] = it }
         }
         return urls
+    }
+
+    private fun launchRefreshTraining() {
+        val currentState = uiState.value as? CheckInDetailUiState.Ready ?: return
+        setState {
+            (this as? CheckInDetailUiState.Ready)?.copy(isLoadingTraining = true) ?: this
+        }
+        viewModelScope.launch {
+            refreshTrainingStats(checkInId, currentState.checkIn.coveredDates).fold(
+                onSuccess = { stats ->
+                    setState {
+                        (this as? CheckInDetailUiState.Ready)?.copy(
+                            trainingStats = stats,
+                            isLoadingTraining = false,
+                        ) ?: this
+                    }
+                },
+                onFailure = { err ->
+                    setState {
+                        (this as? CheckInDetailUiState.Ready)?.copy(isLoadingTraining = false) ?: this
+                    }
+                    emit(CheckInDetailEffect.ShowError(err.message ?: "Failed to load training data"))
+                },
+            )
+        }
     }
 
     private fun launchDelete() {

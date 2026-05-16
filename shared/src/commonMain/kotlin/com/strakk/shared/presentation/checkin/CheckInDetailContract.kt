@@ -2,6 +2,8 @@ package com.strakk.shared.presentation.checkin
 
 import com.strakk.shared.domain.model.CheckIn
 import com.strakk.shared.domain.model.CheckInDelta
+import com.strakk.shared.domain.model.PdfExportOptions
+import com.strakk.shared.domain.model.WeeklyTrainingStats
 
 sealed interface CheckInDetailUiState {
     data object Loading : CheckInDetailUiState
@@ -9,7 +11,10 @@ sealed interface CheckInDetailUiState {
         val checkIn: CheckIn,
         val delta: CheckInDelta?,
         val photoUrls: Map<String, String>,
+        val trainingStats: WeeklyTrainingStats? = null,
         val isRefreshingNutrition: Boolean = false,
+        val isLoadingTraining: Boolean = false,
+        val pdfExportOptions: PdfExportOptions = PdfExportOptions(),
     ) : CheckInDetailUiState
 }
 
@@ -18,6 +23,8 @@ sealed interface CheckInDetailEvent {
     data object OnDelete : CheckInDetailEvent
     data object OnConfirmDelete : CheckInDetailEvent
     data object OnRefreshNutrition : CheckInDetailEvent
+    data object OnRefreshTraining : CheckInDetailEvent
+    data class OnUpdatePdfOptions(val options: PdfExportOptions) : CheckInDetailEvent
 }
 
 sealed interface CheckInDetailEffect {
