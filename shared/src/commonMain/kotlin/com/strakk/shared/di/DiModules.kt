@@ -1,3 +1,5 @@
+@file:Suppress("ImportOrdering")
+
 package com.strakk.shared.di
 
 import com.russhwolf.settings.Settings
@@ -16,6 +18,7 @@ import com.strakk.shared.data.repository.MealDraftRepositoryImpl
 import com.strakk.shared.data.repository.MealPhotoRepositoryImpl
 import com.strakk.shared.data.repository.MealRepositoryImpl
 import com.strakk.shared.data.repository.NutritionRepositoryImpl
+import com.strakk.shared.data.repository.PdfPreferencesRepositoryImpl
 import com.strakk.shared.data.repository.ProfileRepositoryImpl
 import com.strakk.shared.data.repository.SubscriptionRepositoryImpl
 import com.strakk.shared.data.repository.WorkoutRepositoryImpl
@@ -34,6 +37,7 @@ import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealPhotoRepository
 import com.strakk.shared.domain.repository.MealRepository
 import com.strakk.shared.domain.repository.NutritionRepository
+import com.strakk.shared.domain.repository.PdfPreferencesRepository
 import com.strakk.shared.domain.repository.ProfileRepository
 import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.domain.repository.WorkoutRepository
@@ -59,6 +63,7 @@ import com.strakk.shared.domain.usecase.DeleteMealUseCase
 import com.strakk.shared.domain.usecase.DeleteWaterUseCase
 import com.strakk.shared.domain.usecase.DiscardMealDraftUseCase
 import com.strakk.shared.domain.usecase.ExportToHevyUseCase
+import com.strakk.shared.domain.usecase.FetchWeeklyTrainingStatsUseCase
 import com.strakk.shared.domain.usecase.GenerateCheckInPdfUseCase
 import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
 import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
@@ -66,6 +71,7 @@ import com.strakk.shared.domain.usecase.GetCheckInStatsUseCase
 import com.strakk.shared.domain.usecase.GetCurrentUserEmailUseCase
 import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.GetMonthlyActivityUseCase
+import com.strakk.shared.domain.usecase.GetPdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
 import com.strakk.shared.domain.usecase.ObserveActiveMealDraftUseCase
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
@@ -90,6 +96,7 @@ import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
 import com.strakk.shared.domain.usecase.QuickAddKnownEntryUseCase
 import com.strakk.shared.domain.usecase.QuickAddManualUseCase
 import com.strakk.shared.domain.usecase.RefreshSubscriptionStateUseCase
+import com.strakk.shared.domain.usecase.RefreshTrainingStatsUseCase
 import com.strakk.shared.domain.usecase.RemoveItemFromDraftUseCase
 import com.strakk.shared.domain.usecase.RemoveLastWaterEntryUseCase
 import com.strakk.shared.domain.usecase.RenameMealDraftUseCase
@@ -97,6 +104,7 @@ import com.strakk.shared.domain.usecase.ResetPasswordUseCase
 import com.strakk.shared.domain.usecase.RestoreSubscriptionUseCase
 import com.strakk.shared.domain.usecase.SaveGroundedMealUseCase
 import com.strakk.shared.domain.usecase.SaveHevyApiKeyUseCase
+import com.strakk.shared.domain.usecase.SavePdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.ScanMealUseCase
 import com.strakk.shared.domain.usecase.SearchFoodUseCase
 import com.strakk.shared.domain.usecase.SetDevSubscriptionOverrideUseCase
@@ -131,12 +139,12 @@ import io.github.jan.supabase.SupabaseClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
+import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 internal val dataModule = module {
@@ -174,7 +182,16 @@ internal val dataModule = module {
     singleOf(::FeatureLimitsRepositoryImpl) { bind<FeatureLimitsRepository>() }
     singleOf(::FeatureUsageRepositoryImpl) { bind<FeatureUsageRepository>() }
 
-    factoryOf(::CheckInPdfBuilderImpl) { bind<CheckInPdfGenerator>() }
+    factory<CheckInPdfGenerator> {
+        CheckInPdfBuilderImpl(
+            checkInRepository = get(),
+            workoutRepository = get(),
+            profileRepository = get(),
+            supabaseClient = get(),
+            htmlRenderer = get(),
+        )
+    }
+    singleOf(::PdfPreferencesRepositoryImpl) { bind<PdfPreferencesRepository>() }
 }
 
 internal val domainModule = module {
@@ -250,6 +267,8 @@ internal val domainModule = module {
     factoryOf(::ExportToHevyUseCase)
     factoryOf(::GetHevyApiKeyUseCase)
     factoryOf(::SaveHevyApiKeyUseCase)
+    factoryOf(::FetchWeeklyTrainingStatsUseCase)
+    factoryOf(::RefreshTrainingStatsUseCase)
 
     // Check-in
     factoryOf(::ObserveCheckInsUseCase)
@@ -265,6 +284,8 @@ internal val domainModule = module {
 
     // Check-in PDF
     factoryOf(::GenerateCheckInPdfUseCase)
+    factoryOf(::GetPdfExportPreferencesUseCase)
+    factoryOf(::SavePdfExportPreferencesUseCase)
 
     // Subscription + Feature gating
     factoryOf(::ObserveSubscriptionStateUseCase)
@@ -306,6 +327,9 @@ internal val presentationModule = module {
             deleteCheckIn = get(),
             computeNutritionSummary = get(),
             updateCheckIn = get(),
+            refreshTrainingStats = get(),
+            getPdfExportPreferences = get(),
+            savePdfExportPreferences = get(),
         )
     }
     viewModel { params ->
@@ -336,6 +360,8 @@ internal val presentationModule = module {
     }
 }
 
+internal expect fun platformDataModule(): org.koin.core.module.Module
+
 val sharedModule = module {
-    includes(dataModule, domainModule, presentationModule)
+    includes(dataModule, domainModule, presentationModule, platformDataModule())
 }

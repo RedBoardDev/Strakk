@@ -2,6 +2,8 @@ package com.strakk.shared.data.repository
 
 import com.strakk.shared.data.dto.ExportToHevyRequestDto
 import com.strakk.shared.data.dto.ExportToHevyResponseDto
+import com.strakk.shared.data.dto.FetchHevyWorkoutsRequestDto
+import com.strakk.shared.data.dto.FetchHevyWorkoutsResponseDto
 import com.strakk.shared.data.dto.ParseWorkoutPdfRequestDto
 import com.strakk.shared.data.dto.ParseWorkoutPdfResponseDto
 import com.strakk.shared.data.mapper.toDomain
@@ -9,6 +11,7 @@ import com.strakk.shared.data.mapper.toDto
 import com.strakk.shared.domain.common.DomainError
 import com.strakk.shared.domain.common.Logger
 import com.strakk.shared.domain.model.HevyExportResult
+import com.strakk.shared.domain.model.HevyWorkout
 import com.strakk.shared.domain.model.WorkoutProgram
 import com.strakk.shared.domain.model.WorkoutSession
 import com.strakk.shared.domain.repository.WorkoutRepository
@@ -126,5 +129,35 @@ internal class WorkoutRepositoryImpl(
         500 -> "The server errored ($function)."
         502, 503, 504 -> "The service is temporarily unavailable. Try again."
         else -> "$function failed (HTTP $status)."
+    }
+
+    override suspend fun fetchWorkoutsForDateRange(startDate: String, endDate: String): List<HevyWorkout> {
+        requireActiveSession()
+
+        val response = try {
+            supabaseClient.functions.invoke(
+                function = "fetch-hevy-workouts",
+                body = FetchHevyWorkoutsRequestDto(startDate = startDate, endDate = endDate),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(LOG_TAG, "fetch-hevy-workouts invoke failed", e)
+            throw DomainError.DataError(messageForInvokeError(e), e)
+        }
+
+        if (response.status.value !in 200..299) {
+            throw DomainError.DataError(
+                messageForHttpStatus(response.status.value, "fetch-hevy-workouts"),
+            )
+        }
+
+        return try {
+            response.body<FetchHevyWorkoutsResponseDto>().workouts.map { it.toDomain() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw DomainError.DataError("Failed to parse workout data.", e)
+        }
     }
 }

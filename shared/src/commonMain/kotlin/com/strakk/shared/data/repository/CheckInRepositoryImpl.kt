@@ -4,6 +4,7 @@ import com.strakk.shared.data.dto.CheckInDto
 import com.strakk.shared.data.dto.CheckInPhotoDto
 import com.strakk.shared.data.dto.CheckInSummaryResponseDto
 import com.strakk.shared.data.mapper.toDomain
+import com.strakk.shared.data.mapper.toDto
 import com.strakk.shared.data.mapper.toListItem
 import com.strakk.shared.data.mapper.toMeasurements
 import com.strakk.shared.data.mapper.toSeriesPoint
@@ -19,6 +20,7 @@ import com.strakk.shared.domain.model.CheckInSeriesPoint
 import com.strakk.shared.domain.model.DailyNutrition
 import com.strakk.shared.domain.model.NutritionAverages
 import com.strakk.shared.domain.model.NutritionGoals
+import com.strakk.shared.domain.model.WeeklyTrainingStats
 import com.strakk.shared.domain.repository.CheckInRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
@@ -375,6 +377,18 @@ internal class CheckInRepositoryImpl(
     // -------------------------------------------------------------------------
     // Cache
     // -------------------------------------------------------------------------
+
+    override suspend fun saveTrainingStats(checkInId: String, stats: WeeklyTrainingStats) {
+        val dto = stats.toDto()
+        supabaseClient.from(TABLE)
+            .update({ set("training_stats", dto) }) {
+                filter { eq("id", checkInId) }
+            }
+        // Update local cache
+        cache.value = cache.value.map { checkIn ->
+            if (checkIn.id == checkInId) checkIn.copy(trainingStats = dto) else checkIn
+        }
+    }
 
     override suspend fun clearCache() {
         fetchMutex.withLock {

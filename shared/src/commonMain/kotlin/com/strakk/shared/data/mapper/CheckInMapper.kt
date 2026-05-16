@@ -38,6 +38,7 @@ internal fun CheckInDto.toDomain(): CheckIn = CheckIn(
     } else {
         null
     },
+    trainingStats = trainingStats?.toDomain(),
     photos = checkinPhotos?.map { it.toDomain() }.orEmpty(),
     createdAt = createdAt,
     updatedAt = updatedAt,
@@ -70,15 +71,27 @@ internal fun CheckInDto.toMeasurements(): CheckInMeasurements = CheckInMeasureme
     thighRight = thighRightCm,
 )
 
-internal fun CheckInDto.toSeriesPoint(): CheckInSeriesPoint = CheckInSeriesPoint(
-    weekLabel = weekLabel,
-    weight = weightKg,
-    shoulders = shouldersCm,
-    chest = chestCm,
-    armLeft = armLeftCm,
-    armRight = armRightCm,
-    waist = waistCm,
-    hips = hipsCm,
-    thighLeft = thighLeftCm,
-    thighRight = thighRightCm,
-)
+internal fun CheckInDto.toSeriesPoint(): CheckInSeriesPoint {
+    val ts = trainingStats?.toDomain()
+    return CheckInSeriesPoint(
+        weekLabel = weekLabel,
+        weight = weightKg,
+        shoulders = shouldersCm,
+        chest = chestCm,
+        armLeft = armLeftCm,
+        armRight = armRightCm,
+        waist = waistCm,
+        hips = hipsCm,
+        thighLeft = thighLeftCm,
+        thighRight = thighRightCm,
+        trainingSessions = ts?.totalSessions,
+        trainingVolumeKg = ts?.totalVolumeKg,
+        trainingDurationMin = ts?.totalDurationMinutes,
+        avgCalories = avgCalories,
+        avgProtein = avgProtein,
+        avgCarbs = avgCarbs,
+        avgFat = avgFat,
+        avgWater = avgWater,
+        nutritionDays = nutritionDays,
+    )
+}

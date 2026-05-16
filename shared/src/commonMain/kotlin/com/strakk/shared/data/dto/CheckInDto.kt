@@ -28,6 +28,7 @@ internal data class CheckInDto(
     @SerialName("avg_water") val avgWater: Int? = null,
     @SerialName("nutrition_days") val nutritionDays: Int? = null,
     @SerialName("ai_summary") val aiSummary: String? = null,
+    @SerialName("training_stats") val trainingStats: TrainingStatsDto? = null,
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String,
     @SerialName("checkin_photos") val checkinPhotos: List<CheckInPhotoDto>? = null,
