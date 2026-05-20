@@ -13,7 +13,9 @@ struct PdfExportConfig {
     var includeWater: Bool = true
     var includeAverages: Bool = true
     var includeDailyData: Bool = true
-    var includeTraining: Bool = true
+    var includeTrainingSummary: Bool = true
+    var includeMuscleVolume: Bool = true
+    var includeWorkoutDetails: Bool = true
 }
 
 // MARK: - Sheet
@@ -41,7 +43,11 @@ struct PdfExportOptionsSheet: View {
 
                         if hasTrainingData {
                             optionSection("TRAINING") {
-                                toggleRow("Workout stats", isOn: $options.includeTraining)
+                                toggleRow("Training summary", isOn: $options.includeTrainingSummary)
+                                sectionDivider
+                                toggleRow("Muscle volume", isOn: $options.includeMuscleVolume)
+                                sectionDivider
+                                toggleRow("Session details", isOn: $options.includeWorkoutDetails)
                             }
                         }
 

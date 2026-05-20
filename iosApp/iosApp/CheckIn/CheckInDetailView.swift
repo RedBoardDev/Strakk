@@ -242,7 +242,9 @@ struct CheckInDetailView: View {
             includeWater: exportOptions.includeWater,
             includeAverages: exportOptions.includeAverages,
             includeDailyData: exportOptions.includeDailyData,
-            includeTraining: exportOptions.includeTraining
+            includeTrainingSummary: exportOptions.includeTrainingSummary,
+            includeMuscleVolume: exportOptions.includeMuscleVolume,
+            includeWorkoutDetails: exportOptions.includeWorkoutDetails
         )
         vm.onEvent(CheckInDetailEventOnUpdatePdfOptions(options: kmpOptions))
     }

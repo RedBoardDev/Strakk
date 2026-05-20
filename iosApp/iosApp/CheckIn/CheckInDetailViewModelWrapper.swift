@@ -151,7 +151,9 @@ final class CheckInDetailViewModelWrapper {
                 includeWater: options.includeWater,
                 includeAverages: options.includeAverages,
                 includeDailyData: options.includeDailyData,
-                includeTraining: options.includeTraining
+                includeTrainingSummary: options.includeTrainingSummary,
+                includeMuscleVolume: options.includeMuscleVolume,
+                includeWorkoutDetails: options.includeWorkoutDetails
             )
             let bytes = try await pdfUseCase.invoke(checkInId: checkInId, options: kmpOptions)
             return Data((0..<bytes.size).map { UInt8(bitPattern: bytes.get(index: $0)) })
@@ -273,7 +275,9 @@ final class CheckInDetailViewModelWrapper {
             includeWater: options.includeWater,
             includeAverages: options.includeAverages,
             includeDailyData: options.includeDailyData,
-            includeTraining: options.includeTraining
+            includeTrainingSummary: options.includeTrainingSummary,
+            includeMuscleVolume: options.includeMuscleVolume,
+            includeWorkoutDetails: options.includeWorkoutDetails
         )
     }
 
