@@ -19,7 +19,9 @@ internal class PdfPreferencesRepositoryImpl(
     private var includeWater by settings.boolean("pdf_pref_water", true)
     private var includeAverages by settings.boolean("pdf_pref_averages", true)
     private var includeDailyData by settings.boolean("pdf_pref_daily_data", true)
-    private var includeTraining by settings.boolean("pdf_pref_training", true)
+    private var includeTrainingSummary by settings.boolean("pdf_pref_training_summary", true)
+    private var includeMuscleVolume by settings.boolean("pdf_pref_muscle_volume", true)
+    private var includeWorkoutDetails by settings.boolean("pdf_pref_workout_details", true)
 
     override fun getExportOptions(): PdfExportOptions = PdfExportOptions(
         includePhotos = includePhotos,
@@ -32,7 +34,9 @@ internal class PdfPreferencesRepositoryImpl(
         includeWater = includeWater,
         includeAverages = includeAverages,
         includeDailyData = includeDailyData,
-        includeTraining = includeTraining,
+        includeTrainingSummary = includeTrainingSummary,
+        includeMuscleVolume = includeMuscleVolume,
+        includeWorkoutDetails = includeWorkoutDetails,
     )
 
     override fun saveExportOptions(options: PdfExportOptions) {
@@ -46,6 +50,8 @@ internal class PdfPreferencesRepositoryImpl(
         includeWater = options.includeWater
         includeAverages = options.includeAverages
         includeDailyData = options.includeDailyData
-        includeTraining = options.includeTraining
+        includeTrainingSummary = options.includeTrainingSummary
+        includeMuscleVolume = options.includeMuscleVolume
+        includeWorkoutDetails = options.includeWorkoutDetails
     }
 }
