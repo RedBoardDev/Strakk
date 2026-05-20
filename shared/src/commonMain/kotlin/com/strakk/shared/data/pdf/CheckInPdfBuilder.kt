@@ -22,6 +22,15 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 private const val BUCKET = "checkin-photos"
 private const val WEIGHT_HISTORY_COUNT = 8
 
+/** Series of one body measurement across the last N check-ins, oldest first. */
+internal data class MeasurementSeries(
+    val label: String,
+    val unit: String,
+    val values: List<Double?>, // null = not recorded that week
+    val delta: Double?, // current − previous non-null (null if < 2 points)
+    val weekLabels: List<String> = emptyList(), // abbreviated week labels e.g. "S20"
+)
+
 internal class CheckInPdfBuilderImpl(
     private val checkInRepository: CheckInRepository,
     private val workoutRepository: WorkoutRepository,
@@ -47,6 +56,7 @@ internal class CheckInPdfBuilderImpl(
         }
 
         val weightHistory = if (options.includeMeasurements) loadWeightHistory() else emptyList()
+        val measurementHistory = if (options.includeMeasurements) loadMeasurementsHistory() else emptyList()
         val nutritionGoals = loadNutritionGoals()
 
         val html = template.build(
@@ -57,6 +67,7 @@ internal class CheckInPdfBuilderImpl(
             options = options,
             weightHistory = weightHistory,
             nutritionGoals = nutritionGoals,
+            measurementHistory = measurementHistory,
         )
 
         return htmlRenderer.render(html)
@@ -135,12 +146,56 @@ internal class CheckInPdfBuilderImpl(
         return try {
             checkInRepository.observeCheckInSeries().firstOrNull()
                 ?.filter { it.weight != null }
+                ?.sortedBy { it.weekLabel }
                 ?.takeLast(WEIGHT_HISTORY_COUNT)
                 ?.map { it.weekLabel to it.weight!! }
                 ?: emptyList()
         } catch (_: Exception) {
             emptyList()
         }
+    }
+
+    private suspend fun loadMeasurementsHistory(): List<MeasurementSeries> {
+        val points = try {
+            checkInRepository.observeCheckInSeries().firstOrNull()
+                ?.sortedBy { it.weekLabel }
+                ?.takeLast(WEIGHT_HISTORY_COUNT)
+                ?: return emptyList()
+        } catch (_: Exception) {
+            return emptyList()
+        }
+
+        // "2026-W20" → "S20"
+        val weekLabels = points.map { "S" + it.weekLabel.substringAfter("-W", it.weekLabel) }
+
+        fun avg(a: Double?, b: Double?): Double? = listOfNotNull(a, b)
+            .let { if (it.isEmpty()) null else it.average() }
+
+        fun series(
+            label: String,
+            unit: String,
+            get: (com.strakk.shared.domain.model.CheckInSeriesPoint) -> Double?,
+        ): MeasurementSeries {
+            val values = points.map(get)
+            val current = values.lastOrNull { it != null }
+            val previous = values.dropLast(1).lastOrNull { it != null }
+            return MeasurementSeries(
+                label = label,
+                unit = unit,
+                values = values,
+                delta = if (current != null && previous != null) current - previous else null,
+                weekLabels = weekLabels,
+            )
+        }
+
+        return listOf(
+            series("Taille", "cm") { it.waist },
+            series("Hanches", "cm") { it.hips },
+            series("Épaules", "cm") { it.shoulders },
+            series("Buste", "cm") { it.chest },
+            series("Bras", "cm") { avg(it.armLeft, it.armRight) },
+            series("Cuisses", "cm") { avg(it.thighLeft, it.thighRight) },
+        ).filter { ms -> ms.values.any { it != null } }
     }
 
     private suspend fun loadNutritionGoals(): NutritionGoals? = try {

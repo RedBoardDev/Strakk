@@ -18,6 +18,9 @@ import com.strakk.shared.domain.model.HevyWorkoutExercise
 import com.strakk.shared.domain.model.PdfExportOptions
 import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.WeeklyTrainingStats
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Pure-Kotlin HTML template builder for check-in PDF reports.
@@ -26,6 +29,7 @@ import com.strakk.shared.domain.model.WeeklyTrainingStats
  */
 internal class CheckInHtmlTemplate {
 
+    @Suppress("LongParameterList")
     fun build(
         checkIn: CheckIn,
         delta: CheckInDelta?,
@@ -34,6 +38,7 @@ internal class CheckInHtmlTemplate {
         options: PdfExportOptions,
         weightHistory: List<Pair<String, Double>> = emptyList(),
         nutritionGoals: NutritionGoals? = null,
+        measurementHistory: List<MeasurementSeries> = emptyList(),
     ): String = buildString {
         append("<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><style>")
         append(CSS)
@@ -42,11 +47,22 @@ internal class CheckInHtmlTemplate {
         append(headerHtml(checkIn))
         if (options.includePhotos && photoDataBase64.isNotEmpty()) append(photosHtml(photoDataBase64))
         if (options.includeMeasurements) append(measurementsHtml(checkIn, delta, weightHistory))
+
+        // Page 2 — feelings + nutrition together
+        val hasPage2 = options.includeFeelings || options.includeNutrition
+        if (hasPage2) append("<div class=\"pb\"></div>")
         if (options.includeFeelings) append(feelingsHtml(checkIn))
         if (options.includeNutrition) append(nutritionHtml(checkIn, options, trainingStats))
-        if (options.includeTraining && trainingStats != null) append(statisticsPageHtml(trainingStats, checkIn, nutritionGoals))
+
+        // Page 3 — training stats
+        val renderStatsPage = trainingStats != null &&
+            (options.includeTrainingSummary || options.includeMuscleVolume)
+        if (renderStatsPage) {
+            append("<div class=\"pb\"></div>")
+            append(statisticsPageHtml(trainingStats!!, checkIn, nutritionGoals, options, measurementHistory))
+        }
         append("</div>")
-        if (options.includeTraining && trainingStats != null) append(workoutPagesHtml(trainingStats.workouts))
+        if (options.includeWorkoutDetails && trainingStats != null) append(workoutPagesHtml(trainingStats.workouts))
         append("</body></html>")
     }
 
@@ -238,16 +254,19 @@ internal class CheckInHtmlTemplate {
         }
     }
 
-    private fun statisticsPageHtml(st: WeeklyTrainingStats, checkIn: CheckIn, goals: NutritionGoals?): String = buildString {
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")
+    private fun statisticsPageHtml(
+        st: WeeklyTrainingStats,
+        checkIn: CheckIn,
+        goals: NutritionGoals?,
+        options: PdfExportOptions,
+        measurementHistory: List<MeasurementSeries>,
+    ): String = buildString {
         append("<div class=\"sec\">Statistiques</div>")
+        append("<div class=\"fin-row\">")
 
-        // Row 1: Left (macros + volume bars) | Right (body heatmap)
-        append("<div class=\"fin-row\" style=\"align-items:stretch;\">")
-
-        // Left column
-        append("<div class=\"fin-col\" style=\"flex:1.2;display:flex;flex-direction:column;gap:8px;\">")
-
-        // Macro adherence bars (if goals available)
+        // ── Left column: macros adherence + measurements multi-line chart ───
+        append("<div class=\"fin-col\" style=\"flex:1.2;display:flex;flex-direction:column;gap:0;\">")
         val ns = checkIn.nutritionSummary
         if (goals != null && ns != null && ns.nutritionDays > 0) {
             append("<div class=\"sub-label\">Adhérence macros</div>")
@@ -276,44 +295,49 @@ internal class CheckInHtmlTemplate {
             }
             append("</div>")
         }
-
-        // Muscle volume bars
-        if (st.muscleGroupVolume.isNotEmpty()) {
-            val sorted = st.muscleGroupVolume.entries.sortedByDescending { it.value }
-            val mx = sorted.first().value
-            append("<div class=\"sub-label\">Volume par groupe musculaire</div>")
-            append("<div class=\"card\" style=\"padding:8px 10px;\">")
-            for ((m, v) in sorted) {
-                val p = if (mx > 0) ((v / mx) * 100).toInt() else 0
-                append("<div class=\"mb\"><span class=\"mb-l\">${cap(m)}</span><span class=\"mb-t\"><span class=\"mb-f\" style=\"width:${p}%\"></span></span><span class=\"mb-p\">${fmtV(v)}</span></div>")
-            }
-            append("</div>")
+        // measurements multi-line chart + push/pull/legs donut below
+        if (measurementHistory.isNotEmpty()) {
+            append(measurementSparklines(measurementHistory))
+        }
+        if (options.includeMuscleVolume && st.muscleGroupVolume.isNotEmpty()) {
+            append(pushPullLegsDonut(st.muscleGroupVolume))
         }
         append("</div>")
 
-        // Right: body heatmap
-        append("<div class=\"fin-col\" style=\"flex:0.6;text-align:center;display:flex;flex-direction:column;\">")
-        append("<div class=\"sub-label\" style=\"text-align:center;\">Carte musculaire</div>")
-        append("<div style=\"flex:1;display:flex;align-items:center;justify-content:center;\">")
-        append("<div style=\"max-width:85px;\">")
-        append(bodyHeatmapSvg(st.muscleGroupVolume))
-        append("</div></div>")
-        append("<div class=\"body-legend\" style=\"margin-top:3px;\">")
-        append("<div class=\"body-leg-item\"><span class=\"body-leg-swatch hi\"></span>Fort</div>")
-        append("<div class=\"body-leg-item\"><span class=\"body-leg-swatch mid\"></span>Moyen</div>")
-        append("<div class=\"body-leg-item\"><span class=\"body-leg-swatch lo\"></span>Faible</div>")
-        append("</div></div></div>")
-
-        // Row 2: Training stats grid (4 cells)
-        val h = st.totalDurationMinutes / 60; val m = st.totalDurationMinutes % 60
-        val dur = if (h > 0) "$h <span class=\"fin-ts-unit\">h</span> $m" else "$m <span class=\"fin-ts-unit\">min</span>"
-        val vol = "${fmtV(st.totalVolumeKg)} <span class=\"fin-ts-unit\">kg</span>"
-        val totalExercises = st.workouts.sumOf { it.exercises.size }
-        append("<div class=\"sub-label\" style=\"margin-top:12px;\">Entraînement</div><div class=\"fin-train-grid four\">")
-        append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">${st.totalSessions}</div><div class=\"fin-ts-label\">Séances</div></div>")
-        append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$dur</div><div class=\"fin-ts-label\">Durée totale</div></div>")
-        append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$vol</div><div class=\"fin-ts-label\">Volume</div></div>")
-        append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$totalExercises</div><div class=\"fin-ts-label\">Exercices</div></div></div>")
+        // ── Right column: training stats (top-aligned) + volume bars ───────
+        val showRight = options.includeTrainingSummary ||
+            (options.includeMuscleVolume && st.muscleGroupVolume.isNotEmpty())
+        if (showRight) {
+            append("<div class=\"fin-col\" style=\"flex:1;display:flex;flex-direction:column;gap:0;\">")
+            if (options.includeTrainingSummary) {
+                val h = st.totalDurationMinutes / 60; val m = st.totalDurationMinutes % 60
+                val dur = if (h > 0) "$h <span class=\"fin-ts-unit\">h</span> $m" else "$m <span class=\"fin-ts-unit\">min</span>"
+                val (volNum, volUnit) = fmtVolume(st.totalVolumeKg)
+                val vol = "$volNum <span class=\"fin-ts-unit\">$volUnit</span>"
+                val totalExercises = st.workouts.sumOf { it.exercises.size }
+                append("<div class=\"sub-label\">Entraînement</div>")
+                append("<div class=\"fin-train-grid two\">")
+                // icon + value layout for each stat block
+                append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">${st.totalSessions}</div><div class=\"fin-ts-label\">Séances</div></div>")
+                append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$dur</div><div class=\"fin-ts-label\">Durée</div></div>")
+                append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$vol</div><div class=\"fin-ts-label\">Volume</div></div>")
+                append("<div class=\"fin-train-stat\"><div class=\"fin-ts-val accent\">$totalExercises</div><div class=\"fin-ts-label\">Exercices</div></div>")
+                append("</div>")
+            }
+            if (options.includeMuscleVolume && st.muscleGroupVolume.isNotEmpty()) {
+                val sorted = st.muscleGroupVolume.entries.sortedByDescending { it.value }
+                val mx = sorted.first().value
+                append("<div class=\"sub-label\">Volume par groupe musculaire</div>")
+                append("<div class=\"card\" style=\"padding:8px 10px;\">")
+                for ((mu, v) in sorted) {
+                    val p = if (mx > 0) ((v / mx) * 100).toInt() else 0
+                    append("<div class=\"mb\"><span class=\"mb-l\">${cap(mu)}</span><span class=\"mb-t\"><span class=\"mb-f\" style=\"width:${p}%\"></span></span><span class=\"mb-p\">${fmtV(v)}</span></div>")
+                }
+                append("</div>")
+            }
+            append("</div>")
+        }
+        append("</div>") // fin-row
     }
 
     private fun workoutPagesHtml(workouts: List<HevyWorkout>): String = buildString {
@@ -322,6 +346,169 @@ internal class CheckInHtmlTemplate {
             append(exsHtml(w.exercises)); append("</div>")
         }
     }
+
+    /** Single multi-line chart: one normalised line per measurement, all in one SVG. */
+    @Suppress("MagicNumber")
+    private fun measurementSparklines(measurements: List<MeasurementSeries>): String = buildString {
+        val series = measurements.filter { ms -> ms.values.count { it != null } >= 2 }
+        if (series.isEmpty()) return@buildString
+
+        val n = series.maxOf { it.values.size }.coerceAtLeast(2)
+        val weekLabels = series.firstOrNull()?.weekLabels ?: emptyList()
+        // Distinct palette — no two close hues
+        val colors = listOf("#E07C4F", "#637CFF", "#4DAE6A", "#FFC84D", "#E05252", "#B07AAF", "#27B0C4")
+
+        val cw = 200.0; val top = 4.0; val bot = 56.0; val span = bot - top
+
+        fun xOf(i: Int) = fmtD(i.toDouble() / (n - 1) * cw)
+        fun normalise(ms: MeasurementSeries): List<Pair<Int, Double>> {
+            val pts = ms.values.mapIndexedNotNull { i, v -> if (v != null) i to v else null }
+            val lo = pts.minOf { it.second }; val hi = pts.maxOf { it.second }
+            val rng = if (hi > lo) hi - lo else 1.0
+            return pts.map { (i, v) -> i to (bot - ((v - lo) / rng) * (span - 2)) }
+        }
+
+        append("<div class=\"sub-label\">Évolution des mesures</div>")
+        append("<div class=\"card\" style=\"padding:8px 10px 6px;\">")
+
+        // ── Y labels + chart side by side ─────────────────────────────────
+        append("<div style=\"display:flex;align-items:stretch;gap:4px;\">")
+
+        // Y-axis text (HTML, not SVG — avoids stretching with preserveAspectRatio:none)
+        append("<div style=\"display:flex;flex-direction:column;justify-content:space-between;")
+        append("font-size:6px;color:#CCC;width:8px;text-align:right;padding:4px 0 2px;\">")
+        append("<span>+</span><span>−</span></div>")
+
+        // Chart area
+        append("<div style=\"flex:1;\">")
+        append("<svg viewBox=\"0 0 $cw ${fmtD(bot + 2)}\" preserveAspectRatio=\"none\" ")
+        append("style=\"width:100%;height:${(bot + 2).toInt()}px;display:block;\">")
+
+        // Grid lines
+        for (pct in listOf(0.25, 0.5, 0.75)) {
+            val gy = fmtD(top + span * pct)
+            append("<line x1=\"0\" y1=\"$gy\" x2=\"$cw\" y2=\"$gy\" stroke=\"#F2F2F2\" stroke-width=\"0.5\"/>")
+        }
+        append("<line x1=\"0\" y1=\"${fmtD(bot + 1)}\" x2=\"$cw\" y2=\"${fmtD(bot + 1)}\" stroke=\"#EBEBEB\" stroke-width=\"0.5\"/>")
+
+        // Lines + endpoint dots
+        series.forEachIndexed { idx, ms ->
+            val color = colors[idx % colors.size]
+            val pts = normalise(ms)
+            val polyPts = pts.joinToString(" ") { (i, y) -> "${xOf(i)},${fmtD(y)}" }
+            append("<polyline points=\"$polyPts\" fill=\"none\" stroke=\"$color\" ")
+            append("stroke-width=\"1.4\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/>")
+            val last = pts.last()
+            append("<circle cx=\"${xOf(last.first)}\" cy=\"${fmtD(last.second)}\" r=\"2\" fill=\"$color\"/>")
+        }
+        append("</svg>")
+
+        // X-axis labels (HTML, not SVG — no stretching)
+        if (weekLabels.isNotEmpty()) {
+            val step = if (n <= 6) 1 else 2
+            val shown = (0 until n).filter { i -> i % step == 0 || i == n - 1 }
+            append("<div style=\"display:flex;justify-content:space-between;font-size:5.5px;color:#BBB;margin-top:3px;\">")
+            for (i in shown) {
+                append("<span>${weekLabels.getOrElse(i) { "" }}</span>")
+            }
+            append("</div>")
+        }
+        append("</div>") // flex:1
+
+        append("</div>") // Y + chart row
+
+        // ── Legend ───────────────────────────────────────────────────────────
+        append("<div style=\"display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:5px;\">")
+        series.forEachIndexed { idx, ms ->
+            val color = colors[idx % colors.size]
+            val cur = ms.values.lastOrNull { it != null }
+            val deltaStr = when {
+                ms.delta == null -> ""
+                ms.delta > 0.05 -> " <span style=\"color:#4DAE6A;\">+${fmt(ms.delta)}</span>"
+                ms.delta < -0.05 -> " <span style=\"color:#E05252;\">${fmt(ms.delta)}</span>"
+                else -> ""
+            }
+            append("<div style=\"display:flex;align-items:center;gap:3px;font-size:7px;color:#555;\">")
+            append("<span style=\"display:inline-block;width:14px;height:2px;border-radius:1px;background:$color;\"></span>")
+            if (cur != null) append("<b>${ms.label}</b> ${fmt(cur)} cm$deltaStr")
+            else append("<b>${ms.label}</b>")
+            append("</div>")
+        }
+        append("</div>") // legend
+        append("</div>") // card
+    }
+
+    // ── Graph B: Push / Pull / Legs donut ─────────────────────────────────
+
+    private fun classifyMuscle(group: String): String {
+        val g = group.lowercase()
+        return when {
+            g.contains("chest") || g.contains("shoulder") || g.contains("tricep") ||
+                g.contains("pec") || g.contains("delt") -> "Poussé"
+            g.contains("back") || g.contains("bicep") || g.contains("lat") ||
+                g.contains("row") || g.contains("pull") || g.contains("trap") -> "Tiré"
+            g.contains("leg") || g.contains("quad") || g.contains("hamstring") ||
+                g.contains("glute") || g.contains("calf") || g.contains("calve") ||
+                g.contains("hip") -> "Jambes"
+            else -> "Autre"
+        }
+    }
+
+    private fun pushPullLegsDonut(muscleGroupVolume: Map<String, Double>): String = buildString {
+        data class Slice(val label: String, val value: Double, val color: String)
+        val buckets = mutableMapOf("Poussé" to 0.0, "Tiré" to 0.0, "Jambes" to 0.0, "Autre" to 0.0)
+        for ((g, v) in muscleGroupVolume) buckets[classifyMuscle(g)] = buckets.getValue(classifyMuscle(g)) + v
+        val slices = listOf(
+            Slice("Poussé", buckets["Poussé"]!!, "#E07C4F"),
+            Slice("Tiré", buckets["Tiré"]!!, "#637CFF"),
+            Slice("Jambes", buckets["Jambes"]!!, "#4DAE6A"),
+            Slice("Autre", buckets["Autre"]!!, "#CCCCCC"),
+        ).filter { it.value > 0 }
+        val total = slices.sumOf { it.value }
+        if (total == 0.0) return@buildString
+
+        val cx = 50.0; val cy = 50.0; val outerR = 42.0; val innerR = 24.0
+        fun pt(r: Double, a: Double) = fmtD(cx + r * cos(a)) + " " + fmtD(cy + r * sin(a))
+        fun arcPath(r: Double, a1: Double, a2: Double, sweep: Int): String {
+            val large = if (a2 - a1 > PI) 1 else 0
+            return "A $r $r 0 $large $sweep ${pt(r, a2)}"
+        }
+
+        append("<div class=\"sub-label\">Répartition Push / Pull / Legs</div>")
+        append("<div class=\"card\" style=\"padding:8px 10px;\">")
+        append("<div style=\"display:flex;align-items:center;gap:10px;\">")
+
+        // Donut SVG
+        append("<svg viewBox=\"0 0 100 100\" width=\"80\" height=\"80\" style=\"flex-shrink:0;\">")
+        var angle = -PI / 2
+        for (sl in slices) {
+            val sweep = sl.value / total * 2 * PI
+            val end = angle + sweep * 0.998 // tiny gap between sectors
+            append("<path d=\"M ${pt(outerR, angle)} ${arcPath(outerR, angle, end, 1)} ")
+            append("L ${pt(innerR, end)} ${arcPath(innerR, end, angle, 0)} Z\" fill=\"${sl.color}\"/>")
+            angle += sweep
+        }
+        append("</svg>")
+
+        // Legend
+        append("<div style=\"display:flex;flex-direction:column;gap:5px;\">")
+        for (sl in slices) {
+            val pct = (sl.value / total * 100).toInt()
+            val (vn, vu) = fmtVolume(sl.value)
+            append("<div style=\"display:flex;align-items:center;gap:5px;font-size:8px;color:#444;\">")
+            append("<span style=\"display:inline-block;width:10px;height:10px;border-radius:2px;background:${sl.color};\"></span>")
+            append("<span>${sl.label}</span>")
+            append("<span style=\"margin-left:auto;font-weight:700;color:#222;\">$pct%</span>")
+            append("<span style=\"color:#AAA;font-size:7px;\"> $vn $vu</span>")
+            append("</div>")
+        }
+        append("</div>") // legend
+        append("</div>") // flex row
+        append("</div>") // card
+    }
+
+    @Suppress("UnusedPrivateMember", "FunctionOnlyReturningConstant")
+    private fun sparklineSvg(values: List<Double?>): String = ""
 
     private fun exsHtml(exercises: List<HevyWorkoutExercise>): String = buildString {
         var currentSuperset: Int? = null
@@ -367,41 +554,18 @@ internal class CheckInHtmlTemplate {
         if (currentSuperset != null) append("</div>")
     }
 
-    private fun bodyHeatmapSvg(muscleVolume: Map<String, Double>): String {
-        val maxVol = muscleVolume.values.maxOrNull() ?: 1.0
-        fun op(key: String): String {
-            val v = muscleVolume.entries.firstOrNull { it.key.lowercase().contains(key) }?.value ?: 0.0
-            return fmtD((v / maxVol).coerceIn(0.1, 0.9))
-        }
-        // Reuse body silhouette but colorize muscle groups based on volume
-        return """<svg viewBox="-1 0 34 96" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
-$BODY_SVG
-<path style="fill:#E07C4F;opacity:${op("shoulder")};" d="m 19.05,13.25 3.56,1.98 0.73,-0.35 z m -0.11,0.43 -0.37,1.73 2.18,0.54 1.4,-0.49 z"/>
-<path style="fill:#E07C4F;opacity:${op("shoulder")};" d="m 12.62,13.25 -3.56,1.98 -0.73,-0.35 z m 0.11,0.43 0.37,1.73 -2.18,0.54 -1.4,-0.49 z"/>
-<path style="fill:#E07C4F;opacity:${op("chest")};" d="m 20.34,17.09 1.73,3.09 1.89,0.94 -0.5,0.3 -6.8,-2.1 z"/>
-<path style="fill:#E07C4F;opacity:${op("chest")};" d="m 11.35,17.09 -1.73,3.09 -1.89,0.94 0.5,0.3 6.8,-2.1 z"/>
-<path style="fill:#E07C4F;opacity:${op("chest")};" d="m 16.66,19.72 6.8,2.1 -0.65,0.5 -0.91,2.64 -2.1,0.87 -3.35,-1.66 0.2,-3.8 z"/>
-<path style="fill:#E07C4F;opacity:${op("chest")};" d="m 15.03,19.72 -6.8,2.1 0.65,0.5 0.91,2.64 2.1,0.87 3.35,-1.66 -0.2,-3.8 z"/>
-<path style="fill:#E07C4F;opacity:${op("bicep")};" d="m 22.92,15.66 0.76,-0.41 2.41,1.67 1.17,1.51 0.63,1.56 -0.05,3.7 -1.33,-1.72 0.04,-2.59 -0.49,-0.5 -3.14,-3.21 z"/>
-<path style="fill:#E07C4F;opacity:${op("bicep")};" d="m 8.75,15.66 -0.76,-0.41 -2.41,1.67 -1.17,1.51 -0.63,1.56 0.05,3.7 1.33,-1.72 -0.04,-2.59 0.49,-0.5 3.14,-3.21 z"/>
-<path style="fill:#E07C4F;opacity:${op("ab")};" d="m 19.64,34.71 1.81,-1.36 0.16,1.83 1.29,2.37 -1.98,2.74 -1.03,0.17 -0.37,-3.89 z"/>
-<path style="fill:#E07C4F;opacity:${op("ab")};" d="m 12.05,34.71 -1.81,-1.36 -0.16,1.83 -1.29,2.37 1.98,2.74 1.03,0.17 0.37,-3.89 z"/>
-<path style="fill:#E07C4F;opacity:${op("quad")};" d="m 14.4,45.04 0.02,-0.03 -0.15,-0.38 -3.1,-3.4 -0.23,-0.08 2.06,5.32 z m -1.17,2.02 1.28,3.3 0.43,-4.05 -0.25,-0.64 z"/>
-<path style="fill:#E07C4F;opacity:${op("quad")};" d="m 17.28,45.04 -0.02,-0.03 0.15,-0.38 3.1,-3.4 0.23,-0.08 -2.06,5.32 z m 1.17,2.02 -1.28,3.3 -0.43,-4.05 0.25,-0.64 z"/>
-<path style="fill:#E07C4F;opacity:${op("quad")};" d="m 22.06,39.37 v 4.21 l -2.95,5.83 -1.86,5.78 0.19,-4.01 z"/>
-<path style="fill:#E07C4F;opacity:${op("quad")};" d="m 9.63,39.37 v 4.21 l 2.95,5.83 1.86,5.78 -0.19,-4.01 z"/>
-<path style="fill:#E07C4F;opacity:${op("calve")};" d="m 18.25,70.44 0.29,0.91 0.62,3.87 0.08,5.16 -0.87,5.03 0.04,-6.45 -0.91,-2.58 -0.13,-2.83 z"/>
-<path style="fill:#E07C4F;opacity:${op("calve")};" d="m 13.44,70.44 -0.29,0.91 -0.62,3.87 -0.08,5.16 0.87,5.03 -0.04,-6.45 0.91,-2.58 0.13,-2.83 z"/>
-</svg>"""
-    }
-
     @Suppress("MaxLineLength")
     private val DUMBBELL_SVG = """<svg class="train-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#E07C4F" stroke="#E07C4F" stroke-width="0.8" stroke-linejoin="round" d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>"""
+
     private val EMPTY_ICON = """<span class="train-icon-empty"></span>"""
 
     private fun fmt(v:Double):String=if(v==v.toLong().toDouble())v.toLong().toString()else fmtD(v)
     private fun fmtD(v:Double):String=((v*10).toLong()/10.0).toString()
     private fun fmtV(kg:Double):String=if(kg>=1000)"${fmtD(kg/1000)}k"else fmt(kg)
+
+    /** Pretty volume: < 1 t → "X kg" ; ≥ 1 t → "X.x t". Returned as (number, unit). */
+    private fun fmtVolume(kg:Double):Pair<String,String> =
+        if (kg >= 1000.0) fmtD(kg / 1000.0) to "t" else fmt(kg) to "kg"
     private fun fmtW(ml:Double):String{val l=ml/1000.0;return if(l>=1.0)"${fmtD(l)} L"else"${ml.toInt()} ml"}
     private fun cap(s:String):String=s.replaceFirstChar{if(it.isLowerCase())it.titlecase()else it.toString()}
     private fun esc(t:String):String=t.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;")
@@ -425,10 +589,10 @@ $BODY_SVG
     @Suppress("MaxLineLength")
     companion object {
         private const val CSS="""
-@page{size:A4;margin:16mm 20mm 14mm;@bottom-center{content:"Généré par Strakk";font-size:7px;color:#CCC;letter-spacing:0.5px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;}}
+@page{size:A4;margin:0;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#222;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.page{width:210mm;min-height:297mm;padding:18mm 20mm 16mm;margin:0 auto;}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#222;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#FFF;}
+.page{width:210mm;min-height:297mm;padding:0 16mm;margin:0 auto;}
 
 .pb{break-before:page;page-break-before:always;}
 .bar{height:3px;background:#E07C4F;margin-bottom:10px;}
@@ -439,7 +603,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#222;line-hei
 .sec:first-child{margin-top:0;}
 .card{background:#FAFAFA;border:1px solid #EBEBEB;border-radius:5px;padding:10px 12px;margin-top:4px;break-inside:avoid;}
 .fq-wrap,.feel-row,table,.fin-row,.fin-train-grid{break-inside:avoid;}
-.sub-label{font-size:7.5px;font-weight:700;letter-spacing:0.5px;color:#AAA;text-transform:uppercase;margin:0 0 5px;break-after:avoid;page-break-after:avoid;}
+.sub-label{font-size:7.5px;font-weight:700;letter-spacing:0.5px;color:#AAA;text-transform:uppercase;margin:10px 0 3px;break-after:avoid;page-break-after:avoid;}
 table{width:100%;border-collapse:collapse;font-size:9.5px;}
 th{text-align:left;font-size:7.5px;font-weight:700;color:#AAA;letter-spacing:0.4px;text-transform:uppercase;padding:4px 6px;background:#F0F0F0;}
 th.r{text-align:right;}
@@ -468,7 +632,10 @@ tr:nth-child(even) td{background:#F7F7F7;}
 .mb-f{display:block;height:100%;background:#E07C4F;border-radius:3px;opacity:0.4;}
 .mb-p{font-size:8px;color:#999;width:36px;padding-left:6px;font-variant-numeric:tabular-nums;}
 .fin-train-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.fin-train-grid.four{grid-template-columns:repeat(4,1fr);}
+.fin-train-grid.two{grid-template-columns:repeat(2,auto);gap:0;border:1px solid #EBEBEB;border-radius:6px;overflow:hidden;background:#FAFAFA;}
+.fin-train-grid.two .fin-train-stat{background:transparent;border:0;border-radius:0;padding:10px 20px;min-width:84px;}
+.fin-train-grid.two .fin-train-stat:nth-child(odd){border-right:1px solid #EBEBEB;}
+.fin-train-grid.two .fin-train-stat:nth-child(-n+2){border-bottom:1px solid #EBEBEB;}
 .fin-train-stat{text-align:center;padding:8px 4px;background:#FAFAFA;border:1px solid #EBEBEB;border-radius:5px;}
 .fin-ts-val{font-size:14px;font-weight:800;color:#222;font-variant-numeric:tabular-nums;}
 .fin-ts-val.accent{color:#E07C4F;}
@@ -499,14 +666,8 @@ tr:nth-child(even) td{background:#F7F7F7;}
 .train-icon{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle;position:relative;top:-1px;}
 .train-icon-empty{display:inline-block;width:10px;height:10px;margin-right:4px;}
 .legend{display:flex;align-items:center;gap:0;font-size:7.5px;color:#AAA;margin-top:4px;}
-.fin-row{display:flex;gap:10px;align-items:flex-start;}
+.fin-row{display:flex;gap:10px;align-items:stretch;}
 .fin-col{min-width:0;}
-.body-legend{display:flex;justify-content:center;gap:10px;margin-top:6px;font-size:6.5px;color:#AAA;}
-.body-leg-item{display:flex;align-items:center;gap:3px;}
-.body-leg-swatch{display:inline-block;width:10px;height:6px;border-radius:2px;background:#E07C4F;}
-.body-leg-swatch.hi{opacity:0.8;}
-.body-leg-swatch.mid{opacity:0.4;}
-.body-leg-swatch.lo{opacity:0.15;}
 .ss{border-left:2px solid #D0C9E3;padding-left:10px;margin:4px 0 4px 3px;break-inside:avoid;}
 .ss .ex+.ex{border-top:none;}
 .ss-label{display:block;font-size:7px;font-weight:700;color:#A99CC2;letter-spacing:0.6px;margin-bottom:2px;}
