@@ -30,6 +30,7 @@ private const val ANALYSIS_TEMPORARILY_UNAVAILABLE =
 private const val ANALYSIS_QUOTA_EXHAUSTED = "The AI scanner is temporarily busy. Please try again later."
 private const val NO_FOODS_DETECTED = "No food items detected. Try a clearer photo or add manually."
 private const val SAVE_ERROR = "Could not save the meal. Please try again."
+private const val MEAL_NAME_MAX_LENGTH = 60
 
 /**
  * Orchestrates the photo-to-meal analysis flow.
@@ -119,7 +120,7 @@ class PhotoMealViewModel(
                 setState {
                     PhotoMealUiState.Reviewing(
                         items = result.items,
-                        mealName = generateMealName(result.items, event.hint),
+                        mealName = generateMealName(result.items),
                     )
                 }
             } catch (e: CancellationException) {
@@ -166,7 +167,7 @@ class PhotoMealViewModel(
                 setState {
                     PhotoMealUiState.Reviewing(
                         items = result.items,
-                        mealName = generateMealName(result.items, event.description),
+                        mealName = generateMealName(result.items),
                     )
                 }
             } catch (e: CancellationException) {
@@ -368,16 +369,13 @@ class PhotoMealViewModel(
     // Meal name generation
     // -------------------------------------------------------------------------
 
-    private fun generateMealName(items: List<GroundedMealItem>, hint: String?): String {
-        if (!hint.isNullOrBlank()) return hint.trim().replaceFirstChar { it.uppercaseChar() }
-        return when (items.size) {
-            0 -> "Photo meal"
-            1 -> items[0].prediction.name.replaceFirstChar { it.uppercaseChar() }
-            else -> {
-                val first = items[0].prediction.name.replaceFirstChar { it.uppercaseChar() }
-                val second = items[1].prediction.name
-                "$first & $second"
-            }
+    private fun generateMealName(items: List<GroundedMealItem>): String = when (items.size) {
+        0 -> "Photo meal"
+        1 -> items[0].prediction.name.replaceFirstChar { it.uppercaseChar() }.take(MEAL_NAME_MAX_LENGTH)
+        else -> {
+            val first = items[0].prediction.name.replaceFirstChar { it.uppercaseChar() }
+            val second = items[1].prediction.name
+            "$first & $second".take(MEAL_NAME_MAX_LENGTH)
         }
     }
 
