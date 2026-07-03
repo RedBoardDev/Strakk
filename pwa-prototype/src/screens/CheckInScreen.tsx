@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { ScreenScroll } from '../components/ScreenScroll.tsx'
 import { PushPage } from '../components/PushPage.tsx'
@@ -18,7 +18,7 @@ import { colors } from '../theme/tokens.ts'
 import { useStore } from '../store.tsx'
 import { useToast } from '../components/Toast.tsx'
 import { toCheckInView, weightTrendOf, type CheckInView } from '../lib/checkinView.ts'
-import type { CheckinRow } from '../api/checkins.ts'
+import { signedPhotoUrl, type CheckinPhoto, type CheckinRow } from '../api/checkins.ts'
 import { MEASUREMENT_FIELDS, type CheckIn, type Measurements } from '../data/mock.ts'
 
 type Trend = { color: string; icon: IconName | null }
@@ -384,15 +384,35 @@ function TrainingGrid({ checkIn }: { checkIn: CheckIn }) {
   )
 }
 
-function PhotosRow({ count }: { count: number }) {
+// Resolves short-lived signed URLs for the check-in's stored photos and renders
+// them; a grey placeholder shows while a URL resolves or if one fails.
+function PhotosRow({ photos }: { photos: CheckinPhoto[] }) {
+  const [urls, setUrls] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    let cancelled = false
+    void Promise.all(
+      photos.map(async (photo) => [photo.id, await signedPhotoUrl(photo.storage_path).catch(() => null)] as const),
+    ).then((pairs) => {
+      if (cancelled) return
+      const next: Record<string, string> = {}
+      for (const [id, url] of pairs) if (url) next[id] = url
+      setUrls(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [photos])
+
   return (
     <div className="flex gap-2.5">
-      {Array.from({ length: count }, (_, i) => (
-        <div
-          key={i}
-          className="flex-1 aspect-square rounded-card bg-surface-2 flex items-center justify-center"
-        >
-          <Icon name="photo" size={22} className="text-ink-4" />
+      {photos.map((photo) => (
+        <div key={photo.id} className="flex-1 aspect-square rounded-card bg-surface-2 flex items-center justify-center overflow-hidden">
+          {urls[photo.id] ? (
+            <img src={urls[photo.id]} alt="Progress" className="h-full w-full object-cover" />
+          ) : (
+            <Icon name="photo" size={22} className="text-ink-4" />
+          )}
         </div>
       ))}
     </div>
@@ -401,7 +421,7 @@ function PhotosRow({ count }: { count: number }) {
 
 // Detail content rendered INSIDE <PushPage> (PushPage provides nav bar + the
 // scroll region `px-5 pb-32`, so sections here add only vertical rhythm).
-function CheckInDetailContent({ checkIn, data }: { checkIn: CheckIn; data: number[] }) {
+function CheckInDetailContent({ checkIn, data }: { checkIn: CheckInView; data: number[] }) {
   const feel = FEELING[checkIn.feeling]
   return (
     <>
@@ -441,8 +461,12 @@ function CheckInDetailContent({ checkIn, data }: { checkIn: CheckIn; data: numbe
       <SectionLabel>Training</SectionLabel>
       <TrainingGrid checkIn={checkIn} />
 
-      <SectionLabel>Progress photos</SectionLabel>
-      <PhotosRow count={checkIn.photoCount} />
+      {checkIn.row.checkin_photos.length > 0 && (
+        <>
+          <SectionLabel>Progress photos</SectionLabel>
+          <PhotosRow photos={checkIn.row.checkin_photos} />
+        </>
+      )}
     </>
   )
 }

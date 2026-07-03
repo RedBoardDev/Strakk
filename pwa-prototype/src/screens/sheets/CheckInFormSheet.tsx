@@ -11,6 +11,7 @@ import { dateRangeLabel, isoWeekLabel, weekDates } from '../../lib/dates.ts'
 import { MEASUREMENT_COLUMNS, measurementsOf, weekTitle, TAG_LABELS } from '../../lib/checkinView.ts'
 import { useStore } from '../../store.tsx'
 import { computeNutritionSummary, type CheckinInput, type CheckinRow } from '../../api/checkins.ts'
+import { aggregateTrainingStats, fetchHevyWorkouts } from '../../api/hevy.ts'
 import { generateCheckinSummary } from '../../api/ai.ts'
 import { compressImage } from '../../api/photos.ts'
 import { MEASUREMENT_FIELDS, type Measurements } from '../../data/mock.ts'
@@ -200,10 +201,17 @@ export function CheckInFormSheet({
       } else {
         const coveredDates = weekDates(now)
         const nutrition = await computeNutritionSummary(coveredDates).catch(() => null)
+        // Pull the week's Hevy workouts (if connected) into training_stats.
+        const trainingStats = store.state.hevyConnected
+          ? await fetchHevyWorkouts(coveredDates[0], coveredDates[coveredDates.length - 1])
+              .then(aggregateTrainingStats)
+              .catch(() => null)
+          : null
         const row = await store.createCheckin(
           {
             week_label: isoWeekLabel(now),
             covered_dates: coveredDates,
+            training_stats: trainingStats,
             ...base,
             ...(nutrition
               ? {

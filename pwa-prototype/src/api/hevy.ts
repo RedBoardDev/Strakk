@@ -45,3 +45,42 @@ export async function fetchHevyWorkouts(startDate: string, endDate: string): Pro
   })
   return workouts
 }
+
+// Aggregates a week's Hevy workouts into the check-in's training_stats shape:
+// session count, total duration & volume, mean RPE, and per-muscle-group volume.
+export function aggregateTrainingStats(workouts: HevyWorkout[]): {
+  total_sessions: number
+  total_duration_minutes: number
+  total_volume_kg: number
+  avg_rpe: number | null
+  muscle_group_volume: Record<string, number>
+} {
+  let totalDuration = 0
+  let totalVolume = 0
+  let rpeSum = 0
+  let rpeCount = 0
+  const muscleVolume: Record<string, number> = {}
+
+  for (const workout of workouts) {
+    totalDuration += workout.duration_minutes
+    totalVolume += workout.total_volume_kg
+    for (const exercise of workout.exercises) {
+      for (const set of exercise.sets) {
+        if (set.rpe != null) {
+          rpeSum += set.rpe
+          rpeCount += 1
+        }
+        const volume = (set.weight_kg ?? 0) * (set.reps ?? 0)
+        if (volume > 0) muscleVolume[exercise.muscle_group] = (muscleVolume[exercise.muscle_group] ?? 0) + volume
+      }
+    }
+  }
+
+  return {
+    total_sessions: workouts.length,
+    total_duration_minutes: totalDuration,
+    total_volume_kg: Math.round(totalVolume),
+    avg_rpe: rpeCount > 0 ? Math.round((rpeSum / rpeCount) * 10) / 10 : null,
+    muscle_group_volume: muscleVolume,
+  }
+}

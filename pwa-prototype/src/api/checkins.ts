@@ -85,6 +85,7 @@ export type CheckinInput = {
     nutrition_days: number
     ai_summary?: string | null
   }
+  training_stats?: TrainingStats | null
 }
 
 export async function createCheckin(input: CheckinInput): Promise<CheckinRow> {
@@ -97,6 +98,7 @@ export async function createCheckin(input: CheckinInput): Promise<CheckinRow> {
     mental_feeling: input.mental_feeling,
     physical_feeling: input.physical_feeling,
     ...(input.nutrition ?? {}),
+    ...(input.training_stats ? { training_stats: input.training_stats } : {}),
   }
   const { data, error } = await supabase.from('checkins').insert(payload).select(COLUMNS).single()
   if (error) {

@@ -9,6 +9,7 @@ import * as waterApi from './api/water.ts'
 import * as checkinsApi from './api/checkins.ts'
 import * as profileApi from './api/profile.ts'
 import * as foodsApi from './api/foods.ts'
+import * as hevyApi from './api/hevy.ts'
 import type { Macros } from './data/mock.ts'
 
 // ============================================================================
@@ -141,7 +142,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const reload = useCallback(async () => {
-    const [{ data: userData }, profile, meals, orphans, water, checkins, favorites] = await Promise.all([
+    const [{ data: userData }, profile, meals, orphans, water, checkins, favorites, hevyKey] = await Promise.all([
       supabase.auth.getUser(),
       profileApi.fetchProfile().catch(() => null),
       mealsApi.fetchMealsForDate(today).catch(() => []),
@@ -149,6 +150,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       waterApi.fetchWaterForDate(today).catch(() => []),
       checkinsApi.fetchCheckins().catch(() => []),
       foodsApi.fetchFavoriteFoods().catch(() => []),
+      hevyApi.getHevyApiKey().catch(() => null),
     ])
     const authUser = userData.user
     const email = authUser?.email ?? ''
@@ -162,6 +164,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       waterEntries: water,
       checkins,
       favoriteFoods: favorites,
+      hevyConnected: Boolean(hevyKey),
     })
   }, [today, patch])
 
