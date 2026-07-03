@@ -48,7 +48,17 @@ export default defineConfig(({ mode }) => ({
       devOptions: { enabled: false },
     }),
   ],
-  server: { host: true, port: 4173 },
+  server: {
+    host: true,
+    port: 4173,
+    // Accept any Host header (LAN IP, Bonjour name, or the *.trycloudflare.com
+    // domain the tunnel serves under).
+    allowedHosts: true,
+    // `--mode tunnel`: HMR runs over the tunnel's HTTPS/443, so the injected
+    // client must connect back on wss://<tunnel-host>:443, not the dev port.
+    // This keeps hot-reload working on the phone through the tunnel.
+    ...(mode === 'tunnel' ? { hmr: { clientPort: 443 } } : {}),
+  },
   // Preview (production build) must accept the LAN IP and the stable Bonjour
   // hostname (RedBoard.local) so an installed webclip survives DHCP IP changes.
   preview: { host: true, port: 4173, allowedHosts: true },
