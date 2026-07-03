@@ -63,7 +63,7 @@ export function TickSlider({
         <div className="absolute inset-x-0 top-1/2 h-[4px] -translate-y-1/2 rounded-full bg-surface-3" />
         {/* fill */}
         <div
-          className="absolute top-1/2 h-[4px] -translate-y-1/2 rounded-full bg-gradient-to-r from-primary/60 to-primary"
+          className="absolute top-1/2 h-[4px] -translate-y-1/2 rounded-full bg-primary"
           style={{ width: `${pct}%`, transition: dragging ? 'none' : 'width 0.18s ease' }}
         />
         {/* graduations */}

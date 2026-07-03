@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '../../components/Button.tsx'
 import { Stepper } from '../../components/Stepper.tsx'
 import { WheelPicker } from '../../components/WheelPicker.tsx'
@@ -170,6 +170,7 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
   const [hasSession, setHasSession] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   const set = <K extends keyof Data>(key: K, value: Data[K]) => setData((prev) => ({ ...prev, [key]: value }))
 
   // A resuming user already has an account — skip the sign-up step's network call.
@@ -273,21 +274,13 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
     switch (step) {
       case 0:
         return (
-          <div className="relative flex flex-col h-full px-6 pt-4 pb-safe-tight">
-            {/* warm glow bleeding from the top — sets the tone before a single tap */}
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-[45%]"
-              style={{ background: 'radial-gradient(85% 70% at 50% 0%, rgba(255,122,61,0.14), transparent 70%)' }}
-            />
+          <div className="flex flex-col h-full px-6 pt-4 pb-safe-tight">
             <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <div className="relative">
-                <div className="absolute -inset-6 rounded-full bg-primary/25 blur-2xl" />
-                <img
-                  src="/icons/icon-512.png"
-                  alt="Strakk"
-                  className="relative size-20 rounded-[22px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
-                />
-              </div>
+              <img
+                src="/icons/icon-512.png"
+                alt="Strakk"
+                className="size-20 rounded-[22px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
+              />
               <h1 className="mt-7 text-[34px] font-bold tracking-tight text-ink">Strakk</h1>
               <p className="mt-2.5 text-[16px] leading-snug text-ink-2 max-w-[300px]">
                 Nutrition that fits your life — not the other way around.
@@ -304,7 +297,7 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ ...spring.gentle, delay: 0.12 + i * 0.09 }}
-                    className="flex items-center gap-3 rounded-card bg-surface-1/80 px-3.5 py-3 text-left ring-1 ring-inset ring-white/[0.04]"
+                    className="flex items-center gap-3 rounded-card bg-surface-1 px-3.5 py-3 text-left"
                   >
                     <div className="size-9 shrink-0 rounded-[10px] bg-primary/12 flex items-center justify-center">
                       <Icon name={icon} size={16} className="text-primary" />
@@ -472,22 +465,38 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
           >
             {!hasSession && (
               <div className="flex flex-col gap-3">
-                <input
-                  type="email"
-                  value={data.email}
-                  onChange={(event) => set('email', event.target.value)}
-                  placeholder="you@example.com"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
-                />
-                <input
-                  type="password"
-                  value={data.password}
-                  onChange={(event) => set('password', event.target.value)}
-                  placeholder="Password (min. 6 characters)"
-                  className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
-                />
+                <div className="flex h-[56px] items-center gap-3 rounded-card bg-surface-1 px-4 ring-1 ring-inset ring-white/[0.05] focus-within:ring-primary/40">
+                  <Mail size={18} className="shrink-0 text-ink-3" />
+                  <input
+                    type="email"
+                    value={data.email}
+                    onChange={(event) => set('email', event.target.value)}
+                    placeholder="you@example.com"
+                    aria-label="Email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    className="min-w-0 flex-1 bg-transparent text-[16px] text-ink placeholder:text-ink-4 outline-none"
+                  />
+                </div>
+                <div className="flex h-[56px] items-center gap-3 rounded-card bg-surface-1 px-4 ring-1 ring-inset ring-white/[0.05] focus-within:ring-primary/40">
+                  <Lock size={18} className="shrink-0 text-ink-3" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={data.password}
+                    onChange={(event) => set('password', event.target.value)}
+                    placeholder="Password (min. 6 characters)"
+                    aria-label="Password"
+                    className="min-w-0 flex-1 bg-transparent text-[16px] text-ink placeholder:text-ink-4 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="shrink-0 text-ink-3"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             )}
             {error && <div className="mt-3 text-[13px] text-error">{error}</div>}
@@ -555,21 +564,32 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-bg">
-      {/* Top bar: back + progress */}
-      <div className="pt-safe">
-        <div className="h-12 px-3 flex items-center gap-3">
-          <button type="button" onClick={back} aria-label="Back" className="size-9 flex items-center justify-center text-ink">
-            <ChevronLeft size={24} />
-          </button>
-          {showProgress && (
-            <div className="flex-1 pr-3">
-              <ProgressBar value={progress} color={colors.primary} />
-            </div>
-          )}
+      {/* Top bar: back + progress. Hidden on the welcome screen — it's a landing
+          page, and its footer "Sign in" link already handles the way out. */}
+      {step > 0 && (
+        <div className="pt-safe">
+          <div className="h-12 px-3 flex items-center gap-3">
+            <button type="button" onClick={back} aria-label="Back" className="size-9 flex items-center justify-center text-ink">
+              <ChevronLeft size={24} />
+            </button>
+            {showProgress && (
+              <div className="flex-1 pr-3">
+                <ProgressBar value={progress} color={colors.primary} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {/* Steps fill the rest */}
-      <div className="absolute inset-x-0 bottom-0" style={{ top: 'calc(var(--safe-top, env(safe-area-inset-top)) + 48px)' }}>
+      <div
+        className="absolute inset-x-0 bottom-0"
+        style={{
+          top:
+            step === 0
+              ? 'var(--safe-top, env(safe-area-inset-top))'
+              : 'calc(var(--safe-top, env(safe-area-inset-top)) + 48px)',
+        }}
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}

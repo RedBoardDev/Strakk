@@ -140,13 +140,7 @@ export function PhotoMealSheet({
           {preview ? (
             <img src={preview} alt="Your plate" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-b from-[#11182B] via-[#06090F] to-[#11182B]" />
-              <div
-                className="absolute inset-0 opacity-60"
-                style={{ background: 'radial-gradient(120% 90% at 50% 45%, rgba(255,122,61,0.12), transparent 60%)' }}
-              />
-            </>
+            <div className="absolute inset-0 bg-[#0A0F1E]" />
           )}
 
           <div className="absolute inset-0 flex items-center justify-center">

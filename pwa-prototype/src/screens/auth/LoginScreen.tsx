@@ -91,11 +91,6 @@ export function LoginScreen({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-bg">
-      {/* same warm top glow as the onboarding welcome */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[42%]"
-        style={{ background: 'radial-gradient(85% 70% at 50% 0%, rgba(255,122,61,0.13), transparent 70%)' }}
-      />
       <div className="h-full overflow-y-auto pt-safe pb-safe">
         <div className="flex min-h-full flex-col px-7 pt-16 pb-10">
           <motion.div
@@ -104,14 +99,11 @@ export function LoginScreen({
             transition={spring.gentle}
             className="flex flex-col items-center text-center"
           >
-            <div className="relative">
-              <div className="absolute -inset-5 rounded-full bg-primary/25 blur-2xl" />
-              <img
-                src="/icons/icon-512.png"
-                alt="Strakk"
-                className="relative size-[76px] rounded-[21px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
-              />
-            </div>
+            <img
+              src="/icons/icon-512.png"
+              alt="Strakk"
+              className="size-[76px] rounded-[21px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
+            />
             <h1 className="mt-6 text-[28px] font-bold tracking-tight text-ink">
               {mode === 'login' ? 'Welcome back' : 'Reset password'}
             </h1>
