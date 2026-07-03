@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { motion } from 'motion/react'
 import { spring } from '../lib/ios.ts'
-import type { SeriesPoint } from '../data/mock.ts'
+import type { SeriesPoint } from '../data/viewTypes.ts'
 
 // Catmull-Rom smoothed SVG line + filled area, in a 0..100 × 0..height viewBox
 // stretched to fill its container (preserveAspectRatio none). Shared by the list

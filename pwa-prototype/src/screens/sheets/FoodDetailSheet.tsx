@@ -9,7 +9,7 @@ import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
 import { useStore } from '../../store.tsx'
 import type { CatalogFood } from '../../api/foods.ts'
-import type { Macros } from '../../data/mock.ts'
+import type { Macros } from '../../data/viewTypes.ts'
 
 // Macro rows, in the spec's order, each tinted with its accent.
 const MACRO_ROWS: { key: keyof Macros; label: string; unit: string; cls: string }[] = [

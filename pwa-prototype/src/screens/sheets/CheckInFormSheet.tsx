@@ -14,7 +14,7 @@ import { computeNutritionSummary, type CheckinInput, type CheckinRow } from '../
 import { aggregateTrainingStats, fetchHevyWorkouts } from '../../api/hevy.ts'
 import { generateCheckinSummary } from '../../api/ai.ts'
 import { compressImage } from '../../api/photos.ts'
-import { MEASUREMENT_FIELDS, type Measurements } from '../../data/mock.ts'
+import { MEASUREMENT_FIELDS, type Measurements } from '../../data/viewTypes.ts'
 
 const FEELING_TAGS = Object.entries(TAG_LABELS)
   .slice(0, 11)

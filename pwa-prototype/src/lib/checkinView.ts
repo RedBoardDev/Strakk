@@ -1,6 +1,6 @@
 import { dateRangeLabel } from './dates.ts'
 import type { CheckinRow } from '../api/checkins.ts'
-import type { CheckIn, FeelingTag, MacroCompliance, Measurements, SeriesPoint } from '../data/mock.ts'
+import type { CheckIn, FeelingTag, MacroCompliance, Measurements, SeriesPoint } from '../data/viewTypes.ts'
 import type { Goals } from '../store.tsx'
 
 // Adapts an API checkins row to the view model the check-in screens render.

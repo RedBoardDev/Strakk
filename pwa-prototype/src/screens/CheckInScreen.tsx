@@ -19,7 +19,7 @@ import { useStore } from '../store.tsx'
 import { useToast } from '../components/Toast.tsx'
 import { toCheckInView, weightTrendOf, type CheckInView } from '../lib/checkinView.ts'
 import { signedPhotoUrl, type CheckinPhoto, type CheckinRow } from '../api/checkins.ts'
-import { MEASUREMENT_FIELDS, type CheckIn, type Measurements } from '../data/mock.ts'
+import { MEASUREMENT_FIELDS, type CheckIn, type Measurements } from '../data/viewTypes.ts'
 
 type Trend = { color: string; icon: IconName | null }
 

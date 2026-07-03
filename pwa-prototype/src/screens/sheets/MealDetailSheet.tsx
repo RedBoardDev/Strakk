@@ -13,7 +13,7 @@ import { entryMacros, mealMacros, useStore } from '../../store.tsx'
 import { parseBreakdown, type Entry, type EntryPatch, type Meal } from '../../api/meals.ts'
 import { reviewItemFromFood } from '../../components/ReviewItems.tsx'
 import type { CatalogFood } from '../../api/foods.ts'
-import type { Macros } from '../../data/mock.ts'
+import type { Macros } from '../../data/viewTypes.ts'
 
 // Detail sheet for BOTH a meal (grouped entries) and an orphan entry — matching
 // the two timeline row kinds. Edit mode mutates entry rows server-first.

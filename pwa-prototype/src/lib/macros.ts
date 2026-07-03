@@ -1,4 +1,4 @@
-import type { Macros } from '../data/mock.ts'
+import type { Macros } from '../data/viewTypes.ts'
 
 // Shared macro arithmetic — every total/rescale in the app goes through here so
 // displayed totals always match what gets saved.

@@ -1,5 +1,5 @@
 import { parseIntClamped } from '../lib/numbers.ts'
-import type { Macros } from '../data/mock.ts'
+import type { Macros } from '../data/viewTypes.ts'
 
 const FIELDS = [
   { key: 'calories', label: 'kcal', max: 5000, cls: 'text-primary-light' },

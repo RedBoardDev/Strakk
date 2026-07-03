@@ -12,7 +12,7 @@ import { scaleMacros, sumMacros } from '../../lib/macros.ts'
 import { useStore } from '../../store.tsx'
 import type { CatalogFood } from '../../api/foods.ts'
 import type { NewEntryInput } from '../../api/meals.ts'
-import type { Macros } from '../../data/mock.ts'
+import type { Macros } from '../../data/viewTypes.ts'
 
 // A composed meal: several foods with adjustable portions, committed to the
 // backend as one meal + its entries.

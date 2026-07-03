@@ -10,7 +10,7 @@ import * as checkinsApi from './api/checkins.ts'
 import * as profileApi from './api/profile.ts'
 import * as foodsApi from './api/foods.ts'
 import * as hevyApi from './api/hevy.ts'
-import type { Macros } from './data/mock.ts'
+import type { Macros } from './data/viewTypes.ts'
 
 // ============================================================================
 // Server-backed app store. Mirrors the KMP repositories: every mutation is

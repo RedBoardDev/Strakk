@@ -6,7 +6,7 @@ import { MacroInputGrid } from './MacroInputGrid.tsx'
 import { haptic } from '../lib/ios.ts'
 import { sumMacros } from '../lib/macros.ts'
 import type { CatalogFood } from '../api/foods.ts'
-import type { Macros } from '../data/mock.ts'
+import type { Macros } from '../data/viewTypes.ts'
 
 // One reviewable item of an AI-detected meal (quick add / photo meal): the
 // user can fix any macro, adjust the quantity label, remove the item, or add
