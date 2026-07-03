@@ -3,11 +3,8 @@ import { motion } from 'motion/react'
 import { Icon, type IconName } from '../components/Icon.tsx'
 import { MacroGrid } from '../components/MacroCard.tsx'
 import { ScreenScroll } from '../components/ScreenScroll.tsx'
-import { Sheet } from '../components/Sheet.tsx'
-import { Stepper } from '../components/Stepper.tsx'
-import { Button } from '../components/Button.tsx'
-import { useToast } from '../components/Toast.tsx'
-import { haptic, spring } from '../lib/ios.ts'
+import { WaterCard } from '../components/WaterCard.tsx'
+import { haptic } from '../lib/ios.ts'
 import { timeOf } from '../lib/dates.ts'
 import { useNav } from '../nav.ts'
 import { entryMacros, mealMacros, timelineOf, useStore, type TimelineItem } from '../store.tsx'
@@ -65,13 +62,10 @@ function TimelineRow({ item, onTap }: { item: TimelineItem; onTap: () => void })
 
 export function TodayScreen() {
   const nav = useNav()
-  const toast = useToast()
   const store = useStore()
   const { state, consumed, waterMl } = store
   const { goals, ready } = state
 
-  const [waterSheet, setWaterSheet] = useState(false)
-  const [customMl, setCustomMl] = useState(250)
   const [hevyOpen, setHevyOpen] = useState(false)
 
   const timeline = timelineOf(state)
@@ -109,59 +103,11 @@ export function TodayScreen() {
 
         {/* Water */}
         <div className="pt-6">
-          <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-surface-3 flex items-center justify-center shrink-0">
-              <Icon name="drop.fill" size={15} className="text-water" />
-            </div>
-            <div className="text-[18px] font-bold text-ink tnum">
-              <motion.span
-                key={waterMl}
-                initial={{ scale: 1.15 }}
-                animate={{ scale: 1 }}
-                transition={spring.snappy}
-                className="inline-block origin-left"
-              >
-                {(waterMl / 1000).toFixed(1)}
-              </motion.span>{' '}
-              L<span className="text-ink-3 font-semibold"> / {(goals.water / 1000).toFixed(1)} L</span>
-            </div>
-            <div className="flex-1" />
-            <button
-              type="button"
-              disabled={waterMl === 0}
-              onClick={() => {
-                haptic('light')
-                void store.addWater(-250).catch(() => {})
-              }}
-              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-ink disabled:text-ink-4"
-              aria-label="Remove 250 mL"
-            >
-              <Icon name="minus" size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                haptic('light')
-                void store.addWater(250).catch(() => {})
-              }}
-              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-water"
-              aria-label="Add 250 mL"
-            >
-              <Icon name="plus" size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                haptic('light')
-                setCustomMl(250)
-                setWaterSheet(true)
-              }}
-              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-ink-2"
-              aria-label="Custom amount"
-            >
-              <Icon name="pencil" size={15} />
-            </button>
-          </div>
+          <WaterCard
+            totalMl={waterMl}
+            goalMl={goals.water}
+            onDelta={(delta) => void store.addWater(delta).catch(() => {})}
+          />
         </div>
 
         {/* Timeline */}
@@ -224,41 +170,6 @@ export function TodayScreen() {
         </div>
       </div>
 
-      {/* Water custom-amount sheet — add OR remove an arbitrary amount */}
-      <Sheet open={waterSheet} onClose={() => setWaterSheet(false)} title="Custom amount" detents={['small']}>
-        <div className="flex flex-col items-center gap-5 py-3">
-          <Stepper value={customMl} onChange={setCustomMl} step={50} min={50} suffix="mL" />
-          <div className="w-full flex gap-3">
-            <Button
-              variant="secondary"
-              full
-              disabled={waterMl === 0}
-              onClick={() => {
-                setWaterSheet(false)
-                void store
-                  .addWater(-customMl)
-                  .then(() => toast.show(`Removed ${customMl} mL`))
-                  .catch(() => {})
-              }}
-            >
-              Remove
-            </Button>
-            <Button
-              variant="primary"
-              full
-              onClick={() => {
-                setWaterSheet(false)
-                void store
-                  .addWater(customMl)
-                  .then(() => toast.show(`Added ${customMl} mL`))
-                  .catch(() => {})
-              }}
-            >
-              Add water
-            </Button>
-          </div>
-        </div>
-      </Sheet>
 
       <HevyExportSheet open={hevyOpen} onClose={() => setHevyOpen(false)} />
     </div>

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { ScreenScroll } from '../components/ScreenScroll.tsx'
 import { PushPage } from '../components/PushPage.tsx'
 import { MacroGrid } from '../components/MacroCard.tsx'
-import { ProgressBar } from '../components/ProgressBar.tsx'
 import { Button } from '../components/Button.tsx'
 import { Icon } from '../components/Icon.tsx'
 import { SectionLabel } from '../components/SectionLabel.tsx'
+import { WaterCard } from '../components/WaterCard.tsx'
 import { haptic, spring } from '../lib/ios.ts'
 import { toIsoDate, todayIso, timeOf } from '../lib/dates.ts'
 import { useNav } from '../nav.ts'
@@ -20,7 +20,7 @@ import {
   type Entry,
   type Meal,
 } from '../api/meals.ts'
-import { fetchWaterForDate } from '../api/water.ts'
+import { addWaterEntry, fetchWaterForDate, removeWater, type WaterEntry } from '../api/water.ts'
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -31,7 +31,7 @@ const MONTHS_FULL = [
 
 type Selection = { year: number; month: number; date: number; iso: string }
 
-type DayDetail = { meals: Meal[]; orphans: Entry[]; waterMl: number }
+type DayDetail = { meals: Meal[]; orphans: Entry[]; water: WaterEntry[] }
 
 // A mini activity ring — adherence (kcal / goal), green once the goal is met.
 function DayRing({
@@ -151,6 +151,9 @@ export function CalendarScreen() {
   const [selected, setSelected] = useState<Selection | null>(null)
   const [detail, setDetail] = useState<DayDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  // Bumped when the detail page edits water, so the month dots re-fetch.
+  const [datesRefresh, setDatesRefresh] = useState(0)
+  const waterDirty = useRef(false)
 
   const prevMonth = () => {
     if (viewMonth === 0) {
@@ -185,7 +188,7 @@ export function CalendarScreen() {
     return () => {
       cancelled = true
     }
-  }, [viewYear, viewMonth, daysInMonth])
+  }, [viewYear, viewMonth, daysInMonth, datesRefresh])
 
   // Load the selected day's meals, orphans and water.
   useEffect(() => {
@@ -202,7 +205,7 @@ export function CalendarScreen() {
     ])
       .then(([meals, orphans, water]) => {
         if (cancelled) return
-        setDetail({ meals, orphans, waterMl: water.reduce((sum, w) => sum + w.amount, 0) })
+        setDetail({ meals, orphans, water })
         setLoadingDetail(false)
       })
       .catch(() => {
@@ -220,6 +223,36 @@ export function CalendarScreen() {
   const consumed = detail
     ? sumMacros([...detail.meals.map(mealMacros), ...detail.orphans.map(entryMacros)])
     : ZERO_MACROS
+  const detailWaterMl = detail?.water.reduce((sum, w) => sum + w.amount, 0) ?? 0
+
+  // Edit the selected day's water in place (server-first, like Today).
+  const changeWater = async (delta: number) => {
+    if (!selected || !detail) return
+    waterDirty.current = true
+    try {
+      if (delta > 0) {
+        const row = await addWaterEntry(selected.iso, delta)
+        setDetail((d) => (d ? { ...d, water: [...d.water, row] } : d))
+      } else if (delta < 0) {
+        const next = await removeWater(selected.iso, -delta, detail.water)
+        setDetail((d) => (d ? { ...d, water: next } : d))
+      }
+    } catch {
+      // same silent behavior as Today's water buttons
+    }
+  }
+
+  // Closing the day page: refresh the month dots and, if we touched today,
+  // resync the Today screen's water total.
+  const closeDetail = () => {
+    const editedToday = waterDirty.current && selected?.iso === today
+    setSelected(null)
+    if (waterDirty.current) {
+      waterDirty.current = false
+      setDatesRefresh((n) => n + 1)
+      if (editedToday) void store.reload()
+    }
+  }
   const detailRatio = goals.calories > 0 ? consumed.calories / goals.calories : 0
   const detailTitle = selected
     ? `${WEEKDAYS_FULL[new Date(selected.year, selected.month, selected.date).getDay()]} `
@@ -307,7 +340,7 @@ export function CalendarScreen() {
       {/* Day detail page */}
       <PushPage
         open={!!selected}
-        onClose={() => setSelected(null)}
+        onClose={closeDetail}
         title={detailTitle ?? ''}
         footer={
           <Button
@@ -345,20 +378,11 @@ export function CalendarScreen() {
             />
 
             <SectionLabel>Water</SectionLabel>
-            <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
-              <div className="size-9 rounded-lg bg-surface-3 flex items-center justify-center shrink-0">
-                <Icon name="drop.fill" size={15} className="text-water" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[16px] font-bold text-ink tnum">
-                  {((detail?.waterMl ?? 0) / 1000).toFixed(1)} L
-                  <span className="text-ink-3 font-semibold"> / {(goals.water / 1000).toFixed(1)} L</span>
-                </div>
-                <div className="pt-2">
-                  <ProgressBar value={goals.water > 0 ? (detail?.waterMl ?? 0) / goals.water : 0} color={colors.water} />
-                </div>
-              </div>
-            </div>
+            <WaterCard
+              totalMl={detailWaterMl}
+              goalMl={goals.water}
+              onDelta={(delta) => void changeWater(delta)}
+            />
 
             {loadingDetail && (
               <div className="py-10 flex justify-center">

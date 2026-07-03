@@ -53,14 +53,19 @@ export function Sheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  const close = () => {
-    animate(y, closedY, spring.sheet)
-    onClose()
-  }
+  // Ask the parent to close. Never animate out here: the parent may VETO the
+  // close (e.g. MealBuilder's "Discard meal?" confirmation) and keep the sheet
+  // open — pre-animating would leave a dead dimmed backdrop with the panel
+  // off-screen (app feels frozen). The exit animation runs on real unmount
+  // via AnimatePresence.
+  const close = () => onClose()
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.velocity.y > 650 || info.offset.y > 120) {
-      close()
+      onClose()
+      // Spring back in case the parent vetoes; on a real close the exit
+      // animation takes over from the current drag position.
+      animate(y, 0, spring.sheet)
     } else {
       animate(y, 0, spring.snappy)
     }
