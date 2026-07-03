@@ -1,0 +1,33 @@
+{
+  "name": "strakk-pwa-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Premium-iOS-feel PWA mockup of Strakk (evaluation prototype, mock data only)",
+  "scripts": {
+    "dev": "vite",
+    "dev:https": "vite --host --mode https",
+    "tunnel": "npx -y untun@latest tunnel http://localhost:4173",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "^1.22.0",
+    "motion": "^12.42.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "puppeteer-core": "^25.2.1",
+    "tailwindcss": "^4.3.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

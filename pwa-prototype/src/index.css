@@ -1,0 +1,174 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   Strakk design tokens — mirror of DESIGN.md §2–5.
+   Color utilities: bg-bg, bg-surface-1, text-ink, text-ink-2, text-primary,
+   border-hair, etc. Radius: rounded-card (12), rounded-modal (18),
+   rounded-sheet (24), rounded-hero (32).
+   ========================================================================== */
+@theme {
+  /* Backgrounds & surfaces */
+  --color-bg: #050918;
+  --color-bg-elevated: #080d1f;
+  --color-bg-edge: #0b1028;
+  --color-surface-1: #10162f;
+  --color-surface-1-top: #121833;
+  --color-surface-1-bottom: #0c1127;
+  --color-surface-2: #151b38;
+  --color-surface-3: #1a2142;
+
+  /* Text */
+  --color-ink: #f4f6ff;
+  --color-ink-2: #9ca1b8;
+  --color-ink-3: #6f748c;
+  --color-ink-4: #50566f;
+
+  /* Accents */
+  --color-primary: #ff7a3d;
+  --color-primary-light: #ff9a55;
+  --color-protein: #34c7b5;
+  --color-water: #4b8dff;
+  --color-water-light: #67b7ff;
+  --color-fat: #ffc84d;
+  --color-carbs: #637cff;
+  --color-success: #4dae6a;
+  --color-error: #e05252;
+  --color-warning: #e0a84d;
+
+  /* Tinted accent fills */
+  --color-primary-faint: rgba(255, 122, 61, 0.08);
+  --color-primary-border: rgba(255, 122, 61, 0.18);
+  --color-water-faint: rgba(75, 141, 255, 0.12);
+  --color-fat-faint: rgba(255, 200, 77, 0.1);
+  --color-carbs-faint: rgba(99, 124, 255, 0.1);
+
+  /* Borders & dividers */
+  --color-line: rgba(125, 137, 190, 0.25);
+  --color-hair: rgba(133, 143, 190, 0.18);
+  --color-divider-strong: rgba(150, 157, 200, 0.22);
+  --color-divider: rgba(255, 255, 255, 0.12);
+
+  /* Radius */
+  --radius-card: 12px;
+  --radius-modal: 18px;
+  --radius-sheet: 24px;
+  --radius-hero: 32px;
+  --radius-hero-lg: 36px;
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Segoe UI', system-ui, sans-serif;
+
+  /* iOS-spring-ish easing for non-motion CSS transitions */
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ============================================================================
+   Base — iOS standalone feel: kill rubber-band on the shell, no text select on
+   chrome, no tap highlight, no input zoom, momentum scroll in scroll areas.
+   ========================================================================== */
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    /* No document scroll/bounce; only inner .scroll-y regions scroll. Avoids
+       position:fixed on the root, which mis-places the bottom in standalone PWA. */
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  html {
+    background: var(--color-bg);
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* prevent the whole page from rubber-banding in standalone mode */
+    overscroll-behavior: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Inputs: 16px min keeps iOS Safari from zooming on focus */
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+    font-size: 16px;
+  }
+
+  input,
+  textarea,
+  [data-selectable] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* Hide scrollbars but keep scrolling (native iOS has no visible bar) */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  /* Safe-area helpers. --safe-* default to the real device insets but the
+     desktop device frame overrides them so the simulated status bar / home
+     indicator get correct spacing. */
+  .pt-safe {
+    padding-top: var(--safe-top, env(safe-area-inset-top));
+  }
+  .pb-safe {
+    padding-bottom: var(--safe-bottom, env(safe-area-inset-bottom));
+  }
+  /* Tighter bottom clearance for floating chrome (tab bar, sheet/page footers):
+     trim most of the home-indicator inset so buttons sit close to the edge like
+     a compact native bar, keeping ~10px so the gesture bar never overlaps. */
+  .pb-safe-tight {
+    padding-bottom: max(calc(var(--safe-bottom, env(safe-area-inset-bottom)) - 22px), 10px);
+  }
+  .top-safe {
+    top: var(--safe-top, env(safe-area-inset-top));
+  }
+  .h-screen-dvh {
+    height: 100dvh;
+  }
+  /* Momentum scroll region */
+  .scroll-y {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+  /* Soft orange glow under primary CTAs (use sparingly per DESIGN.md) */
+  .glow-primary {
+    box-shadow: 0 8px 24px -6px rgba(255, 122, 61, 0.35);
+  }
+
+  /* Liquid-glass chrome — the ONE material for floating chrome (tab bar, nav
+     bar, action tray, sheet footer). Content surfaces stay solid. Tint is
+     opaque enough that scrolling content reads as a soft glow, not raw text
+     bleeding through. */
+  .glass-chrome {
+    background: rgba(9, 14, 33, 0.82);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  }
+}
