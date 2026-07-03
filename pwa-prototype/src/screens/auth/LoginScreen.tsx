@@ -1,46 +1,45 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '../../components/Button.tsx'
 import { haptic, spring } from '../../lib/ios.ts'
 import * as authApi from '../../api/auth.ts'
 
-function AppMark() {
-  return (
-    <img
-      src="/icons/icon-512.png"
-      alt="Strakk"
-      className="size-[72px] rounded-[20px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
-    />
-  )
-}
+// Shares the onboarding Welcome screen's visual language (top glow, haloed app
+// mark, card fields) so auth and onboarding read as one product.
 
 function Field({
-  label,
+  icon,
   type = 'text',
   value,
   onChange,
   placeholder,
+  ariaLabel,
   trailing,
 }: {
-  label: string
+  icon: React.ReactNode
   type?: string
   value: string
   onChange: (value: string) => void
-  placeholder?: string
+  placeholder: string
+  ariaLabel: string
   trailing?: React.ReactNode
 }) {
   return (
-    <div className="bg-surface-1 rounded-card px-4 h-[54px] flex items-center gap-3">
-      <span className="text-[13px] font-medium text-ink-3 w-[74px] shrink-0">{label}</span>
+    <div
+      className="flex h-[56px] items-center gap-3 rounded-card bg-surface-1 px-4 ring-1 ring-inset
+        ring-white/[0.05] transition-shadow focus-within:ring-primary/40"
+    >
+      <span className="shrink-0 text-ink-3">{icon}</span>
       <input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
+        aria-label={ariaLabel}
         autoCapitalize="none"
         autoCorrect="off"
-        className="flex-1 min-w-0 bg-transparent text-[16px] text-ink placeholder:text-ink-4 outline-none"
+        className="min-w-0 flex-1 bg-transparent text-[16px] text-ink placeholder:text-ink-4 outline-none"
       />
       {trailing}
     </div>
@@ -92,19 +91,36 @@ export function LoginScreen({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-bg">
+      {/* same warm top glow as the onboarding welcome */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[42%]"
+        style={{ background: 'radial-gradient(85% 70% at 50% 0%, rgba(255,122,61,0.13), transparent 70%)' }}
+      />
       <div className="h-full overflow-y-auto pt-safe pb-safe">
-        <div className="min-h-full flex flex-col px-7 pt-14 pb-10">
-          <div className="flex flex-col items-center text-center">
-            <AppMark />
+        <div className="flex min-h-full flex-col px-7 pt-16 pb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={spring.gentle}
+            className="flex flex-col items-center text-center"
+          >
+            <div className="relative">
+              <div className="absolute -inset-5 rounded-full bg-primary/25 blur-2xl" />
+              <img
+                src="/icons/icon-512.png"
+                alt="Strakk"
+                className="relative size-[76px] rounded-[21px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
+              />
+            </div>
             <h1 className="mt-6 text-[28px] font-bold tracking-tight text-ink">
               {mode === 'login' ? 'Welcome back' : 'Reset password'}
             </h1>
-            <p className="mt-2 text-[15px] leading-snug text-ink-2 max-w-[280px]">
+            <p className="mt-2 max-w-[280px] text-[15px] leading-snug text-ink-2">
               {mode === 'login'
                 ? 'Sign in to pick up where you left off.'
                 : 'We’ll email you a link to set a new password.'}
             </p>
-          </div>
+          </motion.div>
 
           <AnimatePresence mode="wait" initial={false}>
             {mode === 'login' ? (
@@ -116,25 +132,33 @@ export function LoginScreen({
                 transition={spring.gentle}
                 className="mt-9 flex flex-col gap-3"
               >
-                <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" />
                 <Field
-                  label="Password"
+                  icon={<Mail size={18} />}
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                  placeholder="you@example.com"
+                  ariaLabel="Email"
+                />
+                <Field
+                  icon={<Lock size={18} />}
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={setPassword}
-                  placeholder="••••••••"
+                  placeholder="Password"
+                  ariaLabel="Password"
                   trailing={
                     <button
                       type="button"
-                      onClick={() => setShowPassword((value) => !value)}
-                      className="text-ink-3 shrink-0"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="shrink-0 text-ink-3"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   }
                 />
-                {error && <div className="text-[13px] text-error px-1">{error}</div>}
+                {error && <div className="px-1 text-[13px] text-error">{error}</div>}
                 <button
                   type="button"
                   onClick={() => {
@@ -143,11 +167,11 @@ export function LoginScreen({
                     setResetSent(false)
                     setError(null)
                   }}
-                  className="self-end text-[13px] font-medium text-primary pt-0.5"
+                  className="self-end pt-0.5 text-[13px] font-medium text-primary"
                 >
                   Forgot password?
                 </button>
-                <div className="pt-3">
+                <div className="pt-2">
                   <Button
                     variant="primary"
                     full
@@ -158,6 +182,26 @@ export function LoginScreen({
                     {busy ? 'Signing in…' : 'Sign in'}
                   </Button>
                 </div>
+
+                <div className="flex items-center gap-3 py-2">
+                  <span className="h-px flex-1 bg-divider/60" />
+                  <span className="text-[12px] font-medium uppercase tracking-wide text-ink-4">or</span>
+                  <span className="h-px flex-1 bg-divider/60" />
+                </div>
+
+                <Button
+                  variant="secondary"
+                  full
+                  onClick={() => {
+                    haptic('light')
+                    onCreateAccount()
+                  }}
+                >
+                  Create an account
+                </Button>
+                <p className="pt-1 text-center text-[12px] leading-snug text-ink-4">
+                  New here? We’ll set your nutrition targets in about a minute.
+                </p>
               </motion.div>
             ) : (
               <motion.div
@@ -169,7 +213,7 @@ export function LoginScreen({
                 className="mt-9 flex flex-col gap-3"
               >
                 {resetSent ? (
-                  <div className="bg-success/12 border border-success/25 rounded-card px-4 py-4 text-center">
+                  <div className="rounded-card border border-success/25 bg-success/12 px-4 py-4 text-center">
                     <div className="text-[15px] font-semibold text-success">Check your inbox</div>
                     <div className="mt-1 text-[13px] text-ink-2">
                       If an account exists for {email || 'that address'}, a reset link is on its way.
@@ -177,9 +221,16 @@ export function LoginScreen({
                   </div>
                 ) : (
                   <>
-                    <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" />
-                    {error && <div className="text-[13px] text-error px-1">{error}</div>}
-                    <div className="pt-3">
+                    <Field
+                      icon={<Mail size={18} />}
+                      type="email"
+                      value={email}
+                      onChange={setEmail}
+                      placeholder="you@example.com"
+                      ariaLabel="Email"
+                    />
+                    {error && <div className="px-1 text-[13px] text-error">{error}</div>}
+                    <div className="pt-2">
                       <Button
                         variant="primary"
                         full
@@ -199,7 +250,7 @@ export function LoginScreen({
                     setMode('login')
                     setError(null)
                   }}
-                  className="self-center text-[14px] font-medium text-primary pt-2"
+                  className="self-center pt-2 text-[14px] font-medium text-primary"
                 >
                   Back to sign in
                 </button>
@@ -208,19 +259,6 @@ export function LoginScreen({
           </AnimatePresence>
 
           <div className="flex-1" />
-
-          {mode === 'login' && (
-            <button
-              type="button"
-              onClick={() => {
-                haptic('light')
-                onCreateAccount()
-              }}
-              className="mt-8 text-center text-[14px] text-ink-2"
-            >
-              New here? <span className="font-semibold text-primary">Create an account</span>
-            </button>
-          )}
         </div>
       </div>
     </div>

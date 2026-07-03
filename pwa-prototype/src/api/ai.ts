@@ -49,6 +49,9 @@ export type CalculateGoalsRequest = {
   training_types?: string[] | null
   training_intensity?: string | null
   daily_activity_level?: string | null
+  // NEAT bucket ('under_7k' | '7k_to_10k' | 'over_10k') + extra endurance load.
+  daily_steps?: string | null
+  weekly_cardio_sessions?: number | null
 }
 
 export type CalculatedGoals = {

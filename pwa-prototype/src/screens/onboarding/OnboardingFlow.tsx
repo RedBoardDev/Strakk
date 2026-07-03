@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '../../components/Button.tsx'
 import { Stepper } from '../../components/Stepper.tsx'
+import { WheelPicker } from '../../components/WheelPicker.tsx'
+import { TickSlider } from '../../components/TickSlider.tsx'
 import { MacroGrid } from '../../components/MacroCard.tsx'
 import { ProgressBar } from '../../components/ProgressBar.tsx'
 import { Icon, type IconName } from '../../components/Icon.tsx'
@@ -17,6 +19,7 @@ type Sex = 'male' | 'female' | 'na'
 type Goal = 'lose' | 'build' | 'maintain' | 'track'
 type Intensity = 'light' | 'moderate' | 'intense'
 type Activity = 'sedentary' | 'moderate' | 'active'
+type Steps = 'under_7k' | '7k_to_10k' | 'over_10k'
 
 // UI value → DB enum value (matches the KMP client + Supabase schema).
 const SEX_DB: Record<Sex, 'male' | 'female' | 'unspecified'> = {
@@ -39,12 +42,15 @@ const ACTIVITY_DB: Record<Activity, 'sedentary' | 'moderately_active' | 'very_ac
 type Data = {
   weight: number
   height: number
+  age: number
   sex: Sex | null
   goal: Goal | null
   sessions: number
   trainingTypes: string[]
+  cardio: number
   intensity: Intensity | null
   activity: Activity | null
+  steps: Steps
   email: string
   password: string
   goals: { calories: number; protein: number; fat: number; carbs: number; water: number }
@@ -53,12 +59,15 @@ type Data = {
 const INITIAL: Data = {
   weight: 75,
   height: 175,
+  age: 25,
   sex: null,
   goal: null,
   sessions: 3,
   trainingTypes: [],
+  cardio: 0,
   intensity: null,
   activity: null,
+  steps: '7k_to_10k', // sensible default — pre-selected to avoid friction
   email: '',
   password: '',
   goals: { calories: 2200, protein: 160, fat: 70, carbs: 240, water: 2500 },
@@ -192,12 +201,15 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
         const calc = await calculateGoals({
           weight_kg: data.weight,
           height_cm: data.height,
+          age: data.age,
           biological_sex: data.sex ? SEX_DB[data.sex] : null,
           fitness_goal: data.goal ? GOAL_DB[data.goal] : null,
           training_frequency_per_week: data.sessions,
           training_types: data.trainingTypes,
           training_intensity: data.intensity,
           daily_activity_level: data.activity ? ACTIVITY_DB[data.activity] : null,
+          daily_steps: data.steps,
+          weekly_cardio_sessions: data.cardio,
         })
         set('goals', {
           calories: calc.calories_kcal,
@@ -261,13 +273,46 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
     switch (step) {
       case 0:
         return (
-          <div className="flex flex-col h-full px-6 pt-4 pb-safe-tight">
+          <div className="relative flex flex-col h-full px-6 pt-4 pb-safe-tight">
+            {/* warm glow bleeding from the top — sets the tone before a single tap */}
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-[45%]"
+              style={{ background: 'radial-gradient(85% 70% at 50% 0%, rgba(255,122,61,0.14), transparent 70%)' }}
+            />
             <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <img src="/icons/icon-512.png" alt="Strakk" className="size-20 rounded-[22px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]" />
-              <h1 className="mt-7 text-[32px] font-bold tracking-tight text-ink">Strakk</h1>
-              <p className="mt-3 text-[16px] leading-snug text-ink-2 max-w-[300px]">
-                Dial in your nutrition and track weekly progress — built to feel effortless.
+              <div className="relative">
+                <div className="absolute -inset-6 rounded-full bg-primary/25 blur-2xl" />
+                <img
+                  src="/icons/icon-512.png"
+                  alt="Strakk"
+                  className="relative size-20 rounded-[22px] ring-1 ring-white/10 shadow-[0_14px_34px_-8px_rgba(0,0,0,0.7)]"
+                />
+              </div>
+              <h1 className="mt-7 text-[34px] font-bold tracking-tight text-ink">Strakk</h1>
+              <p className="mt-2.5 text-[16px] leading-snug text-ink-2 max-w-[300px]">
+                Nutrition that fits your life — not the other way around.
               </p>
+
+              <div className="mt-9 flex w-full max-w-[300px] flex-col gap-2.5">
+                {([
+                  ['sparkles', 'Log meals in seconds — text, photo or barcode'],
+                  ['chart.bar', 'Weekly check-ins, trends & progress photos'],
+                  ['flame.fill', 'Targets computed for you, tuned by AI'],
+                ] as [IconName, string][]).map(([icon, label], i) => (
+                  <motion.div
+                    key={icon}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...spring.gentle, delay: 0.12 + i * 0.09 }}
+                    className="flex items-center gap-3 rounded-card bg-surface-1/80 px-3.5 py-3 text-left ring-1 ring-inset ring-white/[0.04]"
+                  >
+                    <div className="size-9 shrink-0 rounded-[10px] bg-primary/12 flex items-center justify-center">
+                      <Icon name={icon} size={16} className="text-primary" />
+                    </div>
+                    <span className="text-[14px] leading-snug text-ink-2">{label}</span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
             <div className="flex flex-col gap-3 pt-4">
               <Button variant="primary" full glow onClick={next}>Get started</Button>
@@ -279,13 +324,21 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
         )
       case 1:
         return (
-          <Step title="What’s your current weight?" subtitle="We use it to calibrate your targets." onNext={next}>
-            <div className="flex flex-col items-center gap-6 pt-6">
-              <div className="text-[56px] font-bold text-ink tnum leading-none">
+          <Step title="What’s your current weight?" subtitle="Best measured in the morning, fasted — that’s your true baseline." onNext={next}>
+            <div className="flex flex-col items-center pt-2">
+              <div className="text-[54px] font-bold text-ink tnum leading-none">
                 {data.weight}
-                <span className="text-[20px] text-ink-3 font-semibold ml-1">kg</span>
+                <span className="text-[20px] text-ink-3 font-semibold ml-1.5">kg</span>
               </div>
-              <Stepper value={data.weight} onChange={(value) => set('weight', value)} step={1} min={30} suffix="kg" />
+              <WheelPicker
+                value={data.weight}
+                onChange={(value) => set('weight', value)}
+                min={35}
+                max={200}
+                rows={7}
+                className="mt-5 w-full max-w-[200px]"
+              />
+              <div className="mt-3 text-[12px] text-ink-4">Slide to adjust</div>
             </div>
           </Step>
         )
@@ -293,11 +346,14 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
         return (
           <Step title="A bit about you" subtitle="Optional — improves accuracy. Skip if you’d rather not." cta={data.sex ? 'Continue' : 'Skip'} onNext={next}>
             <div className="flex flex-col gap-6">
-              <div>
-                <div className="text-[13px] font-semibold text-ink-3 mb-2">Height</div>
-                <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
-                  <span className="flex-1 text-[18px] font-bold text-ink tnum">{data.height} <span className="text-[13px] text-ink-3 font-semibold">cm</span></span>
-                  <Stepper value={data.height} onChange={(value) => set('height', value)} step={1} min={100} suffix="cm" />
+              <div className="flex gap-3">
+                <div className="flex-1 rounded-card bg-surface-1 px-2 pt-3 pb-2">
+                  <div className="text-center text-[13px] font-semibold text-ink-3 mb-1">Height</div>
+                  <WheelPicker value={data.height} onChange={(value) => set('height', value)} min={120} max={220} suffix="cm" rows={5} />
+                </div>
+                <div className="flex-1 rounded-card bg-surface-1 px-2 pt-3 pb-2">
+                  <div className="text-center text-[13px] font-semibold text-ink-3 mb-1">Age</div>
+                  <WheelPicker value={data.age} onChange={(value) => set('age', value)} min={14} max={90} rows={5} />
                 </div>
               </div>
               <div>
@@ -325,15 +381,24 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
       case 4:
         return (
           <Step title="How do you train?" subtitle="Sessions per week and the kind of training you do." onNext={next}>
-            <div className="flex flex-col gap-6">
-              <div>
-                <div className="text-[13px] font-semibold text-ink-3 mb-2">Sessions / week</div>
-                <div className="flex gap-2 flex-wrap">
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map((n) => (
-                    <Pill key={n} selected={data.sessions === n} label={`${n}`} onClick={() => set('sessions', n)} />
-                  ))}
+            <div className="flex flex-col gap-4">
+              <div className="rounded-card bg-surface-1 px-4 pt-3.5 pb-2">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-[13px] font-semibold text-ink-3">Strength sessions / week</span>
+                  <span className="text-[20px] font-bold text-ink tnum">
+                    {data.sessions}
+                    <span className="text-[12px] text-ink-3 font-semibold ml-0.5">×</span>
+                  </span>
                 </div>
+                <TickSlider
+                  value={data.sessions}
+                  onChange={(value) => set('sessions', value)}
+                  min={0}
+                  max={7}
+                  ariaLabel="Strength sessions per week"
+                />
               </div>
+
               <div>
                 <div className="text-[13px] font-semibold text-ink-3 mb-2">Training types</div>
                 <div className="flex gap-2 flex-wrap">
@@ -341,6 +406,25 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
                     <Pill key={type} selected={data.trainingTypes.includes(type)} label={type} onClick={() => toggleTraining(type)} />
                   ))}
                 </div>
+              </div>
+
+              <div className="rounded-card bg-surface-1 px-4 pt-3.5 pb-2">
+                <div className="flex items-baseline justify-between mb-0.5">
+                  <span className="text-[13px] font-semibold text-ink-3">Cardio / endurance</span>
+                  <span className="text-[20px] font-bold text-ink tnum">
+                    {data.cardio === 5 ? '5+' : data.cardio}
+                    <span className="text-[12px] text-ink-3 font-semibold ml-0.5">×</span>
+                  </span>
+                </div>
+                <div className="text-[12px] text-ink-4 mb-2">Running, cycling, crossfit… per week</div>
+                <TickSlider
+                  value={data.cardio}
+                  onChange={(value) => set('cardio', value)}
+                  min={0}
+                  max={5}
+                  format={(v) => (v === 5 ? '5+' : String(v))}
+                  ariaLabel="Cardio sessions per week"
+                />
               </div>
             </div>
           </Step>
@@ -363,6 +447,15 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
                   <SelectCard selected={data.activity === 'sedentary'} title="Sedentary" subtitle="Desk job, little movement" onClick={() => set('activity', 'sedentary')} />
                   <SelectCard selected={data.activity === 'moderate'} title="Moderately active" subtitle="On your feet part of the day" onClick={() => set('activity', 'moderate')} />
                   <SelectCard selected={data.activity === 'active'} title="Very active" subtitle="Physical job, always moving" onClick={() => set('activity', 'active')} />
+                </div>
+              </div>
+              <div>
+                <div className="text-[13px] font-semibold text-ink-3 mb-1">Daily steps</div>
+                <div className="text-[12px] text-ink-4 mb-2">Your best guess — it fine-tunes your calorie target</div>
+                <div className="flex flex-col gap-2.5">
+                  <SelectCard selected={data.steps === 'under_7k'} title="Mostly seated" subtitle="Under 7,000 steps a day" onClick={() => set('steps', 'under_7k')} />
+                  <SelectCard selected={data.steps === '7k_to_10k'} title="On your feet" subtitle="7,000 – 10,000 steps a day" onClick={() => set('steps', '7k_to_10k')} />
+                  <SelectCard selected={data.steps === 'over_10k'} title="Always moving" subtitle="Over 10,000 steps a day" onClick={() => set('steps', 'over_10k')} />
                 </div>
               </div>
             </div>
