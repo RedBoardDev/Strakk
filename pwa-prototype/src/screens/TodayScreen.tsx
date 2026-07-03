@@ -1,0 +1,277 @@
+import { useState } from 'react'
+import { motion } from 'motion/react'
+import { Icon, type IconName } from '../components/Icon.tsx'
+import { MacroGrid } from '../components/MacroCard.tsx'
+import { ScreenScroll } from '../components/ScreenScroll.tsx'
+import { Sheet } from '../components/Sheet.tsx'
+import { Stepper } from '../components/Stepper.tsx'
+import { Button } from '../components/Button.tsx'
+import { useToast } from '../components/Toast.tsx'
+import { haptic, spring } from '../lib/ios.ts'
+import { useNav } from '../nav.ts'
+import { useStore } from '../store.tsx'
+import type { MealEntry } from '../data/mock.ts'
+
+const SOURCE_ICON: Record<MealEntry['source'], IconName> = {
+  photo: 'camera',
+  search: 'search',
+  barcode: 'barcode',
+  manual: 'pencil',
+  ai: 'sparkles',
+}
+
+function todayLabel(): string {
+  return new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
+function MealRow({ meal, onTap }: { meal: MealEntry; onTap: () => void }) {
+  return (
+    <motion.button
+      type="button"
+      layout
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      whileTap={{ scale: 0.99, backgroundColor: '#151B38' }}
+      transition={{ duration: 0.15 }}
+      onClick={() => {
+        haptic('light')
+        onTap()
+      }}
+      className="w-full bg-surface-1 rounded-card px-4 py-3 flex items-center gap-2.5 text-left"
+    >
+      <span className="tnum w-11 shrink-0 text-[12px] font-semibold text-ink-3">{meal.time}</span>
+      <div className="w-4 shrink-0 flex justify-center">
+        <Icon name="fork" size={13} className="text-ink-2" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[15px] font-semibold text-ink truncate">{meal.type}</div>
+        <div className="text-[12px] text-ink-2 truncate">
+          {meal.items.length} {meal.items.length === 1 ? 'item' : 'items'} · {meal.macros.calories} kcal
+        </div>
+      </div>
+      <Icon name={SOURCE_ICON[meal.source]} size={13} className="text-ink-3 shrink-0" />
+      <Icon name="chevron.right" size={14} className="text-ink-3 shrink-0" />
+    </motion.button>
+  )
+}
+
+// Mock of the native Hevy export (PDF program → routine). Pro-gated.
+function HevyExportSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const toast = useToast()
+  return (
+    <Sheet open={open} onClose={onClose} title="Export to Hevy" detents={['small']}>
+      <div className="flex flex-col gap-3 pt-1 pb-4">
+        <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
+          <div className="size-9 rounded-[10px] bg-surface-3 flex items-center justify-center shrink-0">
+            <Icon name="note" size={16} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[15px] font-semibold text-ink truncate">Upper-Lower_Program.pdf</div>
+            <div className="text-[12px] text-ink-3">Session B · 8 exercises matched</div>
+          </div>
+          <Icon name="check" size={16} className="text-success shrink-0" />
+        </div>
+        <Button
+          variant="primary"
+          full
+          glow
+          onClick={() => {
+            haptic('medium')
+            onClose()
+            toast.show('Routine exported to Hevy')
+          }}
+        >
+          Export routine
+        </Button>
+      </div>
+    </Sheet>
+  )
+}
+
+export function TodayScreen() {
+  const nav = useNav()
+  const toast = useToast()
+  const { state, consumed, dispatch } = useStore()
+  const { goals, waterMl, meals } = state
+
+  const [waterSheet, setWaterSheet] = useState(false)
+  const [customMl, setCustomMl] = useState(250)
+  const [hevyOpen, setHevyOpen] = useState(false)
+
+  const addWater = (delta: number) => {
+    haptic('light')
+    dispatch({ kind: 'water/add', deltaMl: delta })
+  }
+
+  return (
+    <div className="relative h-full">
+      <ScreenScroll
+        title="Today"
+        trailing={
+          <div className="flex items-center gap-1">
+            <span className="text-[13px] text-ink-2">{todayLabel()}</span>
+            <button
+              type="button"
+              onClick={() => {
+                haptic('light')
+                setHevyOpen(true)
+              }}
+              className="size-9 flex items-center justify-center text-ink-2"
+              aria-label="Export to Hevy"
+            >
+              <Icon name="dumbbell.fill" size={18} />
+            </button>
+          </div>
+        }
+      >
+        {/* Macro grid */}
+        <div className="pt-5">
+          <MacroGrid
+            protein={{ consumed: consumed.protein, goal: goals.protein }}
+            calories={{ consumed: consumed.calories, goal: goals.calories }}
+            fat={{ consumed: consumed.fat, goal: goals.fat }}
+            carbs={{ consumed: consumed.carbs, goal: goals.carbs }}
+          />
+        </div>
+
+        {/* Water */}
+        <div className="pt-6">
+          <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
+            <div className="size-9 rounded-lg bg-surface-3 flex items-center justify-center shrink-0">
+              <Icon name="drop.fill" size={15} className="text-water" />
+            </div>
+            <div className="text-[18px] font-bold text-ink tnum">
+              {/* Instant value + a quick pop — a tween here read as laggy ticking. */}
+              <motion.span
+                key={waterMl}
+                initial={{ scale: 1.15 }}
+                animate={{ scale: 1 }}
+                transition={spring.snappy}
+                className="inline-block origin-left"
+              >
+                {(waterMl / 1000).toFixed(1)}
+              </motion.span>{' '}
+              L<span className="text-ink-3 font-semibold"> / {(goals.water / 1000).toFixed(1)} L</span>
+            </div>
+            <div className="flex-1" />
+            <button
+              type="button"
+              disabled={waterMl === 0}
+              onClick={() => waterMl > 0 && addWater(-250)}
+              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-ink disabled:text-ink-4"
+              aria-label="Remove 250 mL"
+            >
+              <Icon name="minus" size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => addWater(250)}
+              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-water"
+              aria-label="Add 250 mL"
+            >
+              <Icon name="plus" size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                haptic('light')
+                setCustomMl(250)
+                setWaterSheet(true)
+              }}
+              className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-ink-2"
+              aria-label="Custom amount"
+            >
+              <Icon name="pencil" size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="pt-6 flex flex-col gap-2">
+          {meals.length === 0 ? (
+            <div className="py-12 flex flex-col items-center gap-2 text-center">
+              <Icon name="fork" size={26} className="text-ink-4" />
+              <div className="text-[15px] text-ink-2">Nothing logged yet</div>
+              <div className="text-[12px] text-ink-4">Add your first meal with the buttons below.</div>
+            </div>
+          ) : (
+            meals
+              .slice()
+              // Reverse-chronological — the most recent meal sits on top.
+              .sort((a, b) => b.time.localeCompare(a.time))
+              .map((m) => <MealRow key={m.id} meal={m} onTap={() => nav.open({ kind: 'mealDetail', meal: m })} />)
+          )}
+        </div>
+
+        {/* Clearance for the floating action bar + tab bar */}
+        <div className="h-28" />
+      </ScreenScroll>
+
+      {/* Action bar — floats just above the glass tab bar; timeline fades into it */}
+      <div
+        className="absolute inset-x-0 z-10 px-5 pt-8 pb-2 pointer-events-none bg-gradient-to-t from-bg from-45% to-transparent"
+        style={{ bottom: 'calc(var(--safe-bottom, env(safe-area-inset-bottom)) + 60px)' }}
+      >
+        <div className="flex gap-3 pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => {
+              haptic('light')
+              nav.open({ kind: 'add' })
+            }}
+            className="flex-1 h-14 rounded-[14px] bg-surface-2 flex items-center justify-center gap-2 text-ink font-semibold text-[15px]"
+          >
+            <Icon name="fork" size={16} /> Meal
+          </button>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              haptic('medium')
+              // Quick = the AI text shortcut; Meal opens the full picker.
+              nav.open({ kind: 'quickAdd' })
+            }}
+            className="flex-1 h-14 rounded-[14px] bg-primary glow-primary flex items-center justify-center gap-2 text-white font-semibold text-[15px]"
+          >
+            <Icon name="sparkles" size={16} /> Quick
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Water custom-amount sheet — add OR remove an arbitrary amount */}
+      <Sheet open={waterSheet} onClose={() => setWaterSheet(false)} title="Custom amount" detents={['small']}>
+        <div className="flex flex-col items-center gap-5 py-3">
+          <Stepper value={customMl} onChange={setCustomMl} step={50} min={50} suffix="mL" />
+          <div className="w-full flex gap-3">
+            <Button
+              variant="secondary"
+              full
+              disabled={waterMl === 0}
+              onClick={() => {
+                dispatch({ kind: 'water/add', deltaMl: -customMl })
+                setWaterSheet(false)
+                toast.show(`Removed ${customMl} mL`)
+              }}
+            >
+              Remove
+            </Button>
+            <Button
+              variant="primary"
+              full
+              onClick={() => {
+                dispatch({ kind: 'water/add', deltaMl: customMl })
+                setWaterSheet(false)
+                toast.show(`Added ${customMl} mL`)
+              }}
+            >
+              Add water
+            </Button>
+          </div>
+        </div>
+      </Sheet>
+
+      <HevyExportSheet open={hevyOpen} onClose={() => setHevyOpen(false)} />
+    </div>
+  )
+}
