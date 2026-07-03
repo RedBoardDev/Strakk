@@ -8,7 +8,8 @@ import { Icon } from '../../components/Icon.tsx'
 import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
 import { useStore } from '../../store.tsx'
-import type { Food, Macros } from '../../data/mock.ts'
+import type { CatalogFood } from '../../api/foods.ts'
+import type { Macros } from '../../data/mock.ts'
 
 // Macro rows, in the spec's order, each tinted with its accent.
 const MACRO_ROWS: { key: keyof Macros; label: string; unit: string; cls: string }[] = [
@@ -26,47 +27,55 @@ export function FoodDetailSheet({
   open,
   onClose,
   food,
+  logDate,
 }: {
   open: boolean
   onClose: () => void
-  food: Food | null
+  food: CatalogFood | null
+  logDate?: string
 }) {
-  // Portion in grams. Reset to the food's default serving whenever the food
-  // changes (the sheet stays mounted, so we adjust state during render rather
-  // than relying on the initial value).
+  const store = useStore()
+  const toast = useToast()
+  const [saving, setSaving] = useState(false)
+
+  // Portion in grams — reset to the food's default serving when the food changes.
   const [grams, setGrams] = useState(100)
-  const [trackedId, setTrackedId] = useState<string | null>(null)
+  const [trackedId, setTrackedId] = useState<string | number | null>(null)
   if (food && food.id !== trackedId) {
     setTrackedId(food.id)
-    setGrams(food.serving.grams)
+    setGrams(Math.round(food.default_portion_grams) || 100)
   }
 
   const scale = grams / 100
-  const { state, dispatch } = useStore()
-  const toast = useToast()
-  const isFav = food ? state.favoriteFoodIds.includes(food.id) : false
+  const per100: Macros = food
+    ? { calories: food.calories, protein: food.protein, fat: food.fat ?? 0, carbs: food.carbs ?? 0 }
+    : { calories: 0, protein: 0, fat: 0, carbs: 0 }
+  const isFav = food ? store.isFavoriteFood(food.name) : false
 
-  const addToLog = () => {
-    if (!food) return
+  const addToLog = async () => {
+    if (!food || saving) return
     haptic('medium')
-    const macros = {
-      calories: Math.round(food.per100.calories * scale),
-      protein: Math.round(food.per100.protein * scale),
-      fat: Math.round(food.per100.fat * scale),
-      carbs: Math.round(food.per100.carbs * scale),
+    setSaving(true)
+    try {
+      await store.addOrphanEntry(
+        {
+          name: food.name,
+          protein: Math.round(food.protein * scale * 10) / 10,
+          calories: Math.round(food.calories * scale),
+          fat: food.fat != null ? Math.round(food.fat * scale * 10) / 10 : null,
+          carbs: food.carbs != null ? Math.round(food.carbs * scale * 10) / 10 : null,
+          quantity: `${grams}g`,
+          source: food.barcode ? 'barcode' : 'search',
+        },
+        logDate,
+      )
+      onClose()
+      toast.show(`Added · ${Math.round(food.calories * scale)} kcal`)
+    } catch {
+      // error already toasted by the store
+    } finally {
+      setSaving(false)
     }
-    dispatch({
-      kind: 'meal/add',
-      meal: {
-        title: food.name,
-        macros,
-        items: [`${food.name} — ${grams}g`],
-        // Mock convention: scanned products carry a 'b' id prefix.
-        source: food.id.startsWith('b') ? 'barcode' : 'search',
-      },
-    })
-    onClose()
-    toast.show(`Added · ${macros.calories} kcal`)
   }
 
   return (
@@ -77,8 +86,8 @@ export function FoodDetailSheet({
       detents={['medium', 'large']}
       footer={
         food && (
-          <Button variant="primary" full glow onClick={addToLog}>
-            <Icon name="plus" size={17} /> Add to log
+          <Button variant="primary" full glow disabled={saving} onClick={() => void addToLog()}>
+            <Icon name="plus" size={17} /> {saving ? 'Adding…' : 'Add to log'}
           </Button>
         )
       }
@@ -89,16 +98,14 @@ export function FoodDetailSheet({
           <div className="pt-1 pb-6 flex items-start gap-3">
             <div className="flex-1 min-w-0">
               <h2 className="text-[22px] font-bold text-ink leading-tight">{food.name}</h2>
-              {(food.brand || food.verified) && (
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-2">
-                  {food.brand && <span className="text-[13px] text-ink-2">{food.brand}</span>}
-                  {food.verified && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success">
-                      <Icon name="check" size={10} /> Verified
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-2">
+                {food.brand && <span className="text-[13px] text-ink-2">{food.brand}</span>}
+                {food.nutriscore && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success uppercase">
+                    Nutri-score {food.nutriscore}
+                  </span>
+                )}
+              </div>
             </div>
             <motion.button
               type="button"
@@ -106,7 +113,16 @@ export function FoodDetailSheet({
               transition={{ duration: 0.1 }}
               onClick={() => {
                 haptic('light')
-                dispatch({ kind: 'food/toggleFavorite', id: food.id })
+                void store
+                  .toggleFavoriteFood({
+                    name: food.name,
+                    protein: Math.round(food.protein * scale * 10) / 10,
+                    calories: Math.round(food.calories * scale),
+                    fat: food.fat != null ? Math.round(food.fat * scale * 10) / 10 : null,
+                    carbs: food.carbs != null ? Math.round(food.carbs * scale * 10) / 10 : null,
+                    quantity: `${grams}g`,
+                  })
+                  .catch(() => {})
               }}
               className={`size-11 -mr-2 flex items-center justify-center shrink-0 ${isFav ? 'text-primary' : 'text-ink-3'}`}
               aria-label={isFav ? 'Remove favorite' : 'Favorite food'}
@@ -121,7 +137,8 @@ export function FoodDetailSheet({
             <div className="flex flex-col items-center gap-2.5">
               <Stepper value={grams} onChange={setGrams} step={10} min={5} suffix="g" />
               <div className="text-[12px] text-ink-3 tnum">
-                {food.serving.label} = {food.serving.grams}g
+                {food.serving_label ? `${food.serving_label} = ` : 'Default portion = '}
+                {Math.round(food.default_portion_grams)}g
               </div>
             </div>
           </div>
@@ -135,7 +152,7 @@ export function FoodDetailSheet({
                   <span className="text-[15px] text-ink">{row.label}</span>
                   <div className="flex-1" />
                   <span className={`text-[15px] font-semibold tnum ${row.cls}`}>
-                    <AnimatedNumber value={food.per100[row.key] * scale} duration={0.4} />
+                    <AnimatedNumber value={per100[row.key] * scale} duration={0.4} />
                     <span className="text-[12px] ml-0.5 opacity-80">{row.unit}</span>
                   </span>
                 </div>

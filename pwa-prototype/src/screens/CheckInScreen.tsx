@@ -17,12 +17,9 @@ import { haptic } from '../lib/ios.ts'
 import { colors } from '../theme/tokens.ts'
 import { useStore } from '../store.tsx'
 import { useToast } from '../components/Toast.tsx'
-import {
-  MEASUREMENT_FIELDS,
-  weightTrend,
-  type CheckIn,
-  type Measurements,
-} from '../data/mock.ts'
+import { toCheckInView, weightTrendOf, type CheckInView } from '../lib/checkinView.ts'
+import type { CheckinRow } from '../api/checkins.ts'
+import { MEASUREMENT_FIELDS, type CheckIn, type Measurements } from '../data/mock.ts'
 
 type Trend = { color: string; icon: IconName | null }
 
@@ -422,14 +419,18 @@ function CheckInDetailContent({ checkIn, data }: { checkIn: CheckIn; data: numbe
       <SectionLabel>Measurements</SectionLabel>
       <MeasurementsGrid measurements={checkIn.measurements} deltas={checkIn.deltas} />
 
-      <SectionLabel>Weight trend</SectionLabel>
-      <Card padding="p-4">
-        <WeightSparkline data={data} height={140} />
-        <div className="mt-2 flex justify-between text-[11px] text-ink-4 tnum">
-          <span>{data[0].toFixed(1)} kg</span>
-          <span>{data[data.length - 1].toFixed(1)} kg</span>
-        </div>
-      </Card>
+      {data.length >= 2 && (
+        <>
+          <SectionLabel>Weight trend</SectionLabel>
+          <Card padding="p-4">
+            <WeightSparkline data={data} height={140} />
+            <div className="mt-2 flex justify-between text-[11px] text-ink-4 tnum">
+              <span>{data[0].toFixed(1)} kg</span>
+              <span>{data[data.length - 1].toFixed(1)} kg</span>
+            </div>
+          </Card>
+        </>
+      )}
 
       <SectionLabel>How you felt</SectionLabel>
       <FeelingsSection checkIn={checkIn} />
@@ -476,21 +477,26 @@ function ActionRow({
 }
 
 export function CheckInScreen() {
-  const { state, dispatch } = useStore()
+  const store = useStore()
   const toast = useToast()
-  const { checkIns } = state
+  const rows = store.state.checkins
+  const calorieGoal = store.state.goals.calories
   const [view, setView] = useState<'list' | 'detail' | 'stats'>('list')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [editTarget, setEditTarget] = useState<CheckIn | null>(null)
+  const [editTarget, setEditTarget] = useState<CheckinRow | null>(null)
   const [actionsOpen, setActionsOpen] = useState(false)
   const [pdfOpen, setPdfOpen] = useState(false)
   const [confirmDeleteCheckIn, setConfirmDeleteCheckIn] = useState(false)
 
+  // API rows adapted to the view model the sections render (deltas vs previous).
+  const checkIns: CheckInView[] = rows.map((row, i) => toCheckInView(row, rows[i + 1], calorieGoal))
+  const weightTrend = weightTrendOf(rows)
+
   // Always render the live check-in (stays fresh after an edit).
   const selected = selectedId ? (checkIns.find((c) => c.id === selectedId) ?? null) : null
 
-  const openDetail = (checkIn: CheckIn) => {
+  const openDetail = (checkIn: CheckInView) => {
     setSelectedId(checkIn.id)
     setView('detail')
   }
@@ -518,9 +524,11 @@ export function CheckInScreen() {
           <QuickStatsSection checkIn={checkIns[0]} onOpenStats={() => setView('stats')} />
         )}
 
-        <div className="pt-3">
-          <TrendsCard data={weightTrend} />
-        </div>
+        {weightTrend.length >= 2 && (
+          <div className="pt-3">
+            <TrendsCard data={weightTrend} />
+          </div>
+        )}
 
         <SectionLabel>Recent check-ins</SectionLabel>
         <div className="flex flex-col gap-2.5">
@@ -568,7 +576,7 @@ export function CheckInScreen() {
             label="Edit check-in"
             onClick={() => {
               setActionsOpen(false)
-              setEditTarget(selected)
+              setEditTarget(selected?.row ?? null)
               setFormOpen(true)
             }}
           />
@@ -601,9 +609,14 @@ export function CheckInScreen() {
         onCancel={() => setConfirmDeleteCheckIn(false)}
         onConfirm={() => {
           setConfirmDeleteCheckIn(false)
-          if (selected) dispatch({ kind: 'checkin/delete', id: selected.id })
+          const row = selected?.row
           setView('list')
-          toast.show('Check-in deleted')
+          if (row) {
+            void store
+              .deleteCheckin(row)
+              .then(() => toast.show('Check-in deleted'))
+              .catch(() => {})
+          }
         }}
       />
 

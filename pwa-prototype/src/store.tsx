@@ -1,196 +1,320 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react'
-import { sumMacros } from './lib/macros.ts'
-import {
-  calendarDays as seedCalendarDays,
-  checkIns as seedCheckIns,
-  goals as seedGoals,
-  meals as seedMeals,
-  user as seedUser,
-  water as seedWater,
-  type CheckIn,
-  type Macros,
-  type MealEntry,
-  type MealType,
-} from './data/mock.ts'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useToast } from './components/Toast.tsx'
+import { sumMacros, ZERO_MACROS } from './lib/macros.ts'
+import { todayIso } from './lib/dates.ts'
+import { supabase } from './api/supabase.ts'
+import * as authApi from './api/auth.ts'
+import * as mealsApi from './api/meals.ts'
+import * as waterApi from './api/water.ts'
+import * as checkinsApi from './api/checkins.ts'
+import * as profileApi from './api/profile.ts'
+import * as foodsApi from './api/foods.ts'
+import type { Macros } from './data/mock.ts'
 
 // ============================================================================
-// App store — the single mutable state behind every screen. Shapes mirror the
-// future API contracts, so "wiring the API" later means swapping the reducer
-// internals for network calls; screens don't change.
+// Server-backed app store. Mirrors the KMP repositories: every mutation is
+// server-first (await the API, then update the in-memory cache) so the UI is
+// always consistent with the database. Errors surface as toasts and reject.
 // ============================================================================
+
+export type Goals = Macros & { water: number }
+
+const DEFAULT_GOALS: Goals = { calories: 2200, protein: 160, fat: 70, carbs: 240, water: 2500 }
 
 export type AppState = {
-  // isPro stays in the model (quota logic lives server-side) but every account
-  // is Pro for now — no payment UI anywhere in the app.
-  user: { firstName: string; streak: number; isPro: boolean }
-  goals: Macros & { water: number }
-  waterMl: number
-  meals: MealEntry[]
-  favoriteMealIds: string[]
-  favoriteFoodIds: string[]
-  checkIns: CheckIn[]
-  integrations: { hevy: boolean }
+  ready: boolean
+  user: { firstName: string; email: string }
+  goals: Goals
+  today: string
+  meals: mealsApi.Meal[]
+  orphans: mealsApi.Entry[]
+  waterEntries: waterApi.WaterEntry[]
+  checkins: checkinsApi.CheckinRow[]
+  favoriteFoods: foodsApi.FavoriteFood[]
+  hevyConnected: boolean
 }
 
-const INITIAL: AppState = {
-  user: seedUser,
-  goals: seedGoals,
-  waterMl: seedWater.current,
-  meals: seedMeals,
-  favoriteMealIds: [],
-  favoriteFoodIds: ['f1', 'f3'],
-  checkIns: seedCheckIns,
-  integrations: { hevy: true },
-}
+// ---- derived helpers (exported for screens) ---------------------------------
 
-// ---- actions ---------------------------------------------------------------
-
-export type NewMeal = {
-  type?: MealType
-  title: string
-  macros: Macros
-  items: string[]
-  source: MealEntry['source']
-}
-
-type Action =
-  | { kind: 'water/add'; deltaMl: number }
-  | { kind: 'meal/add'; meal: NewMeal }
-  | { kind: 'meal/update'; id: string; patch: Partial<Pick<MealEntry, 'items' | 'macros' | 'title' | 'type'>> }
-  | { kind: 'meal/delete'; id: string }
-  | { kind: 'meal/toggleFavorite'; id: string }
-  | { kind: 'food/toggleFavorite'; id: string }
-  | { kind: 'checkin/add'; checkIn: CheckIn }
-  | { kind: 'checkin/update'; id: string; patch: Partial<CheckIn> }
-  | { kind: 'checkin/delete'; id: string }
-  | { kind: 'goals/update'; goals: AppState['goals'] }
-  | { kind: 'user/setPro'; isPro: boolean }
-  | { kind: 'user/setName'; firstName: string }
-  | { kind: 'integration/toggle'; name: keyof AppState['integrations'] }
-  | { kind: 'reset' }
-
-let mealSeq = 100
-
-function nowTime(): string {
-  const now = new Date()
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-}
-
-function inferMealType(): MealType {
-  const hour = new Date().getHours()
-  if (hour < 11) return 'Breakfast'
-  if (hour < 15) return 'Lunch'
-  if (hour < 18) return 'Snack'
-  return 'Dinner'
-}
-
-function toggle(list: string[], id: string): string[] {
-  return list.includes(id) ? list.filter((x) => x !== id) : [...list, id]
-}
-
-function reducer(state: AppState, action: Action): AppState {
-  switch (action.kind) {
-    case 'water/add': {
-      const waterMl = Math.max(0, Math.min(8000, state.waterMl + action.deltaMl))
-      return { ...state, waterMl }
-    }
-    case 'meal/add': {
-      mealSeq += 1
-      const entry: MealEntry = {
-        id: `m${mealSeq}`,
-        type: action.meal.type ?? inferMealType(),
-        time: nowTime(),
-        title: action.meal.title,
-        macros: action.meal.macros,
-        items: action.meal.items,
-        source: action.meal.source,
-      }
-      // Newest first (Today renders reverse-chronological).
-      return { ...state, meals: [entry, ...state.meals] }
-    }
-    case 'meal/update':
-      return {
-        ...state,
-        meals: state.meals.map((meal) => (meal.id === action.id ? { ...meal, ...action.patch } : meal)),
-      }
-    case 'meal/delete':
-      return { ...state, meals: state.meals.filter((meal) => meal.id !== action.id) }
-    case 'meal/toggleFavorite':
-      return { ...state, favoriteMealIds: toggle(state.favoriteMealIds, action.id) }
-    case 'food/toggleFavorite':
-      return { ...state, favoriteFoodIds: toggle(state.favoriteFoodIds, action.id) }
-    case 'checkin/add':
-      return { ...state, checkIns: [action.checkIn, ...state.checkIns] }
-    case 'checkin/update':
-      return {
-        ...state,
-        checkIns: state.checkIns.map((checkIn) =>
-          checkIn.id === action.id ? { ...checkIn, ...action.patch } : checkIn,
-        ),
-      }
-    case 'checkin/delete':
-      return { ...state, checkIns: state.checkIns.filter((checkIn) => checkIn.id !== action.id) }
-    case 'goals/update':
-      return { ...state, goals: action.goals }
-    case 'user/setPro':
-      return { ...state, user: { ...state.user, isPro: action.isPro } }
-    case 'user/setName':
-      return { ...state, user: { ...state.user, firstName: action.firstName } }
-    case 'integration/toggle':
-      return {
-        ...state,
-        integrations: { ...state.integrations, [action.name]: !state.integrations[action.name] },
-      }
-    case 'reset':
-      return INITIAL
-    default:
-      return state
+export function entryMacros(entry: mealsApi.Entry): Macros {
+  return {
+    calories: Math.round(entry.calories),
+    protein: Math.round(entry.protein),
+    fat: Math.round(entry.fat ?? 0),
+    carbs: Math.round(entry.carbs ?? 0),
   }
 }
 
-// ---- persistence -----------------------------------------------------------
+export function mealMacros(meal: mealsApi.Meal): Macros {
+  return sumMacros(meal.meal_entries.map(entryMacros))
+}
 
-// Bump when the seed/shape changes so stale saved state doesn't shadow it.
-const STORAGE_KEY = 'strakk-proto-state-v2'
+export type TimelineItem =
+  | { kind: 'meal'; meal: mealsApi.Meal; createdAt: string }
+  | { kind: 'entry'; entry: mealsApi.Entry; createdAt: string }
 
-function hydrate(): AppState {
-  if (typeof window === 'undefined') return INITIAL
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return INITIAL
-    const saved = JSON.parse(raw) as AppState
-    // Shallow sanity check; anything off falls back to the seed.
-    if (!Array.isArray(saved.meals) || !Array.isArray(saved.checkIns) || !saved.goals) return INITIAL
-    return { ...INITIAL, ...saved }
-  } catch {
-    return INITIAL
+export function timelineOf(state: AppState): TimelineItem[] {
+  const items: TimelineItem[] = [
+    ...state.meals.map((meal) => ({ kind: 'meal' as const, meal, createdAt: meal.created_at })),
+    ...state.orphans.map((entry) => ({ kind: 'entry' as const, entry, createdAt: entry.created_at })),
+  ]
+  return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) // newest first
+}
+
+function goalsFromProfile(profile: profileApi.ProfileRow | null): Goals {
+  if (!profile) return DEFAULT_GOALS
+  return {
+    calories: profile.calorie_goal ?? DEFAULT_GOALS.calories,
+    protein: profile.protein_goal ?? DEFAULT_GOALS.protein,
+    fat: profile.fat_goal ?? DEFAULT_GOALS.fat,
+    carbs: profile.carb_goal ?? DEFAULT_GOALS.carbs,
+    water: profile.water_goal ?? DEFAULT_GOALS.water,
   }
 }
 
-// ---- context ---------------------------------------------------------------
+// ---- store surface ------------------------------------------------------------
 
 type Store = {
   state: AppState
   consumed: Macros
-  dispatch: (action: Action) => void
+  waterMl: number
+  reload: () => Promise<void>
+  // water
+  addWater: (deltaMl: number) => Promise<void>
+  // logging
+  addOrphanEntry: (input: mealsApi.NewEntryInput, logDate?: string) => Promise<void>
+  createMeal: (name: string, inputs: mealsApi.NewEntryInput[], logDate?: string) => Promise<void>
+  addEntryToMeal: (mealId: string, input: mealsApi.NewEntryInput) => Promise<void>
+  updateEntry: (id: string, patch: mealsApi.EntryPatch) => Promise<void>
+  deleteEntry: (id: string) => Promise<void>
+  deleteMeal: (id: string) => Promise<void>
+  renameMeal: (id: string, name: string) => Promise<void>
+  // check-ins
+  createCheckin: (input: checkinsApi.CheckinInput, photos: Blob[]) => Promise<checkinsApi.CheckinRow>
+  updateCheckin: (id: string, input: Omit<checkinsApi.CheckinInput, 'week_label' | 'covered_dates'>) => Promise<void>
+  deleteCheckin: (checkin: checkinsApi.CheckinRow) => Promise<void>
+  attachAiSummary: (id: string, summary: string) => Promise<void>
+  // profile
+  updateGoals: (goals: Goals) => Promise<void>
+  setFirstName: (name: string) => Promise<void>
+  setHevyConnected: (connected: boolean) => void
+  // favorites
+  toggleFavoriteFood: (food: { name: string; protein: number; calories: number; fat?: number | null; carbs?: number | null; quantity?: string | null }) => Promise<void>
+  isFavoriteFood: (name: string) => boolean
 }
 
 const StoreContext = createContext<Store | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, hydrate)
+  const toast = useToast()
+  const today = useMemo(() => todayIso(), [])
+  const [state, setState] = useState<AppState>({
+    ready: false,
+    user: { firstName: '', email: '' },
+    goals: DEFAULT_GOALS,
+    today,
+    meals: [],
+    orphans: [],
+    waterEntries: [],
+    checkins: [],
+    favoriteFoods: [],
+    hevyConnected: false,
+  })
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  const patch = useCallback((partial: Partial<AppState>) => {
+    setState((prev) => ({ ...prev, ...partial }))
+  }, [])
+
+  // Wraps a mutation: reject → toast the error, rethrow for callers that care.
+  const guard = useCallback(
+    async <T,>(work: () => Promise<T>): Promise<T> => {
+      try {
+        return await work()
+      } catch (err) {
+        toast.show(err instanceof Error ? err.message : 'Something went wrong')
+        throw err
+      }
+    },
+    [toast],
+  )
+
+  const reload = useCallback(async () => {
+    const [{ data: userData }, profile, meals, orphans, water, checkins, favorites] = await Promise.all([
+      supabase.auth.getUser(),
+      profileApi.fetchProfile().catch(() => null),
+      mealsApi.fetchMealsForDate(today).catch(() => []),
+      mealsApi.fetchOrphanEntriesForDate(today).catch(() => []),
+      waterApi.fetchWaterForDate(today).catch(() => []),
+      checkinsApi.fetchCheckins().catch(() => []),
+      foodsApi.fetchFavoriteFoods().catch(() => []),
+    ])
+    const authUser = userData.user
+    const email = authUser?.email ?? ''
+    const metaName = (authUser?.user_metadata as { first_name?: string } | undefined)?.first_name
+    patch({
+      ready: true,
+      user: { firstName: metaName || email.split('@')[0] || 'You', email },
+      goals: goalsFromProfile(profile),
+      meals,
+      orphans,
+      waterEntries: water,
+      checkins,
+      favoriteFoods: favorites,
+    })
+  }, [today, patch])
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-    } catch {
-      // Storage full/unavailable — state simply won't survive a reload.
-    }
-  }, [state])
+    void reload()
+  }, [reload])
 
-  const consumed = useMemo(() => sumMacros(state.meals.map((meal) => meal.macros)), [state.meals])
+  const store: Store = {
+    state,
+    consumed: useMemo(
+      () =>
+        sumMacros([
+          ...state.meals.map(mealMacros),
+          ...state.orphans.map(entryMacros),
+        ]) ?? ZERO_MACROS,
+      [state.meals, state.orphans],
+    ),
+    waterMl: useMemo(() => state.waterEntries.reduce((s, w) => s + w.amount, 0), [state.waterEntries]),
+    reload,
 
-  return <StoreContext.Provider value={{ state, consumed, dispatch }}>{children}</StoreContext.Provider>
+    addWater: (deltaMl) =>
+      guard(async () => {
+        const current = stateRef.current.waterEntries
+        if (deltaMl > 0) {
+          const row = await waterApi.addWaterEntry(today, deltaMl)
+          patch({ waterEntries: [...current, row] })
+        } else if (deltaMl < 0) {
+          const next = await waterApi.removeWater(today, -deltaMl, current)
+          patch({ waterEntries: next })
+        }
+      }),
+
+    addOrphanEntry: (input, logDate = today) =>
+      guard(async () => {
+        const row = await mealsApi.addOrphanEntry(input, logDate)
+        if (logDate === today) patch({ orphans: [...stateRef.current.orphans, row] })
+      }),
+
+    createMeal: (name, inputs, logDate = today) =>
+      guard(async () => {
+        const meal = await mealsApi.createMealWithEntries(name, logDate, inputs)
+        if (logDate === today) patch({ meals: [...stateRef.current.meals, meal] })
+      }),
+
+    addEntryToMeal: (mealId, input) =>
+      guard(async () => {
+        const row = await mealsApi.addEntryToMeal(mealId, today, input)
+        patch({
+          meals: stateRef.current.meals.map((m) =>
+            m.id === mealId ? { ...m, meal_entries: [...m.meal_entries, row] } : m,
+          ),
+        })
+      }),
+
+    updateEntry: (id, entryPatch) =>
+      guard(async () => {
+        await mealsApi.updateEntry(id, entryPatch)
+        const apply = (entry: mealsApi.Entry): mealsApi.Entry =>
+          entry.id === id ? { ...entry, ...entryPatch } : entry
+        patch({
+          meals: stateRef.current.meals.map((m) => ({ ...m, meal_entries: m.meal_entries.map(apply) })),
+          orphans: stateRef.current.orphans.map(apply),
+        })
+      }),
+
+    deleteEntry: (id) =>
+      guard(async () => {
+        await mealsApi.deleteEntry(id)
+        patch({
+          meals: stateRef.current.meals.map((m) => ({
+            ...m,
+            meal_entries: m.meal_entries.filter((e) => e.id !== id),
+          })),
+          orphans: stateRef.current.orphans.filter((e) => e.id !== id),
+        })
+      }),
+
+    deleteMeal: (id) =>
+      guard(async () => {
+        await mealsApi.deleteMeal(id)
+        patch({ meals: stateRef.current.meals.filter((m) => m.id !== id) })
+      }),
+
+    renameMeal: (id, name) =>
+      guard(async () => {
+        await mealsApi.renameMeal(id, name)
+        patch({ meals: stateRef.current.meals.map((m) => (m.id === id ? { ...m, name } : m)) })
+      }),
+
+    createCheckin: (input, photos) =>
+      guard(async () => {
+        let row = await checkinsApi.createCheckin(input)
+        for (const [i, blob] of photos.entries()) {
+          const photo = await checkinsApi.uploadCheckinPhoto(row.id, blob, i)
+          row = { ...row, checkin_photos: [...row.checkin_photos, photo] }
+        }
+        patch({ checkins: [row, ...stateRef.current.checkins].sort((a, b) => b.week_label.localeCompare(a.week_label)) })
+        return row
+      }),
+
+    updateCheckin: (id, input) =>
+      guard(async () => {
+        const row = await checkinsApi.updateCheckin(id, input)
+        patch({ checkins: stateRef.current.checkins.map((c) => (c.id === id ? row : c)) })
+      }),
+
+    deleteCheckin: (checkin) =>
+      guard(async () => {
+        await checkinsApi.deleteCheckin(checkin)
+        patch({ checkins: stateRef.current.checkins.filter((c) => c.id !== checkin.id) })
+      }),
+
+    attachAiSummary: (id, summary) =>
+      guard(async () => {
+        await checkinsApi.setAiSummary(id, summary)
+        patch({
+          checkins: stateRef.current.checkins.map((c) => (c.id === id ? { ...c, ai_summary: summary } : c)),
+        })
+      }),
+
+    updateGoals: (goals) =>
+      guard(async () => {
+        await profileApi.updateGoals(goals)
+        patch({ goals })
+      }),
+
+    setFirstName: (name) =>
+      guard(async () => {
+        await authApi.updateFirstName(name)
+        patch({ user: { ...stateRef.current.user, firstName: name } })
+      }),
+
+    setHevyConnected: (connected) => patch({ hevyConnected: connected }),
+
+    toggleFavoriteFood: (food) =>
+      guard(async () => {
+        const normalized = foodsApi.normalizeFoodName(food.name)
+        const existing = stateRef.current.favoriteFoods.find((f) => f.name_normalized === normalized)
+        if (existing) {
+          await foodsApi.removeFavoriteFood(normalized)
+          patch({ favoriteFoods: stateRef.current.favoriteFoods.filter((f) => f.name_normalized !== normalized) })
+        } else {
+          await foodsApi.addFavoriteFood(food)
+          const favorites = await foodsApi.fetchFavoriteFoods().catch(() => stateRef.current.favoriteFoods)
+          patch({ favoriteFoods: favorites })
+        }
+      }),
+
+    isFavoriteFood: (name) =>
+      state.favoriteFoods.some((f) => f.name_normalized === foodsApi.normalizeFoodName(name)),
+  }
+
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }
 
 export function useStore(): Store {
@@ -198,6 +322,3 @@ export function useStore(): Store {
   if (!ctx) throw new Error('useStore must be used within StoreProvider')
   return ctx
 }
-
-// Calendar day logs stay seed-only (past days are read-only in the prototype).
-export const calendarDays = seedCalendarDays

@@ -5,9 +5,9 @@ import { Stepper } from '../../components/Stepper.tsx'
 import { SectionLabel } from '../../components/SectionLabel.tsx'
 import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
-import { useStore } from '../../store.tsx'
+import { useStore, type Goals } from '../../store.tsx'
 
-type GoalKey = 'calories' | 'protein' | 'fat' | 'carbs' | 'water'
+type GoalKey = keyof Goals
 const FIELDS: { key: GoalKey; label: string; step: number; suffix: string }[] = [
   { key: 'calories', label: 'Calories', step: 50, suffix: 'kcal' },
   { key: 'protein', label: 'Protein', step: 5, suffix: 'g' },
@@ -16,15 +16,16 @@ const FIELDS: { key: GoalKey; label: string; step: number; suffix: string }[] = 
   { key: 'water', label: 'Water', step: 100, suffix: 'mL' },
 ]
 
-// Edit daily targets — saving updates the store, so Today's macro grid and the
-// Settings rows reflect the new goals immediately.
+// Edit daily targets — saving persists to the profile row; Today's macro grid
+// and the Settings rows reflect the new goals immediately.
 export function GoalsEditSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { state, dispatch } = useStore()
+  const store = useStore()
   const toast = useToast()
-  const [vals, setVals] = useState<Record<GoalKey, number>>(state.goals)
+  const [vals, setVals] = useState<Goals>(store.state.goals)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (open) setVals(state.goals)
+    if (open) setVals(store.state.goals)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
@@ -39,14 +40,21 @@ export function GoalsEditSheet({ open, onClose }: { open: boolean; onClose: () =
           variant="primary"
           full
           glow
+          disabled={saving}
           onClick={() => {
             haptic('medium')
-            dispatch({ kind: 'goals/update', goals: { ...vals } })
-            onClose()
-            toast.show('Goals updated')
+            setSaving(true)
+            void store
+              .updateGoals({ ...vals })
+              .then(() => {
+                onClose()
+                toast.show('Goals updated')
+              })
+              .catch(() => {})
+              .finally(() => setSaving(false))
           }}
         >
-          Save goals
+          {saving ? 'Saving…' : 'Save goals'}
         </Button>
       }
     >

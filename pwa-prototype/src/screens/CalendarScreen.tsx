@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { ScreenScroll } from '../components/ScreenScroll.tsx'
 import { PushPage } from '../components/PushPage.tsx'
@@ -8,9 +8,19 @@ import { Button } from '../components/Button.tsx'
 import { Icon } from '../components/Icon.tsx'
 import { SectionLabel } from '../components/SectionLabel.tsx'
 import { haptic, spring } from '../lib/ios.ts'
+import { toIsoDate, todayIso, timeOf } from '../lib/dates.ts'
 import { useNav } from '../nav.ts'
 import { colors } from '../theme/tokens.ts'
-import { calendarDays, goals, meals, type DayLog, type MealEntry } from '../data/mock.ts'
+import { useStore, entryMacros, mealMacros } from '../store.tsx'
+import { sumMacros, ZERO_MACROS } from '../lib/macros.ts'
+import {
+  fetchActiveDates,
+  fetchMealsForDate,
+  fetchOrphanEntriesForDate,
+  type Entry,
+  type Meal,
+} from '../api/meals.ts'
+import { fetchWaterForDate } from '../api/water.ts'
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -18,12 +28,10 @@ const MONTHS_FULL = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
-// The month the mock dataset describes; "today" only lights up here.
-const DATA_YEAR = 2026
-const DATA_MONTH = 5 // June (0-indexed)
-const TODAY_DATE = 30
 
-type Selection = { year: number; month: number; date: number }
+type Selection = { year: number; month: number; date: number; iso: string }
+
+type DayDetail = { meals: Meal[]; orphans: Entry[]; waterMl: number }
 
 // A mini activity ring — adherence (kcal / goal), green once the goal is met.
 function DayRing({
@@ -69,41 +77,39 @@ function DayRing({
 
 function DayCell({
   date,
-  log,
+  logged,
   isToday,
   delay,
   onSelect,
 }: {
   date: number
-  log: DayLog | undefined
+  logged: boolean
   isToday: boolean
   delay: number
   onSelect: () => void
 }) {
-  const reached = !!log && log.kcal >= log.goal
-  const numCls = isToday ? 'text-primary font-semibold' : log ? 'text-ink' : 'text-ink-4'
+  const numCls = isToday ? 'text-primary font-semibold' : logged ? 'text-ink' : 'text-ink-4'
   return (
     <motion.button
       type="button"
       whileTap={{ scale: 0.9 }}
       transition={spring.snappy}
       onClick={onSelect}
-      aria-label={`Day ${date}${reached ? ', goal reached' : log ? ', logged' : ''}`}
+      aria-label={`Day ${date}${logged ? ', logged' : ''}`}
       className={[
         'relative h-12 rounded-full flex flex-col items-center justify-center gap-1.5',
         isToday ? 'ring-1 ring-inset ring-primary/35' : '',
       ].join(' ')}
     >
       <span className={`text-[15px] tnum ${numCls}`}>{date}</span>
-      {/* Light adherence indicator: a single dot instead of a per-day ring */}
       <span className="flex h-1.5 items-center justify-center">
-        {log && (
+        {logged && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ ...spring.gentle, delay }}
             className="size-1.5 rounded-full"
-            style={{ backgroundColor: reached ? colors.success : colors.primary, opacity: reached ? 1 : 0.6 }}
+            style={{ backgroundColor: colors.primary, opacity: 0.7 }}
           />
         )}
       </span>
@@ -111,8 +117,7 @@ function DayCell({
   )
 }
 
-
-function SheetMealRow({ meal, onTap }: { meal: MealEntry; onTap: () => void }) {
+function MealSheetRow({ title, subtitle, time, onTap }: { title: string; subtitle: string; time: string; onTap: () => void }) {
   return (
     <motion.button
       type="button"
@@ -121,55 +126,31 @@ function SheetMealRow({ meal, onTap }: { meal: MealEntry; onTap: () => void }) {
       onClick={onTap}
       className="w-full bg-surface-1 rounded-card px-3.5 py-3 flex items-center gap-2.5 text-left"
     >
-      <span className="tnum w-11 shrink-0 text-[12px] font-semibold text-ink-3">{meal.time}</span>
+      <span className="tnum w-11 shrink-0 text-[12px] font-semibold text-ink-3">{time}</span>
       <div className="w-4 shrink-0 flex justify-center">
         <Icon name="fork" size={13} className="text-ink-2" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[15px] font-semibold text-ink truncate">{meal.type}</div>
-        <div className="text-[12px] text-ink-2 truncate">
-          {meal.items.length} items · {meal.macros.calories} kcal
-        </div>
+        <div className="text-[15px] font-semibold text-ink truncate">{title}</div>
+        <div className="text-[12px] text-ink-2 truncate">{subtitle}</div>
       </div>
       <Icon name="chevron.right" size={14} className="text-ink-4 shrink-0" />
     </motion.button>
   )
 }
 
-function dayMacros(log: DayLog | undefined) {
-  if (!log) {
-    return {
-      protein: { consumed: 0, goal: goals.protein },
-      calories: { consumed: 0, goal: goals.calories },
-      fat: { consumed: 0, goal: goals.fat },
-      carbs: { consumed: 0, goal: goals.carbs },
-    }
-  }
-  const ratio = log.goal > 0 ? log.kcal / log.goal : 0
-  // Subtle deterministic per-macro wobble so the four bars don't read identical.
-  const wob = (seed: number) => 1 + (((log.date * seed) % 9) - 4) / 100
-  const scale = (base: number, seed: number) => Math.max(0, Math.round(base * ratio * wob(seed)))
-  return {
-    protein: { consumed: scale(goals.protein, 7), goal: goals.protein },
-    calories: { consumed: log.kcal, goal: goals.calories },
-    fat: { consumed: scale(goals.fat, 3), goal: goals.fat },
-    carbs: { consumed: scale(goals.carbs, 5), goal: goals.carbs },
-  }
-}
-
-function statusLabel(log: DayLog | undefined): string {
-  if (!log) return 'No meals logged'
-  const ratio = log.kcal / log.goal
-  if (ratio >= 1) return 'Goal reached'
-  if (ratio >= 0.85) return 'On track'
-  return 'Under goal'
-}
-
 export function CalendarScreen() {
   const nav = useNav()
-  const [viewYear, setViewYear] = useState(DATA_YEAR)
-  const [viewMonth, setViewMonth] = useState(DATA_MONTH)
+  const store = useStore()
+  const goals = store.state.goals
+  const now = useMemo(() => new Date(), [])
+  const today = todayIso()
+  const [viewYear, setViewYear] = useState(now.getFullYear())
+  const [viewMonth, setViewMonth] = useState(now.getMonth())
+  const [activeDates, setActiveDates] = useState<Set<string>>(new Set())
   const [selected, setSelected] = useState<Selection | null>(null)
+  const [detail, setDetail] = useState<DayDetail | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
   const prevMonth = () => {
     if (viewMonth === 0) {
@@ -190,20 +171,67 @@ export function CalendarScreen() {
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const leading = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7 // Monday-first offset
-  const dayLogs = Array.from({ length: daysInMonth }, (_, i) => calendarDays[i] as DayLog | undefined)
-  const logged = dayLogs.filter((d): d is DayLog => !!d)
-  const reachedCount = logged.filter((d) => d.kcal >= d.goal).length
-  const avgAdherence = logged.length
-    ? logged.reduce((sum, d) => sum + d.kcal / d.goal, 0) / logged.length
-    : 0
 
-  const detailLog = selected ? (calendarDays[selected.date - 1] as DayLog | undefined) : undefined
-  const detailRatio = detailLog ? detailLog.kcal / detailLog.goal : 0
-  const detailWater = Math.min(goals.water, Math.round(detailRatio * goals.water))
+  // Which days of the visible month have any logged data.
+  useEffect(() => {
+    const monthStart = toIsoDate(new Date(viewYear, viewMonth, 1))
+    const monthEnd = toIsoDate(new Date(viewYear, viewMonth, daysInMonth))
+    let cancelled = false
+    void fetchActiveDates(monthStart, monthEnd)
+      .then((dates) => {
+        if (!cancelled) setActiveDates(new Set(dates))
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [viewYear, viewMonth, daysInMonth])
+
+  // Load the selected day's meals, orphans and water.
+  useEffect(() => {
+    if (!selected) {
+      setDetail(null)
+      return
+    }
+    let cancelled = false
+    setLoadingDetail(true)
+    void Promise.all([
+      fetchMealsForDate(selected.iso).catch(() => []),
+      fetchOrphanEntriesForDate(selected.iso).catch(() => []),
+      fetchWaterForDate(selected.iso).catch(() => []),
+    ])
+      .then(([meals, orphans, water]) => {
+        if (cancelled) return
+        setDetail({ meals, orphans, waterMl: water.reduce((sum, w) => sum + w.amount, 0) })
+        setLoadingDetail(false)
+      })
+      .catch(() => {
+        if (!cancelled) setLoadingDetail(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [selected])
+
+  const loggedCount = Array.from({ length: daysInMonth }, (_, i) =>
+    activeDates.has(toIsoDate(new Date(viewYear, viewMonth, i + 1))),
+  ).filter(Boolean).length
+
+  const consumed = detail
+    ? sumMacros([...detail.meals.map(mealMacros), ...detail.orphans.map(entryMacros)])
+    : ZERO_MACROS
+  const detailRatio = goals.calories > 0 ? consumed.calories / goals.calories : 0
   const detailTitle = selected
     ? `${WEEKDAYS_FULL[new Date(selected.year, selected.month, selected.date).getDay()]} `
       + `${selected.date} ${MONTHS_FULL[selected.month]}`
     : undefined
+
+  const statusLabel = () => {
+    if (!detail || (detail.meals.length === 0 && detail.orphans.length === 0)) return 'No meals logged'
+    if (detailRatio >= 1) return 'Goal reached'
+    if (detailRatio >= 0.85) return 'On track'
+    return 'Under goal'
+  }
 
   return (
     <ScreenScroll title="Calendar">
@@ -230,16 +258,16 @@ export function CalendarScreen() {
         </button>
       </div>
 
-      {/* Month adherence summary */}
+      {/* Month summary */}
       <div className="mt-4 bg-surface-1 rounded-card p-3.5 flex items-center gap-3.5">
-        <DayRing progress={avgAdherence} reached={avgAdherence >= 1} size={48} stroke={4}>
-          <span className="text-[12px] font-bold text-ink tnum">{Math.round(avgAdherence * 100)}%</span>
-        </DayRing>
+        <div className="size-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <Icon name="calendar" size={20} className="text-primary" />
+        </div>
         <div className="min-w-0">
           <div className="text-[15px] font-semibold text-ink">
-            {reachedCount} of {logged.length} days hit goal
+            {loggedCount} {loggedCount === 1 ? 'day' : 'days'} logged
           </div>
-          <div className="text-[12px] text-ink-2">{Math.round(avgAdherence * 100)}% average adherence this month</div>
+          <div className="text-[12px] text-ink-2">Tap a day to see its meals and macros.</div>
         </div>
       </div>
 
@@ -257,19 +285,19 @@ export function CalendarScreen() {
         {Array.from({ length: leading }, (_, i) => (
           <div key={`lead-${i}`} className="h-12" />
         ))}
-        {dayLogs.map((log, i) => {
+        {Array.from({ length: daysInMonth }, (_, i) => {
           const date = i + 1
-          const isToday = viewYear === DATA_YEAR && viewMonth === DATA_MONTH && date === TODAY_DATE
+          const iso = toIsoDate(new Date(viewYear, viewMonth, date))
           return (
             <DayCell
               key={date}
               date={date}
-              log={log}
-              isToday={isToday}
+              logged={activeDates.has(iso)}
+              isToday={iso === today}
               delay={Math.min(date * 0.01, 0.3)}
               onSelect={() => {
                 haptic('light')
-                setSelected({ year: viewYear, month: viewMonth, date })
+                setSelected({ year: viewYear, month: viewMonth, date, iso })
               }}
             />
           )
@@ -286,8 +314,7 @@ export function CalendarScreen() {
             variant="primary"
             full
             glow
-            // The picker opens ON TOP — the day page stays underneath.
-            onClick={() => nav.open({ kind: 'add' })}
+            onClick={() => selected && nav.open({ kind: 'add', logDate: selected.iso })}
           >
             <Icon name="plus" size={16} /> Add for this day
           </Button>
@@ -297,20 +324,25 @@ export function CalendarScreen() {
           <div>
             {/* Day summary */}
             <div className="pt-3 flex items-center gap-3.5">
-              <DayRing progress={detailRatio} reached={!!detailLog && detailLog.kcal >= detailLog.goal} size={56} stroke={5}>
+              <DayRing progress={detailRatio} reached={detailRatio >= 1} size={56} stroke={5}>
                 <span className="text-[13px] font-bold text-ink tnum">{Math.round(detailRatio * 100)}%</span>
               </DayRing>
               <div className="min-w-0">
                 <div className="text-[20px] font-bold text-ink tnum">
-                  {(detailLog?.kcal ?? 0).toLocaleString()}
+                  {consumed.calories.toLocaleString()}
                   <span className="text-[13px] text-ink-3 font-semibold"> / {goals.calories.toLocaleString()} kcal</span>
                 </div>
-                <div className="text-[13px] text-ink-2">{statusLabel(detailLog)}</div>
+                <div className="text-[13px] text-ink-2">{statusLabel()}</div>
               </div>
             </div>
 
             <SectionLabel>Nutrition</SectionLabel>
-            <MacroGrid {...dayMacros(detailLog)} />
+            <MacroGrid
+              protein={{ consumed: consumed.protein, goal: goals.protein }}
+              calories={{ consumed: consumed.calories, goal: goals.calories }}
+              fat={{ consumed: consumed.fat, goal: goals.fat }}
+              carbs={{ consumed: consumed.carbs, goal: goals.carbs }}
+            />
 
             <SectionLabel>Water</SectionLabel>
             <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
@@ -319,28 +351,46 @@ export function CalendarScreen() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[16px] font-bold text-ink tnum">
-                  {(detailWater / 1000).toFixed(1)} L
+                  {((detail?.waterMl ?? 0) / 1000).toFixed(1)} L
                   <span className="text-ink-3 font-semibold"> / {(goals.water / 1000).toFixed(1)} L</span>
                 </div>
                 <div className="pt-2">
-                  <ProgressBar value={detailWater / goals.water} color={colors.water} />
+                  <ProgressBar value={goals.water > 0 ? (detail?.waterMl ?? 0) / goals.water : 0} color={colors.water} />
                 </div>
               </div>
             </div>
 
-            {detailLog && (
+            {loadingDetail && (
+              <div className="py-10 flex justify-center">
+                <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+              </div>
+            )}
+
+            {detail && (detail.meals.length > 0 || detail.orphans.length > 0) && (
               <>
-                <SectionLabel>Meals</SectionLabel>
+                <SectionLabel>Logged</SectionLabel>
                 <div className="flex flex-col gap-1.5">
-                  {meals.map((meal) => (
-                    <SheetMealRow
+                  {detail.meals.map((meal) => (
+                    <MealSheetRow
                       key={meal.id}
-                      meal={meal}
+                      title={meal.name}
+                      subtitle={`${meal.meal_entries.length} items · ${mealMacros(meal).calories} kcal`}
+                      time={timeOf(meal.created_at)}
                       onTap={() => {
                         haptic('light')
-                        // Meal drawer slides over the day page; closing it
-                        // returns here instead of kicking back to the grid.
                         nav.open({ kind: 'mealDetail', meal })
+                      }}
+                    />
+                  ))}
+                  {detail.orphans.map((entry) => (
+                    <MealSheetRow
+                      key={entry.id}
+                      title={entry.name ?? 'Item'}
+                      subtitle={`${entryMacros(entry).calories} kcal`}
+                      time={timeOf(entry.created_at)}
+                      onTap={() => {
+                        haptic('light')
+                        nav.open({ kind: 'entryDetail', entry })
                       }}
                     />
                   ))}

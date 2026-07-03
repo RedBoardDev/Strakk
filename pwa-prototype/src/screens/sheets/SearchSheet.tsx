@@ -1,26 +1,30 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { Sheet } from '../../components/Sheet.tsx'
 import { Segmented } from '../../components/Segmented.tsx'
 import { Icon } from '../../components/Icon.tsx'
+import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
 import { useNav } from '../../nav.ts'
-import { recentFoods, searchResults, type Food } from '../../data/mock.ts'
+import { useStore } from '../../store.tsx'
+import { fetchRecentFoods, searchFoods, type CatalogFood, type RecentFood } from '../../api/foods.ts'
 
 type Tab = 'mine' | 'all'
 
-function perServing(food: Food) {
-  const factor = food.serving.grams / 100
-  return {
-    calories: Math.round(food.per100.calories * factor),
-    protein: Math.round(food.per100.protein * factor),
-    fat: Math.round(food.per100.fat * factor),
-    carbs: Math.round(food.per100.carbs * factor),
-  }
+// A saved/recent food — absolute macros for one logged portion.
+type MineFood = {
+  key: string
+  name: string
+  protein: number
+  calories: number
+  fat: number | null
+  carbs: number | null
+  quantity: string | null
+  favorite: boolean
 }
 
-function FoodRow({ food, onTap }: { food: Food; onTap: () => void }) {
-  const macros = perServing(food)
+function CatalogRow({ food, onTap }: { food: CatalogFood; onTap: () => void }) {
+  const factor = (food.default_portion_grams || 100) / 100
   return (
     <motion.button
       type="button"
@@ -38,18 +42,20 @@ function FoodRow({ food, onTap }: { food: Food; onTap: () => void }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-[15px] font-semibold text-ink truncate">{food.name}</span>
-          {food.verified && <Icon name="check" size={12} className="text-success shrink-0" />}
+          {food.nutriscore && ['a', 'b'].includes(food.nutriscore) && (
+            <Icon name="check" size={12} className="text-success shrink-0" />
+          )}
         </div>
         <div className="text-[12px] text-ink-3 truncate">
           {food.brand ? `${food.brand} · ` : ''}
-          {food.serving.label} · {food.serving.grams} g
+          {food.serving_label ?? 'portion'} · {Math.round(food.default_portion_grams)} g
         </div>
         <div className="mt-1 flex items-center gap-1.5 text-[12px] tnum">
-          <span className="font-semibold text-primary-light">{macros.calories} kcal</span>
+          <span className="font-semibold text-primary-light">{Math.round(food.calories * factor)} kcal</span>
           <span className="text-ink-4">·</span>
-          <span className="text-protein">{macros.protein} P</span>
-          <span className="text-fat">{macros.fat} F</span>
-          <span className="text-carbs">{macros.carbs} C</span>
+          <span className="text-protein">{Math.round(food.protein * factor)} P</span>
+          <span className="text-fat">{Math.round((food.fat ?? 0) * factor)} F</span>
+          <span className="text-carbs">{Math.round((food.carbs ?? 0) * factor)} C</span>
         </div>
       </div>
       <Icon name="chevron.right" size={14} className="text-ink-4 shrink-0" />
@@ -57,38 +63,142 @@ function FoodRow({ food, onTap }: { food: Food; onTap: () => void }) {
   )
 }
 
-function EmptyResults({ query }: { query: string }) {
+function MineRow({ food, onAdd }: { food: MineFood; onAdd: () => void }) {
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ backgroundColor: '#151B38' }}
+      transition={{ duration: 0.15 }}
+      onClick={() => {
+        haptic('light')
+        onAdd()
+      }}
+      className="w-full px-2 py-3 flex items-center gap-3 text-left border-b border-hair last:border-0"
+    >
+      <div className="size-9 rounded-[10px] bg-surface-2 flex items-center justify-center shrink-0">
+        <Icon name={food.favorite ? 'heart' : 'clock'} size={15} className={food.favorite ? 'text-primary' : 'text-ink-2'} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[15px] font-semibold text-ink truncate">{food.name}</div>
+        <div className="mt-0.5 flex items-center gap-1.5 text-[12px] tnum">
+          <span className="font-semibold text-primary-light">{Math.round(food.calories)} kcal</span>
+          {food.quantity && (
+            <>
+              <span className="text-ink-4">·</span>
+              <span className="text-ink-3">{food.quantity}</span>
+            </>
+          )}
+        </div>
+      </div>
+      <Icon name="plus" size={16} className="text-primary shrink-0" />
+    </motion.button>
+  )
+}
+
+function EmptyState({ label, sub }: { label: string; sub: string }) {
   return (
     <div className="flex flex-col items-center gap-2 py-14 text-center">
       <Icon name="search" size={28} className="text-ink-4" />
-      <div className="text-[15px] text-ink-2">No results for &ldquo;{query}&rdquo;</div>
-      <div className="text-[12px] text-ink-4 px-10">Try a different name, or switch tabs.</div>
+      <div className="text-[15px] text-ink-2">{label}</div>
+      <div className="text-[12px] text-ink-4 px-10">{sub}</div>
     </div>
   )
 }
 
-export function SearchSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function SearchSheet({
+  open,
+  onClose,
+  logDate,
+}: {
+  open: boolean
+  onClose: () => void
+  logDate?: string
+}) {
   const nav = useNav()
+  const toast = useToast()
+  const store = useStore()
   const [tab, setTab] = useState<Tab>('mine')
   const [query, setQuery] = useState('')
+  const [results, setResults] = useState<CatalogFood[]>([])
+  const [recents, setRecents] = useState<RecentFood[]>([])
+  const [searching, setSearching] = useState(false)
+  const searchSeq = useRef(0)
 
-  // Fresh state every time the sheet is presented.
+  // Fresh state + load recents every time the sheet is presented.
   useEffect(() => {
     if (open) {
       setTab('mine')
       setQuery('')
+      setResults([])
+      void fetchRecentFoods().then(setRecents)
     }
   }, [open])
 
-  const source = tab === 'mine' ? recentFoods : searchResults
+  // Debounced server search (catalog RPC + Open Food Facts live, merged).
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) {
+      setResults([])
+      setSearching(false)
+      return
+    }
+    setSearching(true)
+    const seq = ++searchSeq.current
+    const timer = setTimeout(() => {
+      void searchFoods(q).then((items) => {
+        if (searchSeq.current !== seq) return // stale response
+        setResults(items)
+        setSearching(false)
+      })
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [query])
+
   const needle = query.trim().toLowerCase()
-  const results = useMemo(() => {
-    if (!needle) return source
-    return source.filter(
-      (food) =>
-        food.name.toLowerCase().includes(needle) || (food.brand?.toLowerCase().includes(needle) ?? false),
-    )
-  }, [source, needle])
+  const mine: MineFood[] = [
+    ...store.state.favoriteFoods.map((f) => ({
+      key: `fav-${f.id}`,
+      name: f.name,
+      protein: f.protein,
+      calories: f.calories,
+      fat: f.fat,
+      carbs: f.carbs,
+      quantity: f.quantity,
+      favorite: true,
+    })),
+    ...recents
+      .filter((r) => !store.state.favoriteFoods.some((f) => f.name_normalized === r.name_normalized))
+      .map((r) => ({
+        key: `rec-${r.name_normalized}`,
+        name: r.name,
+        protein: r.protein,
+        calories: r.calories,
+        fat: r.fat,
+        carbs: r.carbs,
+        quantity: r.quantity,
+        favorite: false,
+      })),
+  ].filter((f) => !needle || f.name.toLowerCase().includes(needle))
+
+  const addMine = async (food: MineFood) => {
+    try {
+      await store.addOrphanEntry(
+        {
+          name: food.name,
+          protein: food.protein,
+          calories: food.calories,
+          fat: food.fat,
+          carbs: food.carbs,
+          quantity: food.quantity,
+          source: 'frequent',
+        },
+        logDate,
+      )
+      toast.show(`Added · ${Math.round(food.calories)} kcal`)
+    } catch {
+      // toasted by the store
+    }
+  }
 
   return (
     <Sheet open={open} onClose={onClose} title="Search a food" detents={['large']}>
@@ -122,7 +232,7 @@ export function SearchSheet({ open, onClose }: { open: boolean; onClose: () => v
           <Segmented<Tab>
             options={[
               { value: 'mine', label: 'My Foods' },
-              { value: 'all', label: 'All foods' },
+              { value: 'all', label: 'Catalog' },
             ]}
             value={tab}
             onChange={setTab}
@@ -130,20 +240,47 @@ export function SearchSheet({ open, onClose }: { open: boolean; onClose: () => v
         </div>
       </div>
 
-      <div className="px-2 pt-2 pb-1 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">
-          {tab === 'mine' ? 'Recent foods' : 'All foods'}
-        </span>
-        <span className="text-[11px] text-ink-4 tnum">{results.length}</span>
-      </div>
-
       <div className="pb-8">
-        {results.length === 0 ? (
-          <EmptyResults query={query.trim()} />
+        {tab === 'mine' ? (
+          mine.length === 0 ? (
+            <EmptyState
+              label={needle ? `No match for “${query.trim()}”` : 'No saved foods yet'}
+              sub="Foods you log or favorite show up here for one-tap re-logging."
+            />
+          ) : (
+            <>
+              <div className="px-2 pt-2 pb-1 flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">Favorites & recents</span>
+                <span className="text-[11px] text-ink-4 tnum">{mine.length}</span>
+              </div>
+              {mine.map((food) => (
+                <MineRow key={food.key} food={food} onAdd={() => void addMine(food)} />
+              ))}
+            </>
+          )
+        ) : searching ? (
+          <div className="py-14 flex justify-center">
+            <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          </div>
+        ) : results.length === 0 ? (
+          <EmptyState
+            label={needle.length >= 2 ? `No results for “${query.trim()}”` : 'Search the catalog'}
+            sub={needle.length >= 2 ? 'Try a different spelling or a simpler name.' : 'CIQUAL + Open Food Facts, live.'}
+          />
         ) : (
-          results.map((food) => (
-            <FoodRow key={food.id} food={food} onTap={() => nav.open({ kind: 'foodDetail', food, from: 'search' })} />
-          ))
+          <>
+            <div className="px-2 pt-2 pb-1 flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">Catalog</span>
+              <span className="text-[11px] text-ink-4 tnum">{results.length}</span>
+            </div>
+            {results.map((food) => (
+              <CatalogRow
+                key={`${food.source}-${food.id}`}
+                food={food}
+                onTap={() => nav.open({ kind: 'foodDetail', food, from: 'search', logDate })}
+              />
+            ))}
+          </>
         )}
       </div>
     </Sheet>

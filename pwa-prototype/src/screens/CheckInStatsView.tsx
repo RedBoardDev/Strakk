@@ -7,16 +7,19 @@ import { Ring } from '../components/Ring.tsx'
 import { Segmented } from '../components/Segmented.tsx'
 import { SectionLabel } from '../components/SectionLabel.tsx'
 import { colors } from '../theme/tokens.ts'
-import { checkInStats, type MacroCompliance } from '../data/mock.ts'
+import type { MacroCompliance } from '../data/mock.ts'
 import { SeriesChart } from './SeriesChart.tsx'
+import { computeStats } from '../lib/checkinView.ts'
+import { useStore } from '../store.tsx'
 
-// Period segments — purely visual for the mock (data does not change).
+// Period segments — how many recent weeks the aggregates cover.
 type Period = '4w' | '12w' | 'all'
 const PERIODS: { value: Period; label: string }[] = [
   { value: '4w', label: '4 wk' },
   { value: '12w', label: '12 wk' },
   { value: 'all', label: 'All' },
 ]
+const PERIOD_WEEKS: Record<Period, number> = { '4w': 4, '12w': 12, all: 520 }
 
 // Amber used for nutrition icon + mid-range compliance (matches spec strakkWarning).
 const WARNING = '#E0A84D'
@@ -138,9 +141,12 @@ function StatInlineItem({ value, label }: { value: string; label: string }) {
 // Stats content rendered INSIDE <PushPage> (PushPage provides nav bar + the
 // scroll region `px-5 pb-32`, so sections here add only vertical rhythm).
 export function CheckInStatsView() {
+  const store = useStore()
   const [period, setPeriod] = useState<Period>('12w')
-  const stats = checkInStats
-  const consistencyPct = Math.round((stats.consistency.weeks / stats.consistency.total) * 100)
+  const stats = computeStats(store.state.checkins, store.state.goals, PERIOD_WEEKS[period])
+  const consistencyPct = stats.consistency.total
+    ? Math.round((stats.consistency.weeks / stats.consistency.total) * 100)
+    : 0
 
   return (
     <>
@@ -152,6 +158,15 @@ export function CheckInStatsView() {
         <Segmented options={PERIODS} value={period} onChange={setPeriod} />
       </div>
 
+      {!stats.hasData && (
+        <div className="py-16 flex flex-col items-center gap-2 text-center">
+          <Icon name="chart.bar" size={28} className="text-ink-4" />
+          <div className="text-[15px] text-ink-2">No trends yet</div>
+          <div className="text-[12px] text-ink-4 px-10">Log a few weekly check-ins to see your progress here.</div>
+        </div>
+      )}
+      {stats.hasData && (
+      <>
       {/* 2×2 overview grid */}
       <div className="pt-4 grid grid-cols-2 gap-3">
         <OverviewCard icon="scale" iconColor={colors.primary} label="Weight">
@@ -225,13 +240,15 @@ export function CheckInStatsView() {
         </div>
         <div className="mt-3">
           <ProgressBar
-            value={stats.consistency.weeks / stats.consistency.total}
+            value={stats.consistency.total ? stats.consistency.weeks / stats.consistency.total : 0}
             color={colors.primary}
             height={8}
             reached={false}
           />
         </div>
       </Card>
+      </>
+      )}
     </>
   )
 }

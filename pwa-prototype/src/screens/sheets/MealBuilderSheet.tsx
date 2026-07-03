@@ -10,17 +10,26 @@ import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
 import { scaleMacros, sumMacros } from '../../lib/macros.ts'
 import { useStore } from '../../store.tsx'
-import type { Food, Macros } from '../../data/mock.ts'
+import type { CatalogFood } from '../../api/foods.ts'
+import type { NewEntryInput } from '../../api/meals.ts'
+import type { Macros } from '../../data/mock.ts'
 
-// A composed meal: several food items with adjustable portions. Mirrors the
-// native multi-item meal draft (start → add items → review → confirm).
-type DraftItem = { id: string; name: string; grams: number; per100: Macros }
+// A composed meal: several foods with adjustable portions, committed to the
+// backend as one meal + its entries.
+type DraftItem = { id: string; name: string; grams: number; per100: Macros; fromRecent: boolean }
 
 let seq = 0
 
-function itemFromFood(food: Food): DraftItem {
+function itemFromFood(food: CatalogFood): DraftItem {
   seq += 1
-  return { id: `${food.id}-${seq}`, name: food.name, grams: food.serving.grams, per100: food.per100 }
+  const isRecent = String(food.id).startsWith('recent-')
+  const grams = Math.round(food.default_portion_grams) || 100
+  const per100: Macros = isRecent
+    ? // Recents are absolute per-portion values — treat the portion as 100g so
+      // the stepper still scales sensibly.
+      { calories: food.calories, protein: food.protein, fat: food.fat ?? 0, carbs: food.carbs ?? 0 }
+    : { calories: food.calories, protein: food.protein, fat: food.fat ?? 0, carbs: food.carbs ?? 0 }
+  return { id: `${food.id}-${seq}`, name: food.name, grams: isRecent ? 100 : grams, per100, fromRecent: isRecent }
 }
 
 function macrosOf(item: DraftItem): Macros {
@@ -35,14 +44,22 @@ function totalMacros(items: DraftItem[]): Macros {
   return sumMacros(items.map(macrosOf))
 }
 
-
-export function MealBuilderSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { dispatch } = useStore()
+export function MealBuilderSheet({
+  open,
+  onClose,
+  logDate,
+}: {
+  open: boolean
+  onClose: () => void
+  logDate?: string
+}) {
+  const store = useStore()
   const toast = useToast()
   const [name, setName] = useState('New meal')
   const [items, setItems] = useState<DraftItem[]>([])
   const [adding, setAdding] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -53,11 +70,37 @@ export function MealBuilderSheet({ open, onClose }: { open: boolean; onClose: ()
     }
   }, [open])
 
-  const total = items.reduce((sum, item) => sum + kcalOf(item), 0)
+  const total = totalMacros(items).calories
 
   const requestClose = () => {
     if (items.length > 0) setConfirmCancel(true)
     else onClose()
+  }
+
+  const save = async () => {
+    haptic('medium')
+    setSaving(true)
+    try {
+      const inputs: NewEntryInput[] = items.map((item) => {
+        const m = macrosOf(item)
+        return {
+          name: item.name,
+          protein: m.protein,
+          calories: m.calories,
+          fat: m.fat,
+          carbs: m.carbs,
+          quantity: `${Math.round(item.grams)}g`,
+          source: 'search',
+        }
+      })
+      await store.createMeal(name.trim() || 'New meal', inputs, logDate)
+      onClose()
+      toast.show(`Meal saved · ${total} kcal`)
+    } catch {
+      // toasted by the store
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -68,27 +111,8 @@ export function MealBuilderSheet({ open, onClose }: { open: boolean; onClose: ()
         title="New meal"
         detents={['large']}
         footer={
-          <Button
-            variant="primary"
-            full
-            glow
-            disabled={items.length === 0}
-            onClick={() => {
-              haptic('medium')
-              dispatch({
-                kind: 'meal/add',
-                meal: {
-                  title: name.trim() || 'New meal',
-                  macros: totalMacros(items),
-                  items: items.map((item) => `${item.name} — ${Math.round(item.grams)}g`),
-                  source: 'search',
-                },
-              })
-              onClose()
-              toast.show(`Meal saved · ${total} kcal`)
-            }}
-          >
-            {items.length > 0 ? `Save meal · ${total} kcal` : 'Add items to save'}
+          <Button variant="primary" full glow disabled={items.length === 0 || saving} onClick={() => void save()}>
+            {saving ? 'Saving…' : items.length > 0 ? `Save meal · ${total} kcal` : 'Add items to save'}
           </Button>
         }
       >

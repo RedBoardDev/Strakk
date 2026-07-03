@@ -49,9 +49,18 @@ function NumRow({
   )
 }
 
-export function ManualEntrySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { dispatch } = useStore()
+export function ManualEntrySheet({
+  open,
+  onClose,
+  logDate,
+}: {
+  open: boolean
+  onClose: () => void
+  logDate?: string
+}) {
+  const store = useStore()
   const toast = useToast()
+  const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
   const [nums, setNums] = useState<Record<NumField['key'], string>>({
@@ -82,29 +91,33 @@ export function ManualEntrySheet({ open, onClose }: { open: boolean; onClose: ()
           variant="primary"
           full
           glow
-          disabled={!valid}
+          disabled={!valid || saving}
           onClick={() => {
             haptic('medium')
-            const macros = {
-              calories: Math.round(parseFloat(nums.calories) || 0),
-              protein: Math.round(parseFloat(nums.protein) || 0),
-              fat: Math.round(parseFloat(nums.fat) || 0),
-              carbs: Math.round(parseFloat(nums.carbs) || 0),
-            }
-            dispatch({
-              kind: 'meal/add',
-              meal: {
-                title: name.trim(),
-                macros,
-                items: [quantity.trim() ? `${name.trim()} — ${quantity.trim()}` : name.trim()],
-                source: 'manual',
-              },
-            })
-            onClose()
-            toast.show(`Added · ${macros.calories} kcal`)
+            setSaving(true)
+            const calories = Math.round(parseFloat(nums.calories) || 0)
+            void store
+              .addOrphanEntry(
+                {
+                  name: name.trim(),
+                  protein: Math.round((parseFloat(nums.protein) || 0) * 10) / 10,
+                  calories,
+                  fat: nums.fat === '' ? null : Math.round((parseFloat(nums.fat) || 0) * 10) / 10,
+                  carbs: nums.carbs === '' ? null : Math.round((parseFloat(nums.carbs) || 0) * 10) / 10,
+                  quantity: quantity.trim() || null,
+                  source: 'manual',
+                },
+                logDate,
+              )
+              .then(() => {
+                onClose()
+                toast.show(`Added · ${calories} kcal`)
+              })
+              .catch(() => {})
+              .finally(() => setSaving(false))
           }}
         >
-          Add to log
+          {saving ? 'Adding…' : 'Add to log'}
         </Button>
       }
     >

@@ -8,30 +8,40 @@ import { Stepper } from '../components/Stepper.tsx'
 import { Button } from '../components/Button.tsx'
 import { useToast } from '../components/Toast.tsx'
 import { haptic, spring } from '../lib/ios.ts'
+import { timeOf } from '../lib/dates.ts'
 import { useNav } from '../nav.ts'
-import { useStore } from '../store.tsx'
-import type { MealEntry } from '../data/mock.ts'
+import { entryMacros, mealMacros, timelineOf, useStore, type TimelineItem } from '../store.tsx'
+import type { EntrySource } from '../api/meals.ts'
+import { HevyExportSheet } from './sheets/HevyExportSheet.tsx'
 
-const SOURCE_ICON: Record<MealEntry['source'], IconName> = {
-  photo: 'camera',
+const SOURCE_ICON: Record<EntrySource, IconName> = {
+  photo_ai: 'camera',
   search: 'search',
   barcode: 'barcode',
   manual: 'pencil',
-  ai: 'sparkles',
+  text_ai: 'sparkles',
+  frequent: 'clock',
 }
 
 function todayLabel(): string {
   return new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
-function MealRow({ meal, onTap }: { meal: MealEntry; onTap: () => void }) {
+function TimelineRow({ item, onTap }: { item: TimelineItem; onTap: () => void }) {
+  const isMeal = item.kind === 'meal'
+  const title = isMeal ? item.meal.name : (item.entry.name ?? 'Entry')
+  const kcal = isMeal ? mealMacros(item.meal).calories : entryMacros(item.entry).calories
+  const subtitle = isMeal
+    ? `${item.meal.meal_entries.length} ${item.meal.meal_entries.length === 1 ? 'item' : 'items'} · ${kcal} kcal`
+    : `${item.entry.quantity ? `${item.entry.quantity} · ` : ''}${kcal} kcal`
+  const icon: IconName = isMeal ? 'fork' : SOURCE_ICON[item.entry.source]
+
   return (
     <motion.button
       type="button"
       layout
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
       whileTap={{ scale: 0.99, backgroundColor: '#151B38' }}
       transition={{ duration: 0.15 }}
       onClick={() => {
@@ -40,69 +50,31 @@ function MealRow({ meal, onTap }: { meal: MealEntry; onTap: () => void }) {
       }}
       className="w-full bg-surface-1 rounded-card px-4 py-3 flex items-center gap-2.5 text-left"
     >
-      <span className="tnum w-11 shrink-0 text-[12px] font-semibold text-ink-3">{meal.time}</span>
+      <span className="tnum w-11 shrink-0 text-[12px] font-semibold text-ink-3">{timeOf(item.createdAt)}</span>
       <div className="w-4 shrink-0 flex justify-center">
-        <Icon name="fork" size={13} className="text-ink-2" />
+        <Icon name={icon} size={13} className="text-ink-2" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[15px] font-semibold text-ink truncate">{meal.type}</div>
-        <div className="text-[12px] text-ink-2 truncate">
-          {meal.items.length} {meal.items.length === 1 ? 'item' : 'items'} · {meal.macros.calories} kcal
-        </div>
+        <div className="text-[15px] font-semibold text-ink truncate">{title}</div>
+        <div className="text-[12px] text-ink-2 truncate">{subtitle}</div>
       </div>
-      <Icon name={SOURCE_ICON[meal.source]} size={13} className="text-ink-3 shrink-0" />
       <Icon name="chevron.right" size={14} className="text-ink-3 shrink-0" />
     </motion.button>
-  )
-}
-
-// Mock of the native Hevy export (PDF program → routine). Pro-gated.
-function HevyExportSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const toast = useToast()
-  return (
-    <Sheet open={open} onClose={onClose} title="Export to Hevy" detents={['small']}>
-      <div className="flex flex-col gap-3 pt-1 pb-4">
-        <div className="bg-surface-1 rounded-card px-4 py-3 flex items-center gap-3">
-          <div className="size-9 rounded-[10px] bg-surface-3 flex items-center justify-center shrink-0">
-            <Icon name="note" size={16} className="text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[15px] font-semibold text-ink truncate">Upper-Lower_Program.pdf</div>
-            <div className="text-[12px] text-ink-3">Session B · 8 exercises matched</div>
-          </div>
-          <Icon name="check" size={16} className="text-success shrink-0" />
-        </div>
-        <Button
-          variant="primary"
-          full
-          glow
-          onClick={() => {
-            haptic('medium')
-            onClose()
-            toast.show('Routine exported to Hevy')
-          }}
-        >
-          Export routine
-        </Button>
-      </div>
-    </Sheet>
   )
 }
 
 export function TodayScreen() {
   const nav = useNav()
   const toast = useToast()
-  const { state, consumed, dispatch } = useStore()
-  const { goals, waterMl, meals } = state
+  const store = useStore()
+  const { state, consumed, waterMl } = store
+  const { goals, ready } = state
 
   const [waterSheet, setWaterSheet] = useState(false)
   const [customMl, setCustomMl] = useState(250)
   const [hevyOpen, setHevyOpen] = useState(false)
 
-  const addWater = (delta: number) => {
-    haptic('light')
-    dispatch({ kind: 'water/add', deltaMl: delta })
-  }
+  const timeline = timelineOf(state)
 
   return (
     <div className="relative h-full">
@@ -142,7 +114,6 @@ export function TodayScreen() {
               <Icon name="drop.fill" size={15} className="text-water" />
             </div>
             <div className="text-[18px] font-bold text-ink tnum">
-              {/* Instant value + a quick pop — a tween here read as laggy ticking. */}
               <motion.span
                 key={waterMl}
                 initial={{ scale: 1.15 }}
@@ -158,7 +129,10 @@ export function TodayScreen() {
             <button
               type="button"
               disabled={waterMl === 0}
-              onClick={() => waterMl > 0 && addWater(-250)}
+              onClick={() => {
+                haptic('light')
+                void store.addWater(-250).catch(() => {})
+              }}
               className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-ink disabled:text-ink-4"
               aria-label="Remove 250 mL"
             >
@@ -166,7 +140,10 @@ export function TodayScreen() {
             </button>
             <button
               type="button"
-              onClick={() => addWater(250)}
+              onClick={() => {
+                haptic('light')
+                void store.addWater(250).catch(() => {})
+              }}
               className="size-10 rounded-[12px] bg-surface-2 flex items-center justify-center text-water"
               aria-label="Add 250 mL"
             >
@@ -189,18 +166,26 @@ export function TodayScreen() {
 
         {/* Timeline */}
         <div className="pt-6 flex flex-col gap-2">
-          {meals.length === 0 ? (
+          {!ready ? (
+            <div className="py-12 flex justify-center">
+              <div className="size-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+            </div>
+          ) : timeline.length === 0 ? (
             <div className="py-12 flex flex-col items-center gap-2 text-center">
               <Icon name="fork" size={26} className="text-ink-4" />
               <div className="text-[15px] text-ink-2">Nothing logged yet</div>
               <div className="text-[12px] text-ink-4">Add your first meal with the buttons below.</div>
             </div>
           ) : (
-            meals
-              .slice()
-              // Reverse-chronological — the most recent meal sits on top.
-              .sort((a, b) => b.time.localeCompare(a.time))
-              .map((m) => <MealRow key={m.id} meal={m} onTap={() => nav.open({ kind: 'mealDetail', meal: m })} />)
+            timeline.map((item) => (
+              <TimelineRow
+                key={item.kind === 'meal' ? item.meal.id : item.entry.id}
+                item={item}
+                onTap={() =>
+                  nav.open(item.kind === 'meal' ? { kind: 'mealDetail', meal: item.meal } : { kind: 'entryDetail', entry: item.entry })
+                }
+              />
+            ))
           )}
         </div>
 
@@ -249,9 +234,11 @@ export function TodayScreen() {
               full
               disabled={waterMl === 0}
               onClick={() => {
-                dispatch({ kind: 'water/add', deltaMl: -customMl })
                 setWaterSheet(false)
-                toast.show(`Removed ${customMl} mL`)
+                void store
+                  .addWater(-customMl)
+                  .then(() => toast.show(`Removed ${customMl} mL`))
+                  .catch(() => {})
               }}
             >
               Remove
@@ -260,9 +247,11 @@ export function TodayScreen() {
               variant="primary"
               full
               onClick={() => {
-                dispatch({ kind: 'water/add', deltaMl: customMl })
                 setWaterSheet(false)
-                toast.show(`Added ${customMl} mL`)
+                void store
+                  .addWater(customMl)
+                  .then(() => toast.show(`Added ${customMl} mL`))
+                  .catch(() => {})
               }}
             >
               Add water

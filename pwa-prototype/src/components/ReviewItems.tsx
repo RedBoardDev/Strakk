@@ -5,7 +5,8 @@ import { FoodPickerPanel } from './FoodPickerPanel.tsx'
 import { MacroInputGrid } from './MacroInputGrid.tsx'
 import { haptic } from '../lib/ios.ts'
 import { sumMacros } from '../lib/macros.ts'
-import type { Food, Macros } from '../data/mock.ts'
+import type { CatalogFood } from '../api/foods.ts'
+import type { Macros } from '../data/mock.ts'
 
 // One reviewable item of an AI-detected meal (quick add / photo meal): the
 // user can fix any macro, adjust the quantity label, remove the item, or add
@@ -22,17 +23,20 @@ export type ReviewItem = {
 
 let reviewSeq = 0
 
-export function reviewItemFromFood(food: Food): ReviewItem {
+export function reviewItemFromFood(food: CatalogFood): ReviewItem {
   reviewSeq += 1
-  const factor = food.serving.grams / 100
+  // Recents carry absolute per-portion macros; catalog rows are per-100g.
+  const isRecent = String(food.id).startsWith('recent-')
+  const grams = Math.round(food.default_portion_grams) || 100
+  const factor = isRecent ? 1 : grams / 100
   return {
     id: `rv-${food.id}-${reviewSeq}`,
     name: food.name,
-    qty: `${food.serving.grams}g`,
-    kcal: Math.round(food.per100.calories * factor),
-    p: Math.round(food.per100.protein * factor),
-    f: Math.round(food.per100.fat * factor),
-    c: Math.round(food.per100.carbs * factor),
+    qty: isRecent ? (food.serving_label ?? '') : `${grams}g`,
+    kcal: Math.round(food.calories * factor),
+    p: Math.round(food.protein * factor),
+    f: Math.round((food.fat ?? 0) * factor),
+    c: Math.round((food.carbs ?? 0) * factor),
   }
 }
 

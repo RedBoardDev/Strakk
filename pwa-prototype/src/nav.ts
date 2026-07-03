@@ -1,20 +1,23 @@
 import { createContext, useContext } from 'react'
-import type { Food, MealEntry } from './data/mock.ts'
+import type { CatalogFood } from './api/foods.ts'
+import type { Entry, Meal } from './api/meals.ts'
 import type { TabKey } from './components/TabBar.tsx'
 
 // Active modal flow presented over the tab content. One at a time — selecting in
 // one sheet replaces it with the next (add → search → food detail), which reads
-// as an iOS push within a modal for the prototype.
+// as an iOS push within a modal. `logDate` (yyyy-MM-dd) scopes logging flows to
+// a specific day (calendar "Add for this day"); omitted = today.
 export type Flow =
-  | { kind: 'add' }
-  | { kind: 'mealBuilder' }
-  | { kind: 'search' }
-  | { kind: 'scan' }
-  | { kind: 'manual' }
-  | { kind: 'quickAdd' }
-  | { kind: 'photoMeal' }
-  | { kind: 'foodDetail'; food: Food; from?: 'search' | 'scan' }
-  | { kind: 'mealDetail'; meal: MealEntry }
+  | { kind: 'add'; logDate?: string }
+  | { kind: 'mealBuilder'; logDate?: string }
+  | { kind: 'search'; logDate?: string }
+  | { kind: 'scan'; logDate?: string }
+  | { kind: 'manual'; logDate?: string }
+  | { kind: 'quickAdd'; logDate?: string }
+  | { kind: 'photoMeal'; logDate?: string }
+  | { kind: 'foodDetail'; food: CatalogFood; from?: 'search' | 'scan'; logDate?: string }
+  | { kind: 'mealDetail'; meal: Meal }
+  | { kind: 'entryDetail'; entry: Entry }
 
 export type Nav = {
   open: (flow: Flow) => void

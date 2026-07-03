@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '../../components/Button.tsx'
 import { haptic, spring } from '../../lib/ios.ts'
+import * as authApi from '../../api/auth.ts'
 
 function AppMark() {
   return (
@@ -47,10 +48,10 @@ function Field({
 }
 
 export function LoginScreen({
-  onSignIn,
+  onSignedIn,
   onCreateAccount,
 }: {
-  onSignIn: () => void
+  onSignedIn: () => void
   onCreateAccount: () => void
 }) {
   const [mode, setMode] = useState<'login' | 'reset'>('login')
@@ -58,6 +59,36 @@ export function LoginScreen({
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [resetSent, setResetSent] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const signIn = async () => {
+    haptic('medium')
+    setBusy(true)
+    setError(null)
+    try {
+      await authApi.signIn(email.trim(), password)
+      onSignedIn()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign-in failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const sendReset = async () => {
+    haptic('medium')
+    setBusy(true)
+    setError(null)
+    try {
+      await authApi.resetPassword(email.trim())
+      setResetSent(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send the reset email')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-bg">
@@ -103,12 +134,14 @@ export function LoginScreen({
                     </button>
                   }
                 />
+                {error && <div className="text-[13px] text-error px-1">{error}</div>}
                 <button
                   type="button"
                   onClick={() => {
                     haptic('light')
                     setMode('reset')
                     setResetSent(false)
+                    setError(null)
                   }}
                   className="self-end text-[13px] font-medium text-primary pt-0.5"
                 >
@@ -119,13 +152,10 @@ export function LoginScreen({
                     variant="primary"
                     full
                     glow
-                    disabled={email.trim() === '' || password === ''}
-                    onClick={() => {
-                      haptic('medium')
-                      onSignIn()
-                    }}
+                    disabled={email.trim() === '' || password === '' || busy}
+                    onClick={() => void signIn()}
                   >
-                    Sign in
+                    {busy ? 'Signing in…' : 'Sign in'}
                   </Button>
                 </div>
               </motion.div>
@@ -148,18 +178,16 @@ export function LoginScreen({
                 ) : (
                   <>
                     <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" />
+                    {error && <div className="text-[13px] text-error px-1">{error}</div>}
                     <div className="pt-3">
                       <Button
                         variant="primary"
                         full
                         glow
-                        disabled={email.trim() === ''}
-                        onClick={() => {
-                          haptic('medium')
-                          setResetSent(true)
-                        }}
+                        disabled={email.trim() === '' || busy}
+                        onClick={() => void sendReset()}
                       >
-                        Send reset link
+                        {busy ? 'Sending…' : 'Send reset link'}
                       </Button>
                     </div>
                   </>
@@ -169,6 +197,7 @@ export function LoginScreen({
                   onClick={() => {
                     haptic('light')
                     setMode('login')
+                    setError(null)
                   }}
                   className="self-center text-[14px] font-medium text-primary pt-2"
                 >

@@ -1,33 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { PushPage } from '../../components/PushPage.tsx'
 import { Button } from '../../components/Button.tsx'
-import { Stepper } from '../../components/Stepper.tsx'
 import { Icon } from '../../components/Icon.tsx'
 import { SectionLabel } from '../../components/SectionLabel.tsx'
+import { Stepper } from '../../components/Stepper.tsx'
 import { useToast } from '../../components/Toast.tsx'
 import { haptic } from '../../lib/ios.ts'
+import { dateRangeLabel, isoWeekLabel, weekDates } from '../../lib/dates.ts'
+import { MEASUREMENT_COLUMNS, measurementsOf, weekTitle, TAG_LABELS } from '../../lib/checkinView.ts'
 import { useStore } from '../../store.tsx'
-import { MEASUREMENT_FIELDS, type CheckIn, type FeelingTag, type Measurements } from '../../data/mock.ts'
+import { computeNutritionSummary, type CheckinInput, type CheckinRow } from '../../api/checkins.ts'
+import { generateCheckinSummary } from '../../api/ai.ts'
+import { compressImage } from '../../api/photos.ts'
+import { MEASUREMENT_FIELDS, type Measurements } from '../../data/mock.ts'
 
-// Representative feeling-tag vocabulary (positive AND negative) the user toggles.
-type FormTag = { id: string; label: string; positive: boolean }
-const FEELING_TAGS: FormTag[] = [
-  { id: 'good_energy', label: 'Good energy', positive: true },
-  { id: 'motivated', label: 'Motivated', positive: true },
-  { id: 'strong_training', label: 'Strong training', positive: true },
-  { id: 'good_sleep', label: 'Slept well', positive: true },
-  { id: 'focused', label: 'Focused', positive: true },
-  { id: 'disciplined', label: 'Disciplined', positive: true },
-  { id: 'tired', label: 'Tired', positive: false },
-  { id: 'stress', label: 'Stress', positive: false },
-  { id: 'sore', label: 'Sore', positive: false },
-  { id: 'hungry', label: 'Hungry', positive: false },
-  { id: 'poor_sleep', label: 'Poor sleep', positive: false },
-]
+const FEELING_TAGS = Object.entries(TAG_LABELS)
+  .slice(0, 11)
+  .map(([id, meta]) => ({ id, ...meta }))
 
-function FeelingChip({ tag, selected, onToggle }: { tag: FormTag; selected: boolean; onToggle: () => void }) {
-  const tone = tag.positive
+function FeelingChip({
+  id,
+  label,
+  positive,
+  selected,
+  onToggle,
+}: {
+  id: string
+  label: string
+  positive: boolean
+  selected: boolean
+  onToggle: () => void
+}) {
+  const tone = positive
     ? selected
       ? 'bg-success/20 text-success ring-1 ring-inset ring-success/40'
       : 'bg-surface-2 text-ink-2'
@@ -36,6 +41,7 @@ function FeelingChip({ tag, selected, onToggle }: { tag: FormTag; selected: bool
       : 'bg-surface-2 text-ink-2'
   return (
     <motion.button
+      key={id}
       type="button"
       whileTap={{ scale: 0.94 }}
       transition={{ duration: 0.12 }}
@@ -45,7 +51,7 @@ function FeelingChip({ tag, selected, onToggle }: { tag: FormTag; selected: bool
       }}
       className={`px-3 h-9 rounded-full text-[13px] font-semibold transition-colors ${tone}`}
     >
-      {tag.label}
+      {label}
     </motion.button>
   )
 }
@@ -88,7 +94,7 @@ function NoteField({
       <div className="text-[12px] font-semibold uppercase tracking-[0.05em] text-ink-3">{label}</div>
       <textarea
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => onChange(event.target.value.slice(0, 1000))}
         placeholder={placeholder}
         rows={3}
         className="mt-2 w-full resize-none bg-transparent text-[16px] leading-snug text-ink
@@ -98,60 +104,7 @@ function NoteField({
   )
 }
 
-// Photo slot — tap to "capture" (mock fills the tile), tap again to remove.
-function PhotoTile({ filled, onToggle }: { filled: boolean; onToggle: () => void }) {
-  return (
-    <motion.button
-      type="button"
-      whileTap={{ scale: 0.94 }}
-      transition={{ duration: 0.12 }}
-      onClick={() => {
-        haptic('light')
-        onToggle()
-      }}
-      className={`size-20 shrink-0 rounded-card flex flex-col items-center justify-center gap-1 ring-1 ring-inset ${
-        filled ? 'bg-primary/15 ring-primary/40' : 'bg-surface-2 ring-hair'
-      }`}
-      aria-label={filled ? 'Remove progress photo' : 'Add progress photo'}
-    >
-      <Icon name={filled ? 'photo' : 'camera'} size={20} className={filled ? 'text-primary' : 'text-ink-3'} />
-      <span className={`text-[11px] font-medium ${filled ? 'text-primary' : 'text-ink-4'}`}>
-        {filled ? 'Added' : 'Add'}
-      </span>
-    </motion.button>
-  )
-}
-
-// ---- save helpers ----------------------------------------------------------
-
-let checkInSeq = 100
-
-function computeDeltas(next: Measurements, prev: Measurements | undefined): Partial<Measurements> {
-  if (!prev) return {}
-  const deltas: Partial<Measurements> = {}
-  for (const field of MEASUREMENT_FIELDS) {
-    const diff = Math.round((next[field.key] - prev[field.key]) * 10) / 10
-    if (diff !== 0) deltas[field.key] = diff
-  }
-  return deltas
-}
-
-function feelingFromTags(tags: FeelingTag[]): CheckIn['feeling'] {
-  const positive = tags.filter((tag) => tag.positive).length
-  const negative = tags.length - positive
-  if (negative > positive) return 'Tired'
-  if (positive >= 4) return 'Strong'
-  return 'On track'
-}
-
-function nextWeekMeta(latest: CheckIn | undefined): { label: string; range: string } {
-  const num = latest ? parseInt(latest.weekLabel.replace(/\D/g, ''), 10) + 1 : 1
-  const end = new Date()
-  const start = new Date()
-  start.setDate(end.getDate() - 6)
-  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  return { label: `Week ${num}`, range: `${fmt(start)} – ${fmt(end)}` }
-}
+type PhotoSlot = { file: Blob; preview: string } | null
 
 export function CheckInFormSheet({
   open,
@@ -160,36 +113,36 @@ export function CheckInFormSheet({
 }: {
   open: boolean
   onClose: () => void
-  editing?: CheckIn | null
+  editing?: CheckinRow | null
 }) {
-  const { state, dispatch, consumed } = useStore()
+  const store = useStore()
   const toast = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const pendingSlot = useRef(0)
 
-  const latest = state.checkIns[0] as CheckIn | undefined
-  const [meas, setMeas] = useState<Measurements>(
-    editing?.measurements ?? latest?.measurements ?? ({} as Measurements),
-  )
+  const latest = store.state.checkins[0] as CheckinRow | undefined
+  const [meas, setMeas] = useState<Measurements>({} as Measurements)
   const [tags, setTags] = useState<Set<string>>(new Set())
   const [mental, setMental] = useState('')
   const [physical, setPhysical] = useState('')
-  const [photos, setPhotos] = useState<boolean[]>([false, false, false])
+  const [photos, setPhotos] = useState<PhotoSlot[]>([null, null, null])
+  const [saving, setSaving] = useState(false)
 
   // Fresh state each presentation (prefilled when editing).
   useEffect(() => {
     if (!open) return
     if (editing) {
-      setMeas(editing.measurements)
-      setTags(new Set(editing.feelingTags.map((tag) => tag.id)))
-      setMental(editing.mentalFeeling)
-      setPhysical(editing.physicalFeeling)
-      setPhotos([0, 1, 2].map((i) => i < editing.photoCount))
+      setMeas(measurementsOf(editing))
+      setTags(new Set(editing.feeling_tags ?? []))
+      setMental(editing.mental_feeling ?? '')
+      setPhysical(editing.physical_feeling ?? '')
     } else {
-      setMeas(latest?.measurements ?? ({} as Measurements))
+      setMeas(latest ? measurementsOf(latest) : ({ weight: 75, shoulders: 0, chest: 0, armLeft: 0, armRight: 0, waist: 0, hips: 0, thighLeft: 0, thighRight: 0 } as Measurements))
       setTags(new Set())
       setMental('')
       setPhysical('')
-      setPhotos([false, false, false])
     }
+    setPhotos([null, null, null])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing])
 
@@ -204,63 +157,100 @@ export function CheckInFormSheet({
       return copy
     })
 
-  const selectedTags: FeelingTag[] = FEELING_TAGS.filter((tag) => tags.has(tag.id))
-  const photoCount = photos.filter(Boolean).length
+  const now = new Date()
   const meta = editing
-    ? { label: editing.weekLabel, range: editing.dateRange }
-    : nextWeekMeta(latest)
+    ? { label: weekTitle(editing.week_label), range: dateRangeLabel(editing.covered_dates) }
+    : { label: weekTitle(isoWeekLabel(now)), range: dateRangeLabel(weekDates(now)) }
 
-  const save = () => {
-    haptic('success')
-    if (editing) {
-      // Deltas recompute against the check-in just before the edited one.
-      const index = state.checkIns.findIndex((c) => c.id === editing.id)
-      const previous = state.checkIns[index + 1]
-      dispatch({
-        kind: 'checkin/update',
-        id: editing.id,
-        patch: {
-          measurements: meas,
-          deltas: computeDeltas(meas, previous?.measurements),
-          feelingTags: selectedTags,
-          mentalFeeling: mental,
-          physicalFeeling: physical,
-          feeling: feelingFromTags(selectedTags),
-          photoCount,
-        },
-      })
-      toast.show('Check-in updated')
-    } else {
-      checkInSeq += 1
-      const checkIn: CheckIn = {
-        id: `c${checkInSeq}`,
-        weekLabel: meta.label,
-        dateRange: meta.range,
-        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        feeling: feelingFromTags(selectedTags),
-        adherence: latest?.adherence ?? 0.85,
-        measurements: meas,
-        deltas: computeDeltas(meas, latest?.measurements),
-        feelingTags: selectedTags,
-        mentalFeeling: mental,
-        physicalFeeling: physical,
-        // This week's nutrition summary comes from today's live totals (mock).
-        nutrition: {
-          avgCalories: consumed.calories,
-          avgProtein: consumed.protein,
-          avgFat: consumed.fat,
-          avgCarbs: consumed.carbs,
-          avgWater: state.waterMl,
-          days: 7,
-          aiSummary: 'Week logged. AI summary will be generated once the API is connected.',
-        },
-        training: latest?.training ?? { sessions: 0, durationMin: 0, volumeKg: 0, avgRpe: 0 },
-        photoCount,
-      }
-      dispatch({ kind: 'checkin/add', checkIn })
-      toast.show(`${meta.label} saved`)
+  const pickPhoto = (slot: number) => {
+    pendingSlot.current = slot
+    fileRef.current?.click()
+  }
+
+  const onFile = async (file: File) => {
+    const blob = await compressImage(file, 1600, 0.85)
+    const preview = URL.createObjectURL(blob)
+    setPhotos((prev) => prev.map((p, i) => (i === pendingSlot.current ? { file: blob, preview } : p)))
+  }
+
+  // Measurements → DB columns; zero means "not measured" (NULL).
+  const measurementColumns = (): CheckinInput['measurements'] => {
+    const out: Record<string, number> = {}
+    for (const [key, column] of Object.entries(MEASUREMENT_COLUMNS)) {
+      const value = meas[key as keyof Measurements]
+      if (value > 0) out[column as string] = value
     }
-    onClose()
+    return out as CheckinInput['measurements']
+  }
+
+  const save = async () => {
+    haptic('success')
+    setSaving(true)
+    try {
+      const base = {
+        measurements: measurementColumns(),
+        feeling_tags: [...tags],
+        mental_feeling: mental.trim() || null,
+        physical_feeling: physical.trim() || null,
+      }
+      if (editing) {
+        await store.updateCheckin(editing.id, base)
+        toast.show('Check-in updated')
+        onClose()
+      } else {
+        const coveredDates = weekDates(now)
+        const nutrition = await computeNutritionSummary(coveredDates).catch(() => null)
+        const row = await store.createCheckin(
+          {
+            week_label: isoWeekLabel(now),
+            covered_dates: coveredDates,
+            ...base,
+            ...(nutrition
+              ? {
+                  nutrition: {
+                    avg_protein: nutrition.avg_protein,
+                    avg_calories: nutrition.avg_calories,
+                    avg_fat: nutrition.avg_fat,
+                    avg_carbs: nutrition.avg_carbs,
+                    avg_water: nutrition.avg_water,
+                    nutrition_days: nutrition.nutrition_days,
+                  },
+                }
+              : {}),
+          },
+          photos.filter((p): p is NonNullable<PhotoSlot> => p !== null).map((p) => p.file),
+        )
+        toast.show(`${meta.label} saved`)
+        onClose()
+        // AI summary in the background — appears on the check-in once ready.
+        if (nutrition) {
+          void generateCheckinSummary({
+            avg_protein: nutrition.avg_protein,
+            avg_calories: nutrition.avg_calories,
+            avg_fat: nutrition.avg_fat,
+            avg_carbs: nutrition.avg_carbs,
+            avg_water: nutrition.avg_water,
+            nutrition_days: nutrition.nutrition_days,
+            weight_kg: meas.weight > 0 ? meas.weight : undefined,
+            feeling_tags: [...tags],
+            mental_feeling: mental.trim() || undefined,
+            physical_feeling: physical.trim() || undefined,
+            goals: {
+              protein_goal: store.state.goals.protein,
+              calorie_goal: store.state.goals.calories,
+              water_goal: store.state.goals.water,
+            },
+          })
+            .then((summary) => store.attachAiSummary(row.id, summary))
+            .then(() => toast.show('AI summary ready'))
+            .catch(() => {})
+        }
+      }
+    } catch {
+      // toasted by the store
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -269,11 +259,24 @@ export function CheckInFormSheet({
       onClose={onClose}
       title={editing ? 'Edit check-in' : 'New check-in'}
       footer={
-        <Button variant="primary" full glow onClick={save}>
-          <Icon name="check" size={16} /> {editing ? 'Save changes' : 'Save check-in'}
+        <Button variant="primary" full glow disabled={saving} onClick={() => void save()}>
+          <Icon name="check" size={16} /> {saving ? 'Saving…' : editing ? 'Save changes' : 'Save check-in'}
         </Button>
       }
     >
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) void onFile(file)
+          e.target.value = ''
+        }}
+      />
+
       <SectionLabel>This week</SectionLabel>
       <div className="bg-surface-1 rounded-card px-4 py-3.5 flex items-center gap-3">
         <div className="size-9 rounded-[10px] bg-primary/15 flex items-center justify-center shrink-0">
@@ -299,21 +302,55 @@ export function CheckInFormSheet({
         ))}
       </div>
 
-      <SectionLabel>Progress photos</SectionLabel>
-      <div className="flex gap-2.5">
-        {photos.map((filled, i) => (
-          <PhotoTile
-            key={i}
-            filled={filled}
-            onToggle={() => setPhotos((prev) => prev.map((p, j) => (j === i ? !p : p)))}
-          />
-        ))}
-      </div>
+      {!editing && (
+        <>
+          <SectionLabel>Progress photos</SectionLabel>
+          <div className="flex gap-2.5">
+            {photos.map((photo, i) => (
+              <motion.button
+                key={i}
+                type="button"
+                whileTap={{ scale: 0.94 }}
+                transition={{ duration: 0.12 }}
+                onClick={() => {
+                  haptic('light')
+                  if (photo) {
+                    URL.revokeObjectURL(photo.preview)
+                    setPhotos((prev) => prev.map((p, j) => (j === i ? null : p)))
+                  } else {
+                    pickPhoto(i)
+                  }
+                }}
+                className={`relative size-20 shrink-0 rounded-card overflow-hidden flex flex-col items-center justify-center gap-1 ring-1 ring-inset ${
+                  photo ? 'ring-primary/40' : 'bg-surface-2 ring-hair'
+                }`}
+                aria-label={photo ? 'Remove progress photo' : 'Add progress photo'}
+              >
+                {photo ? (
+                  <img src={photo.preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <>
+                    <Icon name="camera" size={20} className="text-ink-3" />
+                    <span className="text-[11px] font-medium text-ink-4">Add</span>
+                  </>
+                )}
+              </motion.button>
+            ))}
+          </div>
+        </>
+      )}
 
       <SectionLabel>How did you feel?</SectionLabel>
       <div className="flex flex-wrap gap-2">
         {FEELING_TAGS.map((tag) => (
-          <FeelingChip key={tag.id} tag={tag} selected={tags.has(tag.id)} onToggle={() => toggleTag(tag.id)} />
+          <FeelingChip
+            key={tag.id}
+            id={tag.id}
+            label={tag.label}
+            positive={tag.positive}
+            selected={tags.has(tag.id)}
+            onToggle={() => toggleTag(tag.id)}
+          />
         ))}
       </div>
 

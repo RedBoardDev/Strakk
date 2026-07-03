@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Sheet } from '../../components/Sheet.tsx'
 import { Button } from '../../components/Button.tsx'
@@ -7,124 +7,173 @@ import { ReviewItems, reviewTotals, type ReviewItem } from '../../components/Rev
 import { useToast } from '../../components/Toast.tsx'
 import { haptic, spring } from '../../lib/ios.ts'
 import { useStore } from '../../store.tsx'
+import { scanMeal } from '../../api/ai.ts'
+import { compressImage, uploadMealPhoto } from '../../api/photos.ts'
+import type { NewEntryInput } from '../../api/meals.ts'
 
-type Stage = 'camera' | 'analyzing' | 'done'
+type Stage = 'pick' | 'scanning' | 'review'
 
-const PLATE: ReviewItem[] = [
-  { id: 'ph1', name: 'Grilled chicken', qty: '160g', kcal: 280, p: 50, f: 8, c: 0 },
-  { id: 'ph2', name: 'Basmati rice', qty: '180g', kcal: 240, p: 5, f: 1, c: 52 },
-  { id: 'ph3', name: 'Steamed broccoli', qty: '150g', kcal: 55, p: 4, f: 1, c: 7 },
-]
+let seq = 0
 
-// AI photo-meal add (mock): snap a plate → AI detects the items. A live-camera
-// look (plate framing, NOT a barcode reticle), so it's clearly distinct.
-export function PhotoMealSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { dispatch } = useStore()
+// Meal name from item names, capped like the backend's 60-char limit.
+function mealNameFrom(items: ReviewItem[]): string {
+  const joined = items.map((i) => i.name).join(', ')
+  return joined.length > 57 ? `${joined.slice(0, 57)}…` : joined || 'Photo meal'
+}
+
+export function PhotoMealSheet({
+  open,
+  onClose,
+  logDate,
+}: {
+  open: boolean
+  onClose: () => void
+  logDate?: string
+}) {
+  const store = useStore()
   const toast = useToast()
-  const [stage, setStage] = useState<Stage>('camera')
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [stage, setStage] = useState<Stage>('pick')
+  const [preview, setPreview] = useState<string | null>(null)
+  const [photoPath, setPhotoPath] = useState<string | null>(null)
   const [items, setItems] = useState<ReviewItem[]>([])
-
-  const totals = reviewTotals(items)
-
-  const addAll = () => {
-    haptic('medium')
-    dispatch({
-      kind: 'meal/add',
-      meal: {
-        title: items.map((item) => item.name).join(', '),
-        macros: totals,
-        items: items.map((item) => (item.qty ? `${item.name} — ${item.qty}` : item.name)),
-        source: 'photo',
-      },
-    })
-    onClose()
-    toast.show(`Added · ${totals.calories} kcal`)
-  }
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (open) {
-      setStage('camera')
+      setStage('pick')
       setItems([])
+      setPhotoPath(null)
+      setPreview((old) => {
+        if (old) URL.revokeObjectURL(old)
+        return null
+      })
     }
   }, [open])
 
-  useEffect(() => {
-    if (stage !== 'analyzing') return
-    const timer = setTimeout(() => {
-      setStage('done')
-      setItems(PLATE.map((item) => ({ ...item })))
+  const scan = async (file: File) => {
+    setStage('scanning')
+    setPreview(URL.createObjectURL(file))
+    try {
+      const blob = await compressImage(file)
+      const path = await uploadMealPhoto(blob)
+      setPhotoPath(path)
+      const result = await scanMeal([path])
+      setItems(
+        result.items.map((item) => ({
+          id: `pm-${++seq}`,
+          name: item.prediction.name,
+          qty: `${Math.round(item.macros.grams)}g`,
+          kcal: Math.round(item.macros.kcal),
+          p: Math.round(item.macros.protein),
+          f: Math.round(item.macros.fat),
+          c: Math.round(item.macros.carbs),
+        })),
+      )
+      setStage('review')
       haptic('success')
-    }, 1700)
-    return () => clearTimeout(timer)
-  }, [stage])
+    } catch (err) {
+      toast.show(err instanceof Error ? err.message : 'Scan failed')
+      setStage('pick')
+    }
+  }
+
+  const totals = reviewTotals(items)
+
+  const addAll = async () => {
+    haptic('medium')
+    setSaving(true)
+    try {
+      const inputs: NewEntryInput[] = items.map((item, index) => ({
+        name: item.name,
+        protein: item.p,
+        calories: item.kcal,
+        fat: item.f,
+        carbs: item.c,
+        quantity: item.qty || null,
+        source: 'photo_ai',
+        photo_path: index === 0 ? photoPath : null, // photo attached to the first entry
+      }))
+      await store.createMeal(mealNameFrom(items), inputs, logDate)
+      onClose()
+      toast.show(`Added · ${totals.calories} kcal`)
+    } catch {
+      // toasted by the store
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const footer =
-    stage === 'done' ? (
-      <Button variant="primary" full glow disabled={items.length === 0} onClick={addAll}>
-        {items.length > 0
-          ? `Add ${items.length} ${items.length === 1 ? 'item' : 'items'} · ${totals.calories} kcal`
-          : 'Nothing to add'}
+    stage === 'review' ? (
+      <Button variant="primary" full glow disabled={items.length === 0 || saving} onClick={() => void addAll()}>
+        {saving
+          ? 'Adding…'
+          : items.length > 0
+            ? `Add ${items.length} ${items.length === 1 ? 'item' : 'items'} · ${totals.calories} kcal`
+            : 'Nothing to add'}
       </Button>
     ) : (
-      <Button
-        variant="primary"
-        full
-        glow
-        disabled={stage === 'analyzing'}
-        onClick={() => {
-          haptic('medium')
-          setStage('analyzing')
-        }}
-      >
-        <Icon name="camera" size={16} /> {stage === 'analyzing' ? 'Analyzing…' : 'Take photo'}
+      <Button variant="primary" full glow disabled={stage === 'scanning'} onClick={() => fileRef.current?.click()}>
+        <Icon name="camera" size={16} /> {stage === 'scanning' ? 'Analyzing…' : 'Take photo'}
       </Button>
     )
 
   return (
     <Sheet open={open} onClose={onClose} title="Photo meal" detents={['large']} footer={footer}>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) void scan(file)
+          e.target.value = ''
+        }}
+      />
+
       <div className="pt-2">
-        {/* Faux live-camera viewport with a plate framing */}
+        {/* Photo preview / placeholder */}
         <div className="relative h-[300px] rounded-hero overflow-hidden bg-black">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#11182B] via-[#06090F] to-[#11182B]" />
-          <div
-            className="absolute inset-0 opacity-60"
-            style={{ background: 'radial-gradient(120% 90% at 50% 45%, rgba(255,122,61,0.12), transparent 60%)' }}
-          />
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
-            <span className={`size-1.5 rounded-full ${stage === 'done' ? 'bg-success' : 'bg-error animate-pulse'}`} />
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/80">
-              {stage === 'done' ? 'Captured' : 'Live'}
-            </span>
-          </div>
+          {preview ? (
+            <img src={preview} alt="Your plate" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-b from-[#11182B] via-[#06090F] to-[#11182B]" />
+              <div
+                className="absolute inset-0 opacity-60"
+                style={{ background: 'radial-gradient(120% 90% at 50% 45%, rgba(255,122,61,0.12), transparent 60%)' }}
+              />
+            </>
+          )}
 
-          {/* Plate framing circle */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              className="size-48 rounded-full border-2 border-dashed border-white/25 flex items-center justify-center"
-              animate={stage === 'analyzing' ? { scale: [1, 0.96, 1] } : { scale: 1 }}
-              transition={{ duration: 1.2, repeat: stage === 'analyzing' ? Infinity : 0 }}
-            >
-              {stage === 'done' ? (
-                <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={spring.snappy}>
-                  <div className="size-14 rounded-full bg-success/20 flex items-center justify-center">
-                    <Icon name="check" size={28} className="text-success" />
-                  </div>
-                </motion.div>
-              ) : (
+            {stage === 'scanning' ? (
+              <div className="flex flex-col items-center gap-3 rounded-2xl bg-black/50 backdrop-blur-sm px-6 py-5">
+                <div className="size-6 rounded-full border-2 border-primary/40 border-t-primary animate-spin" />
+                <span className="text-[13px] text-white/85 flex items-center gap-1.5">
+                  <Icon name="sparkles" size={13} className="text-primary" /> Analyzing your plate…
+                </span>
+              </div>
+            ) : stage === 'pick' ? (
+              <div className="size-48 rounded-full border-2 border-dashed border-white/25 flex items-center justify-center">
                 <Icon name="fork" size={40} className="text-white/15" />
-              )}
-            </motion.div>
+              </div>
+            ) : null}
           </div>
 
-          {stage === 'analyzing' && (
-            <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-1.5 text-[12px] text-white/80">
-              <Icon name="sparkles" size={13} className="text-primary" /> Analyzing your plate…
+          {stage === 'review' && (
+            <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-1 backdrop-blur-sm">
+              <span className="size-1.5 rounded-full bg-success" />
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-white/85">Analyzed</span>
             </div>
           )}
         </div>
 
         <AnimatePresence>
-          {stage === 'done' && (
+          {stage === 'review' && (
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}

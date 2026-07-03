@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '../../components/Button.tsx'
@@ -8,12 +8,33 @@ import { ProgressBar } from '../../components/ProgressBar.tsx'
 import { Icon, type IconName } from '../../components/Icon.tsx'
 import { haptic, spring } from '../../lib/ios.ts'
 import { colors } from '../../theme/tokens.ts'
+import * as authApi from '../../api/auth.ts'
+import { updateProfile } from '../../api/profile.ts'
+import { calculateGoals } from '../../api/ai.ts'
 
 // ---- shared bits --------------------------------------------------------
 type Sex = 'male' | 'female' | 'na'
 type Goal = 'lose' | 'build' | 'maintain' | 'track'
 type Intensity = 'light' | 'moderate' | 'intense'
 type Activity = 'sedentary' | 'moderate' | 'active'
+
+// UI value → DB enum value (matches the KMP client + Supabase schema).
+const SEX_DB: Record<Sex, 'male' | 'female' | 'unspecified'> = {
+  male: 'male',
+  female: 'female',
+  na: 'unspecified',
+}
+const GOAL_DB: Record<Goal, 'lose_fat' | 'gain_muscle' | 'maintain' | 'just_track'> = {
+  lose: 'lose_fat',
+  build: 'gain_muscle',
+  maintain: 'maintain',
+  track: 'just_track',
+}
+const ACTIVITY_DB: Record<Activity, 'sedentary' | 'moderately_active' | 'very_active'> = {
+  sedentary: 'sedentary',
+  moderate: 'moderately_active',
+  active: 'very_active',
+}
 
 type Data = {
   weight: number
@@ -137,7 +158,15 @@ function Step({
 export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () => void; onBackToLogin: () => void }) {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<Data>(INITIAL)
+  const [hasSession, setHasSession] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const set = <K extends keyof Data>(key: K, value: Data[K]) => setData((prev) => ({ ...prev, [key]: value }))
+
+  // A resuming user already has an account — skip the sign-up step's network call.
+  useEffect(() => {
+    void authApi.getSession().then((session) => setHasSession(Boolean(session)))
+  }, [])
 
   const next = () => {
     haptic('light')
@@ -147,6 +176,74 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
     haptic('light')
     if (step === 0) onBackToLogin()
     else setStep((current) => current - 1)
+  }
+
+  // Sign up (unless resuming), then ask the backend to calculate AI goals so
+  // step 7 opens pre-filled. Goal calc failure is non-fatal — defaults stay.
+  const submitAccount = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      if (!hasSession) {
+        await authApi.signUp(data.email.trim(), data.password)
+        setHasSession(true)
+      }
+      try {
+        const calc = await calculateGoals({
+          weight_kg: data.weight,
+          height_cm: data.height,
+          biological_sex: data.sex ? SEX_DB[data.sex] : null,
+          fitness_goal: data.goal ? GOAL_DB[data.goal] : null,
+          training_frequency_per_week: data.sessions,
+          training_types: data.trainingTypes,
+          training_intensity: data.intensity,
+          daily_activity_level: data.activity ? ACTIVITY_DB[data.activity] : null,
+        })
+        set('goals', {
+          calories: calc.calories_kcal,
+          protein: calc.protein_g,
+          fat: calc.fat_g,
+          carbs: calc.carbs_g,
+          water: calc.water_ml,
+        })
+      } catch {
+        // keep default goals — user can still tweak them on the next step
+      }
+      haptic('light')
+      setStep(7)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not create your account')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Persist the full profile + chosen goals, then enter the app.
+  const finish = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      await updateProfile({
+        weight_kg: data.weight,
+        height_cm: data.height,
+        biological_sex: data.sex ? SEX_DB[data.sex] : null,
+        fitness_goal: data.goal ? GOAL_DB[data.goal] : null,
+        training_frequency: data.sessions,
+        training_types: data.trainingTypes,
+        training_intensity: data.intensity,
+        daily_activity_level: data.activity ? ACTIVITY_DB[data.activity] : null,
+        calorie_goal: data.goals.calories,
+        protein_goal: data.goals.protein,
+        fat_goal: data.goals.fat,
+        carb_goal: data.goals.carbs,
+        water_goal: data.goals.water,
+        onboarding_completed: true,
+      })
+      onComplete()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save your profile')
+      setBusy(false)
+    }
   }
 
   const toggleTraining = (type: string) =>
@@ -274,30 +371,33 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
       case 6:
         return (
           <Step
-            title="Create your account"
-            subtitle="So your data syncs across devices."
-            cta="Create account"
-            ctaDisabled={data.email.trim() === '' || data.password.length < 6}
-            onNext={next}
+            title={hasSession ? 'Almost there' : 'Create your account'}
+            subtitle={hasSession ? 'We’ll calculate your targets next.' : 'So your data syncs across devices.'}
+            cta={busy ? 'Setting up…' : hasSession ? 'Continue' : 'Create account'}
+            ctaDisabled={busy || (!hasSession && (data.email.trim() === '' || data.password.length < 6))}
+            onNext={() => void submitAccount()}
           >
-            <div className="flex flex-col gap-3">
-              <input
-                type="email"
-                value={data.email}
-                onChange={(event) => set('email', event.target.value)}
-                placeholder="you@example.com"
-                autoCapitalize="none"
-                autoCorrect="off"
-                className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
-              />
-              <input
-                type="password"
-                value={data.password}
-                onChange={(event) => set('password', event.target.value)}
-                placeholder="Password (min. 6 characters)"
-                className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
-              />
-            </div>
+            {!hasSession && (
+              <div className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  value={data.email}
+                  onChange={(event) => set('email', event.target.value)}
+                  placeholder="you@example.com"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
+                />
+                <input
+                  type="password"
+                  value={data.password}
+                  onChange={(event) => set('password', event.target.value)}
+                  placeholder="Password (min. 6 characters)"
+                  className="bg-surface-1 rounded-card px-4 h-[54px] text-[16px] text-ink placeholder:text-ink-4 outline-none"
+                />
+              </div>
+            )}
+            {error && <div className="mt-3 text-[13px] text-error">{error}</div>}
           </Step>
         )
       case 7:
@@ -332,7 +432,14 @@ export function OnboardingFlow({ onComplete, onBackToLogin }: { onComplete: () =
       case 8:
       default:
         return (
-          <Step title="Here’s your day" subtitle="This is what a fresh day looks like against your targets." cta="Start tracking" onNext={onComplete}>
+          <Step
+            title="Here’s your day"
+            subtitle="This is what a fresh day looks like against your targets."
+            cta={busy ? 'Saving…' : 'Start tracking'}
+            ctaDisabled={busy}
+            onNext={() => void finish()}
+          >
+            {error && <div className="mb-3 text-[13px] text-error">{error}</div>}
             <MacroGrid
               protein={{ consumed: 0, goal: data.goals.protein }}
               calories={{ consumed: 0, goal: data.goals.calories }}
