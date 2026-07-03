@@ -20,7 +20,7 @@ const MACRO_ROWS: { key: keyof Macros; label: string; unit: string; cls: string 
 ]
 
 const Overline = ({ children }: { children: string }) => (
-  <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-3">{children}</div>
+  <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 mb-3">{children}</div>
 )
 
 export function FoodDetailSheet({

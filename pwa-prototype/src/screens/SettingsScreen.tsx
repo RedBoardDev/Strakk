@@ -228,7 +228,7 @@ export function SettingsScreen() {
           }}
           className="relative w-full flex items-center gap-3 px-4 py-3 text-left"
         >
-          <div className="size-11 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shrink-0">
+          <div className="size-11 rounded-full bg-primary flex items-center justify-center shrink-0">
             <span className="text-[18px] font-bold text-white">{user.firstName[0]?.toUpperCase() ?? '?'}</span>
           </div>
           <div className="flex-1 min-w-0">
@@ -298,7 +298,6 @@ export function SettingsScreen() {
 
       {/* Footer */}
       <div className="pt-7 flex flex-col items-center gap-1">
-        <div className="text-[12px] text-ink-4">Strakk · v1.0.0</div>
         <div className="text-[11px] text-ink-4">Food data: Open Food Facts (ODbL) · CIQUAL</div>
       </div>
 

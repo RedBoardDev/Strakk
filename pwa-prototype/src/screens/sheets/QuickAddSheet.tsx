@@ -151,7 +151,7 @@ export function QuickAddSheet({
               transition={spring.page}
               className="mt-5 pb-4"
             >
-              <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-2">Detected items</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 mb-2">Detected items</div>
               <ReviewItems items={items} onChange={setItems} />
             </motion.div>
           )}

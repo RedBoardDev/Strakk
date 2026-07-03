@@ -250,7 +250,7 @@ export function SearchSheet({
           ) : (
             <>
               <div className="px-2 pt-2 pb-1 flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">Favorites & recents</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Favorites & recents</span>
                 <span className="text-[11px] text-ink-4 tnum">{mine.length}</span>
               </div>
               {mine.map((food) => (
@@ -270,7 +270,7 @@ export function SearchSheet({
         ) : (
           <>
             <div className="px-2 pt-2 pb-1 flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">Catalog</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Catalog</span>
               <span className="text-[11px] text-ink-4 tnum">{results.length}</span>
             </div>
             {results.map((food) => (

@@ -246,7 +246,7 @@ export function MealDetailSheet({
             {/* Items */}
             {meal && meal.meal_entries.length > 0 && (
               <div className="pb-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-2">Items</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 mb-2">Items</div>
                 <div className="bg-surface-1 rounded-card overflow-hidden">
                   {meal.meal_entries.map((entry, i) => (
                     <EntryLine key={entry.id} entry={entry} index={i} />
@@ -258,7 +258,7 @@ export function MealDetailSheet({
             {/* Breakdown of an AI orphan entry */}
             {breakdown && breakdown.length > 0 && (
               <div className="pb-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 mb-2">Detected items</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 mb-2">Detected items</div>
                 <div className="bg-surface-1 rounded-card overflow-hidden divide-y divide-divider/70">
                   {breakdown.map((item) => (
                     <div key={item.name} className="flex items-center justify-between gap-3 px-4 py-3">
