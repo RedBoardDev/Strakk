@@ -6,6 +6,7 @@ import shared
 struct CheckInDetailView: View {
     @State private var vm: CheckInDetailViewModelWrapper
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppNavigator.self) private var navigator
 
     @State private var showDeleteAlert = false
     @State private var shareItems: [Any]?
@@ -51,6 +52,14 @@ struct CheckInDetailView: View {
                     } label: {
                         Label("Edit", systemImage: "pencil")
                     }
+                    if hasMeasurements {
+                        Button {
+                            vm.onEvent(CheckInDetailEventOnPushToHevy())
+                        } label: {
+                            Label("Push to Hevy", systemImage: "arrow.up.circle")
+                        }
+                        .disabled(vm.isPushingToHevy)
+                    }
                     Button(role: .destructive) {
                         showDeleteAlert = true
                     } label: {
@@ -79,6 +88,34 @@ struct CheckInDetailView: View {
             Button("OK", role: .cancel) { vm.errorMessage = nil }
         } message: {
             Text(vm.errorMessage ?? "")
+        }
+        .alert("Hevy API Key Required", isPresented: $vm.requiresHevyApiKey) {
+            Button("Go to Settings") {
+                navigator.selectedTab = 3
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Add your Hevy API key in Settings to push measurements.")
+        }
+        .alert("Measurement Already Exists", isPresented: Binding(
+            get: { vm.hevyPushConflictDate != nil },
+            set: { if !$0 { vm.hevyPushConflictDate = nil } }
+        )) {
+            Button("Overwrite") {
+                vm.onEvent(CheckInDetailEventOnConfirmOverwriteHevy())
+                vm.hevyPushConflictDate = nil
+            }
+            Button("Cancel", role: .cancel) { vm.hevyPushConflictDate = nil }
+        } message: {
+            Text("Hevy already has a measurement entry for \(vm.hevyPushConflictDate ?? ""). Overwrite it?")
+        }
+        .alert("Pushed to Hevy", isPresented: Binding(
+            get: { vm.hevyPushSuccessDate != nil },
+            set: { if !$0 { vm.hevyPushSuccessDate = nil } }
+        )) {
+            Button("OK") {}
+        } message: {
+            Text("Measurement for \(vm.hevyPushSuccessDate ?? "") was pushed to Hevy.")
         }
         .fullScreenCover(isPresented: Binding(
             get: { vm.navigateToWizardCheckInId != nil },
@@ -254,6 +291,19 @@ struct CheckInDetailView: View {
             return training != nil
         }
         return false
+    }
+
+    private var hasMeasurements: Bool {
+        guard case .ready(let checkIn, _, _, _, _, _) = vm.state else { return false }
+        return checkIn.weight != nil
+            || checkIn.shoulders != nil
+            || checkIn.chest != nil
+            || checkIn.armLeft != nil
+            || checkIn.armRight != nil
+            || checkIn.waist != nil
+            || checkIn.hips != nil
+            || checkIn.thighLeft != nil
+            || checkIn.thighRight != nil
     }
 
     // MARK: - Helpers

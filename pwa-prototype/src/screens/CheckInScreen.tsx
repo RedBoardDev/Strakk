@@ -20,6 +20,7 @@ import { useToast } from '../components/Toast.tsx'
 import { toCheckInView, weightTrendOf, type CheckInView } from '../lib/checkinView.ts'
 import { signedPhotoUrl, type CheckinPhoto, type CheckinRow } from '../api/checkins.ts'
 import { MEASUREMENT_FIELDS, type CheckIn, type Measurements } from '../data/viewTypes.ts'
+import { pushCheckinMeasurementsToHevy } from '../api/hevy.ts'
 
 type Trend = { color: string; icon: IconName | null }
 
@@ -512,10 +513,36 @@ export function CheckInScreen() {
   const [actionsOpen, setActionsOpen] = useState(false)
   const [pdfOpen, setPdfOpen] = useState(false)
   const [confirmDeleteCheckIn, setConfirmDeleteCheckIn] = useState(false)
+  const [hevyConflict, setHevyConflict] = useState<{ checkinId: string; date: string } | null>(null)
 
   // API rows adapted to the view model the sections render (deltas vs previous).
   const checkIns: CheckInView[] = rows.map((row, i) => toCheckInView(row, rows[i + 1], calorieGoal))
   const weightTrend = weightTrendOf(rows)
+
+  const pushToHevy = async (checkinId: string, overwrite: boolean) => {
+    try {
+      const result = await pushCheckinMeasurementsToHevy(checkinId, overwrite)
+      if (result.conflict) {
+        setHevyConflict({ checkinId, date: result.date })
+      } else {
+        haptic('success')
+        toast.show('Measurements pushed to Hevy')
+      }
+    } catch (err) {
+      toast.show(err instanceof Error ? err.message : 'Push to Hevy failed')
+    }
+  }
+
+  const hasMeasurements = (row: CheckinRow) =>
+    row.weight_kg != null ||
+    row.shoulders_cm != null ||
+    row.chest_cm != null ||
+    row.arm_left_cm != null ||
+    row.arm_right_cm != null ||
+    row.waist_cm != null ||
+    row.hips_cm != null ||
+    row.thigh_left_cm != null ||
+    row.thigh_right_cm != null
 
   // Always render the live check-in (stays fresh after an edit).
   const selected = selectedId ? (checkIns.find((c) => c.id === selectedId) ?? null) : null
@@ -612,6 +639,16 @@ export function CheckInScreen() {
               setPdfOpen(true)
             }}
           />
+          {selected && hasMeasurements(selected.row) && (
+            <ActionRow
+              icon="dumbbell.fill"
+              label="Push to Hevy"
+              onClick={() => {
+                setActionsOpen(false)
+                void pushToHevy(selected.row.id, false)
+              }}
+            />
+          )}
           <ActionRow
             icon="trash"
             label="Delete check-in"
@@ -641,6 +678,21 @@ export function CheckInScreen() {
               .then(() => toast.show('Check-in deleted'))
               .catch(() => {})
           }
+        }}
+      />
+      <ConfirmDialog
+        open={hevyConflict !== null}
+        title="Measurement already exists"
+        message={
+          hevyConflict ? `Hevy already has a measurement entry for ${hevyConflict.date}. Overwrite it?` : undefined
+        }
+        confirmLabel="Overwrite"
+        destructive={false}
+        onCancel={() => setHevyConflict(null)}
+        onConfirm={() => {
+          const target = hevyConflict
+          setHevyConflict(null)
+          if (target) void pushToHevy(target.checkinId, true)
         }}
       />
 

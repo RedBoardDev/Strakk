@@ -5,12 +5,15 @@ import com.strakk.shared.domain.model.CheckIn
 import com.strakk.shared.domain.model.CheckInDelta
 import com.strakk.shared.domain.model.CheckInInput
 import com.strakk.shared.domain.model.CheckInMeasurements
+import com.strakk.shared.domain.model.HevyMeasurementPushResult
 import com.strakk.shared.domain.usecase.ComputeNutritionSummaryUseCase
 import com.strakk.shared.domain.usecase.DeleteCheckInUseCase
 import com.strakk.shared.domain.usecase.GetCheckInDeltaUseCase
 import com.strakk.shared.domain.usecase.GetCheckInPhotoUrlUseCase
+import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.GetPdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInUseCase
+import com.strakk.shared.domain.usecase.PushCheckInMeasurementsToHevyUseCase
 import com.strakk.shared.domain.usecase.RefreshTrainingStatsUseCase
 import com.strakk.shared.domain.usecase.SavePdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.UpdateCheckInUseCase
@@ -30,6 +33,8 @@ class CheckInDetailViewModel(
     private val refreshTrainingStats: RefreshTrainingStatsUseCase,
     private val getPdfExportPreferences: GetPdfExportPreferencesUseCase,
     private val savePdfExportPreferences: SavePdfExportPreferencesUseCase,
+    private val pushMeasurementsToHevy: PushCheckInMeasurementsToHevyUseCase,
+    private val getHevyApiKey: GetHevyApiKeyUseCase,
 ) : MviViewModel<CheckInDetailUiState, CheckInDetailEvent, CheckInDetailEffect>(CheckInDetailUiState.Loading) {
 
     init { observe() }
@@ -45,6 +50,8 @@ class CheckInDetailViewModel(
                 savePdfExportPreferences(event.options)
                 setState { (this as? CheckInDetailUiState.Ready)?.copy(pdfExportOptions = event.options) ?: this }
             }
+            CheckInDetailEvent.OnPushToHevy -> handlePushToHevy(overwrite = false)
+            CheckInDetailEvent.OnConfirmOverwriteHevy -> handlePushToHevy(overwrite = true)
         }
     }
 
@@ -115,6 +122,33 @@ class CheckInDetailViewModel(
                     emit(CheckInDetailEffect.ShowError(err.message ?: "Failed to load training data"))
                 },
             )
+        }
+    }
+
+    private fun handlePushToHevy(overwrite: Boolean) {
+        val currentState = uiState.value as? CheckInDetailUiState.Ready ?: return
+        setState {
+            (this as? CheckInDetailUiState.Ready)?.copy(isPushingToHevy = true) ?: this
+        }
+        viewModelScope.launch {
+            val key = getHevyApiKey().getOrNull()
+            if (key.isNullOrBlank()) {
+                setState { (this as? CheckInDetailUiState.Ready)?.copy(isPushingToHevy = false) ?: this }
+                emit(CheckInDetailEffect.RequireHevyApiKey)
+                return@launch
+            }
+            pushMeasurementsToHevy(currentState.checkIn.id, overwrite)
+                .onSuccess { result ->
+                    setState { (this as? CheckInDetailUiState.Ready)?.copy(isPushingToHevy = false) ?: this }
+                    when (result) {
+                        is HevyMeasurementPushResult.Pushed -> emit(CheckInDetailEffect.HevyPushSucceeded(result.date))
+                        is HevyMeasurementPushResult.Conflict -> emit(CheckInDetailEffect.HevyPushConflict(result.date))
+                    }
+                }
+                .onFailure { error ->
+                    setState { (this as? CheckInDetailUiState.Ready)?.copy(isPushingToHevy = false) ?: this }
+                    emit(CheckInDetailEffect.ShowError(error.message ?: "Failed to push measurements to Hevy."))
+                }
         }
     }
 

@@ -12,7 +12,13 @@ import platform.CoreGraphics.CGRect
 import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSData
 import platform.Foundation.NSMutableData
+import platform.Foundation.NSURL
 import platform.Foundation.NSSelectorFromString
+import platform.PDFKit.PDFAnnotation
+import platform.PDFKit.PDFAnnotationSubtypeLink
+import platform.PDFKit.PDFDocument
+import platform.PDFKit.PDFPage
+import platform.PDFKit.PDFSelection
 import platform.UIKit.UIGraphicsBeginPDFContextToData
 import platform.UIKit.UIGraphicsBeginPDFPageWithInfo
 import platform.UIKit.UIGraphicsEndPDFContext
@@ -40,6 +46,7 @@ import kotlin.coroutines.resumeWithException
 internal class IosHtmlToPdfRenderer : HtmlToPdfRenderer {
 
     override suspend fun render(html: String): ByteArray = withContext(Dispatchers.Main) {
+        val pdfLinks = extractPdfLinks(html)
         suspendCancellableCoroutine { continuation ->
             val config = WKWebViewConfiguration()
             val webView = WKWebView(
@@ -77,7 +84,8 @@ internal class IosHtmlToPdfRenderer : HtmlToPdfRenderer {
                     }
                     UIGraphicsEndPDFContext()
 
-                    continuation.resume(pdfData.toByteArray())
+                    val annotatedPdfData = addLinkAnnotations(pdfData, pdfLinks)
+                    continuation.resume(annotatedPdfData.toByteArray())
                 }
 
                 override fun webView(
@@ -97,6 +105,54 @@ internal class IosHtmlToPdfRenderer : HtmlToPdfRenderer {
         }
     }
 
+    private fun extractPdfLinks(html: String): List<PdfLink> = PDF_LINK_REGEX
+        .findAll(html)
+        .map { match ->
+            PdfLink(
+                url = match.groupValues[1],
+                text = match.groupValues[2],
+            )
+        }
+        .toList()
+
+    /**
+     * UIPrintPageRenderer preserves the link text but drops HTML link annotations.
+     * Recreate them on the rendered PDF so Preview and iOS can open the workouts.
+     */
+    private fun addLinkAnnotations(pdfData: NSData, links: List<PdfLink>): NSData {
+        if (links.isEmpty()) return pdfData
+
+        val document = PDFDocument(data = pdfData)
+        val selectionsByText = links
+            .map { it.text }
+            .distinct()
+            .associateWith { text ->
+                document.findString(text, withOptions = 0u)
+                    .filterIsInstance<PDFSelection>()
+                    .iterator()
+            }
+
+        links.forEach { link ->
+            val selections = selectionsByText[link.text] ?: return@forEach
+            if (!selections.hasNext()) return@forEach
+
+            val selection = selections.next()
+            val page = selection.pages.firstOrNull() as? PDFPage ?: return@forEach
+            val annotation = PDFAnnotation(
+                bounds = selection.boundsForPage(page),
+                forType = PDFAnnotationSubtypeLink,
+                withProperties = null,
+            )
+            annotation.performSelector(
+                NSSelectorFromString("setURL:"),
+                withObject = NSURL(string = link.url),
+            )
+            page.addAnnotation(annotation)
+        }
+
+        return document.dataRepresentation() ?: pdfData
+    }
+
     private fun NSData.toByteArray(): ByteArray {
         val size = length.toInt()
         val bytes = ByteArray(size)
@@ -108,6 +164,11 @@ internal class IosHtmlToPdfRenderer : HtmlToPdfRenderer {
         return bytes
     }
 }
+
+private data class PdfLink(
+    val url: String,
+    val text: String,
+)
 
 @OptIn(ExperimentalForeignApi::class)
 private class A4PrintPageRenderer : UIPrintPageRenderer() {
@@ -126,3 +187,6 @@ private class A4PrintPageRenderer : UIPrintPageRenderer() {
 private const val A4_WIDTH_PT = 595.0
 private const val A4_HEIGHT_PT = 842.0
 private const val V_MARGIN_PT = 40.0 // ≈14 mm — top + bottom margin on every page
+private val PDF_LINK_REGEX = Regex(
+    """<a\b[^>]*href="(https://hevy\.com/workout/[A-Za-z0-9-]+)"[^>]*data-pdf-link-text="([^"]+)"[^>]*>""",
+)

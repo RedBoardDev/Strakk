@@ -55,6 +55,7 @@ class TodayViewModelTest {
     private lateinit var mealRepository: FakeTodayMealRepository
     private lateinit var draftRepository: FakeTodayDraftRepository
     private lateinit var profileRepository: FakeProfileRepository
+    private lateinit var favoritesRepository: FakeTodayFavoritesRepository
 
     /** Fixed "now" anchored to a known date so trial countdown is deterministic. */
     private val fixedNow = Instant.parse("2026-05-03T12:00:00Z")
@@ -73,6 +74,7 @@ class TodayViewModelTest {
         mealRepository = FakeTodayMealRepository()
         draftRepository = FakeTodayDraftRepository()
         profileRepository = FakeProfileRepository()
+        favoritesRepository = FakeTodayFavoritesRepository()
     }
 
     @AfterTest
@@ -97,6 +99,10 @@ class TodayViewModelTest {
         deleteMealContainer = DeleteMealContainerUseCase(mealRepository),
         updateEntry = UpdateMealEntryUseCase(nutritionRepository, mealRepository),
         observeSubscriptionState = ObserveSubscriptionStateUseCase(subscriptionRepository),
+        observeFavoriteFoods = com.strakk.shared.domain.usecase.ObserveFavoriteFoodsUseCase(favoritesRepository),
+        observeFavoriteMeals = com.strakk.shared.domain.usecase.ObserveFavoriteMealsUseCase(favoritesRepository),
+        toggleFavoriteFood = com.strakk.shared.domain.usecase.ToggleFavoriteFoodUseCase(favoritesRepository),
+        toggleFavoriteMeal = com.strakk.shared.domain.usecase.ToggleFavoriteMealUseCase(favoritesRepository),
         clock = clock,
     )
 
@@ -321,4 +327,30 @@ private class FakeTodayDraftRepository : MealDraftRepository {
     override suspend fun discard() = Unit
     override suspend fun markItemResolved(itemId: String, entry: MealEntry) = Unit
     override suspend fun recordUploadedPath(itemId: String, path: String) = Unit
+}
+
+private class FakeTodayFavoritesRepository : com.strakk.shared.domain.repository.FavoritesRepository {
+    private val foods = MutableStateFlow<List<com.strakk.shared.domain.model.FavoriteFood>>(emptyList())
+    private val meals = MutableStateFlow<List<com.strakk.shared.domain.model.FavoriteMeal>>(emptyList())
+
+    override fun observeFavoriteFoods(): Flow<List<com.strakk.shared.domain.model.FavoriteFood>> = foods
+    override fun observeFavoriteMeals(): Flow<List<com.strakk.shared.domain.model.FavoriteMeal>> = meals
+
+    override suspend fun addFavoriteFood(
+        name: String,
+        protein: Double,
+        calories: Double,
+        fat: Double?,
+        carbs: Double?,
+        quantity: String?,
+        foodCatalogId: Long?,
+    ): com.strakk.shared.domain.model.FavoriteFood = error("Not used")
+
+    override suspend fun removeFavoriteFoodByName(normalizedName: String) = Unit
+    override suspend fun addFavoriteMeal(meal: com.strakk.shared.domain.model.Meal): com.strakk.shared.domain.model.FavoriteMeal = error("Not used")
+    override suspend fun removeFavoriteMealBySourceId(sourceMealId: String) = Unit
+    override suspend fun removeFavoriteMealById(id: String) = Unit
+    override suspend fun loadRecentMeals(daysWindow: Int, limit: Int) = emptyList<com.strakk.shared.domain.model.RecentMeal>()
+    override suspend fun loadRecentFoods(daysWindow: Int, limit: Int) = emptyList<com.strakk.shared.domain.model.MealTemplateItem>()
+    override fun clearCache() = Unit
 }

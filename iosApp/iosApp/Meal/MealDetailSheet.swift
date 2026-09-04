@@ -3,10 +3,19 @@ import shared
 
 struct MealDetailSheet: View {
     let meal: MealData
+    let favorites: FavoritesSnapshotData
     let onEditEntry: (MealEntryData) -> Void
     let onDeleteEntry: (MealEntryData) -> Void
     let onDeleteMeal: () -> Void
+    let onToggleFavorite: () -> Void
+    let onToggleFavoriteFood: (MealEntryData) -> Void
     let onDismiss: () -> Void
+
+    private var isFavorited: Bool { favorites.isMealFavorited(mealId: meal.id) }
+
+    private func isEntryFavorited(_ entry: MealEntryData) -> Bool {
+        favorites.isFoodFavorited(normalizedName: normalizeFoodName(entry.name))
+    }
 
     @State private var selectedEntry: MealEntryData?
 
@@ -53,6 +62,7 @@ struct MealDetailSheet: View {
         .sheet(item: $selectedEntry) { entry in
             EntryDetailSheet(
                 entry: entry,
+                isFavorited: isEntryFavorited(entry),
                 onEdit: {
                     selectedEntry = nil
                     onEditEntry(entry)
@@ -61,6 +71,7 @@ struct MealDetailSheet: View {
                     onDeleteEntry(entry)
                     selectedEntry = nil
                 },
+                onToggleFavorite: { onToggleFavoriteFood(entry) },
                 onDismiss: { selectedEntry = nil }
             )
         }
@@ -71,18 +82,35 @@ struct MealDetailSheet: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(meal.name)
-                .font(.strakkHeading2)
-                .foregroundStyle(Color.strakkTextPrimary)
+        HStack(alignment: .top, spacing: StrakkSpacing.sm) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meal.name)
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextPrimary)
 
-            HStack(spacing: 4) {
-                Text(formatTimeLabel(from: meal.createdAt))
-                Text("·")
-                Text("\(meal.entries.count) item\(meal.entries.count > 1 ? "s" : "")")
+                HStack(spacing: 4) {
+                    Text(formatTimeLabel(from: meal.createdAt))
+                    Text("·")
+                    Text("\(meal.entries.count) item\(meal.entries.count > 1 ? "s" : "")")
+                }
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
             }
-            .font(.strakkCaption)
-            .foregroundStyle(Color.strakkTextSecondary)
+
+            Spacer(minLength: 0)
+
+            Button {
+                HapticEngine.light()
+                onToggleFavorite()
+            } label: {
+                Image(systemName: isFavorited ? "heart.fill" : "heart")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(isFavorited ? Color.strakkPrimary : Color.strakkTextSecondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isFavorited ? "Remove favorite meal" : "Favorite meal")
         }
     }
 

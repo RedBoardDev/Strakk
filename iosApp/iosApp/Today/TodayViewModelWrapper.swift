@@ -80,6 +80,21 @@ struct ActiveDraftData: Equatable {
     let totalProtein: Double
 }
 
+struct FavoritesSnapshotData: Equatable {
+    let foodNames: Set<String>
+    let mealIds: Set<String>
+
+    static let empty = FavoritesSnapshotData(foodNames: [], mealIds: [])
+
+    func isFoodFavorited(normalizedName: String) -> Bool {
+        !normalizedName.isEmpty && foodNames.contains(normalizedName)
+    }
+
+    func isMealFavorited(mealId: String) -> Bool {
+        mealIds.contains(mealId)
+    }
+}
+
 enum TodayState {
     case loading
     case ready(
@@ -88,7 +103,8 @@ enum TodayState {
         timeline: [TimelineItemData],
         waterEntries: [WaterEntryData],
         activeDraft: ActiveDraftData?,
-        trialBanner: TrialBannerData?
+        trialBanner: TrialBannerData?,
+        favorites: FavoritesSnapshotData
     )
 }
 
@@ -186,13 +202,19 @@ final class TodayViewModelWrapper {
                 return nil
             }()
 
+            let favorites = FavoritesSnapshotData(
+                foodNames: Set(ready.favorites.foodNames),
+                mealIds: Set(ready.favorites.mealIds)
+            )
+
             return .ready(
                 dateLabel: ready.dateLabel,
                 summary: KMPMappers.dailySummary(ready.summary),
                 timeline: timeline,
                 waterEntries: ready.waterEntries.map(KMPMappers.waterEntry),
                 activeDraft: activeDraft,
-                trialBanner: trialBanner
+                trialBanner: trialBanner,
+                favorites: favorites
             )
         }
         return .loading

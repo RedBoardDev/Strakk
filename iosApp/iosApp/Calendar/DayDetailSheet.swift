@@ -83,6 +83,7 @@ struct DayDetailSheet: View {
             .sheet(item: $selectedMeal) { meal in
                 MealDetailSheet(
                     meal: meal,
+                    favorites: .empty,
                     onEditEntry: { entry in
                         selectedMeal = nil
                         editingEntry = entry
@@ -94,12 +95,15 @@ struct DayDetailSheet: View {
                         onDeleteMeal(meal)
                         selectedMeal = nil
                     },
+                    onToggleFavorite: { /* not wired in calendar context */ },
+                    onToggleFavoriteFood: { _ in /* not wired in calendar context */ },
                     onDismiss: { selectedMeal = nil }
                 )
             }
             .sheet(item: $selectedEntry) { entry in
                 EntryDetailSheet(
                     entry: entry,
+                    isFavorited: false,
                     onEdit: {
                         selectedEntry = nil
                         editingEntry = entry
@@ -108,6 +112,7 @@ struct DayDetailSheet: View {
                         onDeleteEntry(entry)
                         selectedEntry = nil
                     },
+                    onToggleFavorite: { /* not wired in calendar context */ },
                     onDismiss: { selectedEntry = nil }
                 )
             }

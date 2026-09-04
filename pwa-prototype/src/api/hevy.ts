@@ -46,6 +46,20 @@ export async function fetchHevyWorkouts(startDate: string, endDate: string): Pro
   return workouts
 }
 
+// ---- push-checkin-to-hevy -----------------------------------------------------
+
+export type PushMeasurementsResult = { date: string; conflict: boolean }
+
+export async function pushCheckinMeasurementsToHevy(
+  checkinId: string,
+  overwrite: boolean,
+): Promise<PushMeasurementsResult> {
+  return await invokeEdge<PushMeasurementsResult>('push-checkin-to-hevy', {
+    checkin_id: checkinId,
+    overwrite,
+  })
+}
+
 // Aggregates a week's Hevy workouts into the check-in's training_stats shape:
 // session count, total duration & volume, mean RPE, and per-muscle-group volume.
 export function aggregateTrainingStats(workouts: HevyWorkout[]): {

@@ -33,7 +33,7 @@ import kotlinx.datetime.Clock
  * Observes reactive Flows from the repository cache — state updates
  * automatically after any mutation without requiring an explicit reload.
  */
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class TodayViewModel(
     private val observeDailySummary: ObserveDailySummaryUseCase,
     private val observeMeals: ObserveMealsForDateUseCase,
@@ -47,6 +47,10 @@ class TodayViewModel(
     private val deleteMealContainer: DeleteMealContainerUseCase,
     private val updateEntry: UpdateMealEntryUseCase,
     private val observeSubscriptionState: ObserveSubscriptionStateUseCase,
+    private val observeFavoriteFoods: com.strakk.shared.domain.usecase.ObserveFavoriteFoodsUseCase,
+    private val observeFavoriteMeals: com.strakk.shared.domain.usecase.ObserveFavoriteMealsUseCase,
+    private val toggleFavoriteFood: com.strakk.shared.domain.usecase.ToggleFavoriteFoodUseCase,
+    private val toggleFavoriteMeal: com.strakk.shared.domain.usecase.ToggleFavoriteMealUseCase,
     private val clock: ClockProvider,
 ) : MviViewModel<TodayUiState, TodayEvent, TodayEffect>(TodayUiState.Loading) {
 
@@ -55,6 +59,7 @@ class TodayViewModel(
     init {
         observeToday()
         observeSubscription()
+        observeFavorites()
     }
 
     override fun onEvent(event: TodayEvent) {
@@ -66,7 +71,31 @@ class TodayViewModel(
             is TodayEvent.OnDeleteMeal -> launchDeleteMeal(event.mealId)
             is TodayEvent.OnUpdateEntry -> launchUpdateEntry(event)
             is TodayEvent.OnTrialBannerTapped -> emit(TodayEffect.NavigateToPaywall)
+            is TodayEvent.OnToggleFavoriteFood -> handleToggleFavoriteFood(event.entryId)
+            is TodayEvent.OnToggleFavoriteMeal -> handleToggleFavoriteMeal(event.mealId)
         }
+    }
+
+    private fun handleToggleFavoriteFood(entryId: String) {
+        val state = uiState.value as? TodayUiState.Ready ?: return
+        val entry: MealEntry? = state.timeline
+            .filterIsInstance<TimelineItem.OrphanEntry>()
+            .map { it.entry }
+            .firstOrNull { it.id == entryId }
+            ?: state.timeline
+                .filterIsInstance<TimelineItem.MealContainer>()
+                .flatMap { it.meal.entries }
+                .firstOrNull { it.id == entryId }
+        if (entry != null) launchToggleFavoriteFood(entry)
+    }
+
+    private fun handleToggleFavoriteMeal(mealId: String) {
+        val state = uiState.value as? TodayUiState.Ready ?: return
+        val meal = state.timeline
+            .filterIsInstance<TimelineItem.MealContainer>()
+            .map { it.meal }
+            .firstOrNull { it.id == mealId } ?: return
+        launchToggleFavoriteMeal(meal)
     }
 
     private fun observeToday() {
@@ -82,10 +111,13 @@ class TodayViewModel(
                 observeWaterEntries(dateString),
                 observeActiveDraft(),
             ) { summary, orphans, meals, water, draft ->
-                buildReadyState(dateLabel, summary, orphans, meals, water, draft)
+                buildReadyState(dateLabel, summary, orphans, meals, water, draft, currentFavoritesSnapshot())
             }.collect { state -> setState { state } }
         }
     }
+
+    private fun currentFavoritesSnapshot(): FavoritesSnapshot =
+        (uiState.value as? TodayUiState.Ready)?.favorites ?: FavoritesSnapshot.Empty
 
     private fun observeSubscription() {
         viewModelScope.launch {
@@ -101,6 +133,27 @@ class TodayViewModel(
         }
     }
 
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            combine(
+                observeFavoriteFoods(),
+                observeFavoriteMeals(),
+            ) { foods, meals ->
+                FavoritesSnapshot(
+                    foodNames = foods.map { it.normalizedName }.toSet(),
+                    mealIds = meals.mapNotNull { it.sourceMealId }.toSet(),
+                )
+            }.collect { snapshot ->
+                setState {
+                    when (this) {
+                        is TodayUiState.Ready -> copy(favorites = snapshot)
+                        else -> this
+                    }
+                }
+            }
+        }
+    }
+
     private fun computeTrialBanner(sub: SubscriptionState): TrialBannerState? {
         if (sub !is SubscriptionState.Trial) return null
         val now = Clock.System.now()
@@ -108,13 +161,15 @@ class TodayViewModel(
         return if (remaining in 1..2) TrialBannerState.ExpiringIn(remaining) else null
     }
 
+    @Suppress("LongParameterList")
     private fun buildReadyState(
         dateLabel: String,
-        summary: DailySummary,
+        summary: com.strakk.shared.domain.model.DailySummary,
         orphans: List<MealEntry>,
         meals: List<Meal>,
-        water: List<WaterEntry>,
+        water: List<com.strakk.shared.domain.model.WaterEntry>,
         draft: com.strakk.shared.domain.model.ActiveMealDraft?,
+        favorites: FavoritesSnapshot,
     ): TodayUiState.Ready {
         val timeline = buildList<TimelineItem> {
             meals.forEach { add(TimelineItem.MealContainer(it)) }
@@ -128,6 +183,7 @@ class TodayViewModel(
             waterEntries = water,
             activeDraft = draft,
             trialBanner = computeTrialBanner(subscriptionState.value),
+            favorites = favorites,
         )
     }
 
@@ -166,6 +222,14 @@ class TodayViewModel(
             quantity = event.quantity?.takeIf { it.isNotBlank() },
         )
         updateEntry(entry).onFailure { emitError(it) }
+    }
+
+    private fun launchToggleFavoriteFood(entry: MealEntry) = viewModelScope.launch {
+        toggleFavoriteFood.fromEntry(entry).onFailure { emitError(it) }
+    }
+
+    private fun launchToggleFavoriteMeal(meal: Meal) = viewModelScope.launch {
+        toggleFavoriteMeal(meal).onFailure { emitError(it) }
     }
 
     private fun emitError(throwable: Throwable) {

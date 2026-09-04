@@ -3,6 +3,7 @@ package com.strakk.shared.domain.usecase
 import com.strakk.shared.domain.common.runSuspendCatching
 import com.strakk.shared.domain.repository.AuthRepository
 import com.strakk.shared.domain.repository.CheckInRepository
+import com.strakk.shared.domain.repository.FavoritesRepository
 import com.strakk.shared.domain.repository.MealDraftRepository
 import com.strakk.shared.domain.repository.MealRepository
 import com.strakk.shared.domain.repository.NutritionRepository
@@ -22,6 +23,7 @@ class SignOutUseCase(
     private val mealRepository: MealRepository,
     private val checkInRepository: CheckInRepository,
     private val mealDraftRepository: MealDraftRepository,
+    private val favoritesRepository: FavoritesRepository,
 ) {
     suspend operator fun invoke(): Result<Unit> =
         runSuspendCatching {
@@ -30,6 +32,7 @@ class SignOutUseCase(
             profileRepository.clearCache()
             mealRepository.clearCache()
             checkInRepository.clearCache()
+            favoritesRepository.clearCache()
             mealDraftRepository.discard()
         }
 }

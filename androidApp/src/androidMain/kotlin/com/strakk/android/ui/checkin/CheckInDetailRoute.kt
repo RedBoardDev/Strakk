@@ -33,6 +33,11 @@ fun CheckInDetailRoute(
                 CheckInDetailEffect.NavigateBack -> onNavigateBack()
                 is CheckInDetailEffect.NavigateToWizard -> onNavigateToWizard(effect.checkInId)
                 is CheckInDetailEffect.ShowError -> snackbar.showSnackbar(effect.message)
+                // Push-to-Hevy has no Android UI yet — these effects are unreachable from this screen.
+                CheckInDetailEffect.RequireHevyApiKey,
+                is CheckInDetailEffect.HevyPushSucceeded,
+                is CheckInDetailEffect.HevyPushConflict,
+                -> Unit
             }
         }
     }

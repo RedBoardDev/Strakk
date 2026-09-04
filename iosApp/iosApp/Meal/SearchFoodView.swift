@@ -38,8 +38,10 @@ struct SearchFoodView: View {
     }
 
     @State private var query: String = ""
-    @State private var selectedItemId: String?
+    @State private var selectedTab: SearchTabSelection = .myFoods
+    @State private var selectedFoodKey: String?
     @State private var selectedCatalogId: Int64?
+    @State private var selectedMealKey: String?
     @State private var portionGrams: Double = 100
 
     var body: some View {
@@ -51,20 +53,38 @@ struct SearchFoodView: View {
             .navigationTitle(Text("Search a food"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { StrakkCloseToolbarItem(action: onDismiss) }
-            .searchable(text: $query, prompt: Text("Apple, chicken…"))
+            .searchable(text: $query, prompt: searchPrompt)
             .onChange(of: query) { _, newQuery in
                 searchViewModel.onEvent(SearchFoodEventQueryChanged(query: newQuery))
+            }
+            .onChange(of: selectedTab) { _, newTab in
+                let kmpTab: SearchTab = (newTab == .catalog) ? .catalog : .myfoods
+                searchViewModel.onEvent(SearchFoodEventSwitchTab(tab: kmpTab))
             }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .errorAlert(message: $quickAddViewModel.errorMessage)
+        .errorAlert(message: $searchViewModel.errorMessage)
         .onChange(of: quickAddViewModel.didComplete) { _, didComplete in
             if didComplete {
                 quickAddViewModel.consumeCompletion()
                 onDismiss()
             }
         }
+        .onChange(of: searchViewModel.didAddMealTemplate) { _, didAdd in
+            if didAdd {
+                searchViewModel.consumeMealTemplateAdded()
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                onDismiss()
+            }
+        }
+    }
+
+    private var searchPrompt: Text {
+        selectedTab == .catalog
+            ? Text("Apple, chicken…")
+            : Text("Search my foods")
     }
 }
 
@@ -78,8 +98,13 @@ private extension SearchFoodView {
             ProgressView().tint(Color.strakkPrimary)
         case .error(let message):
             errorView(message: message)
-        case .ready(let query, let results, let isSearching):
-            resultsList(query: query, results: results, isSearching: isSearching)
+        case .ready(_, let queryText, let myFoods, let catalogItems, let isSearching):
+            tabbedList(
+                query: queryText,
+                myFoods: myFoods,
+                catalogItems: catalogItems,
+                isSearching: isSearching
+            )
         }
     }
 
@@ -102,60 +127,34 @@ private extension SearchFoodView {
     }
 
     @ViewBuilder
-    func resultsList(
+    func tabbedList(
         query: String,
-        results: SearchResultsData,
+        myFoods: MyFoodsViewData,
+        catalogItems: [FoodCatalogItemData],
         isSearching: Bool
     ) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                resultsContent(query: query, results: results)
-                if isSearching {
-                    HStack {
-                        Spacer()
-                        ProgressView().tint(Color.strakkPrimary)
-                        Spacer()
-                    }
-                    .padding(.vertical, 12)
-                }
-                Spacer().frame(height: 32)
+        VStack(spacing: 0) {
+            Picker("Tab", selection: $selectedTab) {
+                Text("My foods").tag(SearchTabSelection.myFoods)
+                Text("Catalog").tag(SearchTabSelection.catalog)
             }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 20)
             .padding(.top, 8)
-        }
-    }
+            .padding(.bottom, 8)
 
-    @ViewBuilder
-    func resultsContent(query: String, results: SearchResultsData) -> some View {
-        if query.isEmpty {
-            if results.userItems.isEmpty {
-                emptyFrequentsView
-            } else {
-                sectionHeader("FREQUENT")
-                ForEach(results.userItems) { item in frequentRow(item: item) }
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    switch selectedTab {
+                    case .myFoods:
+                        myFoodsContent(query: query, data: myFoods)
+                    case .catalog:
+                        catalogContent(query: query, items: catalogItems, isSearching: isSearching)
+                    }
+                    Spacer().frame(height: 32)
+                }
+                .padding(.top, 4)
             }
-        } else {
-            if results.userItems.isEmpty && results.catalogItems.isEmpty {
-                noResultsView(query: query)
-            } else {
-                userItemsSection(items: results.userItems)
-                catalogItemsSection(items: results.catalogItems)
-            }
-        }
-    }
-
-    @ViewBuilder
-    func userItemsSection(items: [FrequentItemData]) -> some View {
-        if !items.isEmpty {
-            sectionHeader("MY ITEMS")
-            ForEach(items) { item in frequentRow(item: item) }
-        }
-    }
-
-    @ViewBuilder
-    func catalogItemsSection(items: [FoodCatalogItemData]) -> some View {
-        if !items.isEmpty {
-            sectionHeader("CATALOG")
-            ForEach(items) { item in catalogRow(item: item) }
         }
     }
 
@@ -167,53 +166,158 @@ private extension SearchFoodView {
     }
 }
 
-// MARK: - Rows
+// MARK: - My foods tab
 
 private extension SearchFoodView {
-    func frequentRow(item: FrequentItemData) -> some View {
-        FrequentFoodRow(
+    @ViewBuilder
+    func myFoodsContent(query: String, data: MyFoodsViewData) -> some View {
+        let hasAnything = !data.favoriteMeals.isEmpty
+            || !data.favoriteFoods.isEmpty
+            || !data.recentMeals.isEmpty
+            || !data.recentFoods.isEmpty
+
+        if !hasAnything {
+            if query.isEmpty { emptyMyFoodsView } else { noResultsView(query: query) }
+        } else {
+            if !data.favoriteMeals.isEmpty || !data.favoriteFoods.isEmpty {
+                sectionHeader("FAVORITES")
+            }
+            ForEach(data.favoriteMeals) { meal in favoriteMealRow(meal: meal) }
+            ForEach(data.favoriteFoods) { food in favoriteFoodRow(food: food) }
+
+            if !data.recentMeals.isEmpty {
+                sectionHeader("RECENT MEALS")
+                ForEach(data.recentMeals) { meal in recentMealRow(meal: meal) }
+            }
+
+            if !data.recentFoods.isEmpty {
+                sectionHeader("RECENT FOODS")
+                let favSet = Set(data.favoriteFoods.map { $0.normalizedName })
+                ForEach(data.recentFoods) { item in
+                    frequentRow(item: item, isFavorited: favSet.contains(item.normalizedName))
+                }
+            }
+        }
+    }
+
+    func favoriteMealRow(meal: FavoriteMealData) -> some View {
+        let mealKey = "fav-\(meal.storedId)"
+        return FavoriteMealCard(
+            meal: meal,
+            isSelected: selectedMealKey == mealKey,
+            onTap: {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    selectedMealKey = (selectedMealKey == mealKey) ? nil : mealKey
+                    selectedFoodKey = nil
+                    selectedCatalogId = nil
+                }
+            },
+            onAdd: { addFavoriteMealTemplate(meal: meal) },
+            onUnfavorite: {
+                searchViewModel.onEvent(SearchFoodEventUnfavoriteMeal(favoriteId: meal.storedId))
+            }
+        )
+    }
+
+    func recentMealRow(meal: RecentMealData) -> some View {
+        let mealKey = "rec-\(meal.mealId)"
+        return RecentMealCard(
+            meal: meal,
+            isSelected: selectedMealKey == mealKey,
+            onTap: {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    selectedMealKey = (selectedMealKey == mealKey) ? nil : mealKey
+                    selectedFoodKey = nil
+                    selectedCatalogId = nil
+                }
+            },
+            onAdd: { addRecentMealTemplate(meal: meal) }
+        )
+    }
+
+    func favoriteFoodRow(food: FavoriteFoodData) -> some View {
+        let key = "favfood-\(food.normalizedName)"
+        let item = FrequentItemData(
+            normalizedName: food.normalizedName,
+            name: food.name,
+            protein: food.protein,
+            calories: food.calories,
+            fat: food.fat,
+            carbs: food.carbs,
+            quantity: food.quantity,
+            occurrences: 0
+        )
+        return frequentRow(item: item, key: key, isFavorited: true)
+    }
+
+    func frequentRow(item: FrequentItemData, key: String? = nil, isFavorited: Bool) -> some View {
+        let rowKey = key ?? "freq-\(item.normalizedName)"
+        return FrequentFoodRow(
             item: item,
-            isSelected: selectedItemId == item.normalizedName,
+            isSelected: selectedFoodKey == rowKey,
+            isFavorited: isFavorited,
             portionGrams: $portionGrams,
             isProcessing: quickAddViewModel.isProcessing,
             onTap: {
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    if selectedItemId == item.normalizedName {
-                        selectedItemId = nil
-                        selectedCatalogId = nil
-                    } else {
-                        selectedItemId = item.normalizedName
-                        selectedCatalogId = nil
-                        portionGrams = 100
-                    }
+                    selectedFoodKey = (selectedFoodKey == rowKey) ? nil : rowKey
+                    selectedCatalogId = nil
+                    selectedMealKey = nil
+                    portionGrams = 100
                 }
             },
+            onToggleFavorite: {
+                searchViewModel.onEvent(SearchFoodEventToggleFavoriteFood(
+                    name: item.name ?? item.normalizedName,
+                    protein: item.protein,
+                    calories: item.calories,
+                    fat: asKotlinDouble(item.fat),
+                    carbs: asKotlinDouble(item.carbs),
+                    quantity: item.quantity,
+                    foodCatalogId: nil
+                ))
+            },
             onAdd: { protein, calories, fat, carbs, grams in
-                let qty = String(format: "%.0fg", grams)
-                if isDraftMode {
-                    draftViewModel.onEvent(MealDraftEventAddManualItem(
-                        name: item.name ?? item.normalizedName,
-                        protein: protein,
-                        calories: calories,
-                        fat: asKotlinDouble(fat),
-                        carbs: asKotlinDouble(carbs),
-                        quantity: qty,
-                        source: EntrySource.search
-                    ))
-                    onDismiss()
-                } else {
-                    quickAddSearchItem(QuickAddParams(
-                        name: item.name ?? item.normalizedName,
-                        protein: protein,
-                        calories: calories,
-                        fat: fat,
-                        carbs: carbs,
-                        quantity: qty,
-                        source: EntrySource.frequent
-                    ))
-                }
+                addFoodEntry(
+                    name: item.name ?? item.normalizedName,
+                    protein: protein,
+                    calories: calories,
+                    fat: fat,
+                    carbs: carbs,
+                    grams: grams,
+                    source: .frequent
+                )
             }
         )
+    }
+}
+
+// MARK: - Catalog tab
+
+private extension SearchFoodView {
+    @ViewBuilder
+    func catalogContent(
+        query: String,
+        items: [FoodCatalogItemData],
+        isSearching: Bool
+    ) -> some View {
+        if query.isEmpty {
+            emptyCatalogView
+        } else if items.isEmpty {
+            if isSearching {
+                HStack { Spacer(); ProgressView().tint(Color.strakkPrimary); Spacer() }
+                    .padding(.vertical, 40)
+            } else {
+                noResultsView(query: query)
+            }
+        } else {
+            sectionHeader("CATALOG")
+            ForEach(items) { item in catalogRow(item: item) }
+            if isSearching {
+                HStack { Spacer(); ProgressView().tint(Color.strakkPrimary); Spacer() }
+                    .padding(.vertical, 12)
+            }
+        }
     }
 
     func catalogRow(item: FoodCatalogItemData) -> some View {
@@ -226,55 +330,88 @@ private extension SearchFoodView {
                 withAnimation(.easeInOut(duration: 0.15)) {
                     if selectedCatalogId == item.id {
                         selectedCatalogId = nil
-                        selectedItemId = nil
+                        selectedFoodKey = nil
                     } else {
                         selectedCatalogId = item.id
-                        selectedItemId = nil
+                        selectedFoodKey = nil
+                        selectedMealKey = nil
                         portionGrams = item.defaultPortionGrams
                     }
                 }
             },
             onAdd: { protein, calories, fat, carbs, grams in
-                let qty = String(format: "%.0fg", grams)
-                if isDraftMode {
-                    draftViewModel.onEvent(MealDraftEventAddManualItem(
-                        name: item.name,
-                        protein: protein,
-                        calories: calories,
-                        fat: asKotlinDouble(fat),
-                        carbs: asKotlinDouble(carbs),
-                        quantity: qty,
-                        source: EntrySource.search
-                    ))
-                    onDismiss()
-                } else {
-                    quickAddSearchItem(QuickAddParams(
-                        name: item.name,
-                        protein: protein,
-                        calories: calories,
-                        fat: fat,
-                        carbs: carbs,
-                        quantity: qty,
-                        source: EntrySource.search
-                    ))
-                }
+                addFoodEntry(
+                    name: item.name,
+                    protein: protein,
+                    calories: calories,
+                    fat: fat,
+                    carbs: carbs,
+                    grams: grams,
+                    source: .search
+                )
             }
         )
     }
 }
 
-// MARK: - Quick-add (non-draft mode)
+// MARK: - Actions
 
 private extension SearchFoodView {
-    func quickAddSearchItem(_ params: QuickAddParams) {
-        quickAddViewModel.addKnown(
-            name: params.name,
-            protein: params.protein,
-            calories: params.calories,
-            fat: params.fat,
-            carbs: params.carbs,
-            quantity: params.quantity,
-            source: params.source
+    // swiftlint:disable:next function_parameter_count
+    func addFoodEntry(
+        name: String,
+        protein: Double,
+        calories: Double,
+        fat: Double?,
+        carbs: Double?,
+        grams: Double,
+        source: EntrySource
+    ) {
+        let qty = String(format: "%.0fg", grams)
+        if isDraftMode {
+            draftViewModel.onEvent(MealDraftEventAddManualItem(
+                name: name,
+                protein: protein,
+                calories: calories,
+                fat: asKotlinDouble(fat),
+                carbs: asKotlinDouble(carbs),
+                quantity: qty,
+                source: source
+            ))
+            onDismiss()
+        } else {
+            quickAddViewModel.addKnown(
+                name: name,
+                protein: protein,
+                calories: calories,
+                fat: fat,
+                carbs: carbs,
+                quantity: qty,
+                source: source
+            )
+        }
+    }
+
+    func addFavoriteMealTemplate(meal: FavoriteMealData) {
+        let items = meal.items.map { templateItemKmp($0) }
+        let ref = MealTemplateRefFavorite(id: meal.storedId, name: meal.name, items: items)
+        searchViewModel.onEvent(SearchFoodEventAddMealTemplate(ref: ref, logDate: logDate))
+    }
+
+    func addRecentMealTemplate(meal: RecentMealData) {
+        let items = meal.items.map { templateItemKmp($0) }
+        let ref = MealTemplateRefRecent(sourceMealId: meal.mealId, name: meal.name, items: items)
+        searchViewModel.onEvent(SearchFoodEventAddMealTemplate(ref: ref, logDate: logDate))
+    }
+
+    func templateItemKmp(_ item: MealTemplateItemData) -> MealTemplateItem {
+        MealTemplateItem(
+            name: item.name,
+            protein: item.protein,
+            calories: item.calories,
+            fat: asKotlinDouble(item.fat),
+            carbs: asKotlinDouble(item.carbs),
+            quantity: item.quantity
         )
     }
 }
@@ -282,15 +419,33 @@ private extension SearchFoodView {
 // MARK: - Empty states
 
 private extension SearchFoodView {
-    var emptyFrequentsView: some View {
+    var emptyMyFoodsView: some View {
         VStack(spacing: 8) {
-            Image(systemName: "clock")
+            Image(systemName: "heart")
                 .font(.system(size: 32))
                 .foregroundStyle(Color.strakkTextTertiary)
-            Text("No recent foods")
+            Text("No saved foods yet")
                 .font(.strakkBody)
                 .foregroundStyle(Color.strakkTextSecondary)
-            Text("Add one to build your history.")
+            Text("Foods you add and favorites you save will show up here.")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextTertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 48)
+    }
+
+    var emptyCatalogView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 32))
+                .foregroundStyle(Color.strakkTextTertiary)
+            Text("Search the food catalog")
+                .font(.strakkBody)
+                .foregroundStyle(Color.strakkTextSecondary)
+            Text("Type to look up an item in CIQUAL / Open Food Facts.")
                 .font(.strakkCaption)
                 .foregroundStyle(Color.strakkTextTertiary)
                 .multilineTextAlignment(.center)

@@ -3,6 +3,8 @@ package com.strakk.shared.data.repository
 import com.strakk.shared.data.dto.CheckInDto
 import com.strakk.shared.data.dto.CheckInPhotoDto
 import com.strakk.shared.data.dto.CheckInSummaryResponseDto
+import com.strakk.shared.data.dto.PushMeasurementsToHevyRequestDto
+import com.strakk.shared.data.dto.PushMeasurementsToHevyResponseDto
 import com.strakk.shared.data.mapper.toDomain
 import com.strakk.shared.data.mapper.toDto
 import com.strakk.shared.data.mapper.toListItem
@@ -18,6 +20,7 @@ import com.strakk.shared.domain.model.CheckInMeasurements
 import com.strakk.shared.domain.model.CheckInPhoto
 import com.strakk.shared.domain.model.CheckInSeriesPoint
 import com.strakk.shared.domain.model.DailyNutrition
+import com.strakk.shared.domain.model.HevyMeasurementPushResult
 import com.strakk.shared.domain.model.NutritionAverages
 import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.WeeklyTrainingStats
@@ -387,6 +390,40 @@ internal class CheckInRepositoryImpl(
         // Update local cache
         cache.value = cache.value.map { checkIn ->
             if (checkIn.id == checkInId) checkIn.copy(trainingStats = dto) else checkIn
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Hevy body measurements
+    // -------------------------------------------------------------------------
+
+    override suspend fun pushMeasurementsToHevy(checkInId: String, overwrite: Boolean): HevyMeasurementPushResult {
+        val requestBody = PushMeasurementsToHevyRequestDto(checkinId = checkInId, overwrite = overwrite)
+
+        val response = try {
+            supabaseClient.functions.invoke("push-checkin-to-hevy", body = requestBody)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw DomainError.DataError("Failed to push measurements to Hevy", e)
+        }
+
+        if (response.status.value !in 200..299) {
+            throw DomainError.DataError("Hevy push service returned HTTP ${response.status.value}")
+        }
+
+        val result = try {
+            response.body<PushMeasurementsToHevyResponseDto>()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw DomainError.DataError("Unexpected Hevy push response", e)
+        }
+
+        return if (result.conflict) {
+            HevyMeasurementPushResult.Conflict(result.date)
+        } else {
+            HevyMeasurementPushResult.Pushed(result.date)
         }
     }
 
