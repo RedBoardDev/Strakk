@@ -40,6 +40,13 @@ struct TodayView: View {
     // Feature gating (fed by AddPickerSheet.onFeatureGated + CheckIn effect)
     @State var gatedFeature: Feature?
 
+    private var currentFavorites: FavoritesSnapshotData {
+        if case .ready(_, _, _, _, _, _, let favorites) = viewModel.state {
+            return favorites
+        }
+        return .empty
+    }
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
@@ -56,7 +63,8 @@ struct TodayView: View {
                     let timeline,
                     let waterEntries,
                     let activeDraft,
-                    let trialBanner
+                    let trialBanner,
+                    let favorites
                 ):
                     mainContent(
                         dateLabel: dateLabel,
@@ -64,7 +72,8 @@ struct TodayView: View {
                         timeline: timeline,
                         waterEntries: waterEntries,
                         activeDraft: activeDraft,
-                        trialBanner: trialBanner
+                        trialBanner: trialBanner,
+                        favorites: favorites
                     )
                     .safeAreaInset(edge: .bottom) {
                         if let draft = activeDraft {
@@ -102,6 +111,7 @@ struct TodayView: View {
         .sheet(item: $selectedMeal) { meal in
             MealDetailSheet(
                 meal: meal,
+                favorites: currentFavorites,
                 onEditEntry: { entry in
                     selectedMeal = nil
                     editingEntry = entry
@@ -117,12 +127,19 @@ struct TodayView: View {
                     viewModel.onEvent(TodayEventOnDeleteMeal(mealId: meal.id))
                     selectedMeal = nil
                 },
+                onToggleFavorite: {
+                    viewModel.onEvent(TodayEventOnToggleFavoriteMeal(mealId: meal.id))
+                },
+                onToggleFavoriteFood: { entry in
+                    viewModel.onEvent(TodayEventOnToggleFavoriteFood(entryId: entry.id))
+                },
                 onDismiss: { selectedMeal = nil }
             )
         }
         .sheet(item: $selectedEntry) { entry in
             EntryDetailSheet(
                 entry: entry,
+                isFavorited: currentFavorites.isFoodFavorited(normalizedName: normalizeFoodName(entry.name)),
                 onEdit: {
                     selectedEntry = nil
                     editingEntry = entry
@@ -130,6 +147,9 @@ struct TodayView: View {
                 onDelete: {
                     viewModel.onEvent(TodayEventOnDeleteOrphanEntry(id: entry.id))
                     selectedEntry = nil
+                },
+                onToggleFavorite: {
+                    viewModel.onEvent(TodayEventOnToggleFavoriteFood(entryId: entry.id))
                 },
                 onDismiss: { selectedEntry = nil }
             )
@@ -189,7 +209,8 @@ struct TodayView: View {
         timeline: [TimelineItemData],
         waterEntries: [WaterEntryData],
         activeDraft: ActiveDraftData?,
-        trialBanner: TrialBannerData?
+        trialBanner: TrialBannerData?,
+        favorites: FavoritesSnapshotData
     ) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -252,7 +273,7 @@ struct TodayView: View {
                     } else {
                         LazyVStack(spacing: 6) {
                             ForEach(timeline) { item in
-                                timelineRow(item: item)
+                                timelineRow(item: item, favorites: favorites)
                             }
                         }
                     }

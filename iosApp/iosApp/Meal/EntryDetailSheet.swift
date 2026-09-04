@@ -3,8 +3,10 @@ import shared
 
 struct EntryDetailSheet: View {
     let entry: MealEntryData
+    let isFavorited: Bool
     let onEdit: () -> Void
     let onDelete: () -> Void
+    let onToggleFavorite: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
@@ -41,20 +43,37 @@ struct EntryDetailSheet: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(entry.name ?? "Item")
-                .font(.strakkHeading2)
-                .foregroundStyle(Color.strakkTextPrimary)
-                .lineLimit(2)
+        HStack(alignment: .top, spacing: StrakkSpacing.sm) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.name ?? "Item")
+                    .font(.strakkHeading2)
+                    .foregroundStyle(Color.strakkTextPrimary)
+                    .lineLimit(2)
 
-            HStack(spacing: 6) {
-                Text(formatTimeLabel(from: entry.createdAt))
-                Text("·")
-                entrySourceIcon(for: entry.source)
-                Text(entrySourceLabel(for: entry.source))
+                HStack(spacing: 6) {
+                    Text(formatTimeLabel(from: entry.createdAt))
+                    Text("·")
+                    entrySourceIcon(for: entry.source)
+                    Text(entrySourceLabel(for: entry.source))
+                }
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
             }
-            .font(.strakkCaption)
-            .foregroundStyle(Color.strakkTextSecondary)
+
+            Spacer(minLength: 0)
+
+            Button {
+                HapticEngine.light()
+                onToggleFavorite()
+            } label: {
+                Image(systemName: isFavorited ? "heart.fill" : "heart")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(isFavorited ? Color.strakkPrimary : Color.strakkTextSecondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isFavorited ? "Remove favorite" : "Add favorite")
         }
     }
 

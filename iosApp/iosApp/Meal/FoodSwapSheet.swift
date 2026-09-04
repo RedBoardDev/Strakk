@@ -52,7 +52,8 @@ struct FoodSwapSheet: View {
                 .foregroundStyle(Color.strakkPrimary)
             }
 
-        case .ready(let queryText, let results, let isSearching):
+        case .ready(_, let queryText, _, let catalogItems, let isSearching):
+            let results = SearchResultsData(userItems: [], catalogItems: catalogItems)
             resultsList(query: queryText, results: results, isSearching: isSearching)
         }
     }

@@ -13,6 +13,10 @@ interface GoalsRequest {
   training_types?: string[] | null;
   training_intensity?: string | null;
   daily_activity_level?: string | null;
+  // NEAT signal (bucketed daily step count) and extra endurance load — both
+  // refine TDEE beyond the coarse job-activity level.
+  daily_steps?: string | null;
+  weekly_cardio_sessions?: number | null;
 }
 
 interface GoalsResponse {
@@ -34,6 +38,12 @@ Rules:
   - Moderate (3-4 sessions/week, moderate intensity): 1.55
   - Active (5-6 sessions/week, intense): 1.725
   - Very active (daily intense training + physical job): 1.9
+- Refine the activity multiplier with the daily step count (NEAT signal) when provided:
+  - under 7,000 steps/day: lean to the lower end of the selected multiplier
+  - 7,000-10,000 steps/day: keep the mid estimate
+  - over 10,000 steps/day: lean to the higher end (or +0.1)
+- Add roughly 100-150 kcal per additional weekly cardio/endurance session (running, cycling,
+  crossfit) on top of the strength-based TDEE, since these aren't captured by the training types
 - Adjust based on the user's fitness goal:
   - lose_fat: TDEE - 300 to 500 kcal deficit
   - gain_muscle: TDEE + 200 to 400 kcal surplus
@@ -72,6 +82,18 @@ function buildUserMessage(input: GoalsRequest): string {
   }
   if (input.training_intensity) parts.push(`Training intensity: ${input.training_intensity}`);
   if (input.daily_activity_level) parts.push(`Daily activity level: ${input.daily_activity_level}`);
+
+  const stepLabels: Record<string, string> = {
+    under_7k: "under 7,000 steps/day (low NEAT)",
+    "7k_to_10k": "7,000-10,000 steps/day (moderate NEAT)",
+    over_10k: "over 10,000 steps/day (high NEAT)",
+  };
+  if (input.daily_steps && stepLabels[input.daily_steps]) {
+    parts.push(`Daily steps: ${stepLabels[input.daily_steps]}`);
+  }
+  if (input.weekly_cardio_sessions != null && input.weekly_cardio_sessions > 0) {
+    parts.push(`Extra cardio/endurance sessions: ${input.weekly_cardio_sessions}/week`);
+  }
 
   return parts.join("\n");
 }

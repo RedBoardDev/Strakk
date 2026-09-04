@@ -6,17 +6,19 @@ import shared
 struct FrequentFoodRow: View {
     let item: FrequentItemData
     let isSelected: Bool
+    let isFavorited: Bool
     @Binding var portionGrams: Double
     let isProcessing: Bool
     let onTap: () -> Void
+    let onToggleFavorite: () -> Void
     let onAdd: (_ protein: Double, _ calories: Double, _ fat: Double?, _ carbs: Double?, _ grams: Double) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                Image(systemName: "clock")
+                Image(systemName: isFavorited ? "heart.fill" : "clock")
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.strakkTextTertiary)
+                    .foregroundStyle(isFavorited ? Color.strakkPrimary : Color.strakkTextTertiary)
                     .frame(width: 18)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.name ?? item.normalizedName)
@@ -32,6 +34,18 @@ struct FrequentFoodRow: View {
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextTertiary)
                 }
+                Button {
+                    HapticEngine.light()
+                    onToggleFavorite()
+                } label: {
+                    Image(systemName: isFavorited ? "heart.fill" : "heart")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(isFavorited ? Color.strakkPrimary : Color.strakkTextTertiary)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isFavorited ? "Remove favorite" : "Favorite")
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -133,6 +147,140 @@ struct CatalogFoodRow: View {
             .foregroundStyle(Color.strakkTextTertiary)
         }
     }
+}
+
+// MARK: - FavoriteMealCard
+
+struct FavoriteMealCard: View {
+    let meal: FavoriteMealData
+    let isSelected: Bool
+    let onTap: () -> Void
+    let onAdd: () -> Void
+    let onUnfavorite: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.strakkPrimary)
+                    .frame(width: 18)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.name)
+                        .font(.strakkBody)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .lineLimit(1)
+                    Text(mealSubtitle(itemCount: meal.items.count, kcal: meal.totalCalories))
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                }
+                Spacer()
+                Button {
+                    HapticEngine.light()
+                    onUnfavorite()
+                } label: {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(Color.strakkPrimary)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Remove favorite")
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
+
+            if isSelected {
+                AddMealCtaBar(onAdd: onAdd)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            Divider()
+                .background(Color.strakkDivider)
+                .padding(.leading, 50)
+        }
+    }
+}
+
+// MARK: - RecentMealCard
+
+struct RecentMealCard: View {
+    let meal: RecentMealData
+    let isSelected: Bool
+    let onTap: () -> Void
+    let onAdd: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.strakkTextSecondary)
+                    .frame(width: 18)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.name)
+                        .font(.strakkBody)
+                        .foregroundStyle(Color.strakkTextPrimary)
+                        .lineLimit(1)
+                    Text(mealSubtitle(itemCount: meal.items.count, kcal: meal.totalCalories))
+                        .font(.strakkCaption)
+                        .foregroundStyle(Color.strakkTextSecondary)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
+
+            if isSelected {
+                AddMealCtaBar(onAdd: onAdd)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            Divider()
+                .background(Color.strakkDivider)
+                .padding(.leading, 50)
+        }
+    }
+}
+
+// MARK: - AddMealCtaBar (shared by Favorite/Recent meal cards)
+
+struct AddMealCtaBar: View {
+    let onAdd: () -> Void
+
+    var body: some View {
+        HStack {
+            Text("Add as a new meal for today")
+                .font(.strakkCaption)
+                .foregroundStyle(Color.strakkTextSecondary)
+            Spacer()
+            Button {
+                HapticEngine.light()
+                onAdd()
+            } label: {
+                Text("Add meal")
+                    .font(.strakkCaptionBold)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.strakkPrimary, in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color.strakkSurface1)
+    }
+}
+
+private func mealSubtitle(itemCount: Int, kcal: Double) -> String {
+    let pluralSuffix = itemCount > 1 ? "s" : ""
+    return "\(itemCount) item\(pluralSuffix) · \(String(format: "%.0f kcal", kcal))"
 }
 
 // MARK: - PortionRowView

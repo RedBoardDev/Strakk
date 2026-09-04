@@ -6,18 +6,21 @@ extension TodayView {
     // MARK: - Timeline row dispatch
 
     @ViewBuilder
-    func timelineRow(item: TimelineItemData) -> some View {
+    func timelineRow(item: TimelineItemData, favorites: FavoritesSnapshotData) -> some View {
         switch item {
         case .mealContainer(let meal):
-            mealContainerRow(meal: meal)
+            mealContainerRow(meal: meal, isFavorited: favorites.isMealFavorited(mealId: meal.id))
         case .orphanEntry(let entry):
-            orphanEntryRow(entry: entry)
+            orphanEntryRow(
+                entry: entry,
+                isFavorited: favorites.isFoodFavorited(normalizedName: normalizeFoodName(entry.name))
+            )
         }
     }
 
     // MARK: - Meal container row
 
-    func mealContainerRow(meal: MealData) -> some View {
+    func mealContainerRow(meal: MealData, isFavorited: Bool) -> some View {
         Button {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             selectedMeal = meal
@@ -34,10 +37,17 @@ extension TodayView {
                     .frame(width: 16)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(meal.name)
-                        .font(.strakkHeading3)
-                        .foregroundStyle(Color.strakkTextPrimary)
-                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(meal.name)
+                            .font(.strakkHeading3)
+                            .foregroundStyle(Color.strakkTextPrimary)
+                            .lineLimit(1)
+                        if isFavorited {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.strakkPrimary)
+                        }
+                    }
                     Text("\(meal.entries.count) item\(meal.entries.count > 1 ? "s" : "")")
                         .font(.strakkCaption)
                         .foregroundStyle(Color.strakkTextSecondary)
@@ -74,7 +84,7 @@ extension TodayView {
 
     // MARK: - Orphan entry row
 
-    func orphanEntryRow(entry: MealEntryData) -> some View {
+    func orphanEntryRow(entry: MealEntryData, isFavorited: Bool) -> some View {
         Button {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             selectedEntry = entry
@@ -92,6 +102,12 @@ extension TodayView {
                     .font(.strakkBody)
                     .foregroundStyle(Color.strakkTextPrimary)
                     .lineLimit(1)
+
+                if isFavorited {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.strakkPrimary)
+                }
 
                 if let qty = entry.quantity {
                     Text(qty)

@@ -11,6 +11,7 @@ import com.strakk.shared.data.repository.AuthRepositoryImpl
 import com.strakk.shared.data.repository.BillingRepositoryImpl
 import com.strakk.shared.data.repository.CheckInRepositoryImpl
 import com.strakk.shared.data.repository.FeatureLimitsRepositoryImpl
+import com.strakk.shared.data.repository.FavoritesRepositoryImpl
 import com.strakk.shared.data.repository.FeatureUsageRepositoryImpl
 import com.strakk.shared.data.repository.FoodCatalogRepositoryImpl
 import com.strakk.shared.data.repository.GoalsRepositoryImpl
@@ -30,6 +31,7 @@ import com.strakk.shared.domain.repository.AuthRepository
 import com.strakk.shared.domain.repository.BillingRepository
 import com.strakk.shared.domain.repository.CheckInRepository
 import com.strakk.shared.domain.repository.FeatureLimitsRepository
+import com.strakk.shared.domain.repository.FavoritesRepository
 import com.strakk.shared.domain.repository.FeatureUsageRepository
 import com.strakk.shared.domain.repository.FoodCatalogRepository
 import com.strakk.shared.domain.repository.GoalsRepository
@@ -43,6 +45,7 @@ import com.strakk.shared.domain.repository.SubscriptionRepository
 import com.strakk.shared.domain.repository.WorkoutRepository
 import com.strakk.shared.domain.service.CheckInPdfGenerator
 import com.strakk.shared.domain.usecase.AddItemToDraftUseCase
+import com.strakk.shared.domain.usecase.AddMealFromTemplateUseCase
 import com.strakk.shared.domain.usecase.AddWaterUseCase
 import com.strakk.shared.domain.usecase.AdjustGroundedItemUseCase
 import com.strakk.shared.domain.usecase.BuildMealEntryUseCase
@@ -73,6 +76,8 @@ import com.strakk.shared.domain.usecase.GetHevyApiKeyUseCase
 import com.strakk.shared.domain.usecase.GetMonthlyActivityUseCase
 import com.strakk.shared.domain.usecase.GetPdfExportPreferencesUseCase
 import com.strakk.shared.domain.usecase.LoadPaywallOfferPricesUseCase
+import com.strakk.shared.domain.usecase.LoadRecentFoodsUseCase
+import com.strakk.shared.domain.usecase.LoadRecentMealsUseCase
 import com.strakk.shared.domain.usecase.ObserveActiveMealDraftUseCase
 import com.strakk.shared.domain.usecase.ObserveAuthStatusUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInQuickStatsUseCase
@@ -80,6 +85,8 @@ import com.strakk.shared.domain.usecase.ObserveCheckInUseCase
 import com.strakk.shared.domain.usecase.ObserveCheckInsUseCase
 import com.strakk.shared.domain.usecase.ObserveDailySummaryUseCase
 import com.strakk.shared.domain.usecase.ObserveDevSubscriptionOverrideUseCase
+import com.strakk.shared.domain.usecase.ObserveFavoriteFoodsUseCase
+import com.strakk.shared.domain.usecase.ObserveFavoriteMealsUseCase
 import com.strakk.shared.domain.usecase.ObserveFrequentItemsUseCase
 import com.strakk.shared.domain.usecase.ObserveMealContainersForDateUseCase
 import com.strakk.shared.domain.usecase.ObserveMealsForDateUseCase
@@ -90,6 +97,7 @@ import com.strakk.shared.domain.usecase.ObserveWaterEntriesForDateUseCase
 import com.strakk.shared.domain.usecase.ParseWorkoutPdfUseCase
 import com.strakk.shared.domain.usecase.ProcessMealDraftUseCase
 import com.strakk.shared.domain.usecase.PurchaseSubscriptionUseCase
+import com.strakk.shared.domain.usecase.PushCheckInMeasurementsToHevyUseCase
 import com.strakk.shared.domain.usecase.QuickAddEntryUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromPhotoUseCase
 import com.strakk.shared.domain.usecase.QuickAddFromTextUseCase
@@ -113,6 +121,8 @@ import com.strakk.shared.domain.usecase.SignOutUseCase
 import com.strakk.shared.domain.usecase.SignUpUseCase
 import com.strakk.shared.domain.usecase.SwapFoodMatchUseCase
 import com.strakk.shared.domain.usecase.SyncBillingCustomerInfoUseCase
+import com.strakk.shared.domain.usecase.ToggleFavoriteFoodUseCase
+import com.strakk.shared.domain.usecase.ToggleFavoriteMealUseCase
 import com.strakk.shared.domain.usecase.UpdateCheckInUseCase
 import com.strakk.shared.domain.usecase.UpdateDraftItemUseCase
 import com.strakk.shared.domain.usecase.UpdateMealEntryUseCase
@@ -177,6 +187,7 @@ internal val dataModule = module {
     singleOf(::MealDraftRepositoryImpl) { bind<MealDraftRepository>() }
     singleOf(::OffLiveSearchDataSource)
     singleOf(::FoodCatalogRepositoryImpl) { bind<FoodCatalogRepository>() }
+    singleOf(::FavoritesRepositoryImpl) { bind<FavoritesRepository>() }
     singleOf(::SubscriptionRepositoryImpl) { bind<SubscriptionRepository>() }
     singleOf(::BillingRepositoryImpl) { bind<BillingRepository>() }
     singleOf(::FeatureLimitsRepositoryImpl) { bind<FeatureLimitsRepository>() }
@@ -254,6 +265,15 @@ internal val domainModule = module {
     // Catalogue
     factoryOf(::SearchFoodUseCase)
 
+    // Favorites + recents
+    factoryOf(::ObserveFavoriteFoodsUseCase)
+    factoryOf(::ObserveFavoriteMealsUseCase)
+    factoryOf(::LoadRecentMealsUseCase)
+    factoryOf(::LoadRecentFoodsUseCase)
+    factoryOf(::ToggleFavoriteFoodUseCase)
+    factoryOf(::ToggleFavoriteMealUseCase)
+    factoryOf(::AddMealFromTemplateUseCase)
+
     // V3 Meal Analysis
     factoryOf(::ScanMealUseCase)
     factoryOf(::SaveGroundedMealUseCase)
@@ -281,6 +301,7 @@ internal val domainModule = module {
     factoryOf(::GetCheckInPhotoUrlUseCase)
     factoryOf(::GetCheckInStatsUseCase)
     factoryOf(::ObserveCheckInQuickStatsUseCase)
+    factoryOf(::PushCheckInMeasurementsToHevyUseCase)
 
     // Check-in PDF
     factoryOf(::GenerateCheckInPdfUseCase)
@@ -330,6 +351,8 @@ internal val presentationModule = module {
             refreshTrainingStats = get(),
             getPdfExportPreferences = get(),
             savePdfExportPreferences = get(),
+            pushMeasurementsToHevy = get(),
+            getHevyApiKey = get(),
         )
     }
     viewModel { params ->

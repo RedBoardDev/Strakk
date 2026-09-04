@@ -75,6 +75,8 @@
     <string name="search_food_section_frequent">FRÉQUENTS</string>
     <string name="search_food_section_my_foods">MES ALIMENTS</string>
     <string name="search_food_section_catalog">CATALOGUE</string>
+    <string name="search_food_tab_my_foods">Mes aliments</string>
+    <string name="search_food_tab_catalog">Catalogue</string>
     <string name="search_food_empty_hint">Commencez à taper pour rechercher</string>
     <string name="search_food_no_results">Aucun résultat pour « %s »</string>
     <string name="search_food_add">Ajouter</string>

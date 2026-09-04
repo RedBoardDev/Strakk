@@ -62,6 +62,8 @@
     <string name="search_food_section_frequent">FREQUENT</string>
     <string name="search_food_section_my_foods">MY FOODS</string>
     <string name="search_food_section_catalog">CATALOG</string>
+    <string name="search_food_tab_my_foods">My foods</string>
+    <string name="search_food_tab_catalog">Catalog</string>
     <string name="search_food_empty_hint">Start typing to search</string>
     <string name="search_food_empty_hint_desc">Your frequent foods will appear here.</string>
     <string name="search_food_no_results">No results for \"%s\"</string>

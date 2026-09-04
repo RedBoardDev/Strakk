@@ -98,9 +98,13 @@ final class CheckInDetailViewModelWrapper {
 
     var state: CheckInDetailState = .loading
     var isRefreshingNutrition: Bool = false
+    var isPushingToHevy: Bool = false
     var navigateToWizardCheckInId: String?
     var navigateBack = false
     var errorMessage: String?
+    var requiresHevyApiKey: Bool = false
+    var hevyPushConflictDate: String?
+    var hevyPushSuccessDate: String?
 
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private var effectTask: Task<Void, Never>?
@@ -115,6 +119,7 @@ final class CheckInDetailViewModelWrapper {
             for await newState in stream {
                 self?.state = Self.mapState(newState)
                 self?.isRefreshingNutrition = (newState as? CheckInDetailUiStateReady)?.isRefreshingNutrition == true
+                self?.isPushingToHevy = (newState as? CheckInDetailUiStateReady)?.isPushingToHevy == true
             }
         }
 
@@ -171,6 +176,12 @@ final class CheckInDetailViewModelWrapper {
             navigateBack = true
         } else if let err = effect as? CheckInDetailEffectShowError {
             errorMessage = err.message
+        } else if effect is CheckInDetailEffectRequireHevyApiKey {
+            requiresHevyApiKey = true
+        } else if let succeeded = effect as? CheckInDetailEffectHevyPushSucceeded {
+            hevyPushSuccessDate = succeeded.date
+        } else if let conflict = effect as? CheckInDetailEffectHevyPushConflict {
+            hevyPushConflictDate = conflict.date
         }
     }
 

@@ -47,7 +47,7 @@ struct PdfExportOptionsSheet: View {
                                 sectionDivider
                                 toggleRow("Muscle volume", isOn: $options.includeMuscleVolume)
                                 sectionDivider
-                                toggleRow("Session details", isOn: $options.includeWorkoutDetails)
+                                toggleRow("Hevy session links", isOn: $options.includeWorkoutDetails)
                             }
                         }
 

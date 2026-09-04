@@ -89,6 +89,7 @@ class SettingsViewModelTest {
             mealRepository = FakeSettingsMealRepository(),
             checkInRepository = FakeCheckInRepository(),
             mealDraftRepository = FakeSettingsDraftRepository(),
+            favoritesRepository = FakeSettingsFavoritesRepository(),
         ),
         saveHevyApiKey = SaveHevyApiKeyUseCase(profileRepository),
         getHevyApiKey = GetHevyApiKeyUseCase(profileRepository),
@@ -336,6 +337,7 @@ private class FakeCheckInRepository : CheckInRepository {
         checkInId: String,
         stats: com.strakk.shared.domain.model.WeeklyTrainingStats,
     ) = Unit
+    override suspend fun pushMeasurementsToHevy(checkInId: String, overwrite: Boolean) = error("Unused")
     override suspend fun clearCache() = Unit
 }
 
@@ -391,4 +393,25 @@ private class FakeSettingsDraftRepository : MealDraftRepository {
     override suspend fun discard() = Unit
     override suspend fun markItemResolved(itemId: String, entry: MealEntry) = Unit
     override suspend fun recordUploadedPath(itemId: String, path: String) = Unit
+}
+
+private class FakeSettingsFavoritesRepository : com.strakk.shared.domain.repository.FavoritesRepository {
+    override fun observeFavoriteFoods(): Flow<List<com.strakk.shared.domain.model.FavoriteFood>> = emptyFlow()
+    override fun observeFavoriteMeals(): Flow<List<com.strakk.shared.domain.model.FavoriteMeal>> = emptyFlow()
+    override suspend fun addFavoriteFood(
+        name: String,
+        protein: Double,
+        calories: Double,
+        fat: Double?,
+        carbs: Double?,
+        quantity: String?,
+        foodCatalogId: Long?,
+    ): com.strakk.shared.domain.model.FavoriteFood = error("Not used")
+    override suspend fun removeFavoriteFoodByName(normalizedName: String) = Unit
+    override suspend fun addFavoriteMeal(meal: Meal): com.strakk.shared.domain.model.FavoriteMeal = error("Not used")
+    override suspend fun removeFavoriteMealBySourceId(sourceMealId: String) = Unit
+    override suspend fun removeFavoriteMealById(id: String) = Unit
+    override suspend fun loadRecentMeals(daysWindow: Int, limit: Int) = emptyList<com.strakk.shared.domain.model.RecentMeal>()
+    override suspend fun loadRecentFoods(daysWindow: Int, limit: Int) = emptyList<com.strakk.shared.domain.model.MealTemplateItem>()
+    override fun clearCache() = Unit
 }

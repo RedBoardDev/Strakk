@@ -612,6 +612,9 @@
         }
       }
     },
+    "Add as a new meal for today" : {
+
+    },
     "Add food item" : {
       "localizations" : {
         "fr" : {
@@ -633,7 +636,11 @@
         }
       }
     },
+    "Add meal" : {
+
+    },
     "Add one to build your history." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -693,6 +700,9 @@
           }
         }
       }
+    },
+    "Add your Hevy API key in Settings to push measurements." : {
+
     },
     "Adding..." : {
       "extractionState" : "stale",
@@ -1142,6 +1152,9 @@
           }
         }
       }
+    },
+    "Catalog" : {
+
     },
     "CATALOG" : {
       "extractionState" : "stale",
@@ -2038,6 +2051,9 @@
         }
       }
     },
+    "Foods you add and favorites you save will show up here." : {
+
+    },
     "Forgot password?" : {
       "localizations" : {
         "fr" : {
@@ -2262,6 +2278,9 @@
           }
         }
       }
+    },
+    "Hevy already has a measurement entry for %@. Overwrite it?" : {
+
     },
     "Hevy API Key Required" : {
       "extractionState" : "stale",
@@ -2659,6 +2678,9 @@
         }
       }
     },
+    "Measurement for %@ was pushed to Hevy." : {
+
+    },
     "MEASUREMENTS" : {
       "localizations" : {
         "fr" : {
@@ -2756,6 +2778,9 @@
       }
     },
     "MUSCLE GROUPS" : {
+
+    },
+    "My foods" : {
 
     },
     "MY ITEMS" : {
@@ -2917,6 +2942,7 @@
       }
     },
     "No recent foods" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2946,6 +2972,9 @@
           }
         }
       }
+    },
+    "No saved foods yet" : {
+
     },
     "Not enough data to show trends." : {
       "extractionState" : "stale",
@@ -3629,6 +3658,9 @@
         }
       }
     },
+    "Search my foods" : {
+
+    },
     "Search the catalog" : {
       "localizations" : {
         "fr" : {
@@ -3638,6 +3670,9 @@
           }
         }
       }
+    },
+    "Search the food catalog" : {
+
     },
     "See the annual offer" : {
       "localizations" : {
@@ -4401,6 +4436,9 @@
           }
         }
       }
+    },
+    "Type to look up an item in CIQUAL / Open Food Facts." : {
+
     },
     "Unlock full history with Pro" : {
       "localizations" : {

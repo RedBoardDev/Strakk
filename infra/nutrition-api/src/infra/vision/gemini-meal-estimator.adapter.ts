@@ -1,5 +1,5 @@
 /**
- * Gemini 2.5 Pro single-call meal estimator.
+ * Gemini 3 Flash single-call meal estimator.
  *
  * Bypasses the embedding/Qdrant/disambiguation/cooking-adjustment pipeline
  * entirely: feeds the photo to Gemini and asks for items + portions + macros
@@ -10,7 +10,7 @@
  * before committing to a flow change.
  */
 
-const GEMINI_MODEL = "gemini-2.5-pro";
+const GEMINI_MODEL = "gemini-3-flash-preview";
 const GEMINI_ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 

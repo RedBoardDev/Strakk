@@ -7,6 +7,23 @@ import com.strakk.shared.domain.model.Meal
 import com.strakk.shared.domain.model.MealEntry
 import com.strakk.shared.domain.model.WaterEntry
 
+/** Quick lookup of favorite state for the Today UI. */
+data class FavoritesSnapshot(
+    /** Set of normalized food names favorited by the user. */
+    val foodNames: Set<String>,
+    /** Set of source meal ids favorited by the user. */
+    val mealIds: Set<String>,
+) {
+    fun isFoodFavorited(normalizedName: String): Boolean = normalizedName.isNotEmpty() &&
+        normalizedName in foodNames
+
+    fun isMealFavorited(mealId: String): Boolean = mealId in mealIds
+
+    companion object {
+        val Empty = FavoritesSnapshot(emptySet(), emptySet())
+    }
+}
+
 /**
  * A single chronological item in the Today timeline, either a committed Meal
  * container or an orphan quick-add entry.  Water is rendered separately.
@@ -47,6 +64,7 @@ sealed interface TodayUiState {
         val waterEntries: List<WaterEntry>,
         val activeDraft: ActiveMealDraft?,
         val trialBanner: TrialBannerState? = null,
+        val favorites: FavoritesSnapshot = FavoritesSnapshot.Empty,
     ) : TodayUiState
 }
 
@@ -61,6 +79,12 @@ sealed interface TodayEvent {
     data class OnDeleteMeal(val mealId: String) : TodayEvent
 
     data object OnTrialBannerTapped : TodayEvent
+
+    /** Toggle the favorite state of a meal entry by id (orphan or attached). */
+    data class OnToggleFavoriteFood(val entryId: String) : TodayEvent
+
+    /** Toggle the favorite state of a meal container by id. */
+    data class OnToggleFavoriteMeal(val mealId: String) : TodayEvent
 
     data class OnUpdateEntry(
         val id: String,

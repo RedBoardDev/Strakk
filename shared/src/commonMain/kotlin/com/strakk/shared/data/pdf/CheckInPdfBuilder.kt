@@ -2,6 +2,7 @@ package com.strakk.shared.data.pdf
 
 import com.strakk.shared.domain.model.CheckIn
 import com.strakk.shared.domain.model.CheckInDelta
+import com.strakk.shared.domain.model.CheckInSeriesPoint
 import com.strakk.shared.domain.model.NutritionGoals
 import com.strakk.shared.domain.model.PdfExportOptions
 import com.strakk.shared.domain.model.WeeklyTrainingStats
@@ -55,8 +56,16 @@ internal class CheckInPdfBuilderImpl(
             null
         }
 
-        val weightHistory = if (options.includeMeasurements) loadWeightHistory() else emptyList()
-        val measurementHistory = if (options.includeMeasurements) loadMeasurementsHistory() else emptyList()
+        val weightHistory = if (options.includeMeasurements) {
+            loadWeightHistory(enrichedCheckIn.weekLabel)
+        } else {
+            emptyList()
+        }
+        val measurementHistory = if (options.includeMeasurements) {
+            loadMeasurementsHistory(enrichedCheckIn.weekLabel)
+        } else {
+            emptyList()
+        }
         val nutritionGoals = loadNutritionGoals()
 
         val html = template.build(
@@ -142,12 +151,11 @@ internal class CheckInPdfBuilderImpl(
         }
     }
 
-    private suspend fun loadWeightHistory(): List<Pair<String, Double>> {
+    private suspend fun loadWeightHistory(throughWeekLabel: String): List<Pair<String, Double>> {
         return try {
             checkInRepository.observeCheckInSeries().firstOrNull()
+                ?.historyThroughWeek(throughWeekLabel, WEIGHT_HISTORY_COUNT)
                 ?.filter { it.weight != null }
-                ?.sortedBy { it.weekLabel }
-                ?.takeLast(WEIGHT_HISTORY_COUNT)
                 ?.map { it.weekLabel to it.weight!! }
                 ?: emptyList()
         } catch (_: Exception) {
@@ -155,11 +163,10 @@ internal class CheckInPdfBuilderImpl(
         }
     }
 
-    private suspend fun loadMeasurementsHistory(): List<MeasurementSeries> {
+    private suspend fun loadMeasurementsHistory(throughWeekLabel: String): List<MeasurementSeries> {
         val points = try {
             checkInRepository.observeCheckInSeries().firstOrNull()
-                ?.sortedBy { it.weekLabel }
-                ?.takeLast(WEIGHT_HISTORY_COUNT)
+                ?.historyThroughWeek(throughWeekLabel, WEIGHT_HISTORY_COUNT)
                 ?: return emptyList()
         } catch (_: Exception) {
             return emptyList()
@@ -171,11 +178,7 @@ internal class CheckInPdfBuilderImpl(
         fun avg(a: Double?, b: Double?): Double? = listOfNotNull(a, b)
             .let { if (it.isEmpty()) null else it.average() }
 
-        fun series(
-            label: String,
-            unit: String,
-            get: (com.strakk.shared.domain.model.CheckInSeriesPoint) -> Double?,
-        ): MeasurementSeries {
+        fun series(label: String, unit: String, get: (CheckInSeriesPoint) -> Double?): MeasurementSeries {
             val values = points.map(get)
             val current = values.lastOrNull { it != null }
             val previous = values.dropLast(1).lastOrNull { it != null }
@@ -193,8 +196,8 @@ internal class CheckInPdfBuilderImpl(
             series("Hanches", "cm") { it.hips },
             series("Épaules", "cm") { it.shoulders },
             series("Buste", "cm") { it.chest },
-            series("Bras", "cm") { avg(it.armLeft, it.armRight) },
-            series("Cuisses", "cm") { avg(it.thighLeft, it.thighRight) },
+            series("Bras (moy. G/D)", "cm") { avg(it.armLeft, it.armRight) },
+            series("Cuisses (moy. G/D)", "cm") { avg(it.thighLeft, it.thighRight) },
         ).filter { ms -> ms.values.any { it != null } }
     }
 
